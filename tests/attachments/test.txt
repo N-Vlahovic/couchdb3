@@ -1,0 +1,10 @@
+This is a simple text file.
+
+Here is a list of ingredients as found in the CouchDB documentation:
+
+1. Cook spaghetti
+2. Cook meatballs
+3. Mix them
+4. Add tomato sauce
+5. ...
+6. PROFIT!
