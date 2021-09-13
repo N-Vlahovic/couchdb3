@@ -73,7 +73,7 @@ class TestClient(unittest.TestCase):
         self.assertIs(CLIENT.rev("_users/test"), None)
 
     def test_save_user(self):
-        user_id = "org.couchdb3.user:john"
+        user_id = "org.couchdb.user:john"
         ok, _id, _rev = CLIENT.save_user(
             user_id=user_id,
             name="john",
