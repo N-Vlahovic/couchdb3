@@ -17,7 +17,7 @@ Big parts of the documentation (and thus docstrings) have been copied from Couch
 ## Installation
 Installing via PyPi
 ```bash
-pip install couchdb3-python
+pip install couchdb3
 ```
 
 Installing via Github
@@ -28,7 +28,7 @@ python -m pip install git+https://github.com/n-Vlahovic/couchdb3.git
 Installing from source
 ```bash
 git clone https://github.com/n-Vlahovic/couchdb3;
-python -m pip install -e couchdb3-python
+python -m pip install -e couchdb3
 ```
 
 ## Quickstart
