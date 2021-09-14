@@ -43,6 +43,7 @@ __all__ = [
     &#34;basic_auth&#34;,
     &#34;build_query&#34;,
     &#34;build_url&#34;,
+    &#34;user_name_to_id&#34;,
     &#34;validate_db_name&#34;,
     &#34;validate_proxy&#34;,
     &#34;validate_user_id&#34;,
@@ -299,6 +300,22 @@ def validate_user_id(user_id: str) -&gt; bool:
 
     &#34;&#34;&#34;
     return bool(PATTERN_USER_ID.fullmatch(user_id))
+
+
+def user_name_to_id(name: str) -&gt; str:
+    &#34;&#34;&#34;
+    Convert a name into a valid CouchDB user ID.
+
+    Parameters
+    ----------
+    name : str
+        A user name.
+
+    Returns
+    -------
+    str : A valid CouchDB ID, i.e. of the form `org.couchdb.user:{name}`.
+    &#34;&#34;&#34;
+    return f&#34;org.couchdb.user:{name}&#34;
 
 
 def check_response(response: requests.Response) -&gt; None:
@@ -773,6 +790,38 @@ keys of <code><a title="couchdb3.utils.MIME_TYPES_MAPPING" href="#couchdb3.utils
     }</code></pre>
 </details>
 </dd>
+<dt id="couchdb3.utils.user_name_to_id"><code class="name flex">
+<span>def <span class="ident">user_name_to_id</span></span>(<span>name: str) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Convert a name into a valid CouchDB user ID.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>A user name.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>str : A valid CouchDB ID, i.e. of the form <code>org.couchdb.user:{name}</code>.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def user_name_to_id(name: str) -&gt; str:
+    &#34;&#34;&#34;
+    Convert a name into a valid CouchDB user ID.
+
+    Parameters
+    ----------
+    name : str
+        A user name.
+
+    Returns
+    -------
+    str : A valid CouchDB ID, i.e. of the form `org.couchdb.user:{name}`.
+    &#34;&#34;&#34;
+    return f&#34;org.couchdb.user:{name}&#34;</code></pre>
+</details>
+</dd>
 <dt id="couchdb3.utils.validate_db_name"><code class="name flex">
 <span>def <span class="ident">validate_db_name</span></span>(<span>name: str) ‑> bool</span>
 </code></dt>
@@ -907,6 +956,7 @@ keys of <code><a title="couchdb3.utils.MIME_TYPES_MAPPING" href="#couchdb3.utils
 <li><code><a title="couchdb3.utils.check_response" href="#couchdb3.utils.check_response">check_response</a></code></li>
 <li><code><a title="couchdb3.utils.content_type_getter" href="#couchdb3.utils.content_type_getter">content_type_getter</a></code></li>
 <li><code><a title="couchdb3.utils.extract_url_data" href="#couchdb3.utils.extract_url_data">extract_url_data</a></code></li>
+<li><code><a title="couchdb3.utils.user_name_to_id" href="#couchdb3.utils.user_name_to_id">user_name_to_id</a></code></li>
 <li><code><a title="couchdb3.utils.validate_db_name" href="#couchdb3.utils.validate_db_name">validate_db_name</a></code></li>
 <li><code><a title="couchdb3.utils.validate_proxy" href="#couchdb3.utils.validate_proxy">validate_proxy</a></code></li>
 <li><code><a title="couchdb3.utils.validate_user_id" href="#couchdb3.utils.validate_user_id">validate_user_id</a></code></li>
