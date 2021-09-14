@@ -15,6 +15,7 @@ __all__ = [
     "basic_auth",
     "build_query",
     "build_url",
+    "user_name_to_id",
     "validate_db_name",
     "validate_proxy",
     "validate_user_id",
@@ -271,6 +272,22 @@ def validate_user_id(user_id: str) -> bool:
 
     """
     return bool(PATTERN_USER_ID.fullmatch(user_id))
+
+
+def user_name_to_id(name: str) -> str:
+    """
+    Convert a name into a valid CouchDB user ID.
+
+    Parameters
+    ----------
+    name : str
+        A user name.
+
+    Returns
+    -------
+    str : A valid CouchDB ID, i.e. of the form `org.couchdb.user:{name}`.
+    """
+    return f"org.couchdb.user:{name}"
 
 
 def check_response(response: requests.Response) -> None:
