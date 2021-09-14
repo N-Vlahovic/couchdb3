@@ -83,6 +83,9 @@ class Server(Base):
             disable_ssl_verification=disable_ssl_verification
         )
 
+    def __getitem__(self, item) -&gt; Database:
+        return self.get(item, check=True)
+
     def __repr__(self) -&gt; str:
         &#34;&#34;&#34;
         Close the session on delete.
@@ -320,7 +323,8 @@ class Server(Base):
 
     def get(
             self,
-            name: str
+            name: str,
+            check: bool = False
     ) -&gt; Database:
         &#34;&#34;&#34;
         Get a database by name.
@@ -329,6 +333,8 @@ class Server(Base):
         ----------
         name : str
             The name of the database.
+        check : bool
+            If `True`, raise an exception if database `name` cannot be found in the server. Default `False`.
 
         Returns
         -------
@@ -341,7 +347,8 @@ class Server(Base):
             user=self._user,
             password=self._password,
         )
-        db._head()
+        if check is True:
+            db._head()
         return db
 
     def delete(
@@ -573,6 +580,9 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
             disable_ssl_verification=disable_ssl_verification
         )
 
+    def __getitem__(self, item) -&gt; Database:
+        return self.get(item, check=True)
+
     def __repr__(self) -&gt; str:
         &#34;&#34;&#34;
         Close the session on delete.
@@ -810,7 +820,8 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
 
     def get(
             self,
-            name: str
+            name: str,
+            check: bool = False
     ) -&gt; Database:
         &#34;&#34;&#34;
         Get a database by name.
@@ -819,6 +830,8 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
         ----------
         name : str
             The name of the database.
+        check : bool
+            If `True`, raise an exception if database `name` cannot be found in the server. Default `False`.
 
         Returns
         -------
@@ -831,7 +844,8 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
             user=self._user,
             password=self._password,
         )
-        db._head()
+        if check is True:
+            db._head()
         return db
 
     def delete(
@@ -1278,7 +1292,7 @@ used: <code>3</code>, unless overridden in the <code>cluster config</code>).</dd
 </details>
 </dd>
 <dt id="couchdb3.server.Server.get"><code class="name flex">
-<span>def <span class="ident">get</span></span>(<span>self, name: str) ‑> <a title="couchdb3.database.Database" href="database.html#couchdb3.database.Database">Database</a></span>
+<span>def <span class="ident">get</span></span>(<span>self, name: str, check: bool = False) ‑> <a title="couchdb3.database.Database" href="database.html#couchdb3.database.Database">Database</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Get a database by name.</p>
@@ -1286,6 +1300,8 @@ used: <code>3</code>, unless overridden in the <code>cluster config</code>).</dd
 <dl>
 <dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
 <dd>The name of the database.</dd>
+<dt><strong><code>check</code></strong> :&ensp;<code>bool</code></dt>
+<dd>If <code>True</code>, raise an exception if database <code>name</code> cannot be found in the server. Default <code>False</code>.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -1298,7 +1314,8 @@ used: <code>3</code>, unless overridden in the <code>cluster config</code>).</dd
 </summary>
 <pre><code class="python">def get(
         self,
-        name: str
+        name: str,
+        check: bool = False
 ) -&gt; Database:
     &#34;&#34;&#34;
     Get a database by name.
@@ -1307,6 +1324,8 @@ used: <code>3</code>, unless overridden in the <code>cluster config</code>).</dd
     ----------
     name : str
         The name of the database.
+    check : bool
+        If `True`, raise an exception if database `name` cannot be found in the server. Default `False`.
 
     Returns
     -------
@@ -1319,7 +1338,8 @@ used: <code>3</code>, unless overridden in the <code>cluster config</code>).</dd
         user=self._user,
         password=self._password,
     )
-    db._head()
+    if check is True:
+        db._head()
     return db</code></pre>
 </details>
 </dd>

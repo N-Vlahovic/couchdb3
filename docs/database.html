@@ -35,7 +35,7 @@ import requests
 
 from .base import Base
 from .document import Document, extract_document_id_and_rev
-from .exceptions import NameComplianceError
+from .exceptions import CouchDBError, NameComplianceError
 from .utils import validate_db_name, content_type_getter
 from .view import ViewResult
 
@@ -94,6 +94,9 @@ class Database(Base):
             )
         self.name = name
         self.root = name
+
+    def __getitem__(self, item) -&gt; Document:
+        return self.get(docid=item, check=True)
 
     def __repr__(self) -&gt; str:
         &#34;&#34;&#34;
@@ -578,8 +581,10 @@ class Database(Base):
             open_revs: Iterable[str] = None,
             rev: str = None,
             revs: bool = None,
-            revs_info: bool = None
-    ) -&gt; Document:
+            revs_info: bool = None,
+            check: bool = False,
+            default_value: Any = None,
+    ) -&gt; Union[Document, Any]:
         &#34;&#34;&#34;
         Get a document by id.
 
@@ -614,28 +619,37 @@ class Database(Base):
             Includes list of all known document revisions. Default `None`.
         revs_info : bool
             Includes detailed information for all known document revisions. Default `None`.
+        check : bool
+            If `True`, raise an exception if `docid` cannot be found in the database. Default `False`.
+        default_value : Any
+            The default value to return if `check=False` and the `docid` is not in the database. Default `None`.
 
         Returns
         -------
         `couchdb3.document.Document`
         &#34;&#34;&#34;
-        return Document(**self._get(
-            resource=docid,
-            query_kwargs={
-                &#34;attachments&#34;: attachments,
-                &#34;att_encoding_info&#34;: att_encoding_info,
-                &#34;atts_since&#34;: atts_since,
-                &#34;conflicts&#34;: conflicts,
-                &#34;deleted_conflicts&#34;: deleted_conflicts,
-                &#34;latest&#34;: latest,
-                &#34;local_seq&#34;: local_seq,
-                &#34;meta&#34;: meta,
-                &#34;open_revs&#34;: open_revs,
-                &#34;rev&#34;: rev,
-                &#34;revs&#34;: revs,
-                &#34;revs_info&#34;: revs_info
-            }
-        ).json())
+        try:
+            return Document(**self._get(
+                resource=docid,
+                query_kwargs={
+                    &#34;attachments&#34;: attachments,
+                    &#34;att_encoding_info&#34;: att_encoding_info,
+                    &#34;atts_since&#34;: atts_since,
+                    &#34;conflicts&#34;: conflicts,
+                    &#34;deleted_conflicts&#34;: deleted_conflicts,
+                    &#34;latest&#34;: latest,
+                    &#34;local_seq&#34;: local_seq,
+                    &#34;meta&#34;: meta,
+                    &#34;open_revs&#34;: open_revs,
+                    &#34;rev&#34;: rev,
+                    &#34;revs&#34;: revs,
+                    &#34;revs_info&#34;: revs_info
+                }
+            ).json())
+        except (CouchDBError, requests.exceptions.RequestException) as error:
+            if check is True:
+                raise error
+            return default_value
 
     def get_attachment(
             self,
@@ -1191,6 +1205,9 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
         self.name = name
         self.root = name
 
+    def __getitem__(self, item) -&gt; Document:
+        return self.get(docid=item, check=True)
+
     def __repr__(self) -&gt; str:
         &#34;&#34;&#34;
         Basic repr.
@@ -1674,8 +1691,10 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
             open_revs: Iterable[str] = None,
             rev: str = None,
             revs: bool = None,
-            revs_info: bool = None
-    ) -&gt; Document:
+            revs_info: bool = None,
+            check: bool = False,
+            default_value: Any = None,
+    ) -&gt; Union[Document, Any]:
         &#34;&#34;&#34;
         Get a document by id.
 
@@ -1710,28 +1729,37 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
             Includes list of all known document revisions. Default `None`.
         revs_info : bool
             Includes detailed information for all known document revisions. Default `None`.
+        check : bool
+            If `True`, raise an exception if `docid` cannot be found in the database. Default `False`.
+        default_value : Any
+            The default value to return if `check=False` and the `docid` is not in the database. Default `None`.
 
         Returns
         -------
         `couchdb3.document.Document`
         &#34;&#34;&#34;
-        return Document(**self._get(
-            resource=docid,
-            query_kwargs={
-                &#34;attachments&#34;: attachments,
-                &#34;att_encoding_info&#34;: att_encoding_info,
-                &#34;atts_since&#34;: atts_since,
-                &#34;conflicts&#34;: conflicts,
-                &#34;deleted_conflicts&#34;: deleted_conflicts,
-                &#34;latest&#34;: latest,
-                &#34;local_seq&#34;: local_seq,
-                &#34;meta&#34;: meta,
-                &#34;open_revs&#34;: open_revs,
-                &#34;rev&#34;: rev,
-                &#34;revs&#34;: revs,
-                &#34;revs_info&#34;: revs_info
-            }
-        ).json())
+        try:
+            return Document(**self._get(
+                resource=docid,
+                query_kwargs={
+                    &#34;attachments&#34;: attachments,
+                    &#34;att_encoding_info&#34;: att_encoding_info,
+                    &#34;atts_since&#34;: atts_since,
+                    &#34;conflicts&#34;: conflicts,
+                    &#34;deleted_conflicts&#34;: deleted_conflicts,
+                    &#34;latest&#34;: latest,
+                    &#34;local_seq&#34;: local_seq,
+                    &#34;meta&#34;: meta,
+                    &#34;open_revs&#34;: open_revs,
+                    &#34;rev&#34;: rev,
+                    &#34;revs&#34;: revs,
+                    &#34;revs_info&#34;: revs_info
+                }
+            ).json())
+        except (CouchDBError, requests.exceptions.RequestException) as error:
+            if check is True:
+                raise error
+            return default_value
 
     def get_attachment(
             self,
@@ -2957,7 +2985,7 @@ the query response. Default is <code>False</code>.</dd>
 </details>
 </dd>
 <dt id="couchdb3.database.Database.get"><code class="name flex">
-<span>def <span class="ident">get</span></span>(<span>self, docid: str, *, attachments: bool = None, att_encoding_info: bool = None, atts_since: Iterable[str] = None, conflicts: bool = None, deleted_conflicts: bool = None, latest: bool = None, local_seq: bool = None, meta: bool = None, open_revs: Iterable[str] = None, rev: str = None, revs: bool = None, revs_info: bool = None) ‑> <a title="couchdb3.document.Document" href="document.html#couchdb3.document.Document">Document</a></span>
+<span>def <span class="ident">get</span></span>(<span>self, docid: str, *, attachments: bool = None, att_encoding_info: bool = None, atts_since: Iterable[str] = None, conflicts: bool = None, deleted_conflicts: bool = None, latest: bool = None, local_seq: bool = None, meta: bool = None, open_revs: Iterable[str] = None, rev: str = None, revs: bool = None, revs_info: bool = None, check: bool = False, default_value: Any = None) ‑> Union[<a title="couchdb3.document.Document" href="document.html#couchdb3.document.Document">Document</a>, Any]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Get a document by id.</p>
@@ -2992,6 +3020,10 @@ revisions. Default <code>None</code>.</dd>
 <dd>Includes list of all known document revisions. Default <code>None</code>.</dd>
 <dt><strong><code>revs_info</code></strong> :&ensp;<code>bool</code></dt>
 <dd>Includes detailed information for all known document revisions. Default <code>None</code>.</dd>
+<dt><strong><code>check</code></strong> :&ensp;<code>bool</code></dt>
+<dd>If <code>True</code>, raise an exception if <code>docid</code> cannot be found in the database. Default <code>False</code>.</dd>
+<dt><strong><code>default_value</code></strong> :&ensp;<code>Any</code></dt>
+<dd>The default value to return if <code>check=False</code> and the <code>docid</code> is not in the database. Default <code>None</code>.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <p><code><a title="couchdb3.document.Document" href="document.html#couchdb3.document.Document">Document</a></code></p></div>
@@ -3014,8 +3046,10 @@ revisions. Default <code>None</code>.</dd>
         open_revs: Iterable[str] = None,
         rev: str = None,
         revs: bool = None,
-        revs_info: bool = None
-) -&gt; Document:
+        revs_info: bool = None,
+        check: bool = False,
+        default_value: Any = None,
+) -&gt; Union[Document, Any]:
     &#34;&#34;&#34;
     Get a document by id.
 
@@ -3050,28 +3084,37 @@ revisions. Default <code>None</code>.</dd>
         Includes list of all known document revisions. Default `None`.
     revs_info : bool
         Includes detailed information for all known document revisions. Default `None`.
+    check : bool
+        If `True`, raise an exception if `docid` cannot be found in the database. Default `False`.
+    default_value : Any
+        The default value to return if `check=False` and the `docid` is not in the database. Default `None`.
 
     Returns
     -------
     `couchdb3.document.Document`
     &#34;&#34;&#34;
-    return Document(**self._get(
-        resource=docid,
-        query_kwargs={
-            &#34;attachments&#34;: attachments,
-            &#34;att_encoding_info&#34;: att_encoding_info,
-            &#34;atts_since&#34;: atts_since,
-            &#34;conflicts&#34;: conflicts,
-            &#34;deleted_conflicts&#34;: deleted_conflicts,
-            &#34;latest&#34;: latest,
-            &#34;local_seq&#34;: local_seq,
-            &#34;meta&#34;: meta,
-            &#34;open_revs&#34;: open_revs,
-            &#34;rev&#34;: rev,
-            &#34;revs&#34;: revs,
-            &#34;revs_info&#34;: revs_info
-        }
-    ).json())</code></pre>
+    try:
+        return Document(**self._get(
+            resource=docid,
+            query_kwargs={
+                &#34;attachments&#34;: attachments,
+                &#34;att_encoding_info&#34;: att_encoding_info,
+                &#34;atts_since&#34;: atts_since,
+                &#34;conflicts&#34;: conflicts,
+                &#34;deleted_conflicts&#34;: deleted_conflicts,
+                &#34;latest&#34;: latest,
+                &#34;local_seq&#34;: local_seq,
+                &#34;meta&#34;: meta,
+                &#34;open_revs&#34;: open_revs,
+                &#34;rev&#34;: rev,
+                &#34;revs&#34;: revs,
+                &#34;revs_info&#34;: revs_info
+            }
+        ).json())
+    except (CouchDBError, requests.exceptions.RequestException) as error:
+        if check is True:
+            raise error
+        return default_value</code></pre>
 </details>
 </dd>
 <dt id="couchdb3.database.Database.get_attachment"><code class="name flex">
