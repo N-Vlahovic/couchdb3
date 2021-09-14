@@ -6,8 +6,8 @@ from typing import Dict, List, Tuple, Union
 
 from .base import Base
 from .database import Database
-from .exceptions import ConflictError, CouchDBError, ProxySchemeComplianceError, UserIDComplianceError
-from .utils import validate_proxy, validate_user_id
+from .exceptions import ConflictError, CouchDBError, NotFoundError, ProxySchemeComplianceError, UserIDComplianceError
+from .utils import user_name_to_id, validate_proxy, validate_user_id
 
 
 __all__ = [
@@ -112,9 +112,10 @@ class Server(Base):
 
     def save_user(
             self,
-            user_id: str,
+            name: str,
+            *,
+            user_id: str = None,
             derived_key: str = None,
-            name: str = None,
             roles: List[str] = None,
             password: str = None,
             password_sha: str = None,
@@ -129,12 +130,12 @@ class Server(Base):
 
         Parameters
         ----------
+        name : str
+            User’s name aka login. Immutable e.g. you cannot rename an existing user - you have to create new one.
         user_id : str
             The user’s login with the special prefix `org.couchdb.user:`.
         derived_key : str
             PBKDF2 key derived from salt/iterations.
-        name : str
-            User’s name aka login. Immutable e.g. you cannot rename an existing user - you have to create new one.
         roles : List[str]
             List of user roles. CouchDB doesn’t provide any built-in roles, so you’re free to define your own depending
             on your needs. However, you cannot set system roles like `_admin` there. Also, only administrators may
@@ -161,11 +162,12 @@ class Server(Base):
           - the user ID ( `str`)
           - the current revision ( `str`)
         """
-        if validate_user_id(user_id=user_id) is False:
+        if user_id and validate_user_id(user_id=user_id) is False:
             raise UserIDComplianceError(
                 "User ID does not comply with the CouchDB requirements. "
                 "See https://docs.couchdb.org/en/main/intro/security.html#why-the-org-couchdb-user-prefix."
             )
+        user_id = user_id or user_name_to_id(name)
         body = {
             "_id": user_id,
             "_rev": rev,
@@ -319,8 +321,13 @@ class Server(Base):
             user=self._user,
             password=self._password,
         )
-        if check is True:
+        try:
             db._head()
+        except NotFoundError as error:
+            if check is True:
+                raise error
+        except CouchDBError as error:
+            raise error
         return db
 
     def delete(
