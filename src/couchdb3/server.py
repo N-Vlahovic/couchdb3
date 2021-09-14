@@ -55,6 +55,9 @@ class Server(Base):
             disable_ssl_verification=disable_ssl_verification
         )
 
+    def __getitem__(self, item) -> Database:
+        return self.get(item, check=True)
+
     def __repr__(self) -> str:
         """
         Close the session on delete.
@@ -292,7 +295,8 @@ class Server(Base):
 
     def get(
             self,
-            name: str
+            name: str,
+            check: bool = False
     ) -> Database:
         """
         Get a database by name.
@@ -301,6 +305,8 @@ class Server(Base):
         ----------
         name : str
             The name of the database.
+        check : bool
+            If `True`, raise an exception if database `name` cannot be found in the server. Default `False`.
 
         Returns
         -------
@@ -313,7 +319,8 @@ class Server(Base):
             user=self._user,
             password=self._password,
         )
-        db._head()
+        if check is True:
+            db._head()
         return db
 
     def delete(

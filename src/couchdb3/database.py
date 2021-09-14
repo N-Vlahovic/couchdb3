@@ -7,7 +7,7 @@ import requests
 
 from .base import Base
 from .document import Document, extract_document_id_and_rev
-from .exceptions import NameComplianceError
+from .exceptions import CouchDBError, NameComplianceError
 from .utils import validate_db_name, content_type_getter
 from .view import ViewResult
 
@@ -66,6 +66,9 @@ class Database(Base):
             )
         self.name = name
         self.root = name
+
+    def __getitem__(self, item) -> Document:
+        return self.get(docid=item, check=True)
 
     def __repr__(self) -> str:
         """
@@ -550,8 +553,10 @@ class Database(Base):
             open_revs: Iterable[str] = None,
             rev: str = None,
             revs: bool = None,
-            revs_info: bool = None
-    ) -> Document:
+            revs_info: bool = None,
+            check: bool = False,
+            default_value: Any = None,
+    ) -> Union[Document, Any]:
         """
         Get a document by id.
 
@@ -586,28 +591,37 @@ class Database(Base):
             Includes list of all known document revisions. Default `None`.
         revs_info : bool
             Includes detailed information for all known document revisions. Default `None`.
+        check : bool
+            If `True`, raise an exception if `docid` cannot be found in the database. Default `False`.
+        default_value : Any
+            The default value to return if `check=False` and the `docid` is not in the database. Default `None`.
 
         Returns
         -------
         `couchdb3.document.Document`
         """
-        return Document(**self._get(
-            resource=docid,
-            query_kwargs={
-                "attachments": attachments,
-                "att_encoding_info": att_encoding_info,
-                "atts_since": atts_since,
-                "conflicts": conflicts,
-                "deleted_conflicts": deleted_conflicts,
-                "latest": latest,
-                "local_seq": local_seq,
-                "meta": meta,
-                "open_revs": open_revs,
-                "rev": rev,
-                "revs": revs,
-                "revs_info": revs_info
-            }
-        ).json())
+        try:
+            return Document(**self._get(
+                resource=docid,
+                query_kwargs={
+                    "attachments": attachments,
+                    "att_encoding_info": att_encoding_info,
+                    "atts_since": atts_since,
+                    "conflicts": conflicts,
+                    "deleted_conflicts": deleted_conflicts,
+                    "latest": latest,
+                    "local_seq": local_seq,
+                    "meta": meta,
+                    "open_revs": open_revs,
+                    "rev": rev,
+                    "revs": revs,
+                    "revs_info": revs_info
+                }
+            ).json())
+        except (CouchDBError, requests.exceptions.RequestException) as error:
+            if check is True:
+                raise error
+            return default_value
 
     def get_attachment(
             self,
