@@ -188,12 +188,14 @@ class TestDatabase(unittest.TestCase):
         self.assertIsInstance(result["indexes"], list)
 
     def test_get(self):
+        docid = "test-doc-get"
         doc = {
             "type": "test-doc-get",
-            "_id": "test-doc-get"
+            "_id": docid
         }
+        self.assertIs(DB.get(docid), None)
         DB.create(doc)
-        dbdoc = DB.get(doc["_id"])
+        dbdoc = DB[docid]
         self.assertIsInstance(dbdoc, Document)
         for key in doc:
             self.assertEqual(doc[key], dbdoc[key])
