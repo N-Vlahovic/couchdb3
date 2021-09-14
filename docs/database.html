@@ -839,7 +839,7 @@ class Database(Base):
         &#34;&#34;&#34;
         return self.save(
             doc={
-                &#34;_id&#34;: ddoc,
+                &#34;_id&#34;: f&#34;_design/{ddoc}&#34;,
                 &#34;_rev&#34;: rev,
                 &#34;language&#34;: language,
                 &#34;options&#34;: options,
@@ -849,7 +849,6 @@ class Database(Base):
                 &#34;views&#34;: views,
                 &#34;autoupdate&#34;: autoupdate
             },
-            path=&#34;_design&#34;,
             **kwargs
         )
 
@@ -1947,7 +1946,7 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
         &#34;&#34;&#34;
         return self.save(
             doc={
-                &#34;_id&#34;: ddoc,
+                &#34;_id&#34;: f&#34;_design/{ddoc}&#34;,
                 &#34;_rev&#34;: rev,
                 &#34;language&#34;: language,
                 &#34;options&#34;: options,
@@ -1957,7 +1956,6 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
                 &#34;views&#34;: views,
                 &#34;autoupdate&#34;: autoupdate
             },
-            path=&#34;_design&#34;,
             **kwargs
         )
 
@@ -3460,7 +3458,7 @@ design document functions.</dd>
     &#34;&#34;&#34;
     return self.save(
         doc={
-            &#34;_id&#34;: ddoc,
+            &#34;_id&#34;: f&#34;_design/{ddoc}&#34;,
             &#34;_rev&#34;: rev,
             &#34;language&#34;: language,
             &#34;options&#34;: options,
@@ -3470,7 +3468,6 @@ design document functions.</dd>
             &#34;views&#34;: views,
             &#34;autoupdate&#34;: autoupdate
         },
-        path=&#34;_design&#34;,
         **kwargs
     )</code></pre>
 </details>

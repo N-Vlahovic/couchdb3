@@ -351,8 +351,6 @@ def check_response(response: requests.Response) -&gt; None:
         if response.status_code in exceptions.STATUS_CODE_ERROR_MAPPING:
             _ = exceptions.STATUS_CODE_ERROR_MAPPING[response.status_code]
             if _:
-                if &#34;design&#34; in response.url and response.request.method.lower() != &#34;head&#34;:
-                    breakpoint()
                 raise _(response.text)
             else:
                 return None
@@ -669,8 +667,6 @@ def extract_url_data(url: str) -&gt; Dict:
         if response.status_code in exceptions.STATUS_CODE_ERROR_MAPPING:
             _ = exceptions.STATUS_CODE_ERROR_MAPPING[response.status_code]
             if _:
-                if &#34;design&#34; in response.url and response.request.method.lower() != &#34;head&#34;:
-                    breakpoint()
                 raise _(response.text)
             else:
                 return None
