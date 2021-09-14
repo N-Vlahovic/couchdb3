@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from typing import Any, Dict, List, Tuple, Union
+from typing import Any, Dict, Iterable, List, Tuple, Union
 
 import requests
 
@@ -80,7 +80,7 @@ class Database(Base):
     def all_docs(
             self,
             partition: str = None,
-            keys: List[str] = None,
+            keys: Iterable[str] = None,
             **kwargs
     ) -> ViewResult:
         """
@@ -90,8 +90,8 @@ class Database(Base):
         ----------
         partition : str
             Filter using the partition's name (only valid for partitioned databases). Default is `None`.
-        keys : List[str]
-            Return only documents where the key matches one of the keys specified in the list. Default is `None`.
+        keys : Iterable[str]
+            Return only documents where the key matches one of the keys specified in the argument. Default is `None`.
         kwargs
             Further `couchdb3.database.Database.view` parameters.
 
@@ -541,13 +541,13 @@ class Database(Base):
             *,
             attachments: bool = None,
             att_encoding_info: bool = None,
-            atts_since: List[str] = None,
+            atts_since: Iterable[str] = None,
             conflicts: bool = None,
             deleted_conflicts: bool = None,
             latest: bool = None,
             local_seq: bool = None,
             meta: bool = None,
-            open_revs: List[str] = None,
+            open_revs: Iterable[str] = None,
             rev: str = None,
             revs: bool = None,
             revs_info: bool = None
@@ -564,7 +564,7 @@ class Database(Base):
         att_encoding_info : bool
             Includes encoding information in attachment stubs if the particular attachment is compressed.
             Default `None`.
-        atts_since : List[str]
+        atts_since : Iterable[str]
             Includes attachments only since specified revisions. Doesn’t includes attachments for specified revisions.
             Default `None`.
         conflicts : bool
@@ -577,7 +577,7 @@ class Database(Base):
             Includes last update sequence for the document. Default `None`.
         meta : bool
             Acts same as specifying all conflicts, deleted_conflicts and revs_info query parameters. Default `None`.
-        open_revs : List[str]
+        open_revs : Iterable[str]
             Retrieves documents of specified leaf revisions. Additionally, it accepts value as all to return all leaf
             revisions. Default `None`.
         rev : str
@@ -967,7 +967,7 @@ class Database(Base):
             att_encoding_info: bool = False,
             inclusive_end: bool = True,
             key: str = None,
-            keys: List[str] = None,
+            keys: Iterable[str] = None,
             limit: int = 0,
             reduce: bool = None,
             skip: int = 0,
@@ -1014,8 +1014,8 @@ class Database(Base):
             Specifies whether the specified end key should be included in the result. Default is `True`.
         key : str
             Return only documents that match the specified key. Default is `None`.
-        keys: List[str]
-            Return only documents where the key matches one of the keys specified in the list. Default is `None`.
+        keys: Iterable[str]
+            Return only documents where the key matches one of the keys specified in the argument. Default is `None`.
         limit : int
             Limit the number of the returned documents to the specified number.  Default is `None`.
         reduce : bool
