@@ -5,7 +5,7 @@ import base64
 from collections.abc import Generator
 import re
 import requests
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Set
 from urllib import parse
 
 from . import exceptions
@@ -21,6 +21,10 @@ __all__ = [
     "check_response",
     "content_type_getter",
     "extract_url_data",
+    "COUCHDB_USERS_DB_NAME",
+    "COUCHDB_REPLICATOR_DB_NAME",
+    "COUCHDB_GLOBAL_CHANGES_DB_NAME",
+    "COUCH_DB_RESERVED_DB_NAMES",
     "DEFAULT_TIMEOUT",
     "MIME_TYPES_MAPPING",
     "PATTERN_DB_NAME",
@@ -28,6 +32,20 @@ __all__ = [
     "PATTERN_URL",
 ]
 
+
+COUCHDB_USERS_DB_NAME: str = "_users"
+"""Reserved CouchDB users database name."""
+COUCHDB_REPLICATOR_DB_NAME: str = "_replicator"
+"""Reserved CouchDB replicator database name."""
+COUCHDB_GLOBAL_CHANGES_DB_NAME: str = "_global_changes"
+"""Reserved CouchDB global changes database name."""
+
+COUCH_DB_RESERVED_DB_NAMES: Set[str] = {
+    COUCHDB_USERS_DB_NAME,
+    COUCHDB_REPLICATOR_DB_NAME,
+    COUCHDB_GLOBAL_CHANGES_DB_NAME
+}
+"""Reserved CouchDB database names."""
 
 DEFAULT_TEXTUAL_MIME_TYPE: str = "text/plain"
 DEFAULT_FALLBACK_MIME_TYPE: str = "application/octet-stream"
@@ -219,7 +237,7 @@ def validate_db_name(name: str) -> bool:
     -------
     bool : `True` if the provided name is CouchDB compliant.
     """
-    return bool(PATTERN_DB_NAME.fullmatch(name))
+    return name in COUCH_DB_RESERVED_DB_NAMES or bool(PATTERN_DB_NAME.fullmatch(name))
 
 
 def validate_proxy(proxy: str) -> bool:
