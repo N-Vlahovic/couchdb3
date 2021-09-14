@@ -52,9 +52,11 @@ class TestClient(unittest.TestCase):
 
     def test_get(self):
         if TEST_DB_NAME not in CLIENT:
+            self.assertFalse(CLIENT.get(TEST_DB_NAME).check())
             CLIENT.create(TEST_DB_NAME)
-        db = CLIENT.get(TEST_DB_NAME)
+        db = CLIENT[TEST_DB_NAME]
         self.assertIsInstance(db, Database)
+        self.assertTrue(db.check())
         CLIENT.delete(TEST_DB_NAME)
 
     def test_get_special_db(self):
