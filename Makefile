@@ -13,3 +13,9 @@ deploy-test:
 html:
 	chmod +x scripts/html.sh
 	scripts/html.sh
+
+test:
+	chmod +x scripts/test.sh
+	scripts/test.sh
+
+
