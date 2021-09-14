@@ -2,14 +2,16 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import annotations
-from typing import Dict, Optional, Union
+from typing import Dict, List, Optional, Union
 
 from .base import DictBase
 
 
 __all__ = [
     "extract_document_id_and_rev",
-    "Document"
+    "Document",
+    "SecurityDocumentElement",
+    "SecurityDocument"
 ]
 
 
@@ -64,3 +66,89 @@ class Document(DictBase):
         str : The document's revision.
         """
         return self.get("_rev")
+
+
+class SecurityDocumentElement(DictBase):
+    """CouchDB Security Document Element (representing either `"admins"` or `"members"`) - a wrapper around Python 
+    dictionaries."""
+
+    def add_name(self, name: str) -> None:
+        self.names = sorted(set(self.names).union({name}))
+
+    def add_role(self, role: str) -> None:
+        self.roles = sorted(set(self.roles).union({role}))
+
+    @property
+    def names(self) -> List[str]:
+        """
+        Returns
+        -------
+        List[str] : The document's names.
+        """
+        return self.get("names", [])
+
+    @names.setter
+    def names(self, value) -> None:
+        self.update({
+            "names": value
+        })
+    
+    @property
+    def roles(self) -> List[str]:
+        """
+        Returns
+        -------
+        List[str] : The document's roles.
+        """
+        return self.get("roles", [])
+
+    @roles.setter
+    def roles(self, value) -> None:
+        self.update({
+            "roles": value
+        })
+
+
+class SecurityDocument(DictBase):
+    """CouchDB Security Document - a wrapper around Python dictionaries."""
+    
+    def __init__(
+            self,
+            *args,
+            **kwargs
+    ) -> None:
+        super(SecurityDocument, self).__init__(*args, **kwargs)
+        self.admins = SecurityDocumentElement(**self.get("admins", {}))
+        self.members = SecurityDocumentElement(**self.get("members", {}))
+    
+    @property
+    def admins(self) -> SecurityDocumentElement:
+        """
+        Returns
+        -------
+        SecurityDocument : The document's admins.
+        """
+        return self.get("admins", SecurityDocument())
+    
+    @admins.setter
+    def admins(self, value: SecurityDocumentElement) -> None:
+        self.update({
+            "admins": value
+        })
+
+    @property
+    def members(self) -> SecurityDocumentElement:
+        """
+        Returns
+        -------
+        SecurityDocument : The document's members.
+        """
+        return self.get("members", SecurityDocument())
+
+    @members.setter
+    def members(self, value: SecurityDocumentElement) -> None:
+        self.update({
+            "members": value
+        })
+
+    
