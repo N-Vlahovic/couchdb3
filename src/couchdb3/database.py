@@ -829,7 +829,7 @@ class Database(Base):
             self,
             doc: Union[Dict, Document],
             batch: bool = None,
-            new_edits: bool = True,
+            new_edits: bool = None,
             path: str = None
     ) -> Tuple[str, bool, str]:
         """
