@@ -30,9 +30,10 @@
 # -*- coding: utf-8 -*-
 
 import base64
+from collections.abc import Generator
 import re
 import requests
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Set
 from urllib import parse
 
 from . import exceptions
@@ -48,6 +49,10 @@ __all__ = [
     &#34;check_response&#34;,
     &#34;content_type_getter&#34;,
     &#34;extract_url_data&#34;,
+    &#34;COUCHDB_USERS_DB_NAME&#34;,
+    &#34;COUCHDB_REPLICATOR_DB_NAME&#34;,
+    &#34;COUCHDB_GLOBAL_CHANGES_DB_NAME&#34;,
+    &#34;COUCH_DB_RESERVED_DB_NAMES&#34;,
     &#34;DEFAULT_TIMEOUT&#34;,
     &#34;MIME_TYPES_MAPPING&#34;,
     &#34;PATTERN_DB_NAME&#34;,
@@ -55,6 +60,20 @@ __all__ = [
     &#34;PATTERN_URL&#34;,
 ]
 
+
+COUCHDB_USERS_DB_NAME: str = &#34;_users&#34;
+&#34;&#34;&#34;Reserved CouchDB users database name.&#34;&#34;&#34;
+COUCHDB_REPLICATOR_DB_NAME: str = &#34;_replicator&#34;
+&#34;&#34;&#34;Reserved CouchDB replicator database name.&#34;&#34;&#34;
+COUCHDB_GLOBAL_CHANGES_DB_NAME: str = &#34;_global_changes&#34;
+&#34;&#34;&#34;Reserved CouchDB global changes database name.&#34;&#34;&#34;
+
+COUCH_DB_RESERVED_DB_NAMES: Set[str] = {
+    COUCHDB_USERS_DB_NAME,
+    COUCHDB_REPLICATOR_DB_NAME,
+    COUCHDB_GLOBAL_CHANGES_DB_NAME
+}
+&#34;&#34;&#34;Reserved CouchDB database names.&#34;&#34;&#34;
 
 DEFAULT_TEXTUAL_MIME_TYPE: str = &#34;text/plain&#34;
 DEFAULT_FALLBACK_MIME_TYPE: str = &#34;application/octet-stream&#34;
@@ -149,7 +168,7 @@ PATTERN_URL: re.Pattern = re.compile(r&#34;^(\w+)://((.*):(.*)@|)(\w[\w.-]+\w)(:
 
 
 def _handler(x: Any) -&gt; str:
-    if isinstance(x, (list, set, tuple)):
+    if isinstance(x, (Generator, list, set, tuple)):
         return &#34;[%s]&#34; % &#34;,&#34;.join(f&#34;\&#34;{_handler(_)}\&#34;&#34; for _ in x)
     elif isinstance(x, dict):
         return str({key: _handler(val) for key, val in x.items()})
@@ -246,7 +265,7 @@ def validate_db_name(name: str) -&gt; bool:
     -------
     bool : `True` if the provided name is CouchDB compliant.
     &#34;&#34;&#34;
-    return bool(PATTERN_DB_NAME.fullmatch(name))
+    return name in COUCH_DB_RESERVED_DB_NAMES or bool(PATTERN_DB_NAME.fullmatch(name))
 
 
 def validate_proxy(proxy: str) -&gt; bool:
@@ -394,6 +413,22 @@ def extract_url_data(url: str) -&gt; Dict:
 <section>
 <h2 class="section-title" id="header-variables">Global variables</h2>
 <dl>
+<dt id="couchdb3.utils.COUCHDB_GLOBAL_CHANGES_DB_NAME"><code class="name">var <span class="ident">COUCHDB_GLOBAL_CHANGES_DB_NAME</span> : str</code></dt>
+<dd>
+<div class="desc"><p>Reserved CouchDB global changes database name.</p></div>
+</dd>
+<dt id="couchdb3.utils.COUCHDB_REPLICATOR_DB_NAME"><code class="name">var <span class="ident">COUCHDB_REPLICATOR_DB_NAME</span> : str</code></dt>
+<dd>
+<div class="desc"><p>Reserved CouchDB replicator database name.</p></div>
+</dd>
+<dt id="couchdb3.utils.COUCHDB_USERS_DB_NAME"><code class="name">var <span class="ident">COUCHDB_USERS_DB_NAME</span> : str</code></dt>
+<dd>
+<div class="desc"><p>Reserved CouchDB users database name.</p></div>
+</dd>
+<dt id="couchdb3.utils.COUCH_DB_RESERVED_DB_NAMES"><code class="name">var <span class="ident">COUCH_DB_RESERVED_DB_NAMES</span> : Set[str]</code></dt>
+<dd>
+<div class="desc"><p>Reserved CouchDB database names.</p></div>
+</dd>
 <dt id="couchdb3.utils.DEFAULT_TIMEOUT"><code class="name">var <span class="ident">DEFAULT_TIMEOUT</span> : int</code></dt>
 <dd>
 <div class="desc"><p>The default timeout set in requests.</p></div>
@@ -767,7 +802,7 @@ keys of <code><a title="couchdb3.utils.MIME_TYPES_MAPPING" href="#couchdb3.utils
     -------
     bool : `True` if the provided name is CouchDB compliant.
     &#34;&#34;&#34;
-    return bool(PATTERN_DB_NAME.fullmatch(name))</code></pre>
+    return name in COUCH_DB_RESERVED_DB_NAMES or bool(PATTERN_DB_NAME.fullmatch(name))</code></pre>
 </details>
 </dd>
 <dt id="couchdb3.utils.validate_proxy"><code class="name flex">
@@ -853,6 +888,10 @@ keys of <code><a title="couchdb3.utils.MIME_TYPES_MAPPING" href="#couchdb3.utils
 </li>
 <li><h3><a href="#header-variables">Global variables</a></h3>
 <ul class="">
+<li><code><a title="couchdb3.utils.COUCHDB_GLOBAL_CHANGES_DB_NAME" href="#couchdb3.utils.COUCHDB_GLOBAL_CHANGES_DB_NAME">COUCHDB_GLOBAL_CHANGES_DB_NAME</a></code></li>
+<li><code><a title="couchdb3.utils.COUCHDB_REPLICATOR_DB_NAME" href="#couchdb3.utils.COUCHDB_REPLICATOR_DB_NAME">COUCHDB_REPLICATOR_DB_NAME</a></code></li>
+<li><code><a title="couchdb3.utils.COUCHDB_USERS_DB_NAME" href="#couchdb3.utils.COUCHDB_USERS_DB_NAME">COUCHDB_USERS_DB_NAME</a></code></li>
+<li><code><a title="couchdb3.utils.COUCH_DB_RESERVED_DB_NAMES" href="#couchdb3.utils.COUCH_DB_RESERVED_DB_NAMES">COUCH_DB_RESERVED_DB_NAMES</a></code></li>
 <li><code><a title="couchdb3.utils.DEFAULT_TIMEOUT" href="#couchdb3.utils.DEFAULT_TIMEOUT">DEFAULT_TIMEOUT</a></code></li>
 <li><code><a title="couchdb3.utils.MIME_TYPES_MAPPING" href="#couchdb3.utils.MIME_TYPES_MAPPING">MIME_TYPES_MAPPING</a></code></li>
 <li><code><a title="couchdb3.utils.PATTERN_DB_NAME" href="#couchdb3.utils.PATTERN_DB_NAME">PATTERN_DB_NAME</a></code></li>
