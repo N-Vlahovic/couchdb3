@@ -34,7 +34,7 @@ from typing import Any, Dict, Iterable, List, Tuple, Union
 import requests
 
 from .base import Base
-from .document import Document, extract_document_id_and_rev
+from .document import Document, extract_document_id_and_rev, SecurityDocument, SecurityDocumentElement
 from .exceptions import CouchDBError, NameComplianceError
 from .utils import validate_db_name, content_type_getter
 from .view import ViewResult
@@ -949,35 +949,33 @@ class Database(Base):
 
     def security(
             self
-    ) -&gt; Dict:
+    ) -&gt; SecurityDocument:
         &#34;&#34;&#34;
         Returns the current security object from the specified database.
 
         Returns
         -------
-        Dict : A dictionary with the keys `admins` and `members`. Each contain the following two lists.
-
-          - `members`: List of CouchDB user names
-          - `roles`: List of user roles
+        SecurityDocument : A `couchdb3.document.SecurityDocument` object.
         &#34;&#34;&#34;
-        return self._get(
+        data = self._get(
             resource=&#34;_security&#34;
         ).json()
+        return SecurityDocument(**data)
 
     def update_security(
             self,
-            admins: Dict,
-            members: Dict,
+            admins: Union[Dict, SecurityDocumentElement],
+            members: Union[Dict, SecurityDocumentElement],
     ) -&gt; bool:
         &#34;&#34;&#34;
         Update database security.
 
         Parameters
         ----------
-        admins : Dict
+        admins : Union[Dict, SecurityDocumentElement]
             Object with two fields as `names` and `roles`. [See the official
             documentation](https://docs.couchdb.org/en/main/api/database/security.html#db-security) for more info.
-        members : Dict
+        members : Union[Dict, SecurityDocumentElement]
             Object with two fields as `names` and `roles`. [See the official
             documentation](https://docs.couchdb.org/en/main/api/database/security.html#db-security) for more info.
 
@@ -2059,35 +2057,33 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
 
     def security(
             self
-    ) -&gt; Dict:
+    ) -&gt; SecurityDocument:
         &#34;&#34;&#34;
         Returns the current security object from the specified database.
 
         Returns
         -------
-        Dict : A dictionary with the keys `admins` and `members`. Each contain the following two lists.
-
-          - `members`: List of CouchDB user names
-          - `roles`: List of user roles
+        SecurityDocument : A `couchdb3.document.SecurityDocument` object.
         &#34;&#34;&#34;
-        return self._get(
+        data = self._get(
             resource=&#34;_security&#34;
         ).json()
+        return SecurityDocument(**data)
 
     def update_security(
             self,
-            admins: Dict,
-            members: Dict,
+            admins: Union[Dict, SecurityDocumentElement],
+            members: Union[Dict, SecurityDocumentElement],
     ) -&gt; bool:
         &#34;&#34;&#34;
         Update database security.
 
         Parameters
         ----------
-        admins : Dict
+        admins : Union[Dict, SecurityDocumentElement]
             Object with two fields as `names` and `roles`. [See the official
             documentation](https://docs.couchdb.org/en/main/api/database/security.html#db-security) for more info.
-        members : Dict
+        members : Union[Dict, SecurityDocumentElement]
             Object with two fields as `names` and `roles`. [See the official
             documentation](https://docs.couchdb.org/en/main/api/database/security.html#db-security) for more info.
 
@@ -3638,49 +3634,43 @@ database, an error occurs.</dd>
 </details>
 </dd>
 <dt id="couchdb3.database.Database.security"><code class="name flex">
-<span>def <span class="ident">security</span></span>(<span>self) ‑> Dict</span>
+<span>def <span class="ident">security</span></span>(<span>self) ‑> <a title="couchdb3.document.SecurityDocument" href="document.html#couchdb3.document.SecurityDocument">SecurityDocument</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Returns the current security object from the specified database.</p>
 <h2 id="returns">Returns</h2>
-<p>Dict : A dictionary with the keys <code>admins</code> and <code>members</code>. Each contain the following two lists.</p>
-<ul>
-<li><code>members</code>: List of CouchDB user names</li>
-<li><code>roles</code>: List of user roles</li>
-</ul></div>
+<p>SecurityDocument : A <code><a title="couchdb3.document.SecurityDocument" href="document.html#couchdb3.document.SecurityDocument">SecurityDocument</a></code> object.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def security(
         self
-) -&gt; Dict:
+) -&gt; SecurityDocument:
     &#34;&#34;&#34;
     Returns the current security object from the specified database.
 
     Returns
     -------
-    Dict : A dictionary with the keys `admins` and `members`. Each contain the following two lists.
-
-      - `members`: List of CouchDB user names
-      - `roles`: List of user roles
+    SecurityDocument : A `couchdb3.document.SecurityDocument` object.
     &#34;&#34;&#34;
-    return self._get(
+    data = self._get(
         resource=&#34;_security&#34;
-    ).json()</code></pre>
+    ).json()
+    return SecurityDocument(**data)</code></pre>
 </details>
 </dd>
 <dt id="couchdb3.database.Database.update_security"><code class="name flex">
-<span>def <span class="ident">update_security</span></span>(<span>self, admins: Dict, members: Dict) ‑> bool</span>
+<span>def <span class="ident">update_security</span></span>(<span>self, admins: Union[Dict, <a title="couchdb3.document.SecurityDocumentElement" href="document.html#couchdb3.document.SecurityDocumentElement">SecurityDocumentElement</a>], members: Union[Dict, <a title="couchdb3.document.SecurityDocumentElement" href="document.html#couchdb3.document.SecurityDocumentElement">SecurityDocumentElement</a>]) ‑> bool</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Update database security.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>admins</code></strong> :&ensp;<code>Dict</code></dt>
+<dt><strong><code>admins</code></strong> :&ensp;<code>Union[Dict, SecurityDocumentElement]</code></dt>
 <dd>Object with two fields as <code>names</code> and <code>roles</code>. <a href="https://docs.couchdb.org/en/main/api/database/security.html#db-security">See the official
 documentation</a> for more info.</dd>
-<dt><strong><code>members</code></strong> :&ensp;<code>Dict</code></dt>
+<dt><strong><code>members</code></strong> :&ensp;<code>Union[Dict, SecurityDocumentElement]</code></dt>
 <dd>Object with two fields as <code>names</code> and <code>roles</code>. <a href="https://docs.couchdb.org/en/main/api/database/security.html#db-security">See the official
 documentation</a> for more info.</dd>
 </dl>
@@ -3693,18 +3683,18 @@ Operation status.</p></div>
 </summary>
 <pre><code class="python">def update_security(
         self,
-        admins: Dict,
-        members: Dict,
+        admins: Union[Dict, SecurityDocumentElement],
+        members: Union[Dict, SecurityDocumentElement],
 ) -&gt; bool:
     &#34;&#34;&#34;
     Update database security.
 
     Parameters
     ----------
-    admins : Dict
+    admins : Union[Dict, SecurityDocumentElement]
         Object with two fields as `names` and `roles`. [See the official
         documentation](https://docs.couchdb.org/en/main/api/database/security.html#db-security) for more info.
-    members : Dict
+    members : Union[Dict, SecurityDocumentElement]
         Object with two fields as `names` and `roles`. [See the official
         documentation](https://docs.couchdb.org/en/main/api/database/security.html#db-security) for more info.
 

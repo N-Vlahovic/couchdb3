@@ -30,14 +30,16 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import annotations
-from typing import Dict, Optional, Union
+from typing import Dict, List, Optional, Union
 
 from .base import DictBase
 
 
 __all__ = [
     &#34;extract_document_id_and_rev&#34;,
-    &#34;Document&#34;
+    &#34;Document&#34;,
+    &#34;SecurityDocumentElement&#34;,
+    &#34;SecurityDocument&#34;
 ]
 
 
@@ -91,7 +93,93 @@ class Document(DictBase):
         -------
         str : The document&#39;s revision.
         &#34;&#34;&#34;
-        return self.get(&#34;_rev&#34;)</code></pre>
+        return self.get(&#34;_rev&#34;)
+
+
+class SecurityDocumentElement(DictBase):
+    &#34;&#34;&#34;CouchDB Security Document Element (representing either `&#34;admins&#34;` or `&#34;members&#34;`) - a wrapper around Python 
+    dictionaries.&#34;&#34;&#34;
+
+    def add_name(self, name: str) -&gt; None:
+        self.names = sorted(set(self.names).union({name}))
+
+    def add_role(self, role: str) -&gt; None:
+        self.roles = sorted(set(self.roles).union({role}))
+
+    @property
+    def names(self) -&gt; List[str]:
+        &#34;&#34;&#34;
+        Returns
+        -------
+        List[str] : The document&#39;s names.
+        &#34;&#34;&#34;
+        return self.get(&#34;names&#34;, [])
+
+    @names.setter
+    def names(self, value) -&gt; None:
+        self.update({
+            &#34;names&#34;: value
+        })
+    
+    @property
+    def roles(self) -&gt; List[str]:
+        &#34;&#34;&#34;
+        Returns
+        -------
+        List[str] : The document&#39;s roles.
+        &#34;&#34;&#34;
+        return self.get(&#34;roles&#34;, [])
+
+    @roles.setter
+    def roles(self, value) -&gt; None:
+        self.update({
+            &#34;roles&#34;: value
+        })
+
+
+class SecurityDocument(DictBase):
+    &#34;&#34;&#34;CouchDB Security Document - a wrapper around Python dictionaries.&#34;&#34;&#34;
+    
+    def __init__(
+            self,
+            *args,
+            **kwargs
+    ) -&gt; None:
+        super(SecurityDocument, self).__init__(*args, **kwargs)
+        self.admins = SecurityDocumentElement(**self.get(&#34;admins&#34;, {}))
+        self.members = SecurityDocumentElement(**self.get(&#34;members&#34;, {}))
+    
+    @property
+    def admins(self) -&gt; SecurityDocumentElement:
+        &#34;&#34;&#34;
+        Returns
+        -------
+        SecurityDocument : The document&#39;s admins.
+        &#34;&#34;&#34;
+        return self.get(&#34;admins&#34;, SecurityDocument())
+    
+    @admins.setter
+    def admins(self, value: SecurityDocumentElement) -&gt; None:
+        self.update({
+            &#34;admins&#34;: value
+        })
+
+    @property
+    def members(self) -&gt; SecurityDocumentElement:
+        &#34;&#34;&#34;
+        Returns
+        -------
+        SecurityDocument : The document&#39;s members.
+        &#34;&#34;&#34;
+        return self.get(&#34;members&#34;, SecurityDocument())
+
+    @members.setter
+    def members(self, value: SecurityDocumentElement) -&gt; None:
+        self.update({
+            &#34;members&#34;: value
+        })
+
+    </code></pre>
 </details>
 </section>
 <section>
@@ -231,6 +319,228 @@ def rev(self) -&gt; Optional[str]:
 </dd>
 </dl>
 </dd>
+<dt id="couchdb3.document.SecurityDocument"><code class="flex name class">
+<span>class <span class="ident">SecurityDocument</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>CouchDB Security Document - a wrapper around Python dictionaries.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SecurityDocument(DictBase):
+    &#34;&#34;&#34;CouchDB Security Document - a wrapper around Python dictionaries.&#34;&#34;&#34;
+    
+    def __init__(
+            self,
+            *args,
+            **kwargs
+    ) -&gt; None:
+        super(SecurityDocument, self).__init__(*args, **kwargs)
+        self.admins = SecurityDocumentElement(**self.get(&#34;admins&#34;, {}))
+        self.members = SecurityDocumentElement(**self.get(&#34;members&#34;, {}))
+    
+    @property
+    def admins(self) -&gt; SecurityDocumentElement:
+        &#34;&#34;&#34;
+        Returns
+        -------
+        SecurityDocument : The document&#39;s admins.
+        &#34;&#34;&#34;
+        return self.get(&#34;admins&#34;, SecurityDocument())
+    
+    @admins.setter
+    def admins(self, value: SecurityDocumentElement) -&gt; None:
+        self.update({
+            &#34;admins&#34;: value
+        })
+
+    @property
+    def members(self) -&gt; SecurityDocumentElement:
+        &#34;&#34;&#34;
+        Returns
+        -------
+        SecurityDocument : The document&#39;s members.
+        &#34;&#34;&#34;
+        return self.get(&#34;members&#34;, SecurityDocument())
+
+    @members.setter
+    def members(self, value: SecurityDocumentElement) -&gt; None:
+        self.update({
+            &#34;members&#34;: value
+        })</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="couchdb3.base.DictBase" href="base.html#couchdb3.base.DictBase">DictBase</a></li>
+<li>builtins.dict</li>
+</ul>
+<h3>Instance variables</h3>
+<dl>
+<dt id="couchdb3.document.SecurityDocument.admins"><code class="name">var <span class="ident">admins</span> : <a title="couchdb3.document.SecurityDocumentElement" href="#couchdb3.document.SecurityDocumentElement">SecurityDocumentElement</a></code></dt>
+<dd>
+<div class="desc"><h2 id="returns">Returns</h2>
+<p>SecurityDocument : The document's admins.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def admins(self) -&gt; SecurityDocumentElement:
+    &#34;&#34;&#34;
+    Returns
+    -------
+    SecurityDocument : The document&#39;s admins.
+    &#34;&#34;&#34;
+    return self.get(&#34;admins&#34;, SecurityDocument())</code></pre>
+</details>
+</dd>
+<dt id="couchdb3.document.SecurityDocument.members"><code class="name">var <span class="ident">members</span> : <a title="couchdb3.document.SecurityDocumentElement" href="#couchdb3.document.SecurityDocumentElement">SecurityDocumentElement</a></code></dt>
+<dd>
+<div class="desc"><h2 id="returns">Returns</h2>
+<p>SecurityDocument : The document's members.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def members(self) -&gt; SecurityDocumentElement:
+    &#34;&#34;&#34;
+    Returns
+    -------
+    SecurityDocument : The document&#39;s members.
+    &#34;&#34;&#34;
+    return self.get(&#34;members&#34;, SecurityDocument())</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+<dt id="couchdb3.document.SecurityDocumentElement"><code class="flex name class">
+<span>class <span class="ident">SecurityDocumentElement</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>CouchDB Security Document Element (representing either <code>"admins"</code> or <code>"members"</code>) - a wrapper around Python
+dictionaries.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class SecurityDocumentElement(DictBase):
+    &#34;&#34;&#34;CouchDB Security Document Element (representing either `&#34;admins&#34;` or `&#34;members&#34;`) - a wrapper around Python 
+    dictionaries.&#34;&#34;&#34;
+
+    def add_name(self, name: str) -&gt; None:
+        self.names = sorted(set(self.names).union({name}))
+
+    def add_role(self, role: str) -&gt; None:
+        self.roles = sorted(set(self.roles).union({role}))
+
+    @property
+    def names(self) -&gt; List[str]:
+        &#34;&#34;&#34;
+        Returns
+        -------
+        List[str] : The document&#39;s names.
+        &#34;&#34;&#34;
+        return self.get(&#34;names&#34;, [])
+
+    @names.setter
+    def names(self, value) -&gt; None:
+        self.update({
+            &#34;names&#34;: value
+        })
+    
+    @property
+    def roles(self) -&gt; List[str]:
+        &#34;&#34;&#34;
+        Returns
+        -------
+        List[str] : The document&#39;s roles.
+        &#34;&#34;&#34;
+        return self.get(&#34;roles&#34;, [])
+
+    @roles.setter
+    def roles(self, value) -&gt; None:
+        self.update({
+            &#34;roles&#34;: value
+        })</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="couchdb3.base.DictBase" href="base.html#couchdb3.base.DictBase">DictBase</a></li>
+<li>builtins.dict</li>
+</ul>
+<h3>Instance variables</h3>
+<dl>
+<dt id="couchdb3.document.SecurityDocumentElement.names"><code class="name">var <span class="ident">names</span> : List[str]</code></dt>
+<dd>
+<div class="desc"><h2 id="returns">Returns</h2>
+<p>List[str] : The document's names.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def names(self) -&gt; List[str]:
+    &#34;&#34;&#34;
+    Returns
+    -------
+    List[str] : The document&#39;s names.
+    &#34;&#34;&#34;
+    return self.get(&#34;names&#34;, [])</code></pre>
+</details>
+</dd>
+<dt id="couchdb3.document.SecurityDocumentElement.roles"><code class="name">var <span class="ident">roles</span> : List[str]</code></dt>
+<dd>
+<div class="desc"><h2 id="returns">Returns</h2>
+<p>List[str] : The document's roles.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def roles(self) -&gt; List[str]:
+    &#34;&#34;&#34;
+    Returns
+    -------
+    List[str] : The document&#39;s roles.
+    &#34;&#34;&#34;
+    return self.get(&#34;roles&#34;, [])</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="couchdb3.document.SecurityDocumentElement.add_name"><code class="name flex">
+<span>def <span class="ident">add_name</span></span>(<span>self, name: str) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add_name(self, name: str) -&gt; None:
+    self.names = sorted(set(self.names).union({name}))</code></pre>
+</details>
+</dd>
+<dt id="couchdb3.document.SecurityDocumentElement.add_role"><code class="name flex">
+<span>def <span class="ident">add_role</span></span>(<span>self, role: str) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add_role(self, role: str) -&gt; None:
+    self.roles = sorted(set(self.roles).union({role}))</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
 </dl>
 </section>
 </article>
@@ -257,6 +567,22 @@ def rev(self) -&gt; Optional[str]:
 <ul class="">
 <li><code><a title="couchdb3.document.Document.id" href="#couchdb3.document.Document.id">id</a></code></li>
 <li><code><a title="couchdb3.document.Document.rev" href="#couchdb3.document.Document.rev">rev</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="couchdb3.document.SecurityDocument" href="#couchdb3.document.SecurityDocument">SecurityDocument</a></code></h4>
+<ul class="">
+<li><code><a title="couchdb3.document.SecurityDocument.admins" href="#couchdb3.document.SecurityDocument.admins">admins</a></code></li>
+<li><code><a title="couchdb3.document.SecurityDocument.members" href="#couchdb3.document.SecurityDocument.members">members</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="couchdb3.document.SecurityDocumentElement" href="#couchdb3.document.SecurityDocumentElement">SecurityDocumentElement</a></code></h4>
+<ul class="">
+<li><code><a title="couchdb3.document.SecurityDocumentElement.add_name" href="#couchdb3.document.SecurityDocumentElement.add_name">add_name</a></code></li>
+<li><code><a title="couchdb3.document.SecurityDocumentElement.add_role" href="#couchdb3.document.SecurityDocumentElement.add_role">add_role</a></code></li>
+<li><code><a title="couchdb3.document.SecurityDocumentElement.names" href="#couchdb3.document.SecurityDocumentElement.names">names</a></code></li>
+<li><code><a title="couchdb3.document.SecurityDocumentElement.roles" href="#couchdb3.document.SecurityDocumentElement.roles">roles</a></code></li>
 </ul>
 </li>
 </ul>
