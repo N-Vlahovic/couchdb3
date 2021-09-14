@@ -36,7 +36,7 @@ class Database(Base):
         Parameters
         ----------
         name : str
-            The name of the
+            The name of the database.
         url : str
             The url of the CouchDB server formatted as `scheme://user:password@host:port`. For example:
 
