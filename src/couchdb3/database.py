@@ -6,7 +6,7 @@ from typing import Any, Dict, Iterable, List, Tuple, Union
 import requests
 
 from .base import Base
-from .document import Document, extract_document_id_and_rev
+from .document import Document, extract_document_id_and_rev, SecurityDocument, SecurityDocumentElement
 from .exceptions import CouchDBError, NameComplianceError
 from .utils import validate_db_name, content_type_getter
 from .view import ViewResult
@@ -921,35 +921,33 @@ class Database(Base):
 
     def security(
             self
-    ) -> Dict:
+    ) -> SecurityDocument:
         """
         Returns the current security object from the specified database.
 
         Returns
         -------
-        Dict : A dictionary with the keys `admins` and `members`. Each contain the following two lists.
-
-          - `members`: List of CouchDB user names
-          - `roles`: List of user roles
+        SecurityDocument : A `couchdb3.document.SecurityDocument` object.
         """
-        return self._get(
+        data = self._get(
             resource="_security"
         ).json()
+        return SecurityDocument(**data)
 
     def update_security(
             self,
-            admins: Dict,
-            members: Dict,
+            admins: Union[Dict, SecurityDocumentElement],
+            members: Union[Dict, SecurityDocumentElement],
     ) -> bool:
         """
         Update database security.
 
         Parameters
         ----------
-        admins : Dict
+        admins : Union[Dict, SecurityDocumentElement]
             Object with two fields as `names` and `roles`. [See the official
             documentation](https://docs.couchdb.org/en/main/api/database/security.html#db-security) for more info.
-        members : Dict
+        members : Union[Dict, SecurityDocumentElement]
             Object with two fields as `names` and `roles`. [See the official
             documentation](https://docs.couchdb.org/en/main/api/database/security.html#db-security) for more info.
 
