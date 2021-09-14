@@ -10,7 +10,7 @@ from couchdb3.database import Database
 from couchdb3.document import Document
 from couchdb3.server import Server
 from couchdb3.view import ViewResult, ViewRow
-from couchdb3.utils import content_type_getter
+from couchdb3.utils import content_type_getter, user_name_to_id
 
 from tests.credentials import ATTACHMENT_PATH_HTML, ATTACHMENT_PATH_JSON, ATTACHMENT_PATH_PNG, ATTACHMENT_PATH_TXT, \
     COUCHDB_USER, COUCHDB_PASSWORD, COUCHDB0_URL, DOCUMENT_VIEW
@@ -329,6 +329,30 @@ class TestDatabase(unittest.TestCase):
         self.assertTrue(res in {"created", "exists"})
         self.assertEqual(_id, "_design/example-ddoc")
         self.assertEqual(name, "foo-index")
+
+    def test_security(self):
+        read_user = "reader-0"
+        read_password = "read_password"
+        ok, user_id, user_rev = CLIENT.save_user(
+            name=read_user,
+            password=read_password,
+            roles=["reader"],
+        )
+        self.assertTrue(ok)
+        self.assertEqual(user_id, user_name_to_id(read_user))
+        self.assertIsInstance(user_rev, str)
+        sec = DB.security()
+        sec.members.add_name(read_user)
+        sec.members.add_role("reader")
+        res = DB.update_security(
+            admins=sec.admins,
+            members=sec.members
+        )
+        self.assertTrue(res)
+        self.assertIsInstance(
+            Server(COUCHDB0_URL, user=read_user, password=read_password)[DB.name],
+            Database
+        )
 
     def test_view(self):
         docid = "doc-test-view"
