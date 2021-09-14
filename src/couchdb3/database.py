@@ -811,7 +811,7 @@ class Database(Base):
         """
         return self.save(
             doc={
-                "_id": ddoc,
+                "_id": f"_design/{ddoc}",
                 "_rev": rev,
                 "language": language,
                 "options": options,
@@ -821,7 +821,6 @@ class Database(Base):
                 "views": views,
                 "autoupdate": autoupdate
             },
-            path="_design",
             **kwargs
         )
 
