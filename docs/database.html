@@ -857,7 +857,7 @@ class Database(Base):
             self,
             doc: Union[Dict, Document],
             batch: bool = None,
-            new_edits: bool = True,
+            new_edits: bool = None,
             path: str = None
     ) -&gt; Tuple[str, bool, str]:
         &#34;&#34;&#34;
@@ -1965,7 +1965,7 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
             self,
             doc: Union[Dict, Document],
             batch: bool = None,
-            new_edits: bool = True,
+            new_edits: bool = None,
             path: str = None
     ) -&gt; Tuple[str, bool, str]:
         &#34;&#34;&#34;
@@ -3476,7 +3476,7 @@ design document functions.</dd>
 </details>
 </dd>
 <dt id="couchdb3.database.Database.save"><code class="name flex">
-<span>def <span class="ident">save</span></span>(<span>self, doc: Union[Dict, <a title="couchdb3.document.Document" href="document.html#couchdb3.document.Document">Document</a>], batch: bool = None, new_edits: bool = True, path: str = None) ‑> Tuple[str, bool, str]</span>
+<span>def <span class="ident">save</span></span>(<span>self, doc: Union[Dict, <a title="couchdb3.document.Document" href="document.html#couchdb3.document.Document">Document</a>], batch: bool = None, new_edits: bool = None, path: str = None) ‑> Tuple[str, bool, str]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Create a new named document, or a new revision of the existing document.</p>
@@ -3504,7 +3504,7 @@ to the creation of conflicts.</dd>
         self,
         doc: Union[Dict, Document],
         batch: bool = None,
-        new_edits: bool = True,
+        new_edits: bool = None,
         path: str = None
 ) -&gt; Tuple[str, bool, str]:
     &#34;&#34;&#34;
