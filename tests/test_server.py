@@ -5,6 +5,7 @@ import unittest
 
 from couchdb3.database import Database
 from couchdb3.server import Server
+from couchdb3.utils import COUCH_DB_RESERVED_DB_NAMES
 
 from tests.credentials import COUCHDB_USER, COUCHDB_PASSWORD, COUCHDB0_URL
 
@@ -55,6 +56,11 @@ class TestClient(unittest.TestCase):
         db = CLIENT.get(TEST_DB_NAME)
         self.assertIsInstance(db, Database)
         CLIENT.delete(TEST_DB_NAME)
+
+    def test_get_special_db(self):
+        for _ in COUCH_DB_RESERVED_DB_NAMES:
+            if _ in CLIENT:
+                self.assertIsInstance(CLIENT.get(_), Database)
 
     def test_replicate(self):
         if TEST_DB_NAME not in CLIENT:
