@@ -27,7 +27,7 @@ python -m pip install git+https://github.com/n-Vlahovic/couchdb3.git
 
 Installing from source
 ```bash
-git clone https://github.com/n-Vlahovic/couchdb3;
+git clone https://github.com/n-Vlahovic/couchdb3
 python -m pip install -e couchdb3
 ```
 
