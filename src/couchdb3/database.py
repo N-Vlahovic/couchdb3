@@ -967,27 +967,27 @@ class Database(Base):
             ddoc: str,
             view: str = None,
             *,
-            conflicts: bool = False,
-            descending: bool = False,
+            conflicts: bool = None,
+            descending: bool = None,
             endkey: str = None,
             endkey_docid: str = None,
-            group: bool = False,
+            group: bool = None,
             group_level: int = None,
-            include_docs: bool = False,
-            attachments: bool = False,
-            att_encoding_info: bool = False,
-            inclusive_end: bool = True,
+            include_docs: bool = None,
+            attachments: bool = None,
+            att_encoding_info: bool = None,
+            inclusive_end: bool = None,
             key: str = None,
             keys: Iterable[str] = None,
-            limit: int = 0,
+            limit: int = None,
             reduce: bool = None,
-            skip: int = 0,
-            sort: bool = True,
-            stable: bool = False,
+            skip: int = None,
+            sort: bool = None,
+            stable: bool = None,
             startkey: str = None,
             startkey_docid: str = None,
             update: str = None,
-            update_seq: bool = False
+            update_seq: bool = None
     ) -> ViewResult:
         """
         Executes the specified view function from the specified design documen, c.f [the official
@@ -1000,9 +1000,9 @@ class Database(Base):
         view : str
             The view's id.
         conflicts : bool
-            Include conflicts information in response. Ignored if `include_docs` isn’t `True`. Default is `False`.
+            Include conflicts information in response. Ignored if `include_docs` isn’t `True`. Default is `None`.
         descending : bool
-            Return the documents in descending order by key. Default is `False`.
+            Return the documents in descending order by key. Default is `None`.
         endkey : str
              Stop returning records when the specified key is reached. Default is `None`
         endkey_docid: str
@@ -1010,19 +1010,19 @@ class Database(Base):
             is `None`.
         group: bool
             Group the results using the reduce function to a group or single row. Implies `reduce` is `true` and the
-            maximum `group_level`. Default is `False`.
+            maximum `group_level`. Default is `None`.
         group_level : int
              Specify the group level to be used. Implies group is true. Default is `None`.
         include_docs : bool
-            Include the associated document with each row. Default is `False`.
+            Include the associated document with each row. Default is `None`.
         attachments : bool
             Include the Base64-encoded content of attachments in the documents that are included if `include_docs` is
-            `True`. Ignored if `include_docs` isn’t `True`. Default is `False`.
+            `True`. Ignored if `include_docs` isn’t `True`. Default is `None`.
         att_encoding_info : bool
             Include encoding information in attachment stubs if `include_docs` is `True` and the particular attachment is
             compressed. Ignored if `include_docs` isn’t `True`. Default is `False`.
         inclusive_end : bool
-            Specifies whether the specified end key should be included in the result. Default is `True`.
+            Specifies whether the specified end key should be included in the result. Default is `None`.
         key : str
             Return only documents that match the specified key. Default is `None`.
         keys: Iterable[str]
@@ -1032,12 +1032,12 @@ class Database(Base):
         reduce : bool
             Use the reduction function. Default is `True` when a reduce function is defined. Default is `None`.
         skip : int
-            Skip this number of records before starting to return the results. Default is `0`.
+            Skip this number of records before starting to return the results. Default is `None`.
         sort : bool
             Sort returned rows (see Sorting Returned Rows). Setting this to `False` offers a performance boost. The
-            `total_rows` and `offset` fields are not available when this is set to `False`. Default is `True`.
+            `total_rows` and `offset` fields are not available when this is set to `False`. Default is `None`.
         stable : bool
-            Whether or not the view results should be returned from a stable set of shards. Default is `False`.
+            Whether or not the view results should be returned from a stable set of shards. Default is `None`.
         startkey : str
             Return records starting with the specified key. Default is `None`
         startkey_docid : str
