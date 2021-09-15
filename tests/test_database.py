@@ -23,10 +23,24 @@ DB: Database = CLIENT.get(DB_NAME) if DB_NAME in CLIENT else CLIENT.create(DB_NA
 
 class TestDatabase(unittest.TestCase):
     def test_all_docs(self):
-        result = DB.all_docs()
+        docs = [{
+            "_id": f"test-all-docs-doc-{_}",
+            "name": f"Document {_}",
+        } for _ in range(10)]
+        DB.bulk_docs(docs=docs)
+        result = DB.all_docs(keys=[_["_id"] for _ in docs][:5])
         self.assertIsInstance(result, ViewResult)
+        self.assertListEqual(
+            [_["_id"] for _ in docs][:5],
+            [_.id for _ in result.rows]
+        )
+        result = DB.all_docs(
+            keys=map(lambda _: _["_id"], docs),
+            include_docs=True
+        )
         for _ in result.rows:
             self.assertIsInstance(_, ViewRow)
+            self.assertTrue(_.doc)
 
     def test___contains__(self):
         _id = "test-doc-__contains__"
