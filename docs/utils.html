@@ -169,7 +169,7 @@ PATTERN_URL: re.Pattern = re.compile(r&#34;^(\w+)://((.*):(.*)@|)(\w[\w.-]+\w)(:
 
 
 def _handler(x: Any) -&gt; str:
-    if isinstance(x, (Generator, list, set, tuple)):
+    if isinstance(x, (Generator, map, list, set, tuple)):
         return &#34;[%s]&#34; % &#34;,&#34;.join(f&#34;\&#34;{_handler(_)}\&#34;&#34; for _ in x)
     elif isinstance(x, dict):
         return str({key: _handler(val) for key, val in x.items()})
