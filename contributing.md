@@ -101,6 +101,12 @@ The variable `COUCHDB_URL` has one additional step:
 0. Check if the default local CouchDB URL (`http://localhost:5984`) points to a running server (by sending a `GET` 
 request).
 
+To run all tests, one can execute the command
+```bash 
+make test
+```
+which executes `python -m unittest discover -s tests -t tests`.
+
 
 ## Submitting changes
 To submit changes, simply create a new branch following the format `dev_<description>` 
@@ -147,27 +153,54 @@ def foo(
 
 ## File structure
 ```
-├── archive  # Old dist (git-ignored)
+├── archive  # .gitignore (created automatically when building)
 ├── contributing.md
-├── dist  # Current dist (git-ignored)
-├── docs  # The documentation
+├── dist  # .gitignore (created automatically when building)
+├── docs  # Automatically created when running "make html"
+│   ├── base.html
+│   ├── database.html
+│   ├── document.html
+│   ├── exceptions.html
+│   ├── index.html
+│   ├── server.html
+│   ├── utils.html
+│   └── view.html
 ├── LICENSE
-├── Makefile  # Basic cmds for docs generation, pkg build & deploy to pypi
+├── Makefile
 ├── pyproject.toml
 ├── README.md
 ├── scripts  # Scripts called in Makefile
+│   ├── build.sh
+│   ├── deploy.sh
+│   ├── deploy-test.sh
+│   ├── html.sh
+│   └── test.sh
 ├── setup.py
 ├── src
-│   ├── __init__.py
-│   └── couchdb3  # The actual package
-├── tests
-│   ├── attachments
-│   ├── credentials.py
-│   ├── __init__.py
-│   ├── test_database.py
-│   ├── test_server.py
-│   └── test_utils.py
-│   ├── views
-└── venv  # My Python env (git-ignored)
+│   ├── couchdb3  # Module location
+│   │   ├── base.py
+│   │   ├── database.py
+│   │   ├── document.py
+│   │   ├── exceptions.py
+│   │   ├── __init__.py
+│   │   ├── server.py
+│   │   ├── utils.py
+│   │   └── view.py
+│   └── __init__.py
+└── tests
+    ├── attachments
+    │   ├── test.html
+    │   ├── test.json
+    │   ├── test.png
+    │   └── test.txt
+    ├── credentials.py
+    ├── __init__.py
+    ├── test_database.py
+    ├── test_partitioned_database.py
+    ├── test_server.py
+    ├── test_utils.py
+    └── views
+        └── document-view.js
+
 ```
 
