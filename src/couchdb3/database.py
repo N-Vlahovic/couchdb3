@@ -6,7 +6,8 @@ from typing import Any, Dict, Iterable, List, Tuple, Union
 import requests
 
 from .base import Base
-from .document import Document, extract_document_id_and_rev, SecurityDocument, SecurityDocumentElement
+from .document import Document, AttachmentDocument, extract_document_id_and_rev, SecurityDocument, \
+    SecurityDocumentElement
 from .exceptions import CouchDBError, NameComplianceError
 from .utils import validate_db_name, content_type_getter
 from .view import ViewResult
@@ -632,7 +633,7 @@ class Database(Base):
             docid: str,
             attname: str,
             rev: str = None
-    ) -> requests.Response:
+    ) -> AttachmentDocument:
         """
         Get a document's attachment
 
@@ -647,11 +648,18 @@ class Database(Base):
 
         Returns
         -------
-        requests.Response : A `requests.Response` object containing the attachment content.
+        AttachmentDocument : A `couchdb3.document.AttachmentDocument` instance.
         """
-        return self._get(
+        response = self._get(
             f"{docid}/{attname}",
             query_kwargs={"rev": rev}
+        )
+        return AttachmentDocument(
+            content=response.content,
+            content_encoding=response.headers.get("content-encoding"),
+            content_length=response.headers.get("content-length"),
+            content_type=response.headers.get("content-type"),
+            digest="md5-" + response.headers.get("content-md5"),
         )
 
     def get_design(
