@@ -14,6 +14,7 @@ __all__ = [
     "ATTACHMENT_PATH_JSON",
     "ATTACHMENT_PATH_PNG",
     "ATTACHMENT_PATH_TXT",
+    "ATTACHMENT_PATH_ZIP",
     "COUCHDB_USER",
     "COUCHDB_PASSWORD",
     "COUCHDB0_URL",
@@ -48,6 +49,7 @@ ATTACHMENT_PATH_HTML: str = f"{proj_path}/tests/attachments/test.html"
 ATTACHMENT_PATH_JSON: str = f"{proj_path}/tests/attachments/test.json"
 ATTACHMENT_PATH_PNG: str = f"{proj_path}/tests/attachments/test.png"
 ATTACHMENT_PATH_TXT: str = f"{proj_path}/tests/attachments/test.txt"
+ATTACHMENT_PATH_ZIP: str = f"{proj_path}/tests/attachments/test.zip"
 
 
 with open(f"{proj_path}/tests/views/document-view.js", "r", encoding="utf-8") as _:
