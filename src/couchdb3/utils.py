@@ -145,7 +145,7 @@ PATTERN_URL: re.Pattern = re.compile(r"^(\w+)://((.*):(.*)@|)(\w[\w.-]+\w)(:(\d+
 """A pattern for abstract URLs split as `scheme://user:password@host:port/path`."""
 
 VALID_AUTH_METHODS: Set[str] = {"basic", "cookie"}
-"""The valid auth method arguments. Possible values are \"basic\" or \"cookie\"."""
+"""The valid auth method arguments. Possible values are `\"basic\"` or `\"cookie\"`."""
 
 
 def _handler(x: Any) -> str:
