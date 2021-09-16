@@ -16,6 +16,7 @@ __all__ = [
     "build_query",
     "build_url",
     "user_name_to_id",
+    "validate_auth_method",
     "validate_db_name",
     "validate_proxy",
     "validate_user_id",
@@ -26,11 +27,13 @@ __all__ = [
     "COUCHDB_REPLICATOR_DB_NAME",
     "COUCHDB_GLOBAL_CHANGES_DB_NAME",
     "COUCH_DB_RESERVED_DB_NAMES",
+    "DEFAULT_AUTH_METHOD",
     "DEFAULT_TIMEOUT",
     "MIME_TYPES_MAPPING",
     "PATTERN_DB_NAME",
     "PATTERN_USER_ID",
     "PATTERN_URL",
+    "VALID_AUTH_METHODS"
 ]
 
 
@@ -48,6 +51,8 @@ COUCH_DB_RESERVED_DB_NAMES: Set[str] = {
 }
 """Reserved CouchDB database names."""
 
+DEFAULT_AUTH_METHOD: str = "cookie"
+"""The default authentication method."""
 DEFAULT_TEXTUAL_MIME_TYPE: str = "text/plain"
 DEFAULT_FALLBACK_MIME_TYPE: str = "application/octet-stream"
 DEFAULT_TIMEOUT: int = 15
@@ -138,6 +143,9 @@ PATTERN_USER_ID: re.Pattern = re.compile(r"^org\.couchdb\.user:.*")
 """The pattern for valid user IDs."""
 PATTERN_URL: re.Pattern = re.compile(r"^(\w+)://((.*):(.*)@|)(\w[\w.-]+\w)(:(\d+)|)/?(.*)$")
 """A pattern for abstract URLs split as `scheme://user:password@host:port/path`."""
+
+VALID_AUTH_METHODS: Set[str] = {"basic", "cookie"}
+"""The valid auth method arguments."""
 
 
 def _handler(x: Any) -> str:
@@ -239,6 +247,21 @@ def validate_db_name(name: str) -> bool:
     bool : `True` if the provided name is CouchDB compliant.
     """
     return name in COUCH_DB_RESERVED_DB_NAMES or bool(PATTERN_DB_NAME.fullmatch(name))
+
+
+def validate_auth_method(auth_method: str) -> bool:
+    """
+    Checks if the provided authentication method is valid.
+
+    Parameters
+    ----------
+    auth_method : str
+
+    Returns
+    -------
+    bool: `True` if `auth_method` is in `VALID_AUTH_METHODS`.
+    """
+    return auth_method in VALID_AUTH_METHODS
 
 
 def validate_proxy(proxy: str) -> bool:
