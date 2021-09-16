@@ -34,7 +34,8 @@ from typing import Any, Dict, Iterable, List, Tuple, Union
 import requests
 
 from .base import Base
-from .document import Document, extract_document_id_and_rev, SecurityDocument, SecurityDocumentElement
+from .document import Document, AttachmentDocument, extract_document_id_and_rev, SecurityDocument, \
+    SecurityDocumentElement
 from .exceptions import CouchDBError, NameComplianceError
 from .utils import validate_db_name, content_type_getter
 from .view import ViewResult
@@ -660,7 +661,7 @@ class Database(Base):
             docid: str,
             attname: str,
             rev: str = None
-    ) -&gt; requests.Response:
+    ) -&gt; AttachmentDocument:
         &#34;&#34;&#34;
         Get a document&#39;s attachment
 
@@ -675,11 +676,18 @@ class Database(Base):
 
         Returns
         -------
-        requests.Response : A `requests.Response` object containing the attachment content.
+        AttachmentDocument : A `couchdb3.document.AttachmentDocument` instance.
         &#34;&#34;&#34;
-        return self._get(
+        response = self._get(
             f&#34;{docid}/{attname}&#34;,
             query_kwargs={&#34;rev&#34;: rev}
+        )
+        return AttachmentDocument(
+            content=response.content,
+            content_encoding=response.headers.get(&#34;content-encoding&#34;),
+            content_length=response.headers.get(&#34;content-length&#34;),
+            content_type=response.headers.get(&#34;content-type&#34;),
+            digest=&#34;md5-&#34; + response.headers.get(&#34;content-md5&#34;),
         )
 
     def get_design(
@@ -1773,7 +1781,7 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
             docid: str,
             attname: str,
             rev: str = None
-    ) -&gt; requests.Response:
+    ) -&gt; AttachmentDocument:
         &#34;&#34;&#34;
         Get a document&#39;s attachment
 
@@ -1788,11 +1796,18 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
 
         Returns
         -------
-        requests.Response : A `requests.Response` object containing the attachment content.
+        AttachmentDocument : A `couchdb3.document.AttachmentDocument` instance.
         &#34;&#34;&#34;
-        return self._get(
+        response = self._get(
             f&#34;{docid}/{attname}&#34;,
             query_kwargs={&#34;rev&#34;: rev}
+        )
+        return AttachmentDocument(
+            content=response.content,
+            content_encoding=response.headers.get(&#34;content-encoding&#34;),
+            content_length=response.headers.get(&#34;content-length&#34;),
+            content_type=response.headers.get(&#34;content-type&#34;),
+            digest=&#34;md5-&#34; + response.headers.get(&#34;content-md5&#34;),
         )
 
     def get_design(
@@ -3122,7 +3137,7 @@ revisions. Default <code>None</code>.</dd>
 </details>
 </dd>
 <dt id="couchdb3.database.Database.get_attachment"><code class="name flex">
-<span>def <span class="ident">get_attachment</span></span>(<span>self, docid: str, attname: str, rev: str = None) ‑> requests.models.Response</span>
+<span>def <span class="ident">get_attachment</span></span>(<span>self, docid: str, attname: str, rev: str = None) ‑> <a title="couchdb3.document.AttachmentDocument" href="document.html#couchdb3.document.AttachmentDocument">AttachmentDocument</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Get a document's attachment</p>
@@ -3136,7 +3151,7 @@ revisions. Default <code>None</code>.</dd>
 <dd>A specific revision.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
-<p>requests.Response : A <code>requests.Response</code> object containing the attachment content.</p></div>
+<p>AttachmentDocument : A <code><a title="couchdb3.document.AttachmentDocument" href="document.html#couchdb3.document.AttachmentDocument">AttachmentDocument</a></code> instance.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -3146,7 +3161,7 @@ revisions. Default <code>None</code>.</dd>
         docid: str,
         attname: str,
         rev: str = None
-) -&gt; requests.Response:
+) -&gt; AttachmentDocument:
     &#34;&#34;&#34;
     Get a document&#39;s attachment
 
@@ -3161,11 +3176,18 @@ revisions. Default <code>None</code>.</dd>
 
     Returns
     -------
-    requests.Response : A `requests.Response` object containing the attachment content.
+    AttachmentDocument : A `couchdb3.document.AttachmentDocument` instance.
     &#34;&#34;&#34;
-    return self._get(
+    response = self._get(
         f&#34;{docid}/{attname}&#34;,
         query_kwargs={&#34;rev&#34;: rev}
+    )
+    return AttachmentDocument(
+        content=response.content,
+        content_encoding=response.headers.get(&#34;content-encoding&#34;),
+        content_length=response.headers.get(&#34;content-length&#34;),
+        content_type=response.headers.get(&#34;content-type&#34;),
+        digest=&#34;md5-&#34; + response.headers.get(&#34;content-md5&#34;),
     )</code></pre>
 </details>
 </dd>

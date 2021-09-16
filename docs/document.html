@@ -38,6 +38,7 @@ from .base import DictBase
 __all__ = [
     &#34;extract_document_id_and_rev&#34;,
     &#34;Document&#34;,
+    &#34;AttachmentDocument&#34;,
     &#34;SecurityDocumentElement&#34;,
     &#34;SecurityDocument&#34;
 ]
@@ -96,8 +97,99 @@ class Document(DictBase):
         return self.get(&#34;_rev&#34;)
 
 
+class AttachmentDocument(DictBase):
+    &#34;&#34;&#34;CouchDB Attachment Document - a wrapper around Python dictionaries.&#34;&#34;&#34;
+
+    def __init__(
+            self,
+            *args,
+            **kwargs
+    ) -&gt; None:
+        super(AttachmentDocument, self).__init__(*args, **kwargs)
+        self.content = self.get(&#34;content&#34;)
+        self.content_encoding = self.get(&#34;content_encoding&#34;)
+        self.content_length = self.get(&#34;content_length&#34;)
+        self.content_type = self.get(&#34;content_type&#34;)
+        self.digest = self.get(&#34;digest&#34;)
+
+    @property
+    def content(self) -&gt; bytes:
+        &#34;&#34;&#34;
+        Returns
+        -------
+        bytes : The attachment&#39;s content.
+        &#34;&#34;&#34;
+        return self.get(&#34;content&#34;)
+
+    @content.setter
+    def content(self, value: bytes) -&gt; None:
+        self.update({
+            &#34;content&#34;: value
+        })
+
+    @property
+    def content_encoding(self) -&gt; str:
+        &#34;&#34;&#34;
+        Returns
+        -------
+        str : The attachment&#39;s content encoding.
+        &#34;&#34;&#34;
+        return self.get(&#34;content_encoding&#34;)
+
+    @content_encoding.setter
+    def content_encoding(self, value: str) -&gt; None:
+        self.update({
+            &#34;content_encoding&#34;: value
+        })
+
+    @property
+    def content_length(self) -&gt; int:
+        &#34;&#34;&#34;
+        Returns
+        -------
+        int : The attachment&#39;s content length.
+        &#34;&#34;&#34;
+        return self.get(&#34;content_length&#34;)
+
+    @content_length.setter
+    def content_length(self, value: int) -&gt; None:
+        self.update({
+            &#34;content_length&#34;: int(value)
+        })
+
+    @property
+    def content_type(self) -&gt; str:
+        &#34;&#34;&#34;
+        Returns
+        -------
+        str : The attachment&#39;s content type.
+        &#34;&#34;&#34;
+        return self.get(&#34;content_type&#34;)
+
+    @content_type.setter
+    def content_type(self, value: str) -&gt; None:
+        self.update({
+            &#34;content_type&#34;: value
+        })
+
+    @property
+    def digest(self) -&gt; str:
+        &#34;&#34;&#34;
+        Returns
+        -------
+        str : The attachment&#39;s content digest.
+        &#34;&#34;&#34;
+        return self.get(&#34;digest&#34;)
+
+    @digest.setter
+    def digest(self, value: str) -&gt; None:
+        self.update({
+            &#34;digest&#34;: value
+        })
+
+
 class SecurityDocumentElement(DictBase):
-    &#34;&#34;&#34;CouchDB Security Document Element (representing either `&#34;admins&#34;` or `&#34;members&#34;`) - a wrapper around Python 
+    &#34;&#34;&#34;CouchDB Security Document Element (representing either `&#34;admins&#34;` or `&#34;members&#34;`) - a wrapper around Python
     dictionaries.&#34;&#34;&#34;
 
     def add_name(self, name: str) -&gt; None:
@@ -120,7 +212,7 @@ class SecurityDocumentElement(DictBase):
         self.update({
             &#34;names&#34;: value
         })
-    
+
     @property
     def roles(self) -&gt; List[str]:
         &#34;&#34;&#34;
@@ -135,7 +227,7 @@ class SecurityDocumentElement(DictBase):
         self.update({
             &#34;roles&#34;: value
         })
-
+    
 
 class SecurityDocument(DictBase):
     &#34;&#34;&#34;CouchDB Security Document - a wrapper around Python dictionaries.&#34;&#34;&#34;
@@ -243,6 +335,205 @@ class SecurityDocument(DictBase):
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
+<dt id="couchdb3.document.AttachmentDocument"><code class="flex name class">
+<span>class <span class="ident">AttachmentDocument</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>CouchDB Attachment Document - a wrapper around Python dictionaries.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class AttachmentDocument(DictBase):
+    &#34;&#34;&#34;CouchDB Attachment Document - a wrapper around Python dictionaries.&#34;&#34;&#34;
+
+    def __init__(
+            self,
+            *args,
+            **kwargs
+    ) -&gt; None:
+        super(AttachmentDocument, self).__init__(*args, **kwargs)
+        self.content = self.get(&#34;content&#34;)
+        self.content_encoding = self.get(&#34;content_encoding&#34;)
+        self.content_length = self.get(&#34;content_length&#34;)
+        self.content_type = self.get(&#34;content_type&#34;)
+        self.digest = self.get(&#34;digest&#34;)
+
+    @property
+    def content(self) -&gt; bytes:
+        &#34;&#34;&#34;
+        Returns
+        -------
+        bytes : The attachment&#39;s content.
+        &#34;&#34;&#34;
+        return self.get(&#34;content&#34;)
+
+    @content.setter
+    def content(self, value: bytes) -&gt; None:
+        self.update({
+            &#34;content&#34;: value
+        })
+
+    @property
+    def content_encoding(self) -&gt; str:
+        &#34;&#34;&#34;
+        Returns
+        -------
+        str : The attachment&#39;s content encoding.
+        &#34;&#34;&#34;
+        return self.get(&#34;content_encoding&#34;)
+
+    @content_encoding.setter
+    def content_encoding(self, value: str) -&gt; None:
+        self.update({
+            &#34;content_encoding&#34;: value
+        })
+
+    @property
+    def content_length(self) -&gt; int:
+        &#34;&#34;&#34;
+        Returns
+        -------
+        int : The attachment&#39;s content length.
+        &#34;&#34;&#34;
+        return self.get(&#34;content_length&#34;)
+
+    @content_length.setter
+    def content_length(self, value: int) -&gt; None:
+        self.update({
+            &#34;content_length&#34;: int(value)
+        })
+
+    @property
+    def content_type(self) -&gt; str:
+        &#34;&#34;&#34;
+        Returns
+        -------
+        str : The attachment&#39;s content type.
+        &#34;&#34;&#34;
+        return self.get(&#34;content_type&#34;)
+
+    @content_type.setter
+    def content_type(self, value: str) -&gt; None:
+        self.update({
+            &#34;content_type&#34;: value
+        })
+
+    @property
+    def digest(self) -&gt; str:
+        &#34;&#34;&#34;
+        Returns
+        -------
+        str : The attachment&#39;s content digest.
+        &#34;&#34;&#34;
+        return self.get(&#34;digest&#34;)
+
+    @digest.setter
+    def digest(self, value: str) -&gt; None:
+        self.update({
+            &#34;digest&#34;: value
+        })</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="couchdb3.base.DictBase" href="base.html#couchdb3.base.DictBase">DictBase</a></li>
+<li>builtins.dict</li>
+</ul>
+<h3>Instance variables</h3>
+<dl>
+<dt id="couchdb3.document.AttachmentDocument.content"><code class="name">var <span class="ident">content</span> : bytes</code></dt>
+<dd>
+<div class="desc"><h2 id="returns">Returns</h2>
+<p>bytes : The attachment's content.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def content(self) -&gt; bytes:
+    &#34;&#34;&#34;
+    Returns
+    -------
+    bytes : The attachment&#39;s content.
+    &#34;&#34;&#34;
+    return self.get(&#34;content&#34;)</code></pre>
+</details>
+</dd>
+<dt id="couchdb3.document.AttachmentDocument.content_encoding"><code class="name">var <span class="ident">content_encoding</span> : str</code></dt>
+<dd>
+<div class="desc"><h2 id="returns">Returns</h2>
+<p>str : The attachment's content encoding.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def content_encoding(self) -&gt; str:
+    &#34;&#34;&#34;
+    Returns
+    -------
+    str : The attachment&#39;s content encoding.
+    &#34;&#34;&#34;
+    return self.get(&#34;content_encoding&#34;)</code></pre>
+</details>
+</dd>
+<dt id="couchdb3.document.AttachmentDocument.content_length"><code class="name">var <span class="ident">content_length</span> : int</code></dt>
+<dd>
+<div class="desc"><h2 id="returns">Returns</h2>
+<p>int : The attachment's content length.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def content_length(self) -&gt; int:
+    &#34;&#34;&#34;
+    Returns
+    -------
+    int : The attachment&#39;s content length.
+    &#34;&#34;&#34;
+    return self.get(&#34;content_length&#34;)</code></pre>
+</details>
+</dd>
+<dt id="couchdb3.document.AttachmentDocument.content_type"><code class="name">var <span class="ident">content_type</span> : str</code></dt>
+<dd>
+<div class="desc"><h2 id="returns">Returns</h2>
+<p>str : The attachment's content type.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def content_type(self) -&gt; str:
+    &#34;&#34;&#34;
+    Returns
+    -------
+    str : The attachment&#39;s content type.
+    &#34;&#34;&#34;
+    return self.get(&#34;content_type&#34;)</code></pre>
+</details>
+</dd>
+<dt id="couchdb3.document.AttachmentDocument.digest"><code class="name">var <span class="ident">digest</span> : str</code></dt>
+<dd>
+<div class="desc"><h2 id="returns">Returns</h2>
+<p>str : The attachment's content digest.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def digest(self) -&gt; str:
+    &#34;&#34;&#34;
+    Returns
+    -------
+    str : The attachment&#39;s content digest.
+    &#34;&#34;&#34;
+    return self.get(&#34;digest&#34;)</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
 <dt id="couchdb3.document.Document"><code class="flex name class">
 <span>class <span class="ident">Document</span></span>
 <span>(</span><span>*args, **kwargs)</span>
@@ -428,7 +719,7 @@ dictionaries.</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class SecurityDocumentElement(DictBase):
-    &#34;&#34;&#34;CouchDB Security Document Element (representing either `&#34;admins&#34;` or `&#34;members&#34;`) - a wrapper around Python 
+    &#34;&#34;&#34;CouchDB Security Document Element (representing either `&#34;admins&#34;` or `&#34;members&#34;`) - a wrapper around Python
     dictionaries.&#34;&#34;&#34;
 
     def add_name(self, name: str) -&gt; None:
@@ -451,7 +742,7 @@ dictionaries.</p></div>
         self.update({
             &#34;names&#34;: value
         })
-    
+
     @property
     def roles(self) -&gt; List[str]:
         &#34;&#34;&#34;
@@ -562,6 +853,16 @@ def roles(self) -&gt; List[str]:
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
+<li>
+<h4><code><a title="couchdb3.document.AttachmentDocument" href="#couchdb3.document.AttachmentDocument">AttachmentDocument</a></code></h4>
+<ul class="">
+<li><code><a title="couchdb3.document.AttachmentDocument.content" href="#couchdb3.document.AttachmentDocument.content">content</a></code></li>
+<li><code><a title="couchdb3.document.AttachmentDocument.content_encoding" href="#couchdb3.document.AttachmentDocument.content_encoding">content_encoding</a></code></li>
+<li><code><a title="couchdb3.document.AttachmentDocument.content_length" href="#couchdb3.document.AttachmentDocument.content_length">content_length</a></code></li>
+<li><code><a title="couchdb3.document.AttachmentDocument.content_type" href="#couchdb3.document.AttachmentDocument.content_type">content_type</a></code></li>
+<li><code><a title="couchdb3.document.AttachmentDocument.digest" href="#couchdb3.document.AttachmentDocument.digest">digest</a></code></li>
+</ul>
+</li>
 <li>
 <h4><code><a title="couchdb3.document.Document" href="#couchdb3.document.Document">Document</a></code></h4>
 <ul class="">
