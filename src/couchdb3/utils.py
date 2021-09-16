@@ -52,11 +52,11 @@ COUCH_DB_RESERVED_DB_NAMES: Set[str] = {
 """Reserved CouchDB database names."""
 
 DEFAULT_AUTH_METHOD: str = "cookie"
-"""The default authentication method."""
+"""The default authentication method - values to `\"cookie\"`."""
 DEFAULT_TEXTUAL_MIME_TYPE: str = "text/plain"
 DEFAULT_FALLBACK_MIME_TYPE: str = "application/octet-stream"
 DEFAULT_TIMEOUT: int = 15
-"""The default timeout set in requests."""
+"""The default timeout set in requests - values to `15`."""
 
 MIME_TYPES_MAPPING: Dict = {
     "aac": "audio/aac",
