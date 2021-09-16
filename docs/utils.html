@@ -173,7 +173,7 @@ PATTERN_URL: re.Pattern = re.compile(r&#34;^(\w+)://((.*):(.*)@|)(\w[\w.-]+\w)(:
 &#34;&#34;&#34;A pattern for abstract URLs split as `scheme://user:password@host:port/path`.&#34;&#34;&#34;
 
 VALID_AUTH_METHODS: Set[str] = {&#34;basic&#34;, &#34;cookie&#34;}
-&#34;&#34;&#34;The valid auth method arguments. Possible values are \&#34;basic\&#34; or \&#34;cookie\&#34;.&#34;&#34;&#34;
+&#34;&#34;&#34;The valid auth method arguments. Possible values are `\&#34;basic\&#34;` or `\&#34;cookie\&#34;`.&#34;&#34;&#34;
 
 
 def _handler(x: Any) -&gt; str:
@@ -495,7 +495,7 @@ def extract_url_data(url: str) -&gt; Dict:
 </dd>
 <dt id="couchdb3.utils.VALID_AUTH_METHODS"><code class="name">var <span class="ident">VALID_AUTH_METHODS</span> : Set[str]</code></dt>
 <dd>
-<div class="desc"><p>The valid auth method arguments. Possible values are "basic" or "cookie".</p></div>
+<div class="desc"><p>The valid auth method arguments. Possible values are <code>"basic"</code> or <code>"cookie"</code>.</p></div>
 </dd>
 </dl>
 </section>
