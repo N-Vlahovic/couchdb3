@@ -87,6 +87,10 @@ class Document(DictBase):
         &#34;&#34;&#34;
         return self.get(&#34;_id&#34;)
 
+    @id.setter
+    def id(self, value: str) -&gt; None:
+        self.update({&#34;_id&#34;: value})
+
     @property
     def rev(self) -&gt; Optional[str]:
         &#34;&#34;&#34;
@@ -95,6 +99,10 @@ class Document(DictBase):
         str : The document&#39;s revision.
         &#34;&#34;&#34;
         return self.get(&#34;_rev&#34;)
+
+    @rev.setter
+    def rev(self, value: str) -&gt; None:
+        self.update({&#34;_rev&#34;: value})
 
 
 class AttachmentDocument(DictBase):
@@ -556,6 +564,10 @@ def digest(self) -&gt; str:
         &#34;&#34;&#34;
         return self.get(&#34;_id&#34;)
 
+    @id.setter
+    def id(self, value: str) -&gt; None:
+        self.update({&#34;_id&#34;: value})
+
     @property
     def rev(self) -&gt; Optional[str]:
         &#34;&#34;&#34;
@@ -563,7 +575,11 @@ def digest(self) -&gt; str:
         -------
         str : The document&#39;s revision.
         &#34;&#34;&#34;
-        return self.get(&#34;_rev&#34;)</code></pre>
+        return self.get(&#34;_rev&#34;)
+
+    @rev.setter
+    def rev(self, value: str) -&gt; None:
+        self.update({&#34;_rev&#34;: value})</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
