@@ -44,6 +44,7 @@ __all__ = [
     &#34;build_query&#34;,
     &#34;build_url&#34;,
     &#34;user_name_to_id&#34;,
+    &#34;validate_auth_method&#34;,
     &#34;validate_db_name&#34;,
     &#34;validate_proxy&#34;,
     &#34;validate_user_id&#34;,
@@ -54,11 +55,13 @@ __all__ = [
     &#34;COUCHDB_REPLICATOR_DB_NAME&#34;,
     &#34;COUCHDB_GLOBAL_CHANGES_DB_NAME&#34;,
     &#34;COUCH_DB_RESERVED_DB_NAMES&#34;,
+    &#34;DEFAULT_AUTH_METHOD&#34;,
     &#34;DEFAULT_TIMEOUT&#34;,
     &#34;MIME_TYPES_MAPPING&#34;,
     &#34;PATTERN_DB_NAME&#34;,
     &#34;PATTERN_USER_ID&#34;,
     &#34;PATTERN_URL&#34;,
+    &#34;VALID_AUTH_METHODS&#34;
 ]
 
 
@@ -76,6 +79,8 @@ COUCH_DB_RESERVED_DB_NAMES: Set[str] = {
 }
 &#34;&#34;&#34;Reserved CouchDB database names.&#34;&#34;&#34;
 
+DEFAULT_AUTH_METHOD: str = &#34;cookie&#34;
+&#34;&#34;&#34;The default authentication method.&#34;&#34;&#34;
 DEFAULT_TEXTUAL_MIME_TYPE: str = &#34;text/plain&#34;
 DEFAULT_FALLBACK_MIME_TYPE: str = &#34;application/octet-stream&#34;
 DEFAULT_TIMEOUT: int = 15
@@ -166,6 +171,9 @@ PATTERN_USER_ID: re.Pattern = re.compile(r&#34;^org\.couchdb\.user:.*&#34;)
 &#34;&#34;&#34;The pattern for valid user IDs.&#34;&#34;&#34;
 PATTERN_URL: re.Pattern = re.compile(r&#34;^(\w+)://((.*):(.*)@|)(\w[\w.-]+\w)(:(\d+)|)/?(.*)$&#34;)
 &#34;&#34;&#34;A pattern for abstract URLs split as `scheme://user:password@host:port/path`.&#34;&#34;&#34;
+
+VALID_AUTH_METHODS: Set[str] = {&#34;basic&#34;, &#34;cookie&#34;}
+&#34;&#34;&#34;The valid auth method arguments.&#34;&#34;&#34;
 
 
 def _handler(x: Any) -&gt; str:
@@ -267,6 +275,21 @@ def validate_db_name(name: str) -&gt; bool:
     bool : `True` if the provided name is CouchDB compliant.
     &#34;&#34;&#34;
     return name in COUCH_DB_RESERVED_DB_NAMES or bool(PATTERN_DB_NAME.fullmatch(name))
+
+
+def validate_auth_method(auth_method: str) -&gt; bool:
+    &#34;&#34;&#34;
+    Checks if the provided authentication method is valid.
+
+    Parameters
+    ----------
+    auth_method : str
+
+    Returns
+    -------
+    bool: `True` if `auth_method` is in `VALID_AUTH_METHODS`.
+    &#34;&#34;&#34;
+    return auth_method in VALID_AUTH_METHODS
 
 
 def validate_proxy(proxy: str) -&gt; bool:
@@ -446,6 +469,10 @@ def extract_url_data(url: str) -&gt; Dict:
 <dd>
 <div class="desc"><p>Reserved CouchDB database names.</p></div>
 </dd>
+<dt id="couchdb3.utils.DEFAULT_AUTH_METHOD"><code class="name">var <span class="ident">DEFAULT_AUTH_METHOD</span> : str</code></dt>
+<dd>
+<div class="desc"><p>The default authentication method.</p></div>
+</dd>
 <dt id="couchdb3.utils.DEFAULT_TIMEOUT"><code class="name">var <span class="ident">DEFAULT_TIMEOUT</span> : int</code></dt>
 <dd>
 <div class="desc"><p>The default timeout set in requests.</p></div>
@@ -465,6 +492,10 @@ def extract_url_data(url: str) -&gt; Dict:
 <dt id="couchdb3.utils.PATTERN_USER_ID"><code class="name">var <span class="ident">PATTERN_USER_ID</span> : re.Pattern</code></dt>
 <dd>
 <div class="desc"><p>The pattern for valid user IDs.</p></div>
+</dd>
+<dt id="couchdb3.utils.VALID_AUTH_METHODS"><code class="name">var <span class="ident">VALID_AUTH_METHODS</span> : Set[str]</code></dt>
+<dd>
+<div class="desc"><p>The valid auth method arguments.</p></div>
 </dd>
 </dl>
 </section>
@@ -822,6 +853,37 @@ keys of <code><a title="couchdb3.utils.MIME_TYPES_MAPPING" href="#couchdb3.utils
     return f&#34;org.couchdb.user:{name}&#34;</code></pre>
 </details>
 </dd>
+<dt id="couchdb3.utils.validate_auth_method"><code class="name flex">
+<span>def <span class="ident">validate_auth_method</span></span>(<span>auth_method: str) ‑> bool</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Checks if the provided authentication method is valid.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>auth_method</code></strong> :&ensp;<code>str</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>bool: <code>True</code> if <code>auth_method</code> is in <code><a title="couchdb3.utils.VALID_AUTH_METHODS" href="#couchdb3.utils.VALID_AUTH_METHODS">VALID_AUTH_METHODS</a></code>.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def validate_auth_method(auth_method: str) -&gt; bool:
+    &#34;&#34;&#34;
+    Checks if the provided authentication method is valid.
+
+    Parameters
+    ----------
+    auth_method : str
+
+    Returns
+    -------
+    bool: `True` if `auth_method` is in `VALID_AUTH_METHODS`.
+    &#34;&#34;&#34;
+    return auth_method in VALID_AUTH_METHODS</code></pre>
+</details>
+</dd>
 <dt id="couchdb3.utils.validate_db_name"><code class="name flex">
 <span>def <span class="ident">validate_db_name</span></span>(<span>name: str) ‑> bool</span>
 </code></dt>
@@ -941,15 +1003,17 @@ keys of <code><a title="couchdb3.utils.MIME_TYPES_MAPPING" href="#couchdb3.utils
 <li><code><a title="couchdb3.utils.COUCHDB_REPLICATOR_DB_NAME" href="#couchdb3.utils.COUCHDB_REPLICATOR_DB_NAME">COUCHDB_REPLICATOR_DB_NAME</a></code></li>
 <li><code><a title="couchdb3.utils.COUCHDB_USERS_DB_NAME" href="#couchdb3.utils.COUCHDB_USERS_DB_NAME">COUCHDB_USERS_DB_NAME</a></code></li>
 <li><code><a title="couchdb3.utils.COUCH_DB_RESERVED_DB_NAMES" href="#couchdb3.utils.COUCH_DB_RESERVED_DB_NAMES">COUCH_DB_RESERVED_DB_NAMES</a></code></li>
+<li><code><a title="couchdb3.utils.DEFAULT_AUTH_METHOD" href="#couchdb3.utils.DEFAULT_AUTH_METHOD">DEFAULT_AUTH_METHOD</a></code></li>
 <li><code><a title="couchdb3.utils.DEFAULT_TIMEOUT" href="#couchdb3.utils.DEFAULT_TIMEOUT">DEFAULT_TIMEOUT</a></code></li>
 <li><code><a title="couchdb3.utils.MIME_TYPES_MAPPING" href="#couchdb3.utils.MIME_TYPES_MAPPING">MIME_TYPES_MAPPING</a></code></li>
 <li><code><a title="couchdb3.utils.PATTERN_DB_NAME" href="#couchdb3.utils.PATTERN_DB_NAME">PATTERN_DB_NAME</a></code></li>
 <li><code><a title="couchdb3.utils.PATTERN_URL" href="#couchdb3.utils.PATTERN_URL">PATTERN_URL</a></code></li>
 <li><code><a title="couchdb3.utils.PATTERN_USER_ID" href="#couchdb3.utils.PATTERN_USER_ID">PATTERN_USER_ID</a></code></li>
+<li><code><a title="couchdb3.utils.VALID_AUTH_METHODS" href="#couchdb3.utils.VALID_AUTH_METHODS">VALID_AUTH_METHODS</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
-<ul class="two-column">
+<ul class="">
 <li><code><a title="couchdb3.utils.basic_auth" href="#couchdb3.utils.basic_auth">basic_auth</a></code></li>
 <li><code><a title="couchdb3.utils.build_query" href="#couchdb3.utils.build_query">build_query</a></code></li>
 <li><code><a title="couchdb3.utils.build_url" href="#couchdb3.utils.build_url">build_url</a></code></li>
@@ -957,6 +1021,7 @@ keys of <code><a title="couchdb3.utils.MIME_TYPES_MAPPING" href="#couchdb3.utils
 <li><code><a title="couchdb3.utils.content_type_getter" href="#couchdb3.utils.content_type_getter">content_type_getter</a></code></li>
 <li><code><a title="couchdb3.utils.extract_url_data" href="#couchdb3.utils.extract_url_data">extract_url_data</a></code></li>
 <li><code><a title="couchdb3.utils.user_name_to_id" href="#couchdb3.utils.user_name_to_id">user_name_to_id</a></code></li>
+<li><code><a title="couchdb3.utils.validate_auth_method" href="#couchdb3.utils.validate_auth_method">validate_auth_method</a></code></li>
 <li><code><a title="couchdb3.utils.validate_db_name" href="#couchdb3.utils.validate_db_name">validate_db_name</a></code></li>
 <li><code><a title="couchdb3.utils.validate_proxy" href="#couchdb3.utils.validate_proxy">validate_proxy</a></code></li>
 <li><code><a title="couchdb3.utils.validate_user_id" href="#couchdb3.utils.validate_user_id">validate_user_id</a></code></li>

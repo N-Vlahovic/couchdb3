@@ -34,6 +34,7 @@ from typing import Dict
 
 __all__ = [
     &#34;CouchDBError&#34;,
+    &#34;AuthenticationMethodError&#34;,
     &#34;NameComplianceError&#34;,
     &#34;ProxySchemeComplianceError&#34;,
     &#34;UserIDComplianceError&#34;,
@@ -56,6 +57,10 @@ __all__ = [
 
 class CouchDBError(Exception):
     &#34;&#34;&#34;CouchDB Error&#34;&#34;&#34;
+
+
+class AuthenticationMethodError(CouchDBError):
+    &#34;&#34;&#34;Authentication method is not allowed.&#34;&#34;&#34;
 
 
 class NameComplianceError(CouchDBError):
@@ -164,6 +169,26 @@ STATUS_CODE_ERROR_MAPPING: Dict = {
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
+<dt id="couchdb3.exceptions.AuthenticationMethodError"><code class="flex name class">
+<span>class <span class="ident">AuthenticationMethodError</span></span>
+<span>(</span><span>*args, **kwargs)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Authentication method is not allowed.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class AuthenticationMethodError(CouchDBError):
+    &#34;&#34;&#34;Authentication method is not allowed.&#34;&#34;&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="couchdb3.exceptions.CouchDBError" href="#couchdb3.exceptions.CouchDBError">CouchDBError</a></li>
+<li>builtins.Exception</li>
+<li>builtins.BaseException</li>
+</ul>
+</dd>
 <dt id="couchdb3.exceptions.BadRequestError"><code class="flex name class">
 <span>class <span class="ident">BadRequestError</span></span>
 <span>(</span><span>*args, **kwargs)</span>
@@ -226,6 +251,7 @@ supplied MD5 hash and content also trigger this error, as this may indicate mess
 </ul>
 <h3>Subclasses</h3>
 <ul class="hlist">
+<li><a title="couchdb3.exceptions.AuthenticationMethodError" href="#couchdb3.exceptions.AuthenticationMethodError">AuthenticationMethodError</a></li>
 <li><a title="couchdb3.exceptions.BadRequestError" href="#couchdb3.exceptions.BadRequestError">BadRequestError</a></li>
 <li><a title="couchdb3.exceptions.ConflictError" href="#couchdb3.exceptions.ConflictError">ConflictError</a></li>
 <li><a title="couchdb3.exceptions.ExpectationFailedError" href="#couchdb3.exceptions.ExpectationFailedError">ExpectationFailedError</a></li>
@@ -560,6 +586,9 @@ documentation</a></p></div>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
+<li>
+<h4><code><a title="couchdb3.exceptions.AuthenticationMethodError" href="#couchdb3.exceptions.AuthenticationMethodError">AuthenticationMethodError</a></code></h4>
+</li>
 <li>
 <h4><code><a title="couchdb3.exceptions.BadRequestError" href="#couchdb3.exceptions.BadRequestError">BadRequestError</a></code></h4>
 </li>
