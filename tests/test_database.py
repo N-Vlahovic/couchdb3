@@ -10,7 +10,7 @@ from couchdb3.database import Database
 from couchdb3.document import Document, AttachmentDocument
 from couchdb3.server import Server
 from couchdb3.view import ViewResult, ViewRow
-from couchdb3.utils import content_type_getter, user_name_to_id
+from couchdb3.utils import user_name_to_id
 
 from tests.credentials import ATTACHMENT_PATH_HTML, ATTACHMENT_PATH_JSON, ATTACHMENT_PATH_PNG, ATTACHMENT_PATH_TXT, \
     ATTACHMENT_PATH_ZIP, COUCHDB_USER, COUCHDB_PASSWORD, COUCHDB0_URL, DOCUMENT_VIEW
