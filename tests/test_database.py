@@ -7,7 +7,7 @@ import datetime
 import unittest
 
 from couchdb3.database import Database
-from couchdb3.document import Document
+from couchdb3.document import Document, AttachmentDocument
 from couchdb3.server import Server
 from couchdb3.view import ViewResult, ViewRow
 from couchdb3.utils import content_type_getter, user_name_to_id
@@ -254,11 +254,10 @@ class TestDatabase(unittest.TestCase):
                 docid=docid,
                 attname=attname
             )
-            self.assertEqual(response.status_code, 200)
-            self.assertEqual(
-                content_type_getter(file_name=path),
-                response.headers.get("content-type")
-            )
+            self.assertIsInstance(response, AttachmentDocument)
+            self.assertIsInstance(response.content, bytes)
+            self.assertIsInstance(response.content_length, int)
+            self.assertIsInstance(response.digest, str)
 
     def test_put_design(self):
         ddoc = "document-design"
