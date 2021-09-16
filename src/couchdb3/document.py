@@ -59,6 +59,10 @@ class Document(DictBase):
         """
         return self.get("_id")
 
+    @id.setter
+    def id(self, value: str) -> None:
+        self.update({"_id": value})
+
     @property
     def rev(self) -> Optional[str]:
         """
@@ -67,6 +71,10 @@ class Document(DictBase):
         str : The document's revision.
         """
         return self.get("_rev")
+
+    @rev.setter
+    def rev(self, value: str) -> None:
+        self.update({"_rev": value})
 
 
 class AttachmentDocument(DictBase):
