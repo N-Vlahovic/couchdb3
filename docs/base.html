@@ -29,6 +29,7 @@
 <pre><code class="python">#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+from datetime import datetime
 import requests
 import requests.auth
 from typing import Dict, List, Optional, Union
@@ -55,7 +56,8 @@ class Base(object):
             port: int = None,
             user: str = None,
             password: str = None,
-            disable_ssl_verification: bool = False
+            disable_ssl_verification: bool = False,
+            auth_method: str = None
     ) -&gt; None:
         &#34;&#34;&#34;
 
@@ -75,7 +77,14 @@ class Base(object):
         disable_ssl_verification : bool
             Controls whether to verify the server’s TLS certificate. Set to `True` when connecting to a server with
             self-signed TLS certificates. Default `False`.
+        auth_method : str
+            Authentication method. Choices are `cookie` or `basic`. Default is `couchdb3.utils.DEFAULT_AUTH_METHOD`.
         &#34;&#34;&#34;
+        auth_method = auth_method or utils.DEFAULT_AUTH_METHOD
+        if utils.validate_auth_method(auth_method=auth_method) is False:
+            raise exceptions.AuthenticationMethodError(
+                &#34;Invalid authentication method. Possible values are \&#34;basic\&#34; and \&#34;cookie\&#34;.&#34;
+            )
         _ = utils.extract_url_data(url=url)
         user = user or _[&#34;user&#34;]
         password = password or _[&#34;password&#34;]
@@ -93,6 +102,7 @@ class Base(object):
         self._user = user
         self._password = password
         self._auth = requests.auth.HTTPBasicAuth(user, password) if user and password else None
+        self.auth_method = auth_method
 
     def __bool__(self) -&gt; bool:
         &#34;&#34;&#34;
@@ -174,6 +184,8 @@ class Base(object):
             body: Union[Dict, List] = None,
             timeout: int = utils.DEFAULT_TIMEOUT,
             query_kwargs: Dict = None,
+            auth_method: str = None,
+            root: str = None,
             **req_kwargs
     ) -&gt; requests.Response:
         &#34;&#34;&#34;
@@ -191,20 +203,33 @@ class Base(object):
             The request&#39;s timeout. Default c.f. `couchdb3.utils.DEFAULT_TIMEOUT`.
         query_kwargs : Dict
             A dictionary containing the requests query parameters.
+        auth_method : str
+            Authentication method. Choices are `cookie` or `basic`. Default is `None`.
+        root : str
+            A root relative to the server&#39;s URL, e.g. `&#34;dbname&#34;`. Default is `None`.
         req_kwargs
             Further `requests.request` keyword parameters.
         Returns
         -------
         requests.Response
         &#34;&#34;&#34;
+        auth_method = auth_method or self.auth_method
+        root = root if isinstance(root, str) else self.root
         path = &#34;&#34;
-        if self.root:
-            path += self.root
+        if root:
+            path += root
         if body:
             if isinstance(body, dict):
                 body = {k: v for k, v in body.items() if v is not None}
         if resource:
             path += f&#34;/{resource}&#34;
+        if auth_method == &#34;basic&#34;:
+            req_kwargs.update({
+                &#34;auth&#34;: self._auth
+            })
+        elif auth_method == &#34;cookie&#34;:
+            if self._is_auth_token_expired() is True:
+                self._renew_auth_token()
         response = self.session.request(
             method=method,
             url=utils.build_url(
@@ -216,7 +241,6 @@ class Base(object):
             ),
             json=body,
             timeout=timeout,
-            auth=self._auth,
             **req_kwargs
         )
         utils.check_response(response=response)
@@ -228,6 +252,8 @@ class Base(object):
             *,
             timeout: int = utils.DEFAULT_TIMEOUT,
             query_kwargs: Dict = None,
+            auth_method: str = None,
+            root: str = None,
             **req_kwargs
     ) -&gt; requests.Response:
         &#34;&#34;&#34;
@@ -241,6 +267,10 @@ class Base(object):
             The request&#39;s timeout. Default c.f. `couchdb3.utils.DEFAULT_TIMEOUT`.
         query_kwargs : Dict
             A dictionary containing the requests query parameters.
+        auth_method : str
+            Authentication method. Choices are `cookie` or `basic`. Default is `None`.
+        root : str
+            A root relative to the server&#39;s URL, e.g. `&#34;dbname&#34;`. Default is `None`.
         req_kwargs
             Further `requests.request` keyword parameters.
         Returns
@@ -252,6 +282,8 @@ class Base(object):
             resource=resource,
             timeout=timeout,
             query_kwargs=query_kwargs,
+            auth_method=auth_method,
+            root=root,
             **req_kwargs
         )
 
@@ -261,6 +293,8 @@ class Base(object):
             *,
             timeout: int = utils.DEFAULT_TIMEOUT,
             query_kwargs: Dict = None,
+            auth_method: str = None,
+            root: str = None,
             **req_kwargs
     ) -&gt; requests.Response:
         &#34;&#34;&#34;
@@ -274,6 +308,10 @@ class Base(object):
             The request&#39;s timeout. Default c.f. `couchdb3.utils.DEFAULT_TIMEOUT`.
         query_kwargs : Dict
             A dictionary containing the requests query parameters.
+        auth_method : str
+            Authentication method. Choices are `cookie` or `basic`. Default is `None`.
+        root : str
+            A root relative to the server&#39;s URL, e.g. `&#34;dbname&#34;`. Default is `None`.
         req_kwargs
             Further `requests.request` keyword parameters.
         Returns
@@ -285,6 +323,8 @@ class Base(object):
             resource=resource,
             timeout=timeout,
             query_kwargs=query_kwargs,
+            auth_method=auth_method,
+            root=root,
             **req_kwargs
         )
 
@@ -294,6 +334,8 @@ class Base(object):
             *,
             timeout: int = utils.DEFAULT_TIMEOUT,
             query_kwargs: Dict = None,
+            auth_method: str = None,
+            root: str = None,
             **req_kwargs
     ) -&gt; requests.Response:
         &#34;&#34;&#34;
@@ -307,6 +349,10 @@ class Base(object):
             The request&#39;s timeout. Default c.f. `couchdb3.utils.DEFAULT_TIMEOUT`.
         query_kwargs : Dict
             A dictionary containing the requests query parameters.
+        auth_method : str
+            Authentication method. Choices are `cookie` or `basic`. Default is `None`.
+        root : str
+            A root relative to the server&#39;s URL, e.g. `&#34;dbname&#34;`. Default is `None`.
         req_kwargs
             Further `requests.request` keyword parameters.
         Returns
@@ -318,6 +364,8 @@ class Base(object):
             resource=resource,
             timeout=timeout,
             query_kwargs=query_kwargs,
+            auth_method=auth_method,
+            root=root,
             **req_kwargs
         )
 
@@ -328,6 +376,8 @@ class Base(object):
             body: Union[Dict, List] = None,
             timeout: int = utils.DEFAULT_TIMEOUT,
             query_kwargs: Dict = None,
+            auth_method: str = None,
+            root: str = None,
             **req_kwargs
     ) -&gt; requests.Response:
         &#34;&#34;&#34;
@@ -343,6 +393,10 @@ class Base(object):
             The request&#39;s timeout. Default c.f. `couchdb3.utils.DEFAULT_TIMEOUT`.
         query_kwargs : Union[Dict, List]
             A dictionary containing the requests query parameters.
+        auth_method : str
+            Authentication method. Choices are `cookie` or `basic`. Default is `None`.
+        root : str
+            A root relative to the server&#39;s URL, e.g. `&#34;dbname&#34;`. Default is `None`.
         req_kwargs
             Further `requests.request` keyword parameters.
         Returns
@@ -355,6 +409,8 @@ class Base(object):
             body=body,
             timeout=timeout,
             query_kwargs=query_kwargs,
+            auth_method=auth_method,
+            root=root,
             **req_kwargs
         )
 
@@ -365,6 +421,8 @@ class Base(object):
             body: Union[Dict, List] = None,
             timeout: int = utils.DEFAULT_TIMEOUT,
             query_kwargs: Dict = None,
+            auth_method: str = None,
+            root: str = None,
             **req_kwargs
     ) -&gt; requests.Response:
         &#34;&#34;&#34;
@@ -380,6 +438,10 @@ class Base(object):
             The request&#39;s timeout. Default c.f. `couchdb3.utils.DEFAULT_TIMEOUT`.
         query_kwargs : Dict
             A dictionary containing the requests query parameters.
+        auth_method : str
+            Authentication method. Choices are `cookie` or `basic`. Default is `None`.
+        root : str
+            A root relative to the server&#39;s URL, e.g. `&#34;dbname&#34;`. Default is `None`.
         req_kwargs
             Further `requests.request` keyword parameters.
         Returns
@@ -392,7 +454,39 @@ class Base(object):
             body=body,
             timeout=timeout,
             query_kwargs=query_kwargs,
+            auth_method=auth_method,
+            root=root,
             **req_kwargs
+        )
+
+    def _is_auth_token_expired(self) -&gt; bool:
+        &#34;&#34;&#34;
+        Check if the authentication token is expired.
+
+        Returns
+        -------
+        bool : `True` if the auth token is expired.
+        &#34;&#34;&#34;
+        try:
+            return next(_.expires for _ in self.session.cookies if _.name == &#34;AuthSession&#34;) &lt;= datetime.utcnow().timestamp()
+        except StopIteration:
+            return True
+
+    def _renew_auth_token(self) -&gt; None:
+        &#34;&#34;&#34;
+        Send a `POST` request to the `_session` endpoint to obtain a token.
+        Returns
+        -------
+        None
+        &#34;&#34;&#34;
+        self._post(
+            resource=&#34;_session&#34;,
+            body={
+                &#34;name&#34;: self._user,
+                &#34;password&#34;: self._password
+            },
+            auth_method=&#34;basic&#34;,
+            root=&#34;&#34;
         )
 
     def check(
@@ -417,15 +511,23 @@ class Base(object):
         except (exceptions.CouchDBError, requests.exceptions.RequestException):
             return False
 
-    def info(self) -&gt; Dict:
+    def info(
+            self,
+            partition: str = None
+    ) -&gt; Dict:
         &#34;&#34;&#34;
         Return a server&#39;s or database&#39;s info by sending a `GET` request to `/self.root`.
+
+        Parameters
+        ----------
+        partition : str
+            A specific partition of the database. Only valid for partitioned databases. Default is `None`.
 
         Returns
         -------
         Dict: A dictionary containing the server&#39;s or database&#39;s info.
         &#34;&#34;&#34;
-        return self._get().json()
+        return self._get(resource=f&#34;_partition/{partition}&#34; if partition else None).json()
 
     def rev(
             self,
@@ -475,7 +577,7 @@ class DictBase(dict):
 <dl>
 <dt id="couchdb3.base.Base"><code class="flex name class">
 <span>class <span class="ident">Base</span></span>
-<span>(</span><span>url: str, *, port: int = None, user: str = None, password: str = None, disable_ssl_verification: bool = False)</span>
+<span>(</span><span>url: str, *, port: int = None, user: str = None, password: str = None, disable_ssl_verification: bool = False, auth_method: str = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Abstract base class</p>
@@ -495,6 +597,8 @@ class DictBase(dict):
 <dt><strong><code>disable_ssl_verification</code></strong> :&ensp;<code>bool</code></dt>
 <dd>Controls whether to verify the server’s TLS certificate. Set to <code>True</code> when connecting to a server with
 self-signed TLS certificates. Default <code>False</code>.</dd>
+<dt><strong><code>auth_method</code></strong> :&ensp;<code>str</code></dt>
+<dd>Authentication method. Choices are <code>cookie</code> or <code>basic</code>. Default is <code><a title="couchdb3.utils.DEFAULT_AUTH_METHOD" href="utils.html#couchdb3.utils.DEFAULT_AUTH_METHOD">DEFAULT_AUTH_METHOD</a></code>.</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -512,7 +616,8 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
             port: int = None,
             user: str = None,
             password: str = None,
-            disable_ssl_verification: bool = False
+            disable_ssl_verification: bool = False,
+            auth_method: str = None
     ) -&gt; None:
         &#34;&#34;&#34;
 
@@ -532,7 +637,14 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
         disable_ssl_verification : bool
             Controls whether to verify the server’s TLS certificate. Set to `True` when connecting to a server with
             self-signed TLS certificates. Default `False`.
+        auth_method : str
+            Authentication method. Choices are `cookie` or `basic`. Default is `couchdb3.utils.DEFAULT_AUTH_METHOD`.
         &#34;&#34;&#34;
+        auth_method = auth_method or utils.DEFAULT_AUTH_METHOD
+        if utils.validate_auth_method(auth_method=auth_method) is False:
+            raise exceptions.AuthenticationMethodError(
+                &#34;Invalid authentication method. Possible values are \&#34;basic\&#34; and \&#34;cookie\&#34;.&#34;
+            )
         _ = utils.extract_url_data(url=url)
         user = user or _[&#34;user&#34;]
         password = password or _[&#34;password&#34;]
@@ -550,6 +662,7 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
         self._user = user
         self._password = password
         self._auth = requests.auth.HTTPBasicAuth(user, password) if user and password else None
+        self.auth_method = auth_method
 
     def __bool__(self) -&gt; bool:
         &#34;&#34;&#34;
@@ -631,6 +744,8 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
             body: Union[Dict, List] = None,
             timeout: int = utils.DEFAULT_TIMEOUT,
             query_kwargs: Dict = None,
+            auth_method: str = None,
+            root: str = None,
             **req_kwargs
     ) -&gt; requests.Response:
         &#34;&#34;&#34;
@@ -648,20 +763,33 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
             The request&#39;s timeout. Default c.f. `couchdb3.utils.DEFAULT_TIMEOUT`.
         query_kwargs : Dict
             A dictionary containing the requests query parameters.
+        auth_method : str
+            Authentication method. Choices are `cookie` or `basic`. Default is `None`.
+        root : str
+            A root relative to the server&#39;s URL, e.g. `&#34;dbname&#34;`. Default is `None`.
         req_kwargs
             Further `requests.request` keyword parameters.
         Returns
         -------
         requests.Response
         &#34;&#34;&#34;
+        auth_method = auth_method or self.auth_method
+        root = root if isinstance(root, str) else self.root
         path = &#34;&#34;
-        if self.root:
-            path += self.root
+        if root:
+            path += root
         if body:
             if isinstance(body, dict):
                 body = {k: v for k, v in body.items() if v is not None}
         if resource:
             path += f&#34;/{resource}&#34;
+        if auth_method == &#34;basic&#34;:
+            req_kwargs.update({
+                &#34;auth&#34;: self._auth
+            })
+        elif auth_method == &#34;cookie&#34;:
+            if self._is_auth_token_expired() is True:
+                self._renew_auth_token()
         response = self.session.request(
             method=method,
             url=utils.build_url(
@@ -673,7 +801,6 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
             ),
             json=body,
             timeout=timeout,
-            auth=self._auth,
             **req_kwargs
         )
         utils.check_response(response=response)
@@ -685,6 +812,8 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
             *,
             timeout: int = utils.DEFAULT_TIMEOUT,
             query_kwargs: Dict = None,
+            auth_method: str = None,
+            root: str = None,
             **req_kwargs
     ) -&gt; requests.Response:
         &#34;&#34;&#34;
@@ -698,6 +827,10 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
             The request&#39;s timeout. Default c.f. `couchdb3.utils.DEFAULT_TIMEOUT`.
         query_kwargs : Dict
             A dictionary containing the requests query parameters.
+        auth_method : str
+            Authentication method. Choices are `cookie` or `basic`. Default is `None`.
+        root : str
+            A root relative to the server&#39;s URL, e.g. `&#34;dbname&#34;`. Default is `None`.
         req_kwargs
             Further `requests.request` keyword parameters.
         Returns
@@ -709,6 +842,8 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
             resource=resource,
             timeout=timeout,
             query_kwargs=query_kwargs,
+            auth_method=auth_method,
+            root=root,
             **req_kwargs
         )
 
@@ -718,6 +853,8 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
             *,
             timeout: int = utils.DEFAULT_TIMEOUT,
             query_kwargs: Dict = None,
+            auth_method: str = None,
+            root: str = None,
             **req_kwargs
     ) -&gt; requests.Response:
         &#34;&#34;&#34;
@@ -731,6 +868,10 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
             The request&#39;s timeout. Default c.f. `couchdb3.utils.DEFAULT_TIMEOUT`.
         query_kwargs : Dict
             A dictionary containing the requests query parameters.
+        auth_method : str
+            Authentication method. Choices are `cookie` or `basic`. Default is `None`.
+        root : str
+            A root relative to the server&#39;s URL, e.g. `&#34;dbname&#34;`. Default is `None`.
         req_kwargs
             Further `requests.request` keyword parameters.
         Returns
@@ -742,6 +883,8 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
             resource=resource,
             timeout=timeout,
             query_kwargs=query_kwargs,
+            auth_method=auth_method,
+            root=root,
             **req_kwargs
         )
 
@@ -751,6 +894,8 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
             *,
             timeout: int = utils.DEFAULT_TIMEOUT,
             query_kwargs: Dict = None,
+            auth_method: str = None,
+            root: str = None,
             **req_kwargs
     ) -&gt; requests.Response:
         &#34;&#34;&#34;
@@ -764,6 +909,10 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
             The request&#39;s timeout. Default c.f. `couchdb3.utils.DEFAULT_TIMEOUT`.
         query_kwargs : Dict
             A dictionary containing the requests query parameters.
+        auth_method : str
+            Authentication method. Choices are `cookie` or `basic`. Default is `None`.
+        root : str
+            A root relative to the server&#39;s URL, e.g. `&#34;dbname&#34;`. Default is `None`.
         req_kwargs
             Further `requests.request` keyword parameters.
         Returns
@@ -775,6 +924,8 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
             resource=resource,
             timeout=timeout,
             query_kwargs=query_kwargs,
+            auth_method=auth_method,
+            root=root,
             **req_kwargs
         )
 
@@ -785,6 +936,8 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
             body: Union[Dict, List] = None,
             timeout: int = utils.DEFAULT_TIMEOUT,
             query_kwargs: Dict = None,
+            auth_method: str = None,
+            root: str = None,
             **req_kwargs
     ) -&gt; requests.Response:
         &#34;&#34;&#34;
@@ -800,6 +953,10 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
             The request&#39;s timeout. Default c.f. `couchdb3.utils.DEFAULT_TIMEOUT`.
         query_kwargs : Union[Dict, List]
             A dictionary containing the requests query parameters.
+        auth_method : str
+            Authentication method. Choices are `cookie` or `basic`. Default is `None`.
+        root : str
+            A root relative to the server&#39;s URL, e.g. `&#34;dbname&#34;`. Default is `None`.
         req_kwargs
             Further `requests.request` keyword parameters.
         Returns
@@ -812,6 +969,8 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
             body=body,
             timeout=timeout,
             query_kwargs=query_kwargs,
+            auth_method=auth_method,
+            root=root,
             **req_kwargs
         )
 
@@ -822,6 +981,8 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
             body: Union[Dict, List] = None,
             timeout: int = utils.DEFAULT_TIMEOUT,
             query_kwargs: Dict = None,
+            auth_method: str = None,
+            root: str = None,
             **req_kwargs
     ) -&gt; requests.Response:
         &#34;&#34;&#34;
@@ -837,6 +998,10 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
             The request&#39;s timeout. Default c.f. `couchdb3.utils.DEFAULT_TIMEOUT`.
         query_kwargs : Dict
             A dictionary containing the requests query parameters.
+        auth_method : str
+            Authentication method. Choices are `cookie` or `basic`. Default is `None`.
+        root : str
+            A root relative to the server&#39;s URL, e.g. `&#34;dbname&#34;`. Default is `None`.
         req_kwargs
             Further `requests.request` keyword parameters.
         Returns
@@ -849,7 +1014,39 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
             body=body,
             timeout=timeout,
             query_kwargs=query_kwargs,
+            auth_method=auth_method,
+            root=root,
             **req_kwargs
+        )
+
+    def _is_auth_token_expired(self) -&gt; bool:
+        &#34;&#34;&#34;
+        Check if the authentication token is expired.
+
+        Returns
+        -------
+        bool : `True` if the auth token is expired.
+        &#34;&#34;&#34;
+        try:
+            return next(_.expires for _ in self.session.cookies if _.name == &#34;AuthSession&#34;) &lt;= datetime.utcnow().timestamp()
+        except StopIteration:
+            return True
+
+    def _renew_auth_token(self) -&gt; None:
+        &#34;&#34;&#34;
+        Send a `POST` request to the `_session` endpoint to obtain a token.
+        Returns
+        -------
+        None
+        &#34;&#34;&#34;
+        self._post(
+            resource=&#34;_session&#34;,
+            body={
+                &#34;name&#34;: self._user,
+                &#34;password&#34;: self._password
+            },
+            auth_method=&#34;basic&#34;,
+            root=&#34;&#34;
         )
 
     def check(
@@ -874,15 +1071,23 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
         except (exceptions.CouchDBError, requests.exceptions.RequestException):
             return False
 
-    def info(self) -&gt; Dict:
+    def info(
+            self,
+            partition: str = None
+    ) -&gt; Dict:
         &#34;&#34;&#34;
         Return a server&#39;s or database&#39;s info by sending a `GET` request to `/self.root`.
+
+        Parameters
+        ----------
+        partition : str
+            A specific partition of the database. Only valid for partitioned databases. Default is `None`.
 
         Returns
         -------
         Dict: A dictionary containing the server&#39;s or database&#39;s info.
         &#34;&#34;&#34;
-        return self._get().json()
+        return self._get(resource=f&#34;_partition/{partition}&#34; if partition else None).json()
 
     def rev(
             self,
@@ -998,25 +1203,38 @@ def url(self) -&gt; str:
 </details>
 </dd>
 <dt id="couchdb3.base.Base.info"><code class="name flex">
-<span>def <span class="ident">info</span></span>(<span>self) ‑> Dict</span>
+<span>def <span class="ident">info</span></span>(<span>self, partition: str = None) ‑> Dict</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Return a server's or database's info by sending a <code>GET</code> request to <code>/self.root</code>.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>partition</code></strong> :&ensp;<code>str</code></dt>
+<dd>A specific partition of the database. Only valid for partitioned databases. Default is <code>None</code>.</dd>
+</dl>
 <h2 id="returns">Returns</h2>
 <p>Dict: A dictionary containing the server's or database's info.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def info(self) -&gt; Dict:
+<pre><code class="python">def info(
+        self,
+        partition: str = None
+) -&gt; Dict:
     &#34;&#34;&#34;
     Return a server&#39;s or database&#39;s info by sending a `GET` request to `/self.root`.
+
+    Parameters
+    ----------
+    partition : str
+        A specific partition of the database. Only valid for partitioned databases. Default is `None`.
 
     Returns
     -------
     Dict: A dictionary containing the server&#39;s or database&#39;s info.
     &#34;&#34;&#34;
-    return self._get().json()</code></pre>
+    return self._get(resource=f&#34;_partition/{partition}&#34; if partition else None).json()</code></pre>
 </details>
 </dd>
 <dt id="couchdb3.base.Base.rev"><code class="name flex">
