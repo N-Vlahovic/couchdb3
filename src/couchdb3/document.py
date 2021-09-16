@@ -10,6 +10,7 @@ from .base import DictBase
 __all__ = [
     "extract_document_id_and_rev",
     "Document",
+    "AttachmentDocument",
     "SecurityDocumentElement",
     "SecurityDocument"
 ]
@@ -68,8 +69,99 @@ class Document(DictBase):
         return self.get("_rev")
 
 
+class AttachmentDocument(DictBase):
+    """CouchDB Attachment Document - a wrapper around Python dictionaries."""
+
+    def __init__(
+            self,
+            *args,
+            **kwargs
+    ) -> None:
+        super(AttachmentDocument, self).__init__(*args, **kwargs)
+        self.content = self.get("content")
+        self.content_encoding = self.get("content_encoding")
+        self.content_length = self.get("content_length")
+        self.content_type = self.get("content_type")
+        self.digest = self.get("digest")
+
+    @property
+    def content(self) -> bytes:
+        """
+        Returns
+        -------
+        bytes : The attachment's content.
+        """
+        return self.get("content")
+
+    @content.setter
+    def content(self, value: bytes) -> None:
+        self.update({
+            "content": value
+        })
+
+    @property
+    def content_encoding(self) -> str:
+        """
+        Returns
+        -------
+        str : The attachment's content encoding.
+        """
+        return self.get("content_encoding")
+
+    @content_encoding.setter
+    def content_encoding(self, value: str) -> None:
+        self.update({
+            "content_encoding": value
+        })
+
+    @property
+    def content_length(self) -> int:
+        """
+        Returns
+        -------
+        int : The attachment's content length.
+        """
+        return self.get("content_length")
+
+    @content_length.setter
+    def content_length(self, value: int) -> None:
+        self.update({
+            "content_length": int(value)
+        })
+
+    @property
+    def content_type(self) -> str:
+        """
+        Returns
+        -------
+        str : The attachment's content type.
+        """
+        return self.get("content_type")
+
+    @content_type.setter
+    def content_type(self, value: str) -> None:
+        self.update({
+            "content_type": value
+        })
+
+    @property
+    def digest(self) -> str:
+        """
+        Returns
+        -------
+        str : The attachment's content digest.
+        """
+        return self.get("digest")
+
+    @digest.setter
+    def digest(self, value: str) -> None:
+        self.update({
+            "digest": value
+        })
+
+
 class SecurityDocumentElement(DictBase):
-    """CouchDB Security Document Element (representing either `"admins"` or `"members"`) - a wrapper around Python 
+    """CouchDB Security Document Element (representing either `"admins"` or `"members"`) - a wrapper around Python
     dictionaries."""
 
     def add_name(self, name: str) -> None:
@@ -92,7 +184,7 @@ class SecurityDocumentElement(DictBase):
         self.update({
             "names": value
         })
-    
+
     @property
     def roles(self) -> List[str]:
         """
@@ -107,7 +199,7 @@ class SecurityDocumentElement(DictBase):
         self.update({
             "roles": value
         })
-
+    
 
 class SecurityDocument(DictBase):
     """CouchDB Security Document - a wrapper around Python dictionaries."""
