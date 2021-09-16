@@ -13,7 +13,7 @@ from couchdb3.view import ViewResult, ViewRow
 from couchdb3.utils import content_type_getter, user_name_to_id
 
 from tests.credentials import ATTACHMENT_PATH_HTML, ATTACHMENT_PATH_JSON, ATTACHMENT_PATH_PNG, ATTACHMENT_PATH_TXT, \
-    COUCHDB_USER, COUCHDB_PASSWORD, COUCHDB0_URL, DOCUMENT_VIEW
+    ATTACHMENT_PATH_ZIP, COUCHDB_USER, COUCHDB_PASSWORD, COUCHDB0_URL, DOCUMENT_VIEW
 
 
 CLIENT: Server = Server(COUCHDB0_URL, user=COUCHDB_USER, password=COUCHDB_PASSWORD)
@@ -242,6 +242,7 @@ class TestDatabase(unittest.TestCase):
             ("test.json", ATTACHMENT_PATH_JSON),
             ("test.png", ATTACHMENT_PATH_PNG),
             ("test.txt", ATTACHMENT_PATH_TXT),
+            ("test.zip", ATTACHMENT_PATH_ZIP),
         ]:
             DB.put_attachment(
                 docid=docid,
@@ -298,6 +299,7 @@ class TestDatabase(unittest.TestCase):
             ("test.json", ATTACHMENT_PATH_JSON),
             ("test.png", ATTACHMENT_PATH_PNG),
             ("test.txt", ATTACHMENT_PATH_TXT),
+            ("test.zip", ATTACHMENT_PATH_ZIP),
         ]:
             results = DB.put_attachment(
                 docid=docid,
