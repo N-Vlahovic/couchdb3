@@ -26,7 +26,8 @@ class Server(Base):
             port: int = None,
             user: str = None,
             password: str = None,
-            disable_ssl_verification: bool = False
+            disable_ssl_verification: bool = False,
+            auth_method: str = None
     ) -> None:
         """
 
@@ -46,13 +47,16 @@ class Server(Base):
         disable_ssl_verification : bool
             Controls whether to verify the server’s TLS certificate. Set to `True` when connecting to a server with
             self-signed TLS certificates. Default `False`.
+        auth_method : str
+            Authentication method. Choices are `cookie` or `basic`. Default is `couchdb3.utils.DEFAULT_AUTH_METHOD`.
         """
         super(Server, self).__init__(
             url=url,
             port=port,
             user=user,
             password=password,
-            disable_ssl_verification=disable_ssl_verification
+            disable_ssl_verification=disable_ssl_verification,
+            auth_method=auth_method
         )
 
     def __getitem__(self, item) -> Database:
@@ -320,6 +324,8 @@ class Server(Base):
             url=self.url,
             user=self._user,
             password=self._password,
+            disable_ssl_verification=not self.session.verify,
+            auth_method=self.auth_method,
         )
         try:
             db._head()
