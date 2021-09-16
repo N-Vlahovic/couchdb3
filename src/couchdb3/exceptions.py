@@ -6,6 +6,7 @@ from typing import Dict
 
 __all__ = [
     "CouchDBError",
+    "AuthenticationMethodError",
     "NameComplianceError",
     "ProxySchemeComplianceError",
     "UserIDComplianceError",
@@ -28,6 +29,10 @@ __all__ = [
 
 class CouchDBError(Exception):
     """CouchDB Error"""
+
+
+class AuthenticationMethodError(CouchDBError):
+    """Authentication method is not allowed."""
 
 
 class NameComplianceError(CouchDBError):
