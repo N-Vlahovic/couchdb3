@@ -329,7 +329,7 @@ class Server(Base):
         )
         try:
             db._head()
-        except NotFoundError as error:
+        except (NotFoundError, requests.exceptions.RequestException) as error:
             if check is True:
                 raise error
         except CouchDBError as error:
