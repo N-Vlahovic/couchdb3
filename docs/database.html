@@ -37,7 +37,7 @@ from .base import Base
 from .document import Document, AttachmentDocument, extract_document_id_and_rev, SecurityDocument, \
     SecurityDocumentElement
 from .exceptions import CouchDBError, NameComplianceError
-from .utils import validate_db_name, content_type_getter
+from .utils import validate_db_name, content_type_getter, DEFAULT_TIMEOUT
 from .view import ViewResult
 
 
@@ -59,7 +59,8 @@ class Database(Base):
             user: str = None,
             password: str = None,
             disable_ssl_verification: bool = False,
-            auth_method: str = None
+            auth_method: str = None,
+            timeout: int = DEFAULT_TIMEOUT
     ) -&gt; None:
         &#34;&#34;&#34;
 
@@ -83,6 +84,8 @@ class Database(Base):
             self-signed TLS certificates. Default `False`.
         auth_method : str
             Authentication method. Choices are `cookie` or `basic`. Default is `couchdb3.utils.DEFAULT_AUTH_METHOD`.
+        timeout : int
+            The default timeout for requests. Default c.f. `couchdb3.utils.DEFAULT_TIMEOUT`.
         &#34;&#34;&#34;
         super(Database, self).__init__(
             url=url,
@@ -90,7 +93,8 @@ class Database(Base):
             user=user,
             password=password,
             disable_ssl_verification=disable_ssl_verification,
-            auth_method=auth_method
+            auth_method=auth_method,
+            timeout=timeout
         )
         if validate_db_name(name=name) is False:
             raise NameComplianceError(
@@ -1137,7 +1141,7 @@ class Database(Base):
 <dl>
 <dt id="couchdb3.database.Database"><code class="flex name class">
 <span>class <span class="ident">Database</span></span>
-<span>(</span><span>name: str, *, url: str = None, port: int = None, user: str = None, password: str = None, disable_ssl_verification: bool = False, auth_method: str = None)</span>
+<span>(</span><span>name: str, *, url: str = None, port: int = None, user: str = None, password: str = None, disable_ssl_verification: bool = False, auth_method: str = None, timeout: int = 300)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Abstract Couchdb database</p>
@@ -1161,6 +1165,8 @@ class Database(Base):
 self-signed TLS certificates. Default <code>False</code>.</dd>
 <dt><strong><code>auth_method</code></strong> :&ensp;<code>str</code></dt>
 <dd>Authentication method. Choices are <code>cookie</code> or <code>basic</code>. Default is <code><a title="couchdb3.utils.DEFAULT_AUTH_METHOD" href="utils.html#couchdb3.utils.DEFAULT_AUTH_METHOD">DEFAULT_AUTH_METHOD</a></code>.</dd>
+<dt><strong><code>timeout</code></strong> :&ensp;<code>int</code></dt>
+<dd>The default timeout for requests. Default c.f. <code><a title="couchdb3.utils.DEFAULT_TIMEOUT" href="utils.html#couchdb3.utils.DEFAULT_TIMEOUT">DEFAULT_TIMEOUT</a></code>.</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -1179,7 +1185,8 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
             user: str = None,
             password: str = None,
             disable_ssl_verification: bool = False,
-            auth_method: str = None
+            auth_method: str = None,
+            timeout: int = DEFAULT_TIMEOUT
     ) -&gt; None:
         &#34;&#34;&#34;
 
@@ -1203,6 +1210,8 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
             self-signed TLS certificates. Default `False`.
         auth_method : str
             Authentication method. Choices are `cookie` or `basic`. Default is `couchdb3.utils.DEFAULT_AUTH_METHOD`.
+        timeout : int
+            The default timeout for requests. Default c.f. `couchdb3.utils.DEFAULT_TIMEOUT`.
         &#34;&#34;&#34;
         super(Database, self).__init__(
             url=url,
@@ -1210,7 +1219,8 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
             user=user,
             password=password,
             disable_ssl_verification=disable_ssl_verification,
-            auth_method=auth_method
+            auth_method=auth_method,
+            timeout=timeout
         )
         if validate_db_name(name=name) is False:
             raise NameComplianceError(
