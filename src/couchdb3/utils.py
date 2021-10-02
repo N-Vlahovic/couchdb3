@@ -55,8 +55,8 @@ DEFAULT_AUTH_METHOD: str = "cookie"
 """The default authentication method - values to `\"cookie\"`."""
 DEFAULT_TEXTUAL_MIME_TYPE: str = "text/plain"
 DEFAULT_FALLBACK_MIME_TYPE: str = "application/octet-stream"
-DEFAULT_TIMEOUT: int = 15
-"""The default timeout set in requests - values to `15`."""
+DEFAULT_TIMEOUT: int = 300
+"""The default timeout set in requests - values to `300`."""
 
 MIME_TYPES_MAPPING: Dict = {
     "aac": "audio/aac",
