@@ -29,7 +29,8 @@ class Base(object):
             user: str = None,
             password: str = None,
             disable_ssl_verification: bool = False,
-            auth_method: str = None
+            auth_method: str = None,
+            timeout: int = utils.DEFAULT_TIMEOUT
     ) -> None:
         """
 
@@ -51,6 +52,8 @@ class Base(object):
             self-signed TLS certificates. Default `False`.
         auth_method : str
             Authentication method. Choices are `cookie` or `basic`. Default is `couchdb3.utils.DEFAULT_AUTH_METHOD`.
+        timeout : int
+            The default timeout for requests. Default c.f. `couchdb3.utils.DEFAULT_TIMEOUT`.
         """
         auth_method = auth_method or utils.DEFAULT_AUTH_METHOD
         if utils.validate_auth_method(auth_method=auth_method) is False:
@@ -75,6 +78,7 @@ class Base(object):
         self._password = password
         self._auth = requests.auth.HTTPBasicAuth(user, password) if user and password else None
         self.auth_method = auth_method
+        self.timeout = timeout
 
     def __bool__(self) -> bool:
         """
@@ -154,7 +158,6 @@ class Base(object):
             method: str,
             resource: str = None,
             body: Union[Dict, List] = None,
-            timeout: int = utils.DEFAULT_TIMEOUT,
             query_kwargs: Dict = None,
             auth_method: str = None,
             root: str = None,
@@ -171,8 +174,6 @@ class Base(object):
             The resource to fetch (relative to the host). Default `None`.
         body : Union[Dict, List]
             The request's body. Default `None`.
-        timeout : int
-            The request's timeout. Default c.f. `couchdb3.utils.DEFAULT_TIMEOUT`.
         query_kwargs : Dict
             A dictionary containing the requests query parameters.
         auth_method : str
@@ -212,7 +213,7 @@ class Base(object):
                 **(query_kwargs or {})
             ),
             json=body,
-            timeout=timeout,
+            timeout=self.timeout,
             **req_kwargs
         )
         utils.check_response(response=response)

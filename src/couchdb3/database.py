@@ -9,7 +9,7 @@ from .base import Base
 from .document import Document, AttachmentDocument, extract_document_id_and_rev, SecurityDocument, \
     SecurityDocumentElement
 from .exceptions import CouchDBError, NameComplianceError
-from .utils import validate_db_name, content_type_getter
+from .utils import validate_db_name, content_type_getter, DEFAULT_TIMEOUT
 from .view import ViewResult
 
 
@@ -31,7 +31,8 @@ class Database(Base):
             user: str = None,
             password: str = None,
             disable_ssl_verification: bool = False,
-            auth_method: str = None
+            auth_method: str = None,
+            timeout: int = DEFAULT_TIMEOUT
     ) -> None:
         """
 
@@ -55,6 +56,8 @@ class Database(Base):
             self-signed TLS certificates. Default `False`.
         auth_method : str
             Authentication method. Choices are `cookie` or `basic`. Default is `couchdb3.utils.DEFAULT_AUTH_METHOD`.
+        timeout : int
+            The default timeout for requests. Default c.f. `couchdb3.utils.DEFAULT_TIMEOUT`.
         """
         super(Database, self).__init__(
             url=url,
@@ -62,7 +65,8 @@ class Database(Base):
             user=user,
             password=password,
             disable_ssl_verification=disable_ssl_verification,
-            auth_method=auth_method
+            auth_method=auth_method,
+            timeout=timeout
         )
         if validate_db_name(name=name) is False:
             raise NameComplianceError(
