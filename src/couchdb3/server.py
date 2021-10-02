@@ -7,7 +7,7 @@ from typing import Dict, List, Tuple, Union
 from .base import Base
 from .database import Database
 from .exceptions import ConflictError, CouchDBError, NotFoundError, ProxySchemeComplianceError, UserIDComplianceError
-from .utils import user_name_to_id, validate_proxy, validate_user_id
+from .utils import user_name_to_id, validate_proxy, validate_user_id, DEFAULT_TIMEOUT
 
 
 __all__ = [
@@ -27,7 +27,8 @@ class Server(Base):
             user: str = None,
             password: str = None,
             disable_ssl_verification: bool = False,
-            auth_method: str = None
+            auth_method: str = None,
+            timeout: int = DEFAULT_TIMEOUT
     ) -> None:
         """
 
@@ -49,6 +50,8 @@ class Server(Base):
             self-signed TLS certificates. Default `False`.
         auth_method : str
             Authentication method. Choices are `cookie` or `basic`. Default is `couchdb3.utils.DEFAULT_AUTH_METHOD`.
+        timeout : int
+            The default timeout for requests. Default c.f. `couchdb3.utils.DEFAULT_TIMEOUT`.
         """
         super(Server, self).__init__(
             url=url,
@@ -56,7 +59,8 @@ class Server(Base):
             user=user,
             password=password,
             disable_ssl_verification=disable_ssl_verification,
-            auth_method=auth_method
+            auth_method=auth_method,
+            timeout=timeout
         )
 
     def __getitem__(self, item) -> Database:
