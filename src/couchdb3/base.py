@@ -161,6 +161,7 @@ class Base(object):
             query_kwargs: Dict = None,
             auth_method: str = None,
             root: str = None,
+            timeout: int = None,
             **req_kwargs
     ) -> requests.Response:
         """
@@ -180,6 +181,8 @@ class Base(object):
             Authentication method. Choices are `cookie` or `basic`. Default is `None`.
         root : str
             A root relative to the server's URL, e.g. `"dbname"`. Default is `None`.
+        timeout : int
+            The request's timeout. Default c.f. `couchdb3.utils.DEFAULT_TIMEOUT`.
         req_kwargs
             Further `requests.request` keyword parameters.
         Returns
@@ -213,7 +216,7 @@ class Base(object):
                 **(query_kwargs or {})
             ),
             json=body,
-            timeout=self.timeout,
+            timeout=timeout or self.timeout,
             **req_kwargs
         )
         utils.check_response(response=response)
