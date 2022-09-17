@@ -58,12 +58,17 @@ print(client.up())
 </code></pre>
 <p>user and password can also be passed into the Server constructor as keyword parameters, e.g.</p>
 <pre><code class="language-python">client = couchdb3.Server(
-    &quot;http://127.0.0.1:5984:&quot;,
+    &quot;127.0.0.1:5984:&quot;,  # Scheme omitted - will assume http protocol
     user=&quot;user&quot;,
     password=&quot;password&quot;
 )
 </code></pre>
 <p>Both approaches are equivalent, i.e. in both cases the instance's <code>scheme,host,port,user,password</code> will be identical.</p>
+<p>Further, clients can be used with context managers:</p>
+<pre><code class="language-python">with couchdb3.Server(&quot;http://user:password@127.0.0.1:5984&quot;) as client:
+    # Do stuff
+    ...
+</code></pre>
 <h3 id="getting-or-creating-a-database">Getting or creating a database</h3>
 <pre><code class="language-python">dbname = &quot;mydb&quot;
 db = client.get(dbname) if dbname in client else client.create(dbname)
@@ -168,13 +173,20 @@ user and password can also be passed into the Server constructor as keyword para
 
 ```python
 client = couchdb3.Server(
-    &#34;http://127.0.0.1:5984:&#34;,
+    &#34;127.0.0.1:5984:&#34;,  # Scheme omitted - will assume http protocol
     user=&#34;user&#34;,
     password=&#34;password&#34;
 )
 ```
 
 Both approaches are equivalent, i.e. in both cases the instance&#39;s `scheme,host,port,user,password` will be identical.
+
+Further, clients can be used with context managers:
+```python
+with couchdb3.Server(&#34;http://user:password@127.0.0.1:5984&#34;) as client:
+    # Do stuff
+    ...
+```
 
 ### Getting or creating a database
 ```python

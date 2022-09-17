@@ -151,6 +151,26 @@ class Base(object):
         &#34;&#34;&#34;
         self.session.close()
 
+    def __enter__(self):
+        &#34;&#34;&#34;
+        Enter method to use the class in conjunction with `with ... as ...` statements.
+
+        Returns
+        -------
+        Base: The given instance.
+        &#34;&#34;&#34;
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -&gt; None:
+        &#34;&#34;&#34;
+        Method ran after running `with ... as ...` statements.
+
+        Returns
+        -------
+        None
+        &#34;&#34;&#34;
+        self.session.close()
+
     def __repr__(self) -&gt; str:
         &#34;&#34;&#34;
         Basic repr.
@@ -712,6 +732,26 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
     def __del__(self) -&gt; None:
         &#34;&#34;&#34;
         Close the session on delete.
+
+        Returns
+        -------
+        None
+        &#34;&#34;&#34;
+        self.session.close()
+
+    def __enter__(self):
+        &#34;&#34;&#34;
+        Enter method to use the class in conjunction with `with ... as ...` statements.
+
+        Returns
+        -------
+        Base: The given instance.
+        &#34;&#34;&#34;
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -&gt; None:
+        &#34;&#34;&#34;
+        Method ran after running `with ... as ...` statements.
 
         Returns
         -------
