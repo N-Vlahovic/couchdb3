@@ -109,8 +109,10 @@ which executes `python -m unittest discover -s tests -t tests`.
 
 
 ## Submitting changes
-To submit changes, simply create a new branch following the format `dev_<description>` 
-where `<description>` denotes a short description of the new branch (e.g. `dev_get_attachment_bug_fix`).
+To submit changes, simply create a new branch following the format 
+`username/<optional_date-><description>` 
+where `<description>` denotes a short description of the new branch 
+(e.g. `n-vlahovic/2022-09-get_attachment_bug_fix`).
 Then, push your updates into that branch and open a new pull request for review.
 
 ## Coding conventions

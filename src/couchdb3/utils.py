@@ -7,6 +7,7 @@ import re
 import requests
 from typing import Any, Dict, Optional, Set
 from urllib import parse
+from urllib3.util import Url, parse_url
 
 from . import exceptions
 
@@ -32,7 +33,6 @@ __all__ = [
     "MIME_TYPES_MAPPING",
     "PATTERN_DB_NAME",
     "PATTERN_USER_ID",
-    "PATTERN_URL",
     "VALID_AUTH_METHODS"
 ]
 
@@ -141,8 +141,6 @@ PATTERN_DB_NAME: re.Pattern = re.compile(r"^[a-z][a-z0-9_$()+/-]*$")
 """The pattern for valid database names."""
 PATTERN_USER_ID: re.Pattern = re.compile(r"^org\.couchdb\.user:.*")
 """The pattern for valid user IDs."""
-PATTERN_URL: re.Pattern = re.compile(r"^(\w+)://((.*):(.*)@|)(\w[\w.-]+\w)(:(\d+)|)/?(.*)$")
-"""A pattern for abstract URLs split as `scheme://user:password@host:port/path`."""
 
 VALID_AUTH_METHODS: Set[str] = {"basic", "cookie"}
 """The valid auth method arguments. Possible values are `\"basic\"` or `\"cookie\"`."""
@@ -202,7 +200,7 @@ def build_url(
         path: str = None,
         port: int = None,
         **kwargs,
-) -> str:
+) -> Url:
     """
     Build a URL using the provided scheme, host, path & kwargs.
 
@@ -220,17 +218,15 @@ def build_url(
         Arbitrary keyword-args to be passed as query-params in a URL.
     Returns
     -------
-    str : A URL parsed as string.
+    Url : An instance of `Url`.
     """
-    url = f"{scheme}://{host}"
-    if port:
-        url += f":{port}"
-    if path:
-        path = path.removeprefix("/")
-        url += f"/{path}"
-    if kwargs:
-        url += f"?{build_query(**kwargs)}"
-    return url
+    return Url(
+        scheme=scheme,
+        host=host,
+        port=port,
+        path=path,
+        query=build_query(**kwargs),
+    )
 
 
 def validate_db_name(name: str) -> bool:
@@ -277,7 +273,7 @@ def validate_proxy(proxy: str) -> bool:
     -------
     bool : `True` if the provided proxy is CouchDB compliant.
     """
-    return PATTERN_URL.sub(r"\1", proxy) in {"http", "socks5"}
+    return parse_url(proxy).scheme in {"http", "socks5"}
 
 
 def validate_user_id(user_id: str) -> bool:
@@ -410,11 +406,12 @@ def extract_url_data(url: str) -> Dict:
       - port
       - path
     """
+    parsed = parse_url(url)
     return {
-        "scheme": PATTERN_URL.sub(r"\1", url) or None,
-        "user": PATTERN_URL.sub(r"\3", url) or None,
-        "password": PATTERN_URL.sub(r"\4", url) or None,
-        "host": PATTERN_URL.sub(r"\5", url) or None,
-        "port": int(PATTERN_URL.sub(r"\7", url) or 0) or None,
-        "path": PATTERN_URL.sub(r"\8", url or None)
+        "scheme": parsed.scheme,
+        "user": parsed.auth.split(":")[0] if hasattr(parsed.auth, "split") else None,
+        "password": parsed.auth.split(":")[1] if hasattr(parsed.auth, "split") else None,
+        "host": parsed.host,
+        "port": parsed.port,
+        "path": parsed.path
     }
