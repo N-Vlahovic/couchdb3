@@ -172,6 +172,8 @@ PATTERN_USER_ID: re.Pattern = re.compile(r&#34;^org\.couchdb\.user:.*&#34;)
 
 VALID_AUTH_METHODS: Set[str] = {&#34;basic&#34;, &#34;cookie&#34;}
 &#34;&#34;&#34;The valid auth method arguments. Possible values are `\&#34;basic\&#34;` or `\&#34;cookie\&#34;`.&#34;&#34;&#34;
+VALID_SCHEMES: Set[str] = {&#34;http&#34;, &#34;https&#34;, &#34;socks5&#34;}
+&#34;&#34;&#34;The valid TCP schemes. Possible values are `\&#34;http\&#34;` or `\&#34;https\&#34;` or `\&#34;socks5\&#34;`.&#34;&#34;&#34;
 
 
 def _handler(x: Any) -&gt; str:
@@ -301,7 +303,7 @@ def validate_proxy(proxy: str) -&gt; bool:
     -------
     bool : `True` if the provided proxy is CouchDB compliant.
     &#34;&#34;&#34;
-    return parse_url(proxy).scheme in {&#34;http&#34;, &#34;socks5&#34;}
+    return parse_url(proxy).scheme in VALID_SCHEMES
 
 
 def validate_user_id(user_id: str) -&gt; bool:
@@ -434,6 +436,8 @@ def extract_url_data(url: str) -&gt; Dict:
       - port
       - path
     &#34;&#34;&#34;
+    if not any(url.startswith(_) for _ in VALID_SCHEMES):
+        url = f&#34;http://{url}&#34;
     parsed = parse_url(url)
     return {
         &#34;scheme&#34;: parsed.scheme,
@@ -802,6 +806,8 @@ keys of <code><a title="couchdb3.utils.MIME_TYPES_MAPPING" href="#couchdb3.utils
       - port
       - path
     &#34;&#34;&#34;
+    if not any(url.startswith(_) for _ in VALID_SCHEMES):
+        url = f&#34;http://{url}&#34;
     parsed = parse_url(url)
     return {
         &#34;scheme&#34;: parsed.scheme,
@@ -937,7 +943,7 @@ keys of <code><a title="couchdb3.utils.MIME_TYPES_MAPPING" href="#couchdb3.utils
     -------
     bool : `True` if the provided proxy is CouchDB compliant.
     &#34;&#34;&#34;
-    return parse_url(proxy).scheme in {&#34;http&#34;, &#34;socks5&#34;}</code></pre>
+    return parse_url(proxy).scheme in VALID_SCHEMES</code></pre>
 </details>
 </dd>
 <dt id="couchdb3.utils.validate_user_id"><code class="name flex">

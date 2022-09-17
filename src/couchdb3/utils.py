@@ -144,6 +144,8 @@ PATTERN_USER_ID: re.Pattern = re.compile(r"^org\.couchdb\.user:.*")
 
 VALID_AUTH_METHODS: Set[str] = {"basic", "cookie"}
 """The valid auth method arguments. Possible values are `\"basic\"` or `\"cookie\"`."""
+VALID_SCHEMES: Set[str] = {"http", "https", "socks5"}
+"""The valid TCP schemes. Possible values are `\"http\"` or `\"https\"` or `\"socks5\"`."""
 
 
 def _handler(x: Any) -> str:
@@ -273,7 +275,7 @@ def validate_proxy(proxy: str) -> bool:
     -------
     bool : `True` if the provided proxy is CouchDB compliant.
     """
-    return parse_url(proxy).scheme in {"http", "socks5"}
+    return parse_url(proxy).scheme in VALID_SCHEMES
 
 
 def validate_user_id(user_id: str) -> bool:
@@ -406,6 +408,8 @@ def extract_url_data(url: str) -> Dict:
       - port
       - path
     """
+    if not any(url.startswith(_) for _ in VALID_SCHEMES):
+        url = f"http://{url}"
     parsed = parse_url(url)
     return {
         "scheme": parsed.scheme,
