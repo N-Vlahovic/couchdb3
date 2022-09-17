@@ -123,6 +123,26 @@ class Base(object):
         """
         self.session.close()
 
+    def __enter__(self):
+        """
+        Enter method to use the class in conjunction with `with ... as ...` statements.
+
+        Returns
+        -------
+        Base: The given instance.
+        """
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        """
+        Method ran after running `with ... as ...` statements.
+
+        Returns
+        -------
+        None
+        """
+        self.session.close()
+
     def __repr__(self) -> str:
         """
         Basic repr.

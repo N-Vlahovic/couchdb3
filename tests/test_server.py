@@ -95,6 +95,10 @@ class TestClient(unittest.TestCase):
         self.assertTrue(CLIENT.up())
         self.assertFalse(Server("http://admin:secret@localhost:1234").up())
 
+    def test_with_context(self):
+        with Server(url=COUCHDB0_URL, user=COUCHDB_USER, password=COUCHDB_PASSWORD) as client:
+            self.assertIsInstance(client, Server)
+
 
 @atexit.register
 def rm_test_db() -> None:

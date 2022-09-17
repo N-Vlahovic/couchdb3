@@ -51,13 +51,20 @@ user and password can also be passed into the Server constructor as keyword para
 
 ```python
 client = couchdb3.Server(
-    "http://127.0.0.1:5984:",
+    "127.0.0.1:5984:",  # Scheme omitted - will assume http protocol
     user="user",
     password="password"
 )
 ```
 
 Both approaches are equivalent, i.e. in both cases the instance's `scheme,host,port,user,password` will be identical.
+
+Further, clients can be used with context managers:
+```python
+with couchdb3.Server("http://user:password@127.0.0.1:5984") as client:
+    # Do stuff
+    ...
+```
 
 ### Getting or creating a database
 ```python
