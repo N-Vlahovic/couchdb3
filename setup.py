@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="CouchDB3",
-    version="1.0.6",
+    version="1.0.7",
     author="Nikolai Vlahovic",
     author_email="REDACTED_USERlai@nexup.com",
     description="A wrapper around the CouchDB API.",

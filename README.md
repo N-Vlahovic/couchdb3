@@ -12,7 +12,7 @@ Big parts of the documentation (and thus docstrings) have been copied from Couch
 ## Requirements  
 
 - Python version `>= 3.7`
-- CouchDB version `3.x` (Note that prior versions have not been tested as of `2021-09`)
+- CouchDB version `3.x`
 
 ## Installation
 Installing via PyPi
