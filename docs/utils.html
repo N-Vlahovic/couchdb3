@@ -35,6 +35,7 @@ import re
 import requests
 from typing import Any, Dict, Optional, Set
 from urllib import parse
+from urllib3.util import Url, parse_url
 
 from . import exceptions
 
@@ -60,7 +61,6 @@ __all__ = [
     &#34;MIME_TYPES_MAPPING&#34;,
     &#34;PATTERN_DB_NAME&#34;,
     &#34;PATTERN_USER_ID&#34;,
-    &#34;PATTERN_URL&#34;,
     &#34;VALID_AUTH_METHODS&#34;
 ]
 
@@ -169,8 +169,6 @@ PATTERN_DB_NAME: re.Pattern = re.compile(r&#34;^[a-z][a-z0-9_$()+/-]*$&#34;)
 &#34;&#34;&#34;The pattern for valid database names.&#34;&#34;&#34;
 PATTERN_USER_ID: re.Pattern = re.compile(r&#34;^org\.couchdb\.user:.*&#34;)
 &#34;&#34;&#34;The pattern for valid user IDs.&#34;&#34;&#34;
-PATTERN_URL: re.Pattern = re.compile(r&#34;^(\w+)://((.*):(.*)@|)(\w[\w.-]+\w)(:(\d+)|)/?(.*)$&#34;)
-&#34;&#34;&#34;A pattern for abstract URLs split as `scheme://user:password@host:port/path`.&#34;&#34;&#34;
 
 VALID_AUTH_METHODS: Set[str] = {&#34;basic&#34;, &#34;cookie&#34;}
 &#34;&#34;&#34;The valid auth method arguments. Possible values are `\&#34;basic\&#34;` or `\&#34;cookie\&#34;`.&#34;&#34;&#34;
@@ -230,7 +228,7 @@ def build_url(
         path: str = None,
         port: int = None,
         **kwargs,
-) -&gt; str:
+) -&gt; Url:
     &#34;&#34;&#34;
     Build a URL using the provided scheme, host, path &amp; kwargs.
 
@@ -248,17 +246,15 @@ def build_url(
         Arbitrary keyword-args to be passed as query-params in a URL.
     Returns
     -------
-    str : A URL parsed as string.
+    Url : An instance of `Url`.
     &#34;&#34;&#34;
-    url = f&#34;{scheme}://{host}&#34;
-    if port:
-        url += f&#34;:{port}&#34;
-    if path:
-        path = path.removeprefix(&#34;/&#34;)
-        url += f&#34;/{path}&#34;
-    if kwargs:
-        url += f&#34;?{build_query(**kwargs)}&#34;
-    return url
+    return Url(
+        scheme=scheme,
+        host=host,
+        port=port,
+        path=path,
+        query=build_query(**kwargs),
+    )
 
 
 def validate_db_name(name: str) -&gt; bool:
@@ -305,7 +301,7 @@ def validate_proxy(proxy: str) -&gt; bool:
     -------
     bool : `True` if the provided proxy is CouchDB compliant.
     &#34;&#34;&#34;
-    return PATTERN_URL.sub(r&#34;\1&#34;, proxy) in {&#34;http&#34;, &#34;socks5&#34;}
+    return parse_url(proxy).scheme in {&#34;http&#34;, &#34;socks5&#34;}
 
 
 def validate_user_id(user_id: str) -&gt; bool:
@@ -438,13 +434,14 @@ def extract_url_data(url: str) -&gt; Dict:
       - port
       - path
     &#34;&#34;&#34;
+    parsed = parse_url(url)
     return {
-        &#34;scheme&#34;: PATTERN_URL.sub(r&#34;\1&#34;, url) or None,
-        &#34;user&#34;: PATTERN_URL.sub(r&#34;\3&#34;, url) or None,
-        &#34;password&#34;: PATTERN_URL.sub(r&#34;\4&#34;, url) or None,
-        &#34;host&#34;: PATTERN_URL.sub(r&#34;\5&#34;, url) or None,
-        &#34;port&#34;: int(PATTERN_URL.sub(r&#34;\7&#34;, url) or 0) or None,
-        &#34;path&#34;: PATTERN_URL.sub(r&#34;\8&#34;, url or None)
+        &#34;scheme&#34;: parsed.scheme,
+        &#34;user&#34;: parsed.auth.split(&#34;:&#34;)[0] if hasattr(parsed.auth, &#34;split&#34;) else None,
+        &#34;password&#34;: parsed.auth.split(&#34;:&#34;)[1] if hasattr(parsed.auth, &#34;split&#34;) else None,
+        &#34;host&#34;: parsed.host,
+        &#34;port&#34;: parsed.port,
+        &#34;path&#34;: parsed.path
     }</code></pre>
 </details>
 </section>
@@ -484,10 +481,6 @@ def extract_url_data(url: str) -&gt; Dict:
 <dt id="couchdb3.utils.PATTERN_DB_NAME"><code class="name">var <span class="ident">PATTERN_DB_NAME</span> : re.Pattern</code></dt>
 <dd>
 <div class="desc"><p>The pattern for valid database names.</p></div>
-</dd>
-<dt id="couchdb3.utils.PATTERN_URL"><code class="name">var <span class="ident">PATTERN_URL</span> : re.Pattern</code></dt>
-<dd>
-<div class="desc"><p>A pattern for abstract URLs split as <code>scheme://user:password@host:port/path</code>.</p></div>
 </dd>
 <dt id="couchdb3.utils.PATTERN_USER_ID"><code class="name">var <span class="ident">PATTERN_USER_ID</span> : re.Pattern</code></dt>
 <dd>
@@ -573,7 +566,7 @@ def extract_url_data(url: str) -&gt; Dict:
 </details>
 </dd>
 <dt id="couchdb3.utils.build_url"><code class="name flex">
-<span>def <span class="ident">build_url</span></span>(<span>*, scheme: str, host: str, path: str = None, port: int = None, **kwargs) ‑> str</span>
+<span>def <span class="ident">build_url</span></span>(<span>*, scheme: str, host: str, path: str = None, port: int = None, **kwargs) ‑> urllib3.util.url.Url</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Build a URL using the provided scheme, host, path &amp; kwargs.</p>
@@ -591,7 +584,7 @@ def extract_url_data(url: str) -&gt; Dict:
 <dd>Arbitrary keyword-args to be passed as query-params in a URL.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
-<p>str : A URL parsed as string.</p></div>
+<p>Url : An instance of <code>Url</code>.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -603,7 +596,7 @@ def extract_url_data(url: str) -&gt; Dict:
         path: str = None,
         port: int = None,
         **kwargs,
-) -&gt; str:
+) -&gt; Url:
     &#34;&#34;&#34;
     Build a URL using the provided scheme, host, path &amp; kwargs.
 
@@ -621,17 +614,15 @@ def extract_url_data(url: str) -&gt; Dict:
         Arbitrary keyword-args to be passed as query-params in a URL.
     Returns
     -------
-    str : A URL parsed as string.
+    Url : An instance of `Url`.
     &#34;&#34;&#34;
-    url = f&#34;{scheme}://{host}&#34;
-    if port:
-        url += f&#34;:{port}&#34;
-    if path:
-        path = path.removeprefix(&#34;/&#34;)
-        url += f&#34;/{path}&#34;
-    if kwargs:
-        url += f&#34;?{build_query(**kwargs)}&#34;
-    return url</code></pre>
+    return Url(
+        scheme=scheme,
+        host=host,
+        port=port,
+        path=path,
+        query=build_query(**kwargs),
+    )</code></pre>
 </details>
 </dd>
 <dt id="couchdb3.utils.check_response"><code class="name flex">
@@ -811,13 +802,14 @@ keys of <code><a title="couchdb3.utils.MIME_TYPES_MAPPING" href="#couchdb3.utils
       - port
       - path
     &#34;&#34;&#34;
+    parsed = parse_url(url)
     return {
-        &#34;scheme&#34;: PATTERN_URL.sub(r&#34;\1&#34;, url) or None,
-        &#34;user&#34;: PATTERN_URL.sub(r&#34;\3&#34;, url) or None,
-        &#34;password&#34;: PATTERN_URL.sub(r&#34;\4&#34;, url) or None,
-        &#34;host&#34;: PATTERN_URL.sub(r&#34;\5&#34;, url) or None,
-        &#34;port&#34;: int(PATTERN_URL.sub(r&#34;\7&#34;, url) or 0) or None,
-        &#34;path&#34;: PATTERN_URL.sub(r&#34;\8&#34;, url or None)
+        &#34;scheme&#34;: parsed.scheme,
+        &#34;user&#34;: parsed.auth.split(&#34;:&#34;)[0] if hasattr(parsed.auth, &#34;split&#34;) else None,
+        &#34;password&#34;: parsed.auth.split(&#34;:&#34;)[1] if hasattr(parsed.auth, &#34;split&#34;) else None,
+        &#34;host&#34;: parsed.host,
+        &#34;port&#34;: parsed.port,
+        &#34;path&#34;: parsed.path
     }</code></pre>
 </details>
 </dd>
@@ -945,7 +937,7 @@ keys of <code><a title="couchdb3.utils.MIME_TYPES_MAPPING" href="#couchdb3.utils
     -------
     bool : `True` if the provided proxy is CouchDB compliant.
     &#34;&#34;&#34;
-    return PATTERN_URL.sub(r&#34;\1&#34;, proxy) in {&#34;http&#34;, &#34;socks5&#34;}</code></pre>
+    return parse_url(proxy).scheme in {&#34;http&#34;, &#34;socks5&#34;}</code></pre>
 </details>
 </dd>
 <dt id="couchdb3.utils.validate_user_id"><code class="name flex">
@@ -1007,7 +999,6 @@ keys of <code><a title="couchdb3.utils.MIME_TYPES_MAPPING" href="#couchdb3.utils
 <li><code><a title="couchdb3.utils.DEFAULT_TIMEOUT" href="#couchdb3.utils.DEFAULT_TIMEOUT">DEFAULT_TIMEOUT</a></code></li>
 <li><code><a title="couchdb3.utils.MIME_TYPES_MAPPING" href="#couchdb3.utils.MIME_TYPES_MAPPING">MIME_TYPES_MAPPING</a></code></li>
 <li><code><a title="couchdb3.utils.PATTERN_DB_NAME" href="#couchdb3.utils.PATTERN_DB_NAME">PATTERN_DB_NAME</a></code></li>
-<li><code><a title="couchdb3.utils.PATTERN_URL" href="#couchdb3.utils.PATTERN_URL">PATTERN_URL</a></code></li>
 <li><code><a title="couchdb3.utils.PATTERN_USER_ID" href="#couchdb3.utils.PATTERN_USER_ID">PATTERN_USER_ID</a></code></li>
 <li><code><a title="couchdb3.utils.VALID_AUTH_METHODS" href="#couchdb3.utils.VALID_AUTH_METHODS">VALID_AUTH_METHODS</a></code></li>
 </ul>
