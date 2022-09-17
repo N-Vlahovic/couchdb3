@@ -214,7 +214,7 @@ class Base(object):
                 path=path,
                 port=self.port,
                 **(query_kwargs or {})
-            ),
+            ).url,
             json=body,
             timeout=timeout or self.timeout,
             **req_kwargs
@@ -444,7 +444,9 @@ class Base(object):
         bool : `True` if the auth token is expired.
         """
         try:
-            return next(_.expires for _ in self.session.cookies if _.name == "AuthSession") <= datetime.utcnow().timestamp()
+            return next(
+                _.expires for _ in self.session.cookies if _.name == "AuthSession"
+            ) <= datetime.utcnow().timestamp()
         except StopIteration:
             return True
 
