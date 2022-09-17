@@ -61,7 +61,8 @@ __all__ = [
     &#34;MIME_TYPES_MAPPING&#34;,
     &#34;PATTERN_DB_NAME&#34;,
     &#34;PATTERN_USER_ID&#34;,
-    &#34;VALID_AUTH_METHODS&#34;
+    &#34;VALID_AUTH_METHODS&#34;,
+    &#34;VALID_SCHEMES&#34;,
 ]
 
 
@@ -493,6 +494,10 @@ def extract_url_data(url: str) -&gt; Dict:
 <dt id="couchdb3.utils.VALID_AUTH_METHODS"><code class="name">var <span class="ident">VALID_AUTH_METHODS</span> : Set[str]</code></dt>
 <dd>
 <div class="desc"><p>The valid auth method arguments. Possible values are <code>"basic"</code> or <code>"cookie"</code>.</p></div>
+</dd>
+<dt id="couchdb3.utils.VALID_SCHEMES"><code class="name">var <span class="ident">VALID_SCHEMES</span> : Set[str]</code></dt>
+<dd>
+<div class="desc"><p>The valid TCP schemes. Possible values are <code>"http"</code> or <code>"https"</code> or <code>"socks5"</code>.</p></div>
 </dd>
 </dl>
 </section>
@@ -1007,6 +1012,7 @@ keys of <code><a title="couchdb3.utils.MIME_TYPES_MAPPING" href="#couchdb3.utils
 <li><code><a title="couchdb3.utils.PATTERN_DB_NAME" href="#couchdb3.utils.PATTERN_DB_NAME">PATTERN_DB_NAME</a></code></li>
 <li><code><a title="couchdb3.utils.PATTERN_USER_ID" href="#couchdb3.utils.PATTERN_USER_ID">PATTERN_USER_ID</a></code></li>
 <li><code><a title="couchdb3.utils.VALID_AUTH_METHODS" href="#couchdb3.utils.VALID_AUTH_METHODS">VALID_AUTH_METHODS</a></code></li>
+<li><code><a title="couchdb3.utils.VALID_SCHEMES" href="#couchdb3.utils.VALID_SCHEMES">VALID_SCHEMES</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-functions">Functions</a></h3>
