@@ -33,7 +33,8 @@ __all__ = [
     "MIME_TYPES_MAPPING",
     "PATTERN_DB_NAME",
     "PATTERN_USER_ID",
-    "VALID_AUTH_METHODS"
+    "VALID_AUTH_METHODS",
+    "VALID_SCHEMES",
 ]
 
 
