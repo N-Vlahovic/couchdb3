@@ -18,7 +18,7 @@ class TestUtils(unittest.TestCase):
             descending=True,
             skip=10,
             keys=["hello", "world"]
-        )
+        ).url
         self.assertEqual(url0, parse.unquote(url1))
 
     def test_extract_url_data(self):
@@ -35,7 +35,7 @@ class TestUtils(unittest.TestCase):
         self.assertEqual(password, data["password"])
         self.assertEqual(host, data["host"])
         self.assertEqual(port, data["port"])
-        self.assertEqual(path, data["path"])
+        self.assertEqual(path, data["path"].lstrip("/"))
 
 
 if __name__ == '__main__':
