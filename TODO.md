@@ -1,5 +1,5 @@
 # Todo
 
 ## Authentication
-- Add cookie based authentication
+- <s>Add cookie based authentication</s>
 - 
