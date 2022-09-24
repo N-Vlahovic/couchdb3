@@ -56,7 +56,8 @@ class Server(Base):
             password: str = None,
             disable_ssl_verification: bool = False,
             auth_method: str = None,
-            timeout: int = DEFAULT_TIMEOUT
+            timeout: int = DEFAULT_TIMEOUT,
+            session: requests.Session = None,
     ) -&gt; None:
         &#34;&#34;&#34;
 
@@ -80,6 +81,8 @@ class Server(Base):
             Authentication method. Choices are `cookie` or `basic`. Default is `couchdb3.utils.DEFAULT_AUTH_METHOD`.
         timeout : int
             The default timeout for requests. Default c.f. `couchdb3.utils.DEFAULT_TIMEOUT`.
+        session: requests.Session
+            A specific session to use. Optional - if not provided, a new session will be initialized.
         &#34;&#34;&#34;
         super(Server, self).__init__(
             url=url,
@@ -88,7 +91,8 @@ class Server(Base):
             password=password,
             disable_ssl_verification=disable_ssl_verification,
             auth_method=auth_method,
-            timeout=timeout
+            timeout=timeout,
+            session=session,
         )
 
     def __getitem__(self, item) -&gt; Database:
@@ -358,6 +362,7 @@ class Server(Base):
             password=self._password,
             disable_ssl_verification=not self.session.verify,
             auth_method=self.auth_method,
+            session=self.session,
         )
         try:
             db._head()
@@ -484,7 +489,11 @@ class Server(Base):
           - session_id (`str`) – Unique session ID
           - source_last_seq (`int`) – Last sequence number read from source database
         &#34;&#34;&#34;
-        if (source_proxy and validate_proxy(source_proxy) is False) or (target_proxy and validate_proxy(target_proxy) is False):
+        if (
+                source_proxy and validate_proxy(source_proxy) is False
+        ) or (
+                target_proxy and validate_proxy(target_proxy) is False
+        ):
             raise ProxySchemeComplianceError(&#34;Proxy has invalid scheme.&#34;)
         if sum(bool(_) for _ in [doc_ids, filter_func, selector]) &gt; 1:
             raise CouchDBError(&#34;Arguments \&#34;doc_ids\&#34;, \&#34;filter_func\&#34; and \&#34;selector\&#34; are mutually exclusive.&#34;)
@@ -532,7 +541,7 @@ class Server(Base):
 <dl>
 <dt id="couchdb3.server.Server"><code class="flex name class">
 <span>class <span class="ident">Server</span></span>
-<span>(</span><span>url: str, *, port: int = None, user: str = None, password: str = None, disable_ssl_verification: bool = False, auth_method: str = None, timeout: int = 300)</span>
+<span>(</span><span>url: str, *, port: int = None, user: str = None, password: str = None, disable_ssl_verification: bool = False, auth_method: str = None, timeout: int = 300, session: requests.sessions.Session = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Abstract Couchdb client</p>
@@ -556,6 +565,8 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
 <dd>Authentication method. Choices are <code>cookie</code> or <code>basic</code>. Default is <code><a title="couchdb3.utils.DEFAULT_AUTH_METHOD" href="utils.html#couchdb3.utils.DEFAULT_AUTH_METHOD">DEFAULT_AUTH_METHOD</a></code>.</dd>
 <dt><strong><code>timeout</code></strong> :&ensp;<code>int</code></dt>
 <dd>The default timeout for requests. Default c.f. <code><a title="couchdb3.utils.DEFAULT_TIMEOUT" href="utils.html#couchdb3.utils.DEFAULT_TIMEOUT">DEFAULT_TIMEOUT</a></code>.</dd>
+<dt><strong><code>session</code></strong> :&ensp;<code>requests.Session</code></dt>
+<dd>A specific session to use. Optional - if not provided, a new session will be initialized.</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -574,7 +585,8 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
             password: str = None,
             disable_ssl_verification: bool = False,
             auth_method: str = None,
-            timeout: int = DEFAULT_TIMEOUT
+            timeout: int = DEFAULT_TIMEOUT,
+            session: requests.Session = None,
     ) -&gt; None:
         &#34;&#34;&#34;
 
@@ -598,6 +610,8 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
             Authentication method. Choices are `cookie` or `basic`. Default is `couchdb3.utils.DEFAULT_AUTH_METHOD`.
         timeout : int
             The default timeout for requests. Default c.f. `couchdb3.utils.DEFAULT_TIMEOUT`.
+        session: requests.Session
+            A specific session to use. Optional - if not provided, a new session will be initialized.
         &#34;&#34;&#34;
         super(Server, self).__init__(
             url=url,
@@ -606,7 +620,8 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
             password=password,
             disable_ssl_verification=disable_ssl_verification,
             auth_method=auth_method,
-            timeout=timeout
+            timeout=timeout,
+            session=session,
         )
 
     def __getitem__(self, item) -&gt; Database:
@@ -876,6 +891,7 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
             password=self._password,
             disable_ssl_verification=not self.session.verify,
             auth_method=self.auth_method,
+            session=self.session,
         )
         try:
             db._head()
@@ -1002,7 +1018,11 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
           - session_id (`str`) – Unique session ID
           - source_last_seq (`int`) – Last sequence number read from source database
         &#34;&#34;&#34;
-        if (source_proxy and validate_proxy(source_proxy) is False) or (target_proxy and validate_proxy(target_proxy) is False):
+        if (
+                source_proxy and validate_proxy(source_proxy) is False
+        ) or (
+                target_proxy and validate_proxy(target_proxy) is False
+        ):
             raise ProxySchemeComplianceError(&#34;Proxy has invalid scheme.&#34;)
         if sum(bool(_) for _ in [doc_ids, filter_func, selector]) &gt; 1:
             raise CouchDBError(&#34;Arguments \&#34;doc_ids\&#34;, \&#34;filter_func\&#34; and \&#34;selector\&#34; are mutually exclusive.&#34;)
@@ -1377,6 +1397,7 @@ used: <code>3</code>, unless overridden in the <code>cluster config</code>).</dd
         password=self._password,
         disable_ssl_verification=not self.session.verify,
         auth_method=self.auth_method,
+        session=self.session,
     )
     try:
         db._head()
@@ -1569,7 +1590,11 @@ or <code>“socks5”</code>).</dd>
       - session_id (`str`) – Unique session ID
       - source_last_seq (`int`) – Last sequence number read from source database
     &#34;&#34;&#34;
-    if (source_proxy and validate_proxy(source_proxy) is False) or (target_proxy and validate_proxy(target_proxy) is False):
+    if (
+            source_proxy and validate_proxy(source_proxy) is False
+    ) or (
+            target_proxy and validate_proxy(target_proxy) is False
+    ):
         raise ProxySchemeComplianceError(&#34;Proxy has invalid scheme.&#34;)
     if sum(bool(_) for _ in [doc_ids, filter_func, selector]) &gt; 1:
         raise CouchDBError(&#34;Arguments \&#34;doc_ids\&#34;, \&#34;filter_func\&#34; and \&#34;selector\&#34; are mutually exclusive.&#34;)
