@@ -124,7 +124,7 @@ print(db.delete(docid=docid, rev=db.rev(docid)))  # Fetch the revision on the go
 """
 from . import exceptions
 from . import utils
-from .database import Database
+from .database import Database, Partition
 from .document import Document
 from .server import Server
 from .view import ViewResult, ViewRow
