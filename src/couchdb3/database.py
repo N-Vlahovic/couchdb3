@@ -32,7 +32,8 @@ class Database(Base):
             password: str = None,
             disable_ssl_verification: bool = False,
             auth_method: str = None,
-            timeout: int = DEFAULT_TIMEOUT
+            timeout: int = DEFAULT_TIMEOUT,
+            session: requests.Session = None,
     ) -> None:
         """
 
@@ -58,9 +59,12 @@ class Database(Base):
             Authentication method. Choices are `cookie` or `basic`. Default is `couchdb3.utils.DEFAULT_AUTH_METHOD`.
         timeout : int
             The default timeout for requests. Default c.f. `couchdb3.utils.DEFAULT_TIMEOUT`.
+        session: requests.Session
+            A specific session to use. Optional - if not provided, a new session will be initialized.
         """
         super(Database, self).__init__(
             url=url,
+            session=session,
             port=port,
             user=user,
             password=password,
