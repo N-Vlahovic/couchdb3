@@ -32,7 +32,8 @@ class Database(Base):
             password: str = None,
             disable_ssl_verification: bool = False,
             auth_method: str = None,
-            timeout: int = DEFAULT_TIMEOUT
+            timeout: int = DEFAULT_TIMEOUT,
+            session: requests.Session = None,
     ) -> None:
         """
 
@@ -58,9 +59,12 @@ class Database(Base):
             Authentication method. Choices are `cookie` or `basic`. Default is `couchdb3.utils.DEFAULT_AUTH_METHOD`.
         timeout : int
             The default timeout for requests. Default c.f. `couchdb3.utils.DEFAULT_TIMEOUT`.
+        session: requests.Session
+            A specific session to use. Optional - if not provided, a new session will be initialized.
         """
         super(Database, self).__init__(
             url=url,
+            session=session,
             port=port,
             user=user,
             password=password,
@@ -396,8 +400,8 @@ class Database(Base):
             Instruct a query to use a specific index. Specified either as `"<design_document>"` or
             `["<design_document>", "<index_name>"]`. Default is `None`.
         conflicts : bool
-            Include conflicted documents if `True`. Intended use is to easily find conflicted documents, without an index
-            or view. Default is `False`.
+            Include conflicted documents if `True`. Intended use is to easily find conflicted documents,
+            without an index or view. Default is `False`.
         r : int
             Read quorum needed for the result. This defaults to 1, in which case the document found in the index is
             returned. If set to a higher value, each document is read from at least that many replicas before it is
@@ -486,8 +490,8 @@ class Database(Base):
             Instruct a query to use a specific index. Specified either as `"<design_document>"` or
             `["<design_document>", "<index_name>"]`. Default is `None`.
         conflicts : bool
-            Include conflicted documents if `True`. Intended use is to easily find conflicted documents, without an index
-            or view. Default is `False`.
+            Include conflicted documents if `True`. Intended use is to easily find conflicted documents,
+            without an index or view. Default is `False`.
         r : int
             Read quorum needed for the result. This defaults to 1, in which case the document found in the index is
             returned. If set to a higher value, each document is read from at least that many replicas before it is
@@ -853,8 +857,8 @@ class Database(Base):
         Parameters
         ----------
         doc : Union[Dict, couchdb3.document.Document]
-            A dictionary or a `couchdb3.document.Document` instance containing a valid identifier (`doc["_id"]`) as well as
-            revision number (`doc["_rev"]`) if need be.
+            A dictionary or a `couchdb3.document.Document` instance containing a valid identifier (`doc["_id"]`)
+            as well as revision number (`doc["_rev"]`) if need be.
         batch : bool
             Store document in batch mode. Default `None`.
         new_edits : bool
@@ -1035,8 +1039,8 @@ class Database(Base):
             Include the Base64-encoded content of attachments in the documents that are included if `include_docs` is
             `True`. Ignored if `include_docs` isn’t `True`. Default is `None`.
         att_encoding_info : bool
-            Include encoding information in attachment stubs if `include_docs` is `True` and the particular attachment is
-            compressed. Ignored if `include_docs` isn’t `True`. Default is `False`.
+            Include encoding information in attachment stubs if `include_docs` is `True` and the particular attachment
+            is compressed. Ignored if `include_docs` isn’t `True`. Default is `False`.
         inclusive_end : bool
             Specifies whether the specified end key should be included in the result. Default is `None`.
         key : str

@@ -58,7 +58,8 @@ class Base(object):
             password: str = None,
             disable_ssl_verification: bool = False,
             auth_method: str = None,
-            timeout: int = utils.DEFAULT_TIMEOUT
+            timeout: int = utils.DEFAULT_TIMEOUT,
+            session: requests.Session = None,
     ) -&gt; None:
         &#34;&#34;&#34;
 
@@ -82,6 +83,8 @@ class Base(object):
             Authentication method. Choices are `cookie` or `basic`. Default is `couchdb3.utils.DEFAULT_AUTH_METHOD`.
         timeout : int
             The default timeout for requests. Default c.f. `couchdb3.utils.DEFAULT_TIMEOUT`.
+        session: requests.Session
+            A specific session to use. Optional - if not provided, a new session will be initialized.
         &#34;&#34;&#34;
         auth_method = auth_method or utils.DEFAULT_AUTH_METHOD
         if utils.validate_auth_method(auth_method=auth_method) is False:
@@ -95,7 +98,7 @@ class Base(object):
         self.host = _[&#34;host&#34;]
         self.port = port or _[&#34;port&#34;]
         self.root = None
-        self.session = requests.Session()
+        self.session = session or requests.Session()
         self.session.verify = disable_ssl_verification is False
         # Changing the default headers
         self.session.headers.update({
@@ -603,7 +606,7 @@ class DictBase(dict):
 <dl>
 <dt id="couchdb3.base.Base"><code class="flex name class">
 <span>class <span class="ident">Base</span></span>
-<span>(</span><span>url: str, *, port: int = None, user: str = None, password: str = None, disable_ssl_verification: bool = False, auth_method: str = None, timeout: int = 300)</span>
+<span>(</span><span>url: str, *, port: int = None, user: str = None, password: str = None, disable_ssl_verification: bool = False, auth_method: str = None, timeout: int = 300, session: requests.sessions.Session = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Abstract base class</p>
@@ -627,6 +630,8 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
 <dd>Authentication method. Choices are <code>cookie</code> or <code>basic</code>. Default is <code><a title="couchdb3.utils.DEFAULT_AUTH_METHOD" href="utils.html#couchdb3.utils.DEFAULT_AUTH_METHOD">DEFAULT_AUTH_METHOD</a></code>.</dd>
 <dt><strong><code>timeout</code></strong> :&ensp;<code>int</code></dt>
 <dd>The default timeout for requests. Default c.f. <code><a title="couchdb3.utils.DEFAULT_TIMEOUT" href="utils.html#couchdb3.utils.DEFAULT_TIMEOUT">DEFAULT_TIMEOUT</a></code>.</dd>
+<dt><strong><code>session</code></strong> :&ensp;<code>requests.Session</code></dt>
+<dd>A specific session to use. Optional - if not provided, a new session will be initialized.</dd>
 </dl></div>
 <details class="source">
 <summary>
@@ -646,7 +651,8 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
             password: str = None,
             disable_ssl_verification: bool = False,
             auth_method: str = None,
-            timeout: int = utils.DEFAULT_TIMEOUT
+            timeout: int = utils.DEFAULT_TIMEOUT,
+            session: requests.Session = None,
     ) -&gt; None:
         &#34;&#34;&#34;
 
@@ -670,6 +676,8 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
             Authentication method. Choices are `cookie` or `basic`. Default is `couchdb3.utils.DEFAULT_AUTH_METHOD`.
         timeout : int
             The default timeout for requests. Default c.f. `couchdb3.utils.DEFAULT_TIMEOUT`.
+        session: requests.Session
+            A specific session to use. Optional - if not provided, a new session will be initialized.
         &#34;&#34;&#34;
         auth_method = auth_method or utils.DEFAULT_AUTH_METHOD
         if utils.validate_auth_method(auth_method=auth_method) is False:
@@ -683,7 +691,7 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
         self.host = _[&#34;host&#34;]
         self.port = port or _[&#34;port&#34;]
         self.root = None
-        self.session = requests.Session()
+        self.session = session or requests.Session()
         self.session.verify = disable_ssl_verification is False
         # Changing the default headers
         self.session.headers.update({
