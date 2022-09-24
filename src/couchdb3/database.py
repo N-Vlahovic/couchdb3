@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
+from __future__ import annotations
 from typing import Any, Dict, Iterable, List, Tuple, Union
 
 import requests
@@ -14,7 +14,8 @@ from .view import ViewResult
 
 
 __all__ = [
-    "Database"
+    "Database",
+    "Partition",
 ]
 
 
@@ -1104,3 +1105,88 @@ class Database(Base):
                 "update_seq": update_seq
             }
         ).json())
+
+    def get_partition(self, partition_id: str) -> Partition:
+        """
+        Get a given partition.
+
+        Parameters
+        ----------
+        partition_id : str
+            The partition's ID.
+
+        Returns
+        -------
+        `Partition`
+        """
+        return Partition(
+            partition_id=partition_id,
+            name=self.name,
+            url=self.url,
+            port=self.port,
+            user=self._user,
+            password=self._password,
+            disable_ssl_verification=not self.session.verify,
+            auth_method=self.auth_method,
+            session=self.session,
+        )
+
+
+class Partition(Database):
+    """
+    Abstract Couchdb partition
+    """
+    def __init__(
+            self,
+            partition_id: str,
+            name: str,
+            *,
+            url: str = None,
+            port: int = None,
+            user: str = None,
+            password: str = None,
+            disable_ssl_verification: bool = False,
+            auth_method: str = None,
+            timeout: int = DEFAULT_TIMEOUT,
+            session: requests.Session = None,
+    ) -> None:
+        """
+
+        Parameters
+        ----------
+        name : str
+            The name of the database.
+        url : str
+            The url of the CouchDB server formatted as `scheme://user:password@host:port`. For example:
+
+                "http://user:password@127.0.0.1:5984"
+                "https://couchdb.example.com"
+        port : int
+            The port of the CouchDB server. Can also be supplied via the url.
+        user : str
+            The CouchDB admin username. Can also be supplied via the url.
+        password : str
+            The CouchDB admin password. Can also be supplied via the url.
+        disable_ssl_verification : bool
+            Controls whether to verify the server’s TLS certificate. Set to `True` when connecting to a server with
+            self-signed TLS certificates. Default `False`.
+        auth_method : str
+            Authentication method. Choices are `cookie` or `basic`. Default is `couchdb3.utils.DEFAULT_AUTH_METHOD`.
+        timeout : int
+            The default timeout for requests. Default c.f. `couchdb3.utils.DEFAULT_TIMEOUT`.
+        session: requests.Session
+            A specific session to use. Optional - if not provided, a new session will be initialized.
+        """
+        super(Partition, self).__init__(
+            name=name,
+            url=url,
+            session=session,
+            port=port,
+            user=user,
+            password=password,
+            disable_ssl_verification=disable_ssl_verification,
+            auth_method=auth_method,
+            timeout=timeout
+        )
+        self.partition_id = partition_id
+        self.root = f"{name}/_partition/{partition_id}"
