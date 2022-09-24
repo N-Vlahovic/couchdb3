@@ -28,7 +28,7 @@
 </summary>
 <pre><code class="python">#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
+from __future__ import annotations
 from typing import Any, Dict, Iterable, List, Tuple, Union
 
 import requests
@@ -42,7 +42,8 @@ from .view import ViewResult
 
 
 __all__ = [
-    &#34;Database&#34;
+    &#34;Database&#34;,
+    &#34;Partition&#34;,
 ]
 
 
@@ -1131,7 +1132,92 @@ class Database(Base):
                 &#34;update&#34;: update,
                 &#34;update_seq&#34;: update_seq
             }
-        ).json())</code></pre>
+        ).json())
+
+    def get_partition(self, partition_id: str) -&gt; Partition:
+        &#34;&#34;&#34;
+        Get a given partition.
+
+        Parameters
+        ----------
+        partition_id : str
+            The partition&#39;s ID.
+
+        Returns
+        -------
+        `Partition`
+        &#34;&#34;&#34;
+        return Partition(
+            partition_id=partition_id,
+            name=self.name,
+            url=self.url,
+            port=self.port,
+            user=self._user,
+            password=self._password,
+            disable_ssl_verification=not self.session.verify,
+            auth_method=self.auth_method,
+            session=self.session,
+        )
+
+
+class Partition(Database):
+    &#34;&#34;&#34;
+    Abstract Couchdb partition
+    &#34;&#34;&#34;
+    def __init__(
+            self,
+            partition_id: str,
+            name: str,
+            *,
+            url: str = None,
+            port: int = None,
+            user: str = None,
+            password: str = None,
+            disable_ssl_verification: bool = False,
+            auth_method: str = None,
+            timeout: int = DEFAULT_TIMEOUT,
+            session: requests.Session = None,
+    ) -&gt; None:
+        &#34;&#34;&#34;
+
+        Parameters
+        ----------
+        name : str
+            The name of the database.
+        url : str
+            The url of the CouchDB server formatted as `scheme://user:password@host:port`. For example:
+
+                &#34;http://user:password@127.0.0.1:5984&#34;
+                &#34;https://couchdb.example.com&#34;
+        port : int
+            The port of the CouchDB server. Can also be supplied via the url.
+        user : str
+            The CouchDB admin username. Can also be supplied via the url.
+        password : str
+            The CouchDB admin password. Can also be supplied via the url.
+        disable_ssl_verification : bool
+            Controls whether to verify the server’s TLS certificate. Set to `True` when connecting to a server with
+            self-signed TLS certificates. Default `False`.
+        auth_method : str
+            Authentication method. Choices are `cookie` or `basic`. Default is `couchdb3.utils.DEFAULT_AUTH_METHOD`.
+        timeout : int
+            The default timeout for requests. Default c.f. `couchdb3.utils.DEFAULT_TIMEOUT`.
+        session: requests.Session
+            A specific session to use. Optional - if not provided, a new session will be initialized.
+        &#34;&#34;&#34;
+        super(Partition, self).__init__(
+            name=name,
+            url=url,
+            session=session,
+            port=port,
+            user=user,
+            password=password,
+            disable_ssl_verification=disable_ssl_verification,
+            auth_method=auth_method,
+            timeout=timeout
+        )
+        self.partition_id = partition_id
+        self.root = f&#34;{name}/_partition/{partition_id}&#34;</code></pre>
 </details>
 </section>
 <section>
@@ -1145,7 +1231,7 @@ class Database(Base):
 <dl>
 <dt id="couchdb3.database.Database"><code class="flex name class">
 <span>class <span class="ident">Database</span></span>
-<span>(</span><span>name: str, *, url: str = None, port: int = None, user: str = None, password: str = None, disable_ssl_verification: bool = False, auth_method: str = None, timeout: int = 300, session: requests.sessions.Session = None)</span>
+<span>(</span><span>name: str, *, url: str = None, port: int = None, user: str = None, password: str = None, disable_ssl_verification: bool = False, auth_method: str = None, timeout: int = 300, session: requests.Session = None)</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Abstract Couchdb database</p>
@@ -2263,11 +2349,40 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
                 &#34;update&#34;: update,
                 &#34;update_seq&#34;: update_seq
             }
-        ).json())</code></pre>
+        ).json())
+
+    def get_partition(self, partition_id: str) -&gt; Partition:
+        &#34;&#34;&#34;
+        Get a given partition.
+
+        Parameters
+        ----------
+        partition_id : str
+            The partition&#39;s ID.
+
+        Returns
+        -------
+        `Partition`
+        &#34;&#34;&#34;
+        return Partition(
+            partition_id=partition_id,
+            name=self.name,
+            url=self.url,
+            port=self.port,
+            user=self._user,
+            password=self._password,
+            disable_ssl_verification=not self.session.verify,
+            auth_method=self.auth_method,
+            session=self.session,
+        )</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="couchdb3.base.Base" href="base.html#couchdb3.base.Base">Base</a></li>
+</ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="couchdb3.database.Partition" href="#couchdb3.database.Partition">Partition</a></li>
 </ul>
 <h3>Methods</h3>
 <dl>
@@ -2324,7 +2439,7 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
 </details>
 </dd>
 <dt id="couchdb3.database.Database.bulk_docs"><code class="name flex">
-<span>def <span class="ident">bulk_docs</span></span>(<span>self, docs: List[Union[Dict, <a title="couchdb3.document.Document" href="document.html#couchdb3.document.Document">Document</a>]], new_edits: bool = True) ‑> List[Dict]</span>
+<span>def <span class="ident">bulk_docs</span></span>(<span>self, docs: List[Union[Dict, Document]], new_edits: bool = True) ‑> List[Dict]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>The bulk document API allows you to create and update multiple documents at the same time within a single
@@ -2396,7 +2511,7 @@ document values.</p>
 </details>
 </dd>
 <dt id="couchdb3.database.Database.bulk_get"><code class="name flex">
-<span>def <span class="ident">bulk_get</span></span>(<span>self, docs: List[Union[Dict, <a title="couchdb3.document.Document" href="document.html#couchdb3.document.Document">Document</a>]], revs: bool = False) ‑> List[Dict]</span>
+<span>def <span class="ident">bulk_get</span></span>(<span>self, docs: List[Union[Dict, Document]], revs: bool = False) ‑> List[Dict]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>This method can be called to query several documents in bulk. It is well suited for fetching a specific
@@ -2573,7 +2688,7 @@ database. For more info, please refer to
 </details>
 </dd>
 <dt id="couchdb3.database.Database.create"><code class="name flex">
-<span>def <span class="ident">create</span></span>(<span>self, doc: Union[Dict, <a title="couchdb3.document.Document" href="document.html#couchdb3.document.Document">Document</a>], *, batch: bool = None) ‑> Tuple[str, bool, str]</span>
+<span>def <span class="ident">create</span></span>(<span>self, doc: Union[Dict, Document], *, batch: bool = None) ‑> Tuple[str, bool, str]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Create a new document.</p>
@@ -3251,6 +3366,48 @@ revisions. Default <code>None</code>.</dd>
     return self.get(docid=f&#34;_design/{ddoc}&#34;, **kwargs)</code></pre>
 </details>
 </dd>
+<dt id="couchdb3.database.Database.get_partition"><code class="name flex">
+<span>def <span class="ident">get_partition</span></span>(<span>self, partition_id: str) ‑> <a title="couchdb3.database.Partition" href="#couchdb3.database.Partition">Partition</a></span>
+</code></dt>
+<dd>
+<div class="desc"><p>Get a given partition.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>partition_id</code></strong> :&ensp;<code>str</code></dt>
+<dd>The partition's ID.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p><code><a title="couchdb3.database.Partition" href="#couchdb3.database.Partition">Partition</a></code></p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def get_partition(self, partition_id: str) -&gt; Partition:
+    &#34;&#34;&#34;
+    Get a given partition.
+
+    Parameters
+    ----------
+    partition_id : str
+        The partition&#39;s ID.
+
+    Returns
+    -------
+    `Partition`
+    &#34;&#34;&#34;
+    return Partition(
+        partition_id=partition_id,
+        name=self.name,
+        url=self.url,
+        port=self.port,
+        user=self._user,
+        password=self._password,
+        disable_ssl_verification=not self.session.verify,
+        auth_method=self.auth_method,
+        session=self.session,
+    )</code></pre>
+</details>
+</dd>
 <dt id="couchdb3.database.Database.indexes"><code class="name flex">
 <span>def <span class="ident">indexes</span></span>(<span>self) ‑> Dict</span>
 </code></dt>
@@ -3525,7 +3682,7 @@ design document functions.</dd>
 </details>
 </dd>
 <dt id="couchdb3.database.Database.save"><code class="name flex">
-<span>def <span class="ident">save</span></span>(<span>self, doc: Union[Dict, <a title="couchdb3.document.Document" href="document.html#couchdb3.document.Document">Document</a>], batch: bool = None, new_edits: bool = None, path: str = None) ‑> Tuple[str, bool, str]</span>
+<span>def <span class="ident">save</span></span>(<span>self, doc: Union[Dict, Document], batch: bool = None, new_edits: bool = None, path: str = None) ‑> Tuple[str, bool, str]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Create a new named document, or a new revision of the existing document.</p>
@@ -3710,7 +3867,7 @@ database, an error occurs.</dd>
 </details>
 </dd>
 <dt id="couchdb3.database.Database.update_security"><code class="name flex">
-<span>def <span class="ident">update_security</span></span>(<span>self, admins: Union[Dict, <a title="couchdb3.document.SecurityDocumentElement" href="document.html#couchdb3.document.SecurityDocumentElement">SecurityDocumentElement</a>], members: Union[Dict, <a title="couchdb3.document.SecurityDocumentElement" href="document.html#couchdb3.document.SecurityDocumentElement">SecurityDocumentElement</a>]) ‑> bool</span>
+<span>def <span class="ident">update_security</span></span>(<span>self, admins: Union[Dict, SecurityDocumentElement], members: Union[Dict, SecurityDocumentElement]) ‑> bool</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Update database security.</p>
@@ -3973,6 +4130,140 @@ view reflects. Default is <code>False</code>.</dd>
 </li>
 </ul>
 </dd>
+<dt id="couchdb3.database.Partition"><code class="flex name class">
+<span>class <span class="ident">Partition</span></span>
+<span>(</span><span>partition_id: str, name: str, *, url: str = None, port: int = None, user: str = None, password: str = None, disable_ssl_verification: bool = False, auth_method: str = None, timeout: int = 300, session: requests.Session = None)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Abstract Couchdb partition</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>The name of the database.</dd>
+<dt><strong><code>url</code></strong> :&ensp;<code>str</code></dt>
+<dd>The url of the CouchDB server formatted as <code>scheme://user:password@host:port</code>. For example:<pre><code>"http://user:password@127.0.0.1:5984"
+"https://couchdb.example.com"
+</code></pre>
+</dd>
+<dt><strong><code>port</code></strong> :&ensp;<code>int</code></dt>
+<dd>The port of the CouchDB server. Can also be supplied via the url.</dd>
+<dt><strong><code>user</code></strong> :&ensp;<code>str</code></dt>
+<dd>The CouchDB admin username. Can also be supplied via the url.</dd>
+<dt><strong><code>password</code></strong> :&ensp;<code>str</code></dt>
+<dd>The CouchDB admin password. Can also be supplied via the url.</dd>
+<dt><strong><code>disable_ssl_verification</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Controls whether to verify the server’s TLS certificate. Set to <code>True</code> when connecting to a server with
+self-signed TLS certificates. Default <code>False</code>.</dd>
+<dt><strong><code>auth_method</code></strong> :&ensp;<code>str</code></dt>
+<dd>Authentication method. Choices are <code>cookie</code> or <code>basic</code>. Default is <code><a title="couchdb3.utils.DEFAULT_AUTH_METHOD" href="utils.html#couchdb3.utils.DEFAULT_AUTH_METHOD">DEFAULT_AUTH_METHOD</a></code>.</dd>
+<dt><strong><code>timeout</code></strong> :&ensp;<code>int</code></dt>
+<dd>The default timeout for requests. Default c.f. <code><a title="couchdb3.utils.DEFAULT_TIMEOUT" href="utils.html#couchdb3.utils.DEFAULT_TIMEOUT">DEFAULT_TIMEOUT</a></code>.</dd>
+<dt><strong><code>session</code></strong> :&ensp;<code>requests.Session</code></dt>
+<dd>A specific session to use. Optional - if not provided, a new session will be initialized.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Partition(Database):
+    &#34;&#34;&#34;
+    Abstract Couchdb partition
+    &#34;&#34;&#34;
+    def __init__(
+            self,
+            partition_id: str,
+            name: str,
+            *,
+            url: str = None,
+            port: int = None,
+            user: str = None,
+            password: str = None,
+            disable_ssl_verification: bool = False,
+            auth_method: str = None,
+            timeout: int = DEFAULT_TIMEOUT,
+            session: requests.Session = None,
+    ) -&gt; None:
+        &#34;&#34;&#34;
+
+        Parameters
+        ----------
+        name : str
+            The name of the database.
+        url : str
+            The url of the CouchDB server formatted as `scheme://user:password@host:port`. For example:
+
+                &#34;http://user:password@127.0.0.1:5984&#34;
+                &#34;https://couchdb.example.com&#34;
+        port : int
+            The port of the CouchDB server. Can also be supplied via the url.
+        user : str
+            The CouchDB admin username. Can also be supplied via the url.
+        password : str
+            The CouchDB admin password. Can also be supplied via the url.
+        disable_ssl_verification : bool
+            Controls whether to verify the server’s TLS certificate. Set to `True` when connecting to a server with
+            self-signed TLS certificates. Default `False`.
+        auth_method : str
+            Authentication method. Choices are `cookie` or `basic`. Default is `couchdb3.utils.DEFAULT_AUTH_METHOD`.
+        timeout : int
+            The default timeout for requests. Default c.f. `couchdb3.utils.DEFAULT_TIMEOUT`.
+        session: requests.Session
+            A specific session to use. Optional - if not provided, a new session will be initialized.
+        &#34;&#34;&#34;
+        super(Partition, self).__init__(
+            name=name,
+            url=url,
+            session=session,
+            port=port,
+            user=user,
+            password=password,
+            disable_ssl_verification=disable_ssl_verification,
+            auth_method=auth_method,
+            timeout=timeout
+        )
+        self.partition_id = partition_id
+        self.root = f&#34;{name}/_partition/{partition_id}&#34;</code></pre>
+</details>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="couchdb3.database.Database" href="#couchdb3.database.Database">Database</a></li>
+<li><a title="couchdb3.base.Base" href="base.html#couchdb3.base.Base">Base</a></li>
+</ul>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="couchdb3.database.Database" href="#couchdb3.database.Database">Database</a></b></code>:
+<ul class="hlist">
+<li><code><a title="couchdb3.database.Database.all_docs" href="#couchdb3.database.Database.all_docs">all_docs</a></code></li>
+<li><code><a title="couchdb3.database.Database.bulk_docs" href="#couchdb3.database.Database.bulk_docs">bulk_docs</a></code></li>
+<li><code><a title="couchdb3.database.Database.bulk_get" href="#couchdb3.database.Database.bulk_get">bulk_get</a></code></li>
+<li><code><a title="couchdb3.database.Database.check" href="base.html#couchdb3.base.Base.check">check</a></code></li>
+<li><code><a title="couchdb3.database.Database.compact" href="#couchdb3.database.Database.compact">compact</a></code></li>
+<li><code><a title="couchdb3.database.Database.copy" href="#couchdb3.database.Database.copy">copy</a></code></li>
+<li><code><a title="couchdb3.database.Database.create" href="#couchdb3.database.Database.create">create</a></code></li>
+<li><code><a title="couchdb3.database.Database.delete" href="#couchdb3.database.Database.delete">delete</a></code></li>
+<li><code><a title="couchdb3.database.Database.delete_attachment" href="#couchdb3.database.Database.delete_attachment">delete_attachment</a></code></li>
+<li><code><a title="couchdb3.database.Database.explain" href="#couchdb3.database.Database.explain">explain</a></code></li>
+<li><code><a title="couchdb3.database.Database.find" href="#couchdb3.database.Database.find">find</a></code></li>
+<li><code><a title="couchdb3.database.Database.get" href="#couchdb3.database.Database.get">get</a></code></li>
+<li><code><a title="couchdb3.database.Database.get_attachment" href="#couchdb3.database.Database.get_attachment">get_attachment</a></code></li>
+<li><code><a title="couchdb3.database.Database.get_design" href="#couchdb3.database.Database.get_design">get_design</a></code></li>
+<li><code><a title="couchdb3.database.Database.get_partition" href="#couchdb3.database.Database.get_partition">get_partition</a></code></li>
+<li><code><a title="couchdb3.database.Database.indexes" href="#couchdb3.database.Database.indexes">indexes</a></code></li>
+<li><code><a title="couchdb3.database.Database.info" href="base.html#couchdb3.base.Base.info">info</a></code></li>
+<li><code><a title="couchdb3.database.Database.purge" href="#couchdb3.database.Database.purge">purge</a></code></li>
+<li><code><a title="couchdb3.database.Database.put_attachment" href="#couchdb3.database.Database.put_attachment">put_attachment</a></code></li>
+<li><code><a title="couchdb3.database.Database.put_design" href="#couchdb3.database.Database.put_design">put_design</a></code></li>
+<li><code><a title="couchdb3.database.Database.rev" href="base.html#couchdb3.base.Base.rev">rev</a></code></li>
+<li><code><a title="couchdb3.database.Database.save" href="#couchdb3.database.Database.save">save</a></code></li>
+<li><code><a title="couchdb3.database.Database.save_index" href="#couchdb3.database.Database.save_index">save_index</a></code></li>
+<li><code><a title="couchdb3.database.Database.security" href="#couchdb3.database.Database.security">security</a></code></li>
+<li><code><a title="couchdb3.database.Database.update_security" href="#couchdb3.database.Database.update_security">update_security</a></code></li>
+<li><code><a title="couchdb3.database.Database.url" href="base.html#couchdb3.base.Base.url">url</a></code></li>
+<li><code><a title="couchdb3.database.Database.view" href="#couchdb3.database.Database.view">view</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
 </dl>
 </section>
 </article>
@@ -4005,6 +4296,7 @@ view reflects. Default is <code>False</code>.</dd>
 <li><code><a title="couchdb3.database.Database.get" href="#couchdb3.database.Database.get">get</a></code></li>
 <li><code><a title="couchdb3.database.Database.get_attachment" href="#couchdb3.database.Database.get_attachment">get_attachment</a></code></li>
 <li><code><a title="couchdb3.database.Database.get_design" href="#couchdb3.database.Database.get_design">get_design</a></code></li>
+<li><code><a title="couchdb3.database.Database.get_partition" href="#couchdb3.database.Database.get_partition">get_partition</a></code></li>
 <li><code><a title="couchdb3.database.Database.indexes" href="#couchdb3.database.Database.indexes">indexes</a></code></li>
 <li><code><a title="couchdb3.database.Database.purge" href="#couchdb3.database.Database.purge">purge</a></code></li>
 <li><code><a title="couchdb3.database.Database.put_attachment" href="#couchdb3.database.Database.put_attachment">put_attachment</a></code></li>
@@ -4015,6 +4307,9 @@ view reflects. Default is <code>False</code>.</dd>
 <li><code><a title="couchdb3.database.Database.update_security" href="#couchdb3.database.Database.update_security">update_security</a></code></li>
 <li><code><a title="couchdb3.database.Database.view" href="#couchdb3.database.Database.view">view</a></code></li>
 </ul>
+</li>
+<li>
+<h4><code><a title="couchdb3.database.Partition" href="#couchdb3.database.Partition">Partition</a></code></h4>
 </li>
 </ul>
 </li>
