@@ -456,7 +456,11 @@ class Server(Base):
           - session_id (`str`) – Unique session ID
           - source_last_seq (`int`) – Last sequence number read from source database
         """
-        if (source_proxy and validate_proxy(source_proxy) is False) or (target_proxy and validate_proxy(target_proxy) is False):
+        if (
+                source_proxy and validate_proxy(source_proxy) is False
+        ) or (
+                target_proxy and validate_proxy(target_proxy) is False
+        ):
             raise ProxySchemeComplianceError("Proxy has invalid scheme.")
         if sum(bool(_) for _ in [doc_ids, filter_func, selector]) > 1:
             raise CouchDBError("Arguments \"doc_ids\", \"filter_func\" and \"selector\" are mutually exclusive.")
