@@ -28,7 +28,8 @@ class Server(Base):
             password: str = None,
             disable_ssl_verification: bool = False,
             auth_method: str = None,
-            timeout: int = DEFAULT_TIMEOUT
+            timeout: int = DEFAULT_TIMEOUT,
+            session: requests.Session = None,
     ) -> None:
         """
 
@@ -52,6 +53,8 @@ class Server(Base):
             Authentication method. Choices are `cookie` or `basic`. Default is `couchdb3.utils.DEFAULT_AUTH_METHOD`.
         timeout : int
             The default timeout for requests. Default c.f. `couchdb3.utils.DEFAULT_TIMEOUT`.
+        session: requests.Session
+            A specific session to use. Optional - if not provided, a new session will be initialized.
         """
         super(Server, self).__init__(
             url=url,
@@ -60,7 +63,8 @@ class Server(Base):
             password=password,
             disable_ssl_verification=disable_ssl_verification,
             auth_method=auth_method,
-            timeout=timeout
+            timeout=timeout,
+            session=session,
         )
 
     def __getitem__(self, item) -> Database:
@@ -330,6 +334,7 @@ class Server(Base):
             password=self._password,
             disable_ssl_verification=not self.session.verify,
             auth_method=self.auth_method,
+            session=self.session,
         )
         try:
             db._head()
