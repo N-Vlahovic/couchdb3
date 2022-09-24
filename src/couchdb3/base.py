@@ -30,7 +30,8 @@ class Base(object):
             password: str = None,
             disable_ssl_verification: bool = False,
             auth_method: str = None,
-            timeout: int = utils.DEFAULT_TIMEOUT
+            timeout: int = utils.DEFAULT_TIMEOUT,
+            session: requests.Session = None,
     ) -> None:
         """
 
@@ -54,6 +55,8 @@ class Base(object):
             Authentication method. Choices are `cookie` or `basic`. Default is `couchdb3.utils.DEFAULT_AUTH_METHOD`.
         timeout : int
             The default timeout for requests. Default c.f. `couchdb3.utils.DEFAULT_TIMEOUT`.
+        session: requests.Session
+            A specific session to use. Optional - if not provided, a new session will be initialized.
         """
         auth_method = auth_method or utils.DEFAULT_AUTH_METHOD
         if utils.validate_auth_method(auth_method=auth_method) is False:
@@ -67,7 +70,7 @@ class Base(object):
         self.host = _["host"]
         self.port = port or _["port"]
         self.root = None
-        self.session = requests.Session()
+        self.session = session or requests.Session()
         self.session.verify = disable_ssl_verification is False
         # Changing the default headers
         self.session.headers.update({
