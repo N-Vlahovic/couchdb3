@@ -101,7 +101,7 @@ class Database(Base):
             **kwargs
     ) -> ViewResult:
         """
-        Executes the built-in _all_docs view, returning all of the documents in the database.
+        Executes the built-in _all_docs view, returning all the documents in the database (or partition).
 
         Parameters
         ----------
@@ -1189,4 +1189,38 @@ class Partition(Database):
             timeout=timeout
         )
         self.partition_id = partition_id
-        self.root = f"{name}/_partition/{partition_id}"
+        # self.root = f"{name}/_partition/{partition_id}"
+
+    def all_docs(
+            self,
+            keys: Iterable[str] = None,
+            **kwargs
+    ) -> ViewResult:
+        """
+        Executes the built-in _all_docs view, returning all the documents in the partition.
+
+        Parameters
+        ----------
+        keys : Iterable[str]
+            Return only documents where the key matches one of the keys specified in the argument. Default is `None`.
+        kwargs
+            Further `couchdb3.database.Database.view` parameters.
+
+        Returns
+        -------
+        ViewResult
+        """
+        return super(Partition, self).all_docs(partition=self.partition_id, keys=keys, **kwargs)
+
+    # noinspection PyMethodOverriding
+    def info(
+            self,
+    ) -> Dict:
+        """
+        Return the partition's info by sending a `GET` request to `/self.root`.
+
+        Returns
+        -------
+        Dict: A dictionary containing the server's or database's info.
+        """
+        return super(Partition, self).info(partition=self.partition_id)
