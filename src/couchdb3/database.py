@@ -674,6 +674,7 @@ class Database(Base):
     def get_design(
             self,
             ddoc: str,
+            partition: str = None,
             **kwargs
     ) -> Document:
         """
@@ -683,6 +684,8 @@ class Database(Base):
         ----------
         ddoc: str
             The design document's name.
+        partition: str
+            An optional partition ID. Only valid for partitioned databases. (Default `None`.)
         kwargs
             Further `Database.get` parameters.
 
@@ -690,7 +693,10 @@ class Database(Base):
         -------
         Document : A `couchdb3.document.Document` object containing the design document's content.
         """
-        return self.get(docid=f"_design/{ddoc}", **kwargs)
+        return self.get(
+            docid=f"_partition/{partition}/_design/{ddoc}" if partition else f"_design/{ddoc}",
+            **kwargs
+        )
 
     def purge(
             self,
@@ -988,6 +994,7 @@ class Database(Base):
             ddoc: str,
             view: str = None,
             *,
+            partition: str = None,
             conflicts: bool = None,
             descending: bool = None,
             endkey: str = None,
@@ -1011,7 +1018,7 @@ class Database(Base):
             update_seq: bool = None
     ) -> ViewResult:
         """
-        Executes the specified view function from the specified design documen, c.f [the official
+        Executes the specified view function from the specified design document, c.f [the official
         documentation](https://docs.couchdb.org/en/main/api/ddoc/views.html#db-design-design-doc-view-view-name).
 
         Parameters
@@ -1020,6 +1027,8 @@ class Database(Base):
             The corresponding design document's id.
         view : str
             The view's id.
+        partition: str
+            An optional partition ID. Only valid for partitioned databases. (Default `None`.)
         conflicts : bool
             Include conflicts information in response. Ignored if `include_docs` isn’t `True`. Default is `None`.
         descending : bool
@@ -1079,8 +1088,9 @@ class Database(Base):
         -------
         `view.ViewResult`
         """
+        path = f"_partition/{partition}/_design" if partition else "_design"
         return ViewResult(**self._get(
-            resource=f"_design/{ddoc}/_view/{view}" if (ddoc and view) else ddoc,
+            resource=f"{path}/{ddoc}/_view/{view}" if (ddoc and view) else ddoc,
             query_kwargs={
                 "conflicts": conflicts,
                 "descending": descending,
@@ -1227,3 +1237,128 @@ class Partition(Database):
         Dict: A dictionary containing the server's or database's info.
         """
         return super(Partition, self).info(partition=self.partition_id)
+
+    # noinspection PyMethodOverriding
+    def view(
+            self,
+            ddoc: str,
+            view: str = None,
+            *,
+            # partition: str = None,
+            conflicts: bool = None,
+            descending: bool = None,
+            endkey: str = None,
+            endkey_docid: str = None,
+            group: bool = None,
+            group_level: int = None,
+            include_docs: bool = None,
+            attachments: bool = None,
+            att_encoding_info: bool = None,
+            inclusive_end: bool = None,
+            key: str = None,
+            keys: Iterable[str] = None,
+            limit: int = None,
+            reduce: bool = None,
+            skip: int = None,
+            sort: bool = None,
+            stable: bool = None,
+            startkey: str = None,
+            startkey_docid: str = None,
+            update: str = None,
+            update_seq: bool = None
+    ) -> ViewResult:
+        """
+        Executes the specified view function from the specified design document, c.f [the official
+        documentation](https://docs.couchdb.org/en/main/api/ddoc/views.html#db-design-design-doc-view-view-name).
+
+        Parameters
+        ----------
+        ddoc : str
+            The corresponding design document's id.
+        view : str
+            The view's id.
+        conflicts : bool
+            Include conflicts information in response. Ignored if `include_docs` isn’t `True`. Default is `None`.
+        descending : bool
+            Return the documents in descending order by key. Default is `None`.
+        endkey : str
+             Stop returning records when the specified key is reached. Default is `None`
+        endkey_docid: str
+            Stop returning records when the specified document ID is reached. Ignored if `endkey` is not set. Default
+            is `None`.
+        group: bool
+            Group the results using the reduce function to a group or single row. Implies `reduce` is `true` and the
+            maximum `group_level`. Default is `None`.
+        group_level : int
+             Specify the group level to be used. Implies group is true. Default is `None`.
+        include_docs : bool
+            Include the associated document with each row. Default is `None`.
+        attachments : bool
+            Include the Base64-encoded content of attachments in the documents that are included if `include_docs` is
+            `True`. Ignored if `include_docs` isn’t `True`. Default is `None`.
+        att_encoding_info : bool
+            Include encoding information in attachment stubs if `include_docs` is `True` and the particular attachment
+            is compressed. Ignored if `include_docs` isn’t `True`. Default is `False`.
+        inclusive_end : bool
+            Specifies whether the specified end key should be included in the result. Default is `None`.
+        key : str
+            Return only documents that match the specified key. Default is `None`.
+        keys: Iterable[str]
+            Return only documents where the key matches one of the keys specified in the argument. Default is `None`.
+        limit : int
+            Limit the number of the returned documents to the specified number.  Default is `None`.
+        reduce : bool
+            Use the reduction function. Default is `True` when a reduce function is defined. Default is `None`.
+        skip : int
+            Skip this number of records before starting to return the results. Default is `None`.
+        sort : bool
+            Sort returned rows (see Sorting Returned Rows). Setting this to `False` offers a performance boost. The
+            `total_rows` and `offset` fields are not available when this is set to `False`. Default is `None`.
+        stable : bool
+            Whether or not the view results should be returned from a stable set of shards. Default is `None`.
+        startkey : str
+            Return records starting with the specified key. Default is `None`
+        startkey_docid : str
+            Return records starting with the specified document ID. Ignored if `startkey` is not set. Default is `None`
+        update : str
+            Whether or not the view in question should be updated prior to responding to the user. Supported values:
+
+            - `true`
+            - `false`
+            - `lazy`
+
+            Default is `None`.
+        update_seq : bool
+             Whether to include in the response an `update_seq` value indicating the sequence id of the database the
+             view reflects. Default is `False`.
+
+        Returns
+        -------
+        `view.ViewResult`
+        """
+        return super(Partition, self).view(
+            ddoc=ddoc,
+            view=view,
+            partition=self.partition_id,
+            conflicts=conflicts,
+            descending=descending,
+            endkey=endkey,
+            endkey_docid=endkey_docid,
+            group=group,
+            group_level=group_level,
+            include_docs=include_docs,
+            attachments=attachments,
+            att_encoding_info=att_encoding_info,
+            inclusive_end=inclusive_end,
+            key=key,
+            keys=keys,
+            limit=limit,
+            reduce=reduce,
+            skip=skip,
+            sort=sort,
+            stable=stable,
+            startkey=startkey,
+            startkey_docid=startkey_docid,
+            update=update,
+            update_seq=update_seq
+        )
