@@ -1219,6 +1219,9 @@ class Partition(Database):
         self.partition_id = partition_id
         # self.root = f&#34;{name}/_partition/{partition_id}&#34;
 
+    def __repr__(self) -&gt; str:
+        return f&#34;{super(Partition, self).__repr__()}/{self.partition_id}&#34;
+
     def all_docs(
             self,
             keys: Iterable[str] = None,
@@ -4257,6 +4260,9 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
         )
         self.partition_id = partition_id
         # self.root = f&#34;{name}/_partition/{partition_id}&#34;
+
+    def __repr__(self) -&gt; str:
+        return f&#34;{super(Partition, self).__repr__()}/{self.partition_id}&#34;
 
     def all_docs(
             self,
