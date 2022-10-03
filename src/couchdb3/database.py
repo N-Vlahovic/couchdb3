@@ -1191,6 +1191,9 @@ class Partition(Database):
         self.partition_id = partition_id
         # self.root = f"{name}/_partition/{partition_id}"
 
+    def __repr__(self) -> str:
+        return f"{super(Partition, self).__repr__()}/{self.partition_id}"
+
     def all_docs(
             self,
             keys: Iterable[str] = None,
