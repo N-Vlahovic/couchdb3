@@ -3,10 +3,12 @@
 
 import atexit
 import datetime
+import random
+import string
 
 import unittest
 
-from couchdb3.database import Database
+from couchdb3.database import Database, Partition
 from couchdb3.document import Document, AttachmentDocument
 from couchdb3.server import Server
 from couchdb3.view import ViewResult, ViewRow
@@ -16,9 +18,19 @@ from tests.credentials import ATTACHMENT_PATH_HTML, ATTACHMENT_PATH_JSON, ATTACH
     ATTACHMENT_PATH_ZIP, COUCHDB_USER, COUCHDB_PASSWORD, COUCHDB0_URL, DOCUMENT_VIEW
 
 
+def get_or_create_db(db_name: str, client: Server, partitioned: bool = False) -> Database:
+    return client.get(db_name) if db_name in client else client.create(db_name, partitioned=partitioned)
+
+
 CLIENT: Server = Server(COUCHDB0_URL, user=COUCHDB_USER, password=COUCHDB_PASSWORD)
-DB_NAME: str = "tmp-test-db"
-DB: Database = CLIENT.get(DB_NAME) if DB_NAME in CLIENT else CLIENT.create(DB_NAME)
+DB_NAME: str = "test-" + "".join(random.choices(string.ascii_lowercase, k=5))
+DB_NAME_PARTITIONED: str = f"{DB_NAME}-partitioned"
+DB: Database = get_or_create_db(DB_NAME, CLIENT)
+DB_PARTITIONED: Database = get_or_create_db(DB_NAME_PARTITIONED, CLIENT, True)
+
+DDOC_ID: str = "document-design"
+P_ID: str = "p0"
+VIEW_ID: str = "document-view"
 
 
 class TestDatabase(unittest.TestCase):
@@ -260,35 +272,44 @@ class TestDatabase(unittest.TestCase):
             self.assertIsInstance(response.digest, str)
 
     def test_put_design(self):
-        ddoc = "document-design"
-        _id, ok, _rev = DB.put_design(
-            ddoc=ddoc,
-            rev=DB.rev(f"_design/{ddoc}"),
-            views={
-                "document-view": {
-                    "map": DOCUMENT_VIEW
-                }
-            }
-        )
-        self.assertEqual(_id, f"_design/{ddoc}")
-        self.assertEqual(ok, True)
-        self.assertIsInstance(_rev, str)
-
-    def test_get_design(self):
-        ddoc = "document-design"
-        _id = f"_design/{ddoc}"
-        if _id not in DB:
-            DB.put_design(
+        for partitioned, db in [
+            (False, DB),
+            (True, DB_PARTITIONED),
+        ]:
+            ddoc = DDOC_ID
+            _id, ok, _rev = db.put_design(
                 ddoc=ddoc,
-                rev=DB.rev(_id),
+                rev=db.rev(f"_design/{ddoc}"),
                 views={
-                    "document-view": {
+                    VIEW_ID: {
                         "map": DOCUMENT_VIEW
                     }
-                }
+                },
+                partitioned=partitioned
             )
-        result = DB.get_design(ddoc=ddoc)
-        self.assertIsInstance(result, Document)
+            self.assertEqual(_id, f"_design/{ddoc}")
+            self.assertEqual(ok, True)
+            self.assertIsInstance(_rev, str)
+
+    def test_get_design(self):
+        for partitioned, db in [
+            (None, DB),
+            (True, DB_PARTITIONED),
+        ]:
+            _id = f"_design/{DDOC_ID}"
+            if _id not in db:
+                db.put_design(
+                    ddoc=DDOC_ID,
+                    rev=db.rev(_id),
+                    views={
+                        VIEW_ID: {
+                            "map": DOCUMENT_VIEW
+                        }
+                    },
+                    partitioned=partitioned
+                )
+            result = DB.get_design(ddoc=DDOC_ID)
+            self.assertIsInstance(result, Document)
 
     def test_put_attachment(self):
         docid = "test-doc-put-attachment"
@@ -370,28 +391,41 @@ class TestDatabase(unittest.TestCase):
         )
 
     def test_view(self):
-        docid = "doc-test-view"
-        if docid not in DB:
-            DB.save({
-                "type": "document",
-                "name": "",
-                "_id": docid
-            })
-        ddoc = "document-design"
-        view = "document-view"
-        _id = f"_design/{ddoc}"
-        if _id not in DB:
-            DB.put_design(
-                ddoc=ddoc,
-                rev=DB.rev(_id),
-                views={
-                    view: {
-                        "map": DOCUMENT_VIEW
-                    }
-                }
+        for partitioned, db in [
+            (None, DB),
+            (True, DB_PARTITIONED),
+        ]:
+            docid = (f"{P_ID}:" if partitioned else "") + "doc-test-view"
+            if docid not in db:
+                db.save({
+                    "type": "document",
+                    "name": "",
+                    "_id": docid
+                })
+            _id = f"_design/{DDOC_ID}"
+            if _id not in db:
+                db.put_design(
+                    ddoc=DDOC_ID,
+                    rev=db.rev(_id),
+                    views={
+                        VIEW_ID: {
+                            "map": DOCUMENT_VIEW
+                        }
+                    },
+                    partitioned=partitioned,
+                )
+            result = db.view(
+                ddoc=DDOC_ID,
+                view=VIEW_ID,
+                limit=1,
+                partition=P_ID if partitioned else None,
             )
-        result = DB.view(ddoc=ddoc, view=view, limit=1)
-        self.assertEqual(result.rows[0].id, docid)
+            self.assertEqual(result.rows[0].id, docid)
+
+    def test_partition(self):
+        self.assertTrue(DB_PARTITIONED.info()["props"]["partitioned"])
+        partition = DB_PARTITIONED.get_partition("p0")
+        self.assertIsInstance(partition, Partition)
 
 
 @atexit.register
@@ -399,7 +433,9 @@ def rm_test_db() -> None:
     """
     Removing temporary test database.
     """
-    CLIENT.delete(DB_NAME)
+    for db_name in (DB_NAME, DB_NAME_PARTITIONED):
+        if db_name in CLIENT:
+            CLIENT.delete(db_name)
 
 
 if __name__ == '__main__':
