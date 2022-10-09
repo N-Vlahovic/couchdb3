@@ -166,7 +166,7 @@ class Database(Base):
     def bulk_get(
             self,
             docs: List[Union[Dict, Document]],
-            revs: bool = False
+            revs: bool = False,
     ) -> List[Dict]:
         """
         This method can be called to query several documents in bulk. It is well suited for fetching a specific
@@ -1267,7 +1267,24 @@ class Partition(Database):
             stable: bool = None,
             execution_stats: bool = False
     ) -> Dict:
-        ...
+        """
+        See `Database.find`.
+        """
+        return super(Partition, self).find(
+            selector=selector,
+            limit=limit,
+            skip=skip,
+            sort=sort,
+            fields=fields,
+            use_index=use_index,
+            conflicts=conflicts,
+            r=r,
+            bookmark=bookmark,
+            update=update,
+            stable=stable,
+            execution_stats=execution_stats,
+            partition=self.partition_id,
+        )
 
     # noinspection PyMethodOverriding
     def view(
@@ -1393,3 +1410,237 @@ class Partition(Database):
             update=update,
             update_seq=update_seq
         )
+
+    def bulk_docs(
+            self,
+            docs: List[Union[Dict, Document]],
+            new_edits: bool = True
+    ) -> List[Dict]:
+        """
+        See `Database.bulk_docs`.
+
+        Note:
+        Appends the partition's ID to the documents' ID.
+        """
+        return super(Partition, self).bulk_docs(
+            docs=[self.add_partition_to_doc(doc) for doc in docs],
+            new_edits=new_edits,
+        )
+
+    def bulk_get(
+            self,
+            docs: List[Union[Dict, Document]],
+            revs: bool = False,
+    ) -> List[Dict]:
+        """
+        See `Database.bulk_get`.
+
+        Note:
+        Appends the partition's ID to the documents' ID.
+        """
+        return super(Partition, self).bulk_get(
+            docs=[self.add_partition_to_doc(doc) for doc in docs],
+            revs=revs,
+        )
+
+    def copy(
+            self,
+            docid: str,
+            destid: str,
+            rev: str = None,
+            destrev: str = None
+    ) -> Tuple[str, bool, str]:
+        """
+        See `Database.copy`.
+
+        Note:
+        Appends the partition's ID to the document's ID.
+        """
+        return super(Partition, self).copy(
+            docid=self.add_partition_to_str(docid),
+            destid=self.add_partition_to_str(destid),
+            rev=rev,
+            destrev=destrev,
+        )
+
+    def create(
+            self,
+            doc: Union[Dict, Document],
+            *,
+            batch: bool = None
+    ) -> Tuple[str, bool, str]:
+        """
+        See `Database.create`.
+
+        Note:
+        Appends the partition's ID to the document's ID.
+        """
+        return super(Partition, self).create(
+            doc=self.add_partition_to_doc(doc),
+            batch=batch,
+        )
+
+    def delete(
+            self,
+            docid: str,
+            rev: str,
+            *,
+            batch: bool = None
+    ) -> bool:
+        """
+        See `Database.delete`.
+
+        Note:
+        Appends the partition's ID to the document's ID.
+        """
+        return super(Partition, self).delete(
+            docid=self.add_partition_to_str(docid),
+            rev=rev,
+            batch=batch,
+        )
+
+    def delete_attachment(
+            self,
+            docid: str,
+            attname: str,
+            rev: str,
+            *,
+            batch: bool = False
+    ) -> bool:
+        """
+        See `Database.delete_attachment`.
+
+        Note:
+        Appends the partition's ID to the document's ID.
+        """
+        return super(Partition, self).delete_attachment(
+            docid=self.add_partition_to_str(docid),
+            attname=attname,
+            rev=rev,
+            batch=batch,
+        )
+
+    def get(
+            self,
+            docid: str,
+            *,
+            attachments: bool = None,
+            att_encoding_info: bool = None,
+            atts_since: Iterable[str] = None,
+            conflicts: bool = None,
+            deleted_conflicts: bool = None,
+            latest: bool = None,
+            local_seq: bool = None,
+            meta: bool = None,
+            open_revs: Iterable[str] = None,
+            rev: str = None,
+            revs: bool = None,
+            revs_info: bool = None,
+            check: bool = False,
+            default_value: Any = None,
+    ) -> Union[Document, Any]:
+        """
+        See `Database.get`.
+
+        Note:
+        Appends the partition's ID to the document's ID.
+        """
+        return super(Partition, self).get(
+            docid=self.add_partition_to_str(docid),
+            attachments=attachments,
+            att_encoding_info=att_encoding_info,
+            atts_since=atts_since,
+            conflicts=conflicts,
+            deleted_conflicts=deleted_conflicts,
+            latest=latest,
+            local_seq=local_seq,
+            meta=meta,
+            open_revs=open_revs,
+            rev=rev,
+            revs=revs,
+            revs_info=revs_info,
+            check=check,
+            default_value=default_value,
+        )
+
+    def get_attachment(
+            self,
+            docid: str,
+            attname: str,
+            rev: str = None
+    ) -> AttachmentDocument:
+        """
+        See `Database.get_attachment`.
+
+        Note:
+        Appends the partition's ID to the document's ID.
+        """
+        return super(Partition, self).get_attachment(
+            docid=self.add_partition_to_str(docid),
+            attname=attname,
+            rev=rev,
+        )
+
+    def put_attachment(
+            self,
+            docid: str,
+            attname: str,
+            path: str = None,
+            *,
+            content: Any = None,
+            rev: str = None,
+    ) -> Tuple[str, bool, str]:
+        """
+        See `Database.put_attachment`.
+
+        Note:
+        Appends the partition's ID to the document's ID.
+        """
+        return super(Partition, self).put_attachment(
+            docid=self.add_partition_to_str(docid),
+            attname=attname,
+            path=path,
+            content=content,
+            rev=rev,
+        )
+
+    def save(
+            self,
+            doc: Union[Dict, Document],
+            batch: bool = None,
+            new_edits: bool = None,
+            path: str = None
+    ) -> Tuple[str, bool, str]:
+        """
+        See `Database.save`.
+
+        Note:
+        Appends the partition's ID to the document's ID.
+        """
+        return super(Partition, self).save(
+            doc=self.add_partition_to_doc(doc),
+            batch=batch,
+            new_edits=new_edits,
+            path=path,
+        )
+
+    def __contains__(self, item):
+        return super(Partition, self).__contains__(self.add_partition_to_str(item))
+
+    def add_partition_to_str(self, string: str) -> str:
+        """
+        Append the instance's partition ID to a string.
+        """
+        if string.startswith(self.partition_id):
+            return string
+        return f"{self.partition_id}:{string}"
+
+    def add_partition_to_doc(self, doc: Union[Document, Dict]) -> Union[Document, Dict]:
+        """
+        Append the instance's partition ID to the document's ID.
+        """
+        docid = doc.get("_id")
+        if docid is None:
+            return doc
+        doc["_id"] = self.add_partition_to_str(docid)
+        return doc
