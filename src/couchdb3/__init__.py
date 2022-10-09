@@ -121,10 +121,49 @@ docid = "mydoc-id"
 print(db.delete(docid=docid, rev=db.rev(docid)))  # Fetch the revision on the go
 # True
 ```
+
+### Working with partitions
+For a partitioned database, the `couchdb3.Partition` class offers a wrapper around partitions (acting similarly 
+to collections in Mongo). 
+
+```python
+from couchdb3 import Server, Database, Partition
+
+
+client: Server = Server(...)
+db: Database = client["some-db"]
+partition: Partition = db.get_partition("partition_id")
+```
+
+Partition instances append the partition's ID the document IDs (`partition-id:doc-id`) for a simpler user interaction, 
+e.g.
+```python
+doc_id = "test-id"
+print(doc_id in partition)  # no need to append the partition's ID
+rev = partition.rev(doc_id)
+partition.save({
+    "_id": doc_id,  # no need to append the partition's ID
+    "_rev": rev,
+    ...
+})
+```
+
+The partition ID will only be appended provided document IDs do not start with `partition-id`, e.g. the following will 
+work and be equivalent to the previous example
+```python
+doc_id = "partition_id:test-id"
+print(doc_id in partition)
+rev = partition.rev(doc_id)
+partition.save({
+    "_id": doc_id,
+    "_rev": rev,
+    ...
+})
+```
 """
 from . import exceptions
 from . import utils
-from .database import Database
+from .database import Database, Partition
 from .document import Document
 from .server import Server
 from .view import ViewResult, ViewRow

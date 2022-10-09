@@ -24,6 +24,7 @@ __all__ = [
     "check_response",
     "content_type_getter",
     "extract_url_data",
+    "partitioned_db_resource_parser",
     "COUCHDB_USERS_DB_NAME",
     "COUCHDB_REPLICATOR_DB_NAME",
     "COUCHDB_GLOBAL_CHANGES_DB_NAME",
@@ -420,3 +421,23 @@ def extract_url_data(url: str) -> Dict:
         "port": parsed.port,
         "path": parsed.path
     }
+
+
+def partitioned_db_resource_parser(
+        resource: str = None,
+        partition: str = None,
+) -> Optional[str]:
+    """
+    Build resource path with optional partition ID.
+
+    Parameters
+    ----------
+    resource : str
+        The resource to fetch (relative to the host). Default `None`.
+    partition: str
+        An optional partition ID. Only valid for partitioned databases. (Default `None`.)
+    Returns
+    ----------
+        The (relative) path of the resource.
+    """
+    return f"_partition/{partition}/{resource}" if partition else resource
