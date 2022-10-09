@@ -141,3 +141,6 @@ cython_debug/
 archive/
 
 /.idea
+
+# Scratch folder
+/scratch/
