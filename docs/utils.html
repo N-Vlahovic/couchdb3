@@ -52,6 +52,7 @@ __all__ = [
     &#34;check_response&#34;,
     &#34;content_type_getter&#34;,
     &#34;extract_url_data&#34;,
+    &#34;partitioned_db_resource_parser&#34;,
     &#34;COUCHDB_USERS_DB_NAME&#34;,
     &#34;COUCHDB_REPLICATOR_DB_NAME&#34;,
     &#34;COUCHDB_GLOBAL_CHANGES_DB_NAME&#34;,
@@ -447,7 +448,27 @@ def extract_url_data(url: str) -&gt; Dict:
         &#34;host&#34;: parsed.host,
         &#34;port&#34;: parsed.port,
         &#34;path&#34;: parsed.path
-    }</code></pre>
+    }
+
+
+def partitioned_db_resource_parser(
+        resource: str = None,
+        partition: str = None,
+) -&gt; Optional[str]:
+    &#34;&#34;&#34;
+    Build resource path with optional partition ID.
+
+    Parameters
+    ----------
+    resource : str
+        The resource to fetch (relative to the host). Default `None`.
+    partition: str
+        An optional partition ID. Only valid for partitioned databases. (Default `None`.)
+    Returns
+    ----------
+        The (relative) path of the resource.
+    &#34;&#34;&#34;
+    return f&#34;_partition/{partition}/{resource}&#34; if partition else resource</code></pre>
 </details>
 </section>
 <section>
@@ -824,6 +845,45 @@ keys of <code><a title="couchdb3.utils.MIME_TYPES_MAPPING" href="#couchdb3.utils
     }</code></pre>
 </details>
 </dd>
+<dt id="couchdb3.utils.partitioned_db_resource_parser"><code class="name flex">
+<span>def <span class="ident">partitioned_db_resource_parser</span></span>(<span>resource: str = None, partition: str = None) ‑> Optional[str]</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Build resource path with optional partition ID.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>resource</code></strong> :&ensp;<code>str</code></dt>
+<dd>The resource to fetch (relative to the host). Default <code>None</code>.</dd>
+<dt><strong><code>partition</code></strong> :&ensp;<code>str</code></dt>
+<dd>An optional partition ID. Only valid for partitioned databases. (Default <code>None</code>.)</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<pre><code>The (relative) path of the resource.
+</code></pre></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def partitioned_db_resource_parser(
+        resource: str = None,
+        partition: str = None,
+) -&gt; Optional[str]:
+    &#34;&#34;&#34;
+    Build resource path with optional partition ID.
+
+    Parameters
+    ----------
+    resource : str
+        The resource to fetch (relative to the host). Default `None`.
+    partition: str
+        An optional partition ID. Only valid for partitioned databases. (Default `None`.)
+    Returns
+    ----------
+        The (relative) path of the resource.
+    &#34;&#34;&#34;
+    return f&#34;_partition/{partition}/{resource}&#34; if partition else resource</code></pre>
+</details>
+</dd>
 <dt id="couchdb3.utils.user_name_to_id"><code class="name flex">
 <span>def <span class="ident">user_name_to_id</span></span>(<span>name: str) ‑> str</span>
 </code></dt>
@@ -1023,6 +1083,7 @@ keys of <code><a title="couchdb3.utils.MIME_TYPES_MAPPING" href="#couchdb3.utils
 <li><code><a title="couchdb3.utils.check_response" href="#couchdb3.utils.check_response">check_response</a></code></li>
 <li><code><a title="couchdb3.utils.content_type_getter" href="#couchdb3.utils.content_type_getter">content_type_getter</a></code></li>
 <li><code><a title="couchdb3.utils.extract_url_data" href="#couchdb3.utils.extract_url_data">extract_url_data</a></code></li>
+<li><code><a title="couchdb3.utils.partitioned_db_resource_parser" href="#couchdb3.utils.partitioned_db_resource_parser">partitioned_db_resource_parser</a></code></li>
 <li><code><a title="couchdb3.utils.user_name_to_id" href="#couchdb3.utils.user_name_to_id">user_name_to_id</a></code></li>
 <li><code><a title="couchdb3.utils.validate_auth_method" href="#couchdb3.utils.validate_auth_method">validate_auth_method</a></code></li>
 <li><code><a title="couchdb3.utils.validate_db_name" href="#couchdb3.utils.validate_db_name">validate_db_name</a></code></li>
