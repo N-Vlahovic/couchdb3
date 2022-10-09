@@ -9,7 +9,7 @@ from .base import Base
 from .document import Document, AttachmentDocument, extract_document_id_and_rev, SecurityDocument, \
     SecurityDocumentElement
 from .exceptions import CouchDBError, NameComplianceError
-from .utils import validate_db_name, content_type_getter, DEFAULT_TIMEOUT
+from .utils import validate_db_name, content_type_getter, DEFAULT_TIMEOUT, partitioned_db_resource_parser
 from .view import ViewResult
 
 
@@ -466,7 +466,8 @@ class Database(Base):
             bookmark: str = None,
             update: bool = True,
             stable: bool = None,
-            execution_stats: bool = False
+            execution_stats: bool = False,
+            partition: str = None,
     ) -> Dict:
         """
         Find documents using a declarative JSON querying syntax.
@@ -510,6 +511,8 @@ class Database(Base):
         execution_stats : bool
             Include [execution statistics](https://docs.couchdb.org/en/main/api/database/find.html#find-statistics) in
             the query response. Default is `False`.
+        partition: str
+            An optional partition ID. Only valid for partitioned databases. (Default `None`.)
 
         Returns
         -------
@@ -520,7 +523,10 @@ class Database(Base):
           - `warning`
         """
         return self._post(
-            resource="_find",
+            resource=partitioned_db_resource_parser(
+                resource="_find",
+                partition=partition,
+            ),
             body={
                 "selector": selector,
                 "limit": limit,
@@ -674,7 +680,6 @@ class Database(Base):
     def get_design(
             self,
             ddoc: str,
-            partition: str = None,
             **kwargs
     ) -> Document:
         """
@@ -684,8 +689,6 @@ class Database(Base):
         ----------
         ddoc: str
             The design document's name.
-        partition: str
-            An optional partition ID. Only valid for partitioned databases. (Default `None`.)
         kwargs
             Further `Database.get` parameters.
 
@@ -694,7 +697,7 @@ class Database(Base):
         Document : A `couchdb3.document.Document` object containing the design document's content.
         """
         return self.get(
-            docid=f"_partition/{partition}/_design/{ddoc}" if partition else f"_design/{ddoc}",
+            docid=f"_design/{ddoc}",
             **kwargs
         )
 
@@ -1088,7 +1091,10 @@ class Database(Base):
         -------
         `view.ViewResult`
         """
-        path = f"_partition/{partition}/_design" if partition else "_design"
+        path = partitioned_db_resource_parser(
+            resource="_find",
+            partition=partition,
+        )
         return ViewResult(**self._get(
             resource=f"{path}/{ddoc}/_view/{view}" if (ddoc and view) else ddoc,
             query_kwargs={
@@ -1237,6 +1243,24 @@ class Partition(Database):
         Dict: A dictionary containing the server's or database's info.
         """
         return super(Partition, self).info(partition=self.partition_id)
+
+    # noinspection PyMethodOverriding
+    def find(
+            self,
+            selector: Dict,
+            limit: int = 25,
+            skip: int = 0,
+            sort: List[Dict] = None,
+            fields: List[str] = None,
+            use_index: Union[str, List[str]] = None,
+            conflicts: bool = False,
+            r: int = 1,
+            bookmark: str = None,
+            update: bool = True,
+            stable: bool = None,
+            execution_stats: bool = False
+    ) -> Dict:
+        ...
 
     # noinspection PyMethodOverriding
     def view(
