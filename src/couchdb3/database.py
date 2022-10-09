@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 from __future__ import annotations
-from typing import Any, Dict, Iterable, List, Tuple, Union
+from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 import requests
 
@@ -1603,6 +1603,15 @@ class Partition(Database):
             content=content,
             rev=rev,
         )
+
+    def rev(
+            self,
+            resource: str
+    ) -> Optional[str]:
+        """
+        See `Database.rev`.
+        """
+        return super(Partition, self).rev(self.add_partition_to_str(resource))
 
     def save(
             self,
