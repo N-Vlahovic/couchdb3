@@ -805,6 +805,7 @@ class Database(Base):
             validate_doc_update: str = None,
             views: Dict = None,
             autoupdate: bool = None,
+            partitioned: bool = None,
             **kwargs
     ) -> Tuple[str, bool, str]:
         """
@@ -832,6 +833,8 @@ class Database(Base):
             [View functions](https://docs.couchdb.org/en/latest/ddocs/ddocs.html#viewfun) definition.
         autoupdate : bool
             Indicates whether to automatically build indexes defined in this design document.
+        partitioned : bool
+            Set to `True` for a partitioned design.
         kwargs
         Further `Database.save` parameters.
 
@@ -839,6 +842,10 @@ class Database(Base):
         -------
         Tuple[str, bool, str] : The document's id ( `str`), the operation status (`bool`) and the revision ( `str`).
         """
+        if partitioned:
+            options = (options or dict()).update({
+                "partitioned": partitioned
+            })
         return self.save(
             doc={
                 "_id": f"_design/{ddoc}",
@@ -1092,7 +1099,7 @@ class Database(Base):
         `view.ViewResult`
         """
         path = partitioned_db_resource_parser(
-            resource="_find",
+            resource="_design",
             partition=partition,
         )
         return ViewResult(**self._get(
