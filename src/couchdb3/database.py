@@ -762,12 +762,12 @@ class Database(Base):
         """
         if (not content and not path) or (content and path):
             raise ValueError("Precisely one of the arguments \"attdata\" and  \"attloc\" must be provided.")
-        content_type = content_type_getter(data=content, file_name=path)
+        content_type = content_type_getter(data=content, file_name=path if path else attname)
         resource = f"{docid}/{attname}"
         query_kwargs = {"rev": rev}
         req_kwargs = {
             "headers": {
-                "content-type": content_type_getter(data=content, file_name=path)
+                "content-type": content_type_getter(data=content, file_name=path if path else attname)
             }
         }
         if path:
@@ -780,6 +780,16 @@ class Database(Base):
                         "content-type": content_type
                     }
                 )
+        elif content_type in ('application/xml'):
+            req_kwargs.update({"body": content})
+            response = self._put(
+                resource=resource,
+                query_kwargs=query_kwargs,
+                data=content,
+                headers={
+                    "content-type": content_type
+                },
+            )      
         else:
             req_kwargs.update({"body": content})
             response = self._put(
@@ -788,7 +798,7 @@ class Database(Base):
                 body=content,
                 headers={
                     "content-type": content_type
-                }
+                },
             )
         data = response.json()
         return data["id"], data["ok"], data["rev"]
