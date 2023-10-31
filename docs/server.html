@@ -417,26 +417,15 @@ class Server(Base):
             Fully qualified source database URL or an object which contains the full URL of the source database with
             additional parameters like headers. Eg:
 
-                &#34;source_db_name&#34;
-
-            or
-
                 &#34;http://example.com/source_db_name&#34;
 
             or
 
                 {“url”:”url in here”, “headers”: {“header1”:”value1”, …}}
 
-            For backwards compatibility, CouchDB 3.x will
-            auto-convert bare database names by prepending the address and port CouchDB is listening on, to form a
-            complete URL. This behaviour is deprecated in 3.x and will be removed in CouchDB 4.0.
         target : Union[Dict, str]
             Fully qualified target database URL or an object which contains the full URL of the source database with
             additional parameters like headers. Eg:
-
-                &#34;target_db_name&#34;
-
-            or
 
                 &#34;http://example.com/target_db_name&#34;
 
@@ -444,13 +433,6 @@ class Server(Base):
 
                 {“url”:”url in here”, “headers”: {“header1”:”value1”, …}}
 
-            For backwards compatibility, CouchDB 3.x will
-            auto-convert bare database names by prepending the address and port CouchDB is listening on, to form a
-            complete URL. This behaviour is deprecated in 3.x and will be removed in CouchDB 4.0.
-
-            For backwards compatibility, CouchDB 3.x will
-            auto-convert bare database names by prepending the address and port CouchDB is listening on, to form a
-            complete URL. This behaviour is deprecated in 3.x and will be removed in CouchDB 4.0.
         replication_id : str
             The ID of the replication document.
         cancel : bool
@@ -946,26 +928,15 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
             Fully qualified source database URL or an object which contains the full URL of the source database with
             additional parameters like headers. Eg:
 
-                &#34;source_db_name&#34;
-
-            or
-
                 &#34;http://example.com/source_db_name&#34;
 
             or
 
                 {“url”:”url in here”, “headers”: {“header1”:”value1”, …}}
 
-            For backwards compatibility, CouchDB 3.x will
-            auto-convert bare database names by prepending the address and port CouchDB is listening on, to form a
-            complete URL. This behaviour is deprecated in 3.x and will be removed in CouchDB 4.0.
         target : Union[Dict, str]
             Fully qualified target database URL or an object which contains the full URL of the source database with
             additional parameters like headers. Eg:
-
-                &#34;target_db_name&#34;
-
-            or
 
                 &#34;http://example.com/target_db_name&#34;
 
@@ -973,13 +944,6 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
 
                 {“url”:”url in here”, “headers”: {“header1”:”value1”, …}}
 
-            For backwards compatibility, CouchDB 3.x will
-            auto-convert bare database names by prepending the address and port CouchDB is listening on, to form a
-            complete URL. This behaviour is deprecated in 3.x and will be removed in CouchDB 4.0.
-
-            For backwards compatibility, CouchDB 3.x will
-            auto-convert bare database names by prepending the address and port CouchDB is listening on, to form a
-            complete URL. This behaviour is deprecated in 3.x and will be removed in CouchDB 4.0.
         replication_id : str
             The ID of the replication document.
         cancel : bool
@@ -1421,36 +1385,21 @@ used: <code>3</code>, unless overridden in the <code>cluster config</code>).</dd
 <dd>
 <p>Fully qualified source database URL or an object which contains the full URL of the source database with
 additional parameters like headers. Eg:</p>
-<pre><code>"source_db_name"
-</code></pre>
-<p>or</p>
 <pre><code>"http://example.com/source_db_name"
 </code></pre>
 <p>or</p>
 <pre><code>{“url”:”url in here”, “headers”: {“header1”:”value1”, …}}
 </code></pre>
-<p>For backwards compatibility, CouchDB 3.x will
-auto-convert bare database names by prepending the address and port CouchDB is listening on, to form a
-complete URL. This behaviour is deprecated in 3.x and will be removed in CouchDB 4.0.</p>
 </dd>
 <dt><strong><code>target</code></strong> :&ensp;<code>Union[Dict, str]</code></dt>
 <dd>
 <p>Fully qualified target database URL or an object which contains the full URL of the source database with
 additional parameters like headers. Eg:</p>
-<pre><code>"target_db_name"
-</code></pre>
-<p>or</p>
 <pre><code>"http://example.com/target_db_name"
 </code></pre>
 <p>or</p>
 <pre><code>{“url”:”url in here”, “headers”: {“header1”:”value1”, …}}
 </code></pre>
-<p>For backwards compatibility, CouchDB 3.x will
-auto-convert bare database names by prepending the address and port CouchDB is listening on, to form a
-complete URL. This behaviour is deprecated in 3.x and will be removed in CouchDB 4.0.</p>
-<p>For backwards compatibility, CouchDB 3.x will
-auto-convert bare database names by prepending the address and port CouchDB is listening on, to form a
-complete URL. This behaviour is deprecated in 3.x and will be removed in CouchDB 4.0.</p>
 </dd>
 <dt><strong><code>replication_id</code></strong> :&ensp;<code>str</code></dt>
 <dd>The ID of the replication document.</dd>
@@ -1518,26 +1467,15 @@ or <code>“socks5”</code>).</dd>
         Fully qualified source database URL or an object which contains the full URL of the source database with
         additional parameters like headers. Eg:
 
-            &#34;source_db_name&#34;
-
-        or
-
             &#34;http://example.com/source_db_name&#34;
 
         or
 
             {“url”:”url in here”, “headers”: {“header1”:”value1”, …}}
 
-        For backwards compatibility, CouchDB 3.x will
-        auto-convert bare database names by prepending the address and port CouchDB is listening on, to form a
-        complete URL. This behaviour is deprecated in 3.x and will be removed in CouchDB 4.0.
     target : Union[Dict, str]
         Fully qualified target database URL or an object which contains the full URL of the source database with
         additional parameters like headers. Eg:
-
-            &#34;target_db_name&#34;
-
-        or
 
             &#34;http://example.com/target_db_name&#34;
 
@@ -1545,13 +1483,6 @@ or <code>“socks5”</code>).</dd>
 
             {“url”:”url in here”, “headers”: {“header1”:”value1”, …}}
 
-        For backwards compatibility, CouchDB 3.x will
-        auto-convert bare database names by prepending the address and port CouchDB is listening on, to form a
-        complete URL. This behaviour is deprecated in 3.x and will be removed in CouchDB 4.0.
-
-        For backwards compatibility, CouchDB 3.x will
-        auto-convert bare database names by prepending the address and port CouchDB is listening on, to form a
-        complete URL. This behaviour is deprecated in 3.x and will be removed in CouchDB 4.0.
     replication_id : str
         The ID of the replication document.
     cancel : bool
