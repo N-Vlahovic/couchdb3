@@ -790,12 +790,12 @@ class Database(Base):
         &#34;&#34;&#34;
         if (not content and not path) or (content and path):
             raise ValueError(&#34;Precisely one of the arguments \&#34;attdata\&#34; and  \&#34;attloc\&#34; must be provided.&#34;)
-        content_type = content_type_getter(data=content, file_name=path)
+        content_type = content_type_getter(data=content, file_name=path if path else attname)
         resource = f&#34;{docid}/{attname}&#34;
         query_kwargs = {&#34;rev&#34;: rev}
         req_kwargs = {
             &#34;headers&#34;: {
-                &#34;content-type&#34;: content_type_getter(data=content, file_name=path)
+                &#34;content-type&#34;: content_type_getter(data=content, file_name=path if path else attname)
             }
         }
         if path:
@@ -808,6 +808,16 @@ class Database(Base):
                         &#34;content-type&#34;: content_type
                     }
                 )
+        elif content_type in (&#39;application/xml&#39;):
+            req_kwargs.update({&#34;body&#34;: content})
+            response = self._put(
+                resource=resource,
+                query_kwargs=query_kwargs,
+                data=content,
+                headers={
+                    &#34;content-type&#34;: content_type
+                },
+            )      
         else:
             req_kwargs.update({&#34;body&#34;: content})
             response = self._put(
@@ -816,7 +826,7 @@ class Database(Base):
                 body=content,
                 headers={
                     &#34;content-type&#34;: content_type
-                }
+                },
             )
         data = response.json()
         return data[&#34;id&#34;], data[&#34;ok&#34;], data[&#34;rev&#34;]
@@ -2470,12 +2480,12 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
         &#34;&#34;&#34;
         if (not content and not path) or (content and path):
             raise ValueError(&#34;Precisely one of the arguments \&#34;attdata\&#34; and  \&#34;attloc\&#34; must be provided.&#34;)
-        content_type = content_type_getter(data=content, file_name=path)
+        content_type = content_type_getter(data=content, file_name=path if path else attname)
         resource = f&#34;{docid}/{attname}&#34;
         query_kwargs = {&#34;rev&#34;: rev}
         req_kwargs = {
             &#34;headers&#34;: {
-                &#34;content-type&#34;: content_type_getter(data=content, file_name=path)
+                &#34;content-type&#34;: content_type_getter(data=content, file_name=path if path else attname)
             }
         }
         if path:
@@ -2488,6 +2498,16 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
                         &#34;content-type&#34;: content_type
                     }
                 )
+        elif content_type in (&#39;application/xml&#39;):
+            req_kwargs.update({&#34;body&#34;: content})
+            response = self._put(
+                resource=resource,
+                query_kwargs=query_kwargs,
+                data=content,
+                headers={
+                    &#34;content-type&#34;: content_type
+                },
+            )      
         else:
             req_kwargs.update({&#34;body&#34;: content})
             response = self._put(
@@ -2496,7 +2516,7 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
                 body=content,
                 headers={
                     &#34;content-type&#34;: content_type
-                }
+                },
             )
         data = response.json()
         return data[&#34;id&#34;], data[&#34;ok&#34;], data[&#34;rev&#34;]
@@ -4047,12 +4067,12 @@ Precisely one of the arguments <code>path</code> or <code>content</code> must be
     &#34;&#34;&#34;
     if (not content and not path) or (content and path):
         raise ValueError(&#34;Precisely one of the arguments \&#34;attdata\&#34; and  \&#34;attloc\&#34; must be provided.&#34;)
-    content_type = content_type_getter(data=content, file_name=path)
+    content_type = content_type_getter(data=content, file_name=path if path else attname)
     resource = f&#34;{docid}/{attname}&#34;
     query_kwargs = {&#34;rev&#34;: rev}
     req_kwargs = {
         &#34;headers&#34;: {
-            &#34;content-type&#34;: content_type_getter(data=content, file_name=path)
+            &#34;content-type&#34;: content_type_getter(data=content, file_name=path if path else attname)
         }
     }
     if path:
@@ -4065,6 +4085,16 @@ Precisely one of the arguments <code>path</code> or <code>content</code> must be
                     &#34;content-type&#34;: content_type
                 }
             )
+    elif content_type in (&#39;application/xml&#39;):
+        req_kwargs.update({&#34;body&#34;: content})
+        response = self._put(
+            resource=resource,
+            query_kwargs=query_kwargs,
+            data=content,
+            headers={
+                &#34;content-type&#34;: content_type
+            },
+        )      
     else:
         req_kwargs.update({&#34;body&#34;: content})
         response = self._put(
@@ -4073,7 +4103,7 @@ Precisely one of the arguments <code>path</code> or <code>content</code> must be
             body=content,
             headers={
                 &#34;content-type&#34;: content_type
-            }
+            },
         )
     data = response.json()
     return data[&#34;id&#34;], data[&#34;ok&#34;], data[&#34;rev&#34;]</code></pre>
