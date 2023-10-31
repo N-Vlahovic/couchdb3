@@ -67,9 +67,9 @@ class TestClient(unittest.TestCase):
     def test_replicate(self):
         if TEST_DB_NAME not in CLIENT:
             CLIENT.create(TEST_DB_NAME)
-        target_db = f"{TEST_DB_NAME}-rep"
+        target_db = f"{CLIENT.url}/{TEST_DB_NAME}-rep"
         result = CLIENT.replicate(
-            source=TEST_DB_NAME,
+            source=CLIENT.get(TEST_DB_NAME).url,
             target=target_db,
             continuous=True,
             create_target=True
