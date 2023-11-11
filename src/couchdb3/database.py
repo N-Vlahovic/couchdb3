@@ -1107,6 +1107,23 @@ class Database(Base):
         Returns
         -------
         `view.ViewResult`
+
+        Examples
+        --------
+        >>> import couchdb3
+        >>> db = couchdb3.Server("http://localhost:5984").get("mydb")
+        >>> db.view("myddoc", "myview")
+        ViewResult: {
+            'total_rows': 1,
+            'offset': 0,
+            'rows': [
+                {
+                    'id': 'doc-test-view',
+                    'key': 'doc-test-view',
+                    'value': None
+                }
+            ]
+        }
         """
         path = partitioned_db_resource_parser(
             resource="_design",
