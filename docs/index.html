@@ -58,7 +58,7 @@ print(client.up())
 </code></pre>
 <p>user and password can also be passed into the Server constructor as keyword parameters, e.g.</p>
 <pre><code class="language-python">client = couchdb3.Server(
-    &quot;127.0.0.1:5984:&quot;,  # Scheme omitted - will assume http protocol
+    &quot;127.0.0.1:5984&quot;,  # Scheme omitted - will assume http protocol
     user=&quot;user&quot;,
     password=&quot;password&quot;
 )
@@ -205,7 +205,7 @@ user and password can also be passed into the Server constructor as keyword para
 
 ```python
 client = couchdb3.Server(
-    &#34;127.0.0.1:5984:&#34;,  # Scheme omitted - will assume http protocol
+    &#34;127.0.0.1:5984&#34;,  # Scheme omitted - will assume http protocol
     user=&#34;user&#34;,
     password=&#34;password&#34;
 )
