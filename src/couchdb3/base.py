@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from datetime import datetime
+from datetime import datetime, timezone
 import requests
 import requests.auth
 from typing import Dict, List, Optional, Union
@@ -469,7 +469,7 @@ class Base(object):
         try:
             return next(
                 _.expires for _ in self.session.cookies if _.name == "AuthSession"
-            ) <= datetime.utcnow().timestamp()
+            ) <= datetime.now(timezone.utc).timestamp()
         except StopIteration:
             return True
 
