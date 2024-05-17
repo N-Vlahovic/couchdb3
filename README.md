@@ -123,7 +123,7 @@ print(db.delete(docid=docid, rev=db.rev(docid)))  # Fetch the revision on the go
 ```
 
 ### Working with partitions
-For a partitioned database, the `couchdb3.Partition` class offers a wrapper around partitions (acting similarly 
+For a partitioned database, the `couchdb3.database.Partition` class offers a wrapper around partitions (acting similarly 
 to collections in Mongo). 
 
 ```python

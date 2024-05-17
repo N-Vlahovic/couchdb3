@@ -3,13 +3,14 @@
 from __future__ import annotations
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
+import mimetypes
 import requests
 
 from .base import Base
 from .document import Document, AttachmentDocument, extract_document_id_and_rev, SecurityDocument, \
     SecurityDocumentElement
 from .exceptions import CouchDBError, NameComplianceError
-from .utils import validate_db_name, content_type_getter, DEFAULT_TIMEOUT, partitioned_db_resource_parser
+from .utils import validate_db_name, DEFAULT_TIMEOUT, partitioned_db_resource_parser
 from .view import ViewResult
 
 
@@ -730,12 +731,12 @@ class Database(Base):
             attname: str,
             path: str = None,
             *,
-            content: Any = None,
+            content: bytes = None,
+            content_type: str = None,
             rev: str = None,
     ) -> Tuple[str, bool, str]:
         """
         Uploads the supplied content as an attachment to the specified document.
-        The appropriate content-type is generated using `couchdb3.utils.content_type_getter`.
 
         Parameters
         ----------
@@ -746,9 +747,12 @@ class Database(Base):
         path : str
             The path ot the local file to be uploaded.
             Precisely one of the arguments `path` or `content` must be supplied.
-        content : str
+        content : bytes
             The content to be uploaded.
             Precisely one of the arguments `path` or `content` must be supplied.
+        content_type : str
+            The attachment's content-type (mime-type).
+            Must be provided when passing the `content` argument.
         rev : str
             The document's current revision. Must be supplied for existing documents.
 
@@ -762,44 +766,22 @@ class Database(Base):
         """
         if (not content and not path) or (content and path):
             raise ValueError("Precisely one of the arguments \"attdata\" and  \"attloc\" must be provided.")
-        content_type = content_type_getter(data=content, file_name=path if path else attname)
+        if content and not content_type:
+            raise ValueError("Argument \"content_type\" cannot be empty when \"content\" is provided.")
         resource = f"{docid}/{attname}"
         query_kwargs = {"rev": rev}
-        req_kwargs = {
-            "headers": {
-                "content-type": content_type_getter(data=content, file_name=path if path else attname)
-            }
-        }
+        content_type = content_type if content_type else mimetypes.guess_type(path)[0]
         if path:
             with open(path, "rb") as file:
-                response = self._put(
-                    resource=resource,
-                    query_kwargs=query_kwargs,
-                    data=file,
-                    headers={
-                        "content-type": content_type
-                    }
-                )
-        elif content_type in ('application/xml'):
-            req_kwargs.update({"body": content})
-            response = self._put(
-                resource=resource,
-                query_kwargs=query_kwargs,
-                data=content,
-                headers={
-                    "content-type": content_type
-                },
-            )      
-        else:
-            req_kwargs.update({"body": content})
-            response = self._put(
-                resource=resource,
-                query_kwargs=query_kwargs,
-                body=content,
-                headers={
-                    "content-type": content_type
-                },
-            )
+                content = file.read()
+        response = self._put(
+            resource=resource,
+            query_kwargs=query_kwargs,
+            data=content,
+            headers={
+                "content-type": content_type
+            },
+        )
         data = response.json()
         return data["id"], data["ok"], data["rev"]
 
@@ -1597,7 +1579,8 @@ class Partition(Database):
             attname: str,
             path: str = None,
             *,
-            content: Any = None,
+            content: bytes = None,
+            content_type: str = None,
             rev: str = None,
     ) -> Tuple[str, bool, str]:
         """
@@ -1609,6 +1592,7 @@ class Partition(Database):
         return super(Partition, self).put_attachment(
             docid=self.add_partition_to_str(docid),
             attname=attname,
+            content_type=content_type,
             path=path,
             content=content,
             rev=rev,

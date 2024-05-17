@@ -228,7 +228,7 @@ class SecurityDocument(DictBase):
         -------
         SecurityDocument : The document's admins.
         """
-        return self.get("admins", SecurityDocument())
+        return self.get("admins", SecurityDocumentElement())
     
     @admins.setter
     def admins(self, value: SecurityDocumentElement) -> None:
@@ -243,7 +243,7 @@ class SecurityDocument(DictBase):
         -------
         SecurityDocument : The document's members.
         """
-        return self.get("members", SecurityDocument())
+        return self.get("members", SecurityDocumentElement())
 
     @members.setter
     def members(self, value: SecurityDocumentElement) -> None:

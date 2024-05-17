@@ -31,9 +31,11 @@
 
 import base64
 from collections.abc import Generator
+from enum import Enum
+import mimetypes
 import re
 import requests
-from typing import Any, Dict, Optional, Set
+from typing import Any, Dict, Optional, Set, Type
 from urllib import parse
 from urllib3.util import Url, parse_url
 
@@ -50,7 +52,6 @@ __all__ = [
     &#34;validate_proxy&#34;,
     &#34;validate_user_id&#34;,
     &#34;check_response&#34;,
-    &#34;content_type_getter&#34;,
     &#34;extract_url_data&#34;,
     &#34;partitioned_db_resource_parser&#34;,
     &#34;COUCHDB_USERS_DB_NAME&#34;,
@@ -59,7 +60,7 @@ __all__ = [
     &#34;COUCH_DB_RESERVED_DB_NAMES&#34;,
     &#34;DEFAULT_AUTH_METHOD&#34;,
     &#34;DEFAULT_TIMEOUT&#34;,
-    &#34;MIME_TYPES_MAPPING&#34;,
+    &#34;MimeTypeEnum&#34;,
     &#34;PATTERN_DB_NAME&#34;,
     &#34;PATTERN_USER_ID&#34;,
     &#34;VALID_AUTH_METHODS&#34;,
@@ -83,89 +84,15 @@ COUCH_DB_RESERVED_DB_NAMES: Set[str] = {
 
 DEFAULT_AUTH_METHOD: str = &#34;cookie&#34;
 &#34;&#34;&#34;The default authentication method - values to `\&#34;cookie\&#34;`.&#34;&#34;&#34;
-DEFAULT_TEXTUAL_MIME_TYPE: str = &#34;text/plain&#34;
-DEFAULT_FALLBACK_MIME_TYPE: str = &#34;application/octet-stream&#34;
+
 DEFAULT_TIMEOUT: int = 300
 &#34;&#34;&#34;The default timeout set in requests - values to `300`.&#34;&#34;&#34;
 
-MIME_TYPES_MAPPING: Dict = {
-    &#34;aac&#34;: &#34;audio/aac&#34;,
-    &#34;abw&#34;: &#34;application/x-abiword&#34;,
-    &#34;arc&#34;: &#34;application/x-freearc&#34;,
-    &#34;avi&#34;: &#34;video/x-msvideo&#34;,
-    &#34;azw&#34;: &#34;application/vnd.amazon.ebook&#34;,
-    &#34;bin&#34;: &#34;application/octet-stream&#34;,
-    &#34;bmp&#34;: &#34;image/bmp&#34;,
-    &#34;bz&#34;: &#34;application/x-bzip&#34;,
-    &#34;bz2&#34;: &#34;application/x-bzip2&#34;,
-    &#34;cda&#34;: &#34;application/x-cdf&#34;,
-    &#34;csh&#34;: &#34;application/x-csh&#34;,
-    &#34;css&#34;: &#34;text/css&#34;,
-    &#34;csv&#34;: &#34;text/csv&#34;,
-    &#34;doc&#34;: &#34;application/msword&#34;,
-    &#34;docx&#34;: &#34;application/vnd.openxmlformats-officedocument.wordprocessingml.document&#34;,
-    &#34;eot&#34;: &#34;application/vnd.ms-fontobject&#34;,
-    &#34;epub&#34;: &#34;application/epub+zip&#34;,
-    &#34;gz&#34;: &#34;application/gzip&#34;,
-    &#34;gif&#34;: &#34;image/gif&#34;,
-    &#34;htm&#34;: &#34;text/html&#34;,
-    &#34;html&#34;: &#34;text/html&#34;,
-    &#34;ico&#34;: &#34;image/vnd.microsoft.icon&#34;,
-    &#34;ics&#34;: &#34;text/calendar&#34;,
-    &#34;jar&#34;: &#34;application/java-archive&#34;,
-    &#34;jpeg&#34;: &#34;image/jpeg&#34;,
-    &#34;jpg&#34;: &#34;image/jpeg&#34;,
-    &#34;js&#34;: &#34;text/javascript&#34;,
-    &#34;json&#34;: &#34;application/json&#34;,
-    &#34;jsonld&#34;: &#34;application/ld+json&#34;,
-    &#34;mid&#34;: &#34;audio/midi audio/x-midi&#34;,
-    &#34;midi&#34;: &#34;audio/midi audio/x-midi&#34;,
-    &#34;mjs&#34;: &#34;text/javascript&#34;,
-    &#34;mp3&#34;: &#34;audio/mpeg&#34;,
-    &#34;mp4&#34;: &#34;video/mp4&#34;,
-    &#34;mpeg&#34;: &#34;video/mpeg&#34;,
-    &#34;mpkg&#34;: &#34;application/vnd.apple.installer+xml&#34;,
-    &#34;odp&#34;: &#34;application/vnd.oasis.opendocument.presentation&#34;,
-    &#34;ods&#34;: &#34;application/vnd.oasis.opendocument.spreadsheet&#34;,
-    &#34;odt&#34;: &#34;application/vnd.oasis.opendocument.text&#34;,
-    &#34;oga&#34;: &#34;audio/ogg&#34;,
-    &#34;ogv&#34;: &#34;video/ogg&#34;,
-    &#34;ogx&#34;: &#34;application/ogg&#34;,
-    &#34;opus&#34;: &#34;audio/opus&#34;,
-    &#34;otf&#34;: &#34;font/otf&#34;,
-    &#34;png&#34;: &#34;image/png&#34;,
-    &#34;pdf&#34;: &#34;application/pdf&#34;,
-    &#34;php&#34;: &#34;application/x-httpd-php&#34;,
-    &#34;ppt&#34;: &#34;application/vnd.ms-powerpoint&#34;,
-    &#34;pptx&#34;: &#34;application/vnd.openxmlformats-officedocument.presentationml.presentation&#34;,
-    &#34;rar&#34;: &#34;application/vnd.rar&#34;,
-    &#34;rtf&#34;: &#34;application/rtf&#34;,
-    &#34;sh&#34;: &#34;application/x-sh&#34;,
-    &#34;svg&#34;: &#34;image/svg+xml&#34;,
-    &#34;swf&#34;: &#34;application/x-shockwave-flash&#34;,
-    &#34;tar&#34;: &#34;application/x-tar&#34;,
-    &#34;tif .tiff&#34;: &#34;image/tiff&#34;,
-    &#34;ts&#34;: &#34;video/mp2t&#34;,
-    &#34;ttf&#34;: &#34;font/ttf&#34;,
-    &#34;txt&#34;: &#34;text/plain&#34;,
-    &#34;vsd&#34;: &#34;application/vnd.visio&#34;,
-    &#34;wav&#34;: &#34;audio/wav&#34;,
-    &#34;weba&#34;: &#34;audio/webm&#34;,
-    &#34;webm&#34;: &#34;video/webm&#34;,
-    &#34;webp&#34;: &#34;image/webp&#34;,
-    &#34;woff&#34;: &#34;font/woff&#34;,
-    &#34;woff2&#34;: &#34;font/woff2&#34;,
-    &#34;xhtml&#34;: &#34;application/xhtml+xml&#34;,
-    &#34;xls&#34;: &#34;application/vnd.ms-excel&#34;,
-    &#34;xlsx&#34;: &#34;application/vnd.openxmlformats-officedocument.spreadsheetml.sheet&#34;,
-    &#34;xml&#34;: &#34;application/xml&#34;,
-    &#34;xul&#34;: &#34;application/vnd.mozilla.xul+xml&#34;,
-    &#34;zip&#34;: &#34;application/zip&#34;,
-    &#34;3gp&#34;: &#34;video/3gpp&#34;,
-    &#34;3g2&#34;: &#34;video/3gpp2&#34;,
-    &#34;7z&#34;: &#34;application/x-7z-compressed&#34;
-}
-&#34;&#34;&#34;A dictionary mapping file extensions to their appropriate content-type.&#34;&#34;&#34;
+MimeTypeEnum: Type[Enum] = Enum(
+    &#39;MimeTypeEnum&#39;,
+    {&#39;mime_type_&#39; + k.removeprefix(&#39;.&#39;): v for k, v in mimetypes.types_map.items()}
+)
+&#34;&#34;&#34;An Enum containing all existing mime types.&#34;&#34;&#34;
 
 PATTERN_DB_NAME: re.Pattern = re.compile(r&#34;^[a-z][a-z0-9_$()+/-]*$&#34;)
 &#34;&#34;&#34;The pattern for valid database names.&#34;&#34;&#34;
@@ -380,44 +307,6 @@ def check_response(response: requests.Response) -&gt; None:
         raise err
 
 
-def content_type_getter(
-        file_name: str = None,
-        data: Any = None
-) -&gt; Optional[str]:
-    &#34;&#34;&#34;
-    Get the appropriate content-type.
-
-    If the argument `file_name` is provided, the content-type will be determined by matching the file extension against
-    keys of `MIME_TYPES_MAPPING`. If no match was found, then `&#34;application/octet-stream&#34;` will be returned.
-
-    Alternatively, if the argument `data` is provided the conent-type returned will be
-
-    - `&#34;application/json&#34;` if `data` is a dictionary or a list
-    - `&#34;text/plain&#34;` else
-
-    Parameters
-    ----------
-    file_name : str
-        A file name.
-    data : Any
-        A Python object.
-
-    Returns
-    -------
-    str : A valid content-type.
-    &#34;&#34;&#34;
-    if file_name:
-        for ext, mime_type in MIME_TYPES_MAPPING.items():
-            if file_name.endswith(f&#34;.{ext}&#34;):
-                return mime_type
-        return DEFAULT_FALLBACK_MIME_TYPE
-    elif data:
-        if isinstance(data, (dict, list)):
-            return &#34;application/json&#34;
-        else:
-            return DEFAULT_TEXTUAL_MIME_TYPE
-
-
 def extract_url_data(url: str) -&gt; Dict:
     &#34;&#34;&#34;
     Extract scheme, credentials, host, port &amp; path from a URL.
@@ -499,10 +388,6 @@ def partitioned_db_resource_parser(
 <dt id="couchdb3.utils.DEFAULT_TIMEOUT"><code class="name">var <span class="ident">DEFAULT_TIMEOUT</span> : int</code></dt>
 <dd>
 <div class="desc"><p>The default timeout set in requests - values to <code>300</code>.</p></div>
-</dd>
-<dt id="couchdb3.utils.MIME_TYPES_MAPPING"><code class="name">var <span class="ident">MIME_TYPES_MAPPING</span> : Dict</code></dt>
-<dd>
-<div class="desc"><p>A dictionary mapping file extensions to their appropriate content-type.</p></div>
 </dd>
 <dt id="couchdb3.utils.PATTERN_DB_NAME"><code class="name">var <span class="ident">PATTERN_DB_NAME</span> : re.Pattern</code></dt>
 <dd>
@@ -723,69 +608,6 @@ def partitioned_db_resource_parser(
             else:
                 return None
         raise err</code></pre>
-</details>
-</dd>
-<dt id="couchdb3.utils.content_type_getter"><code class="name flex">
-<span>def <span class="ident">content_type_getter</span></span>(<span>file_name: str = None, data: Any = None) ‑> Optional[str]</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Get the appropriate content-type.</p>
-<p>If the argument <code>file_name</code> is provided, the content-type will be determined by matching the file extension against
-keys of <code><a title="couchdb3.utils.MIME_TYPES_MAPPING" href="#couchdb3.utils.MIME_TYPES_MAPPING">MIME_TYPES_MAPPING</a></code>. If no match was found, then <code>"application/octet-stream"</code> will be returned.</p>
-<p>Alternatively, if the argument <code>data</code> is provided the conent-type returned will be</p>
-<ul>
-<li><code>"application/json"</code> if <code>data</code> is a dictionary or a list</li>
-<li><code>"text/plain"</code> else</li>
-</ul>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>file_name</code></strong> :&ensp;<code>str</code></dt>
-<dd>A file name.</dd>
-<dt><strong><code>data</code></strong> :&ensp;<code>Any</code></dt>
-<dd>A Python object.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<p>str : A valid content-type.</p></div>
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">def content_type_getter(
-        file_name: str = None,
-        data: Any = None
-) -&gt; Optional[str]:
-    &#34;&#34;&#34;
-    Get the appropriate content-type.
-
-    If the argument `file_name` is provided, the content-type will be determined by matching the file extension against
-    keys of `MIME_TYPES_MAPPING`. If no match was found, then `&#34;application/octet-stream&#34;` will be returned.
-
-    Alternatively, if the argument `data` is provided the conent-type returned will be
-
-    - `&#34;application/json&#34;` if `data` is a dictionary or a list
-    - `&#34;text/plain&#34;` else
-
-    Parameters
-    ----------
-    file_name : str
-        A file name.
-    data : Any
-        A Python object.
-
-    Returns
-    -------
-    str : A valid content-type.
-    &#34;&#34;&#34;
-    if file_name:
-        for ext, mime_type in MIME_TYPES_MAPPING.items():
-            if file_name.endswith(f&#34;.{ext}&#34;):
-                return mime_type
-        return DEFAULT_FALLBACK_MIME_TYPE
-    elif data:
-        if isinstance(data, (dict, list)):
-            return &#34;application/json&#34;
-        else:
-            return DEFAULT_TEXTUAL_MIME_TYPE</code></pre>
 </details>
 </dd>
 <dt id="couchdb3.utils.extract_url_data"><code class="name flex">
@@ -1047,6 +869,668 @@ keys of <code><a title="couchdb3.utils.MIME_TYPES_MAPPING" href="#couchdb3.utils
 </dl>
 </section>
 <section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="couchdb3.utils.MimeTypeEnum"><code class="flex name class">
+<span>class <span class="ident">MimeTypeEnum</span></span>
+<span>(</span><span>*args, **kwds)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create a collection of name/value pairs.</p>
+<p>Example enumeration:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; class Color(Enum):
+...     RED = 1
+...     BLUE = 2
+...     GREEN = 3
+</code></pre>
+<p>Access them by:</p>
+<ul>
+<li>attribute access:</li>
+</ul>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>Color.RED
+<Color.RED: 1></p>
+</blockquote>
+</blockquote>
+</blockquote>
+<ul>
+<li>value lookup:</li>
+</ul>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>Color(1)
+<Color.RED: 1></p>
+</blockquote>
+</blockquote>
+</blockquote>
+<ul>
+<li>name lookup:</li>
+</ul>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>Color['RED']
+<Color.RED: 1></p>
+</blockquote>
+</blockquote>
+</blockquote>
+<p>Enumerations can be iterated over, and know how many members they have:</p>
+<pre><code class="language-python-repl">&gt;&gt;&gt; len(Color)
+3
+</code></pre>
+<pre><code class="language-python-repl">&gt;&gt;&gt; list(Color)
+[&lt;Color.RED: 1&gt;, &lt;Color.BLUE: 2&gt;, &lt;Color.GREEN: 3&gt;]
+</code></pre>
+<p>Methods can be added to enumerations, and members can have their own
+attributes &ndash; see the documentation for details.</p></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li>enum.Enum</li>
+</ul>
+<h3>Class variables</h3>
+<dl>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_3g2"><code class="name">var <span class="ident">mime_type_3g2</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_3gp"><code class="name">var <span class="ident">mime_type_3gp</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_3gpp"><code class="name">var <span class="ident">mime_type_3gpp</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_3gpp2"><code class="name">var <span class="ident">mime_type_3gpp2</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_a"><code class="name">var <span class="ident">mime_type_a</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_aac"><code class="name">var <span class="ident">mime_type_aac</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_adts"><code class="name">var <span class="ident">mime_type_adts</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_ai"><code class="name">var <span class="ident">mime_type_ai</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_aif"><code class="name">var <span class="ident">mime_type_aif</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_aifc"><code class="name">var <span class="ident">mime_type_aifc</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_aiff"><code class="name">var <span class="ident">mime_type_aiff</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_ass"><code class="name">var <span class="ident">mime_type_ass</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_au"><code class="name">var <span class="ident">mime_type_au</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_avi"><code class="name">var <span class="ident">mime_type_avi</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_avif"><code class="name">var <span class="ident">mime_type_avif</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_bat"><code class="name">var <span class="ident">mime_type_bat</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_bcpio"><code class="name">var <span class="ident">mime_type_bcpio</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_bin"><code class="name">var <span class="ident">mime_type_bin</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_bmp"><code class="name">var <span class="ident">mime_type_bmp</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_c"><code class="name">var <span class="ident">mime_type_c</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_cdf"><code class="name">var <span class="ident">mime_type_cdf</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_cpio"><code class="name">var <span class="ident">mime_type_cpio</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_csh"><code class="name">var <span class="ident">mime_type_csh</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_css"><code class="name">var <span class="ident">mime_type_css</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_csv"><code class="name">var <span class="ident">mime_type_csv</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_dll"><code class="name">var <span class="ident">mime_type_dll</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_doc"><code class="name">var <span class="ident">mime_type_doc</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_dot"><code class="name">var <span class="ident">mime_type_dot</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_dvi"><code class="name">var <span class="ident">mime_type_dvi</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_eml"><code class="name">var <span class="ident">mime_type_eml</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_eps"><code class="name">var <span class="ident">mime_type_eps</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_etx"><code class="name">var <span class="ident">mime_type_etx</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_exe"><code class="name">var <span class="ident">mime_type_exe</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_gif"><code class="name">var <span class="ident">mime_type_gif</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_gtar"><code class="name">var <span class="ident">mime_type_gtar</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_h"><code class="name">var <span class="ident">mime_type_h</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_h5"><code class="name">var <span class="ident">mime_type_h5</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_hdf"><code class="name">var <span class="ident">mime_type_hdf</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_heic"><code class="name">var <span class="ident">mime_type_heic</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_heif"><code class="name">var <span class="ident">mime_type_heif</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_htm"><code class="name">var <span class="ident">mime_type_htm</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_html"><code class="name">var <span class="ident">mime_type_html</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_ico"><code class="name">var <span class="ident">mime_type_ico</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_ief"><code class="name">var <span class="ident">mime_type_ief</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_jpe"><code class="name">var <span class="ident">mime_type_jpe</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_jpeg"><code class="name">var <span class="ident">mime_type_jpeg</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_jpg"><code class="name">var <span class="ident">mime_type_jpg</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_js"><code class="name">var <span class="ident">mime_type_js</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_json"><code class="name">var <span class="ident">mime_type_json</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_ksh"><code class="name">var <span class="ident">mime_type_ksh</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_latex"><code class="name">var <span class="ident">mime_type_latex</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_loas"><code class="name">var <span class="ident">mime_type_loas</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_m1v"><code class="name">var <span class="ident">mime_type_m1v</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_m3u"><code class="name">var <span class="ident">mime_type_m3u</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_m3u8"><code class="name">var <span class="ident">mime_type_m3u8</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_man"><code class="name">var <span class="ident">mime_type_man</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_me"><code class="name">var <span class="ident">mime_type_me</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_mht"><code class="name">var <span class="ident">mime_type_mht</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_mhtml"><code class="name">var <span class="ident">mime_type_mhtml</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_mif"><code class="name">var <span class="ident">mime_type_mif</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_mjs"><code class="name">var <span class="ident">mime_type_mjs</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_mov"><code class="name">var <span class="ident">mime_type_mov</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_movie"><code class="name">var <span class="ident">mime_type_movie</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_mp2"><code class="name">var <span class="ident">mime_type_mp2</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_mp3"><code class="name">var <span class="ident">mime_type_mp3</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_mp4"><code class="name">var <span class="ident">mime_type_mp4</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_mpa"><code class="name">var <span class="ident">mime_type_mpa</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_mpe"><code class="name">var <span class="ident">mime_type_mpe</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_mpeg"><code class="name">var <span class="ident">mime_type_mpeg</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_mpg"><code class="name">var <span class="ident">mime_type_mpg</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_ms"><code class="name">var <span class="ident">mime_type_ms</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_n3"><code class="name">var <span class="ident">mime_type_n3</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_nc"><code class="name">var <span class="ident">mime_type_nc</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_nq"><code class="name">var <span class="ident">mime_type_nq</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_nt"><code class="name">var <span class="ident">mime_type_nt</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_nws"><code class="name">var <span class="ident">mime_type_nws</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_o"><code class="name">var <span class="ident">mime_type_o</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_obj"><code class="name">var <span class="ident">mime_type_obj</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_oda"><code class="name">var <span class="ident">mime_type_oda</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_opus"><code class="name">var <span class="ident">mime_type_opus</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_p12"><code class="name">var <span class="ident">mime_type_p12</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_p7c"><code class="name">var <span class="ident">mime_type_p7c</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_pbm"><code class="name">var <span class="ident">mime_type_pbm</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_pdf"><code class="name">var <span class="ident">mime_type_pdf</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_pfx"><code class="name">var <span class="ident">mime_type_pfx</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_pgm"><code class="name">var <span class="ident">mime_type_pgm</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_pl"><code class="name">var <span class="ident">mime_type_pl</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_png"><code class="name">var <span class="ident">mime_type_png</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_pnm"><code class="name">var <span class="ident">mime_type_pnm</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_pot"><code class="name">var <span class="ident">mime_type_pot</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_ppa"><code class="name">var <span class="ident">mime_type_ppa</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_ppm"><code class="name">var <span class="ident">mime_type_ppm</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_pps"><code class="name">var <span class="ident">mime_type_pps</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_ppt"><code class="name">var <span class="ident">mime_type_ppt</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_ps"><code class="name">var <span class="ident">mime_type_ps</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_pwz"><code class="name">var <span class="ident">mime_type_pwz</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_py"><code class="name">var <span class="ident">mime_type_py</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_pyc"><code class="name">var <span class="ident">mime_type_pyc</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_pyo"><code class="name">var <span class="ident">mime_type_pyo</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_qt"><code class="name">var <span class="ident">mime_type_qt</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_ra"><code class="name">var <span class="ident">mime_type_ra</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_ram"><code class="name">var <span class="ident">mime_type_ram</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_ras"><code class="name">var <span class="ident">mime_type_ras</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_rdf"><code class="name">var <span class="ident">mime_type_rdf</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_rgb"><code class="name">var <span class="ident">mime_type_rgb</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_roff"><code class="name">var <span class="ident">mime_type_roff</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_rtx"><code class="name">var <span class="ident">mime_type_rtx</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_sgm"><code class="name">var <span class="ident">mime_type_sgm</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_sgml"><code class="name">var <span class="ident">mime_type_sgml</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_sh"><code class="name">var <span class="ident">mime_type_sh</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_shar"><code class="name">var <span class="ident">mime_type_shar</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_snd"><code class="name">var <span class="ident">mime_type_snd</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_so"><code class="name">var <span class="ident">mime_type_so</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_src"><code class="name">var <span class="ident">mime_type_src</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_srt"><code class="name">var <span class="ident">mime_type_srt</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_sv4cpio"><code class="name">var <span class="ident">mime_type_sv4cpio</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_sv4crc"><code class="name">var <span class="ident">mime_type_sv4crc</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_svg"><code class="name">var <span class="ident">mime_type_svg</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_swf"><code class="name">var <span class="ident">mime_type_swf</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_t"><code class="name">var <span class="ident">mime_type_t</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_tar"><code class="name">var <span class="ident">mime_type_tar</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_tcl"><code class="name">var <span class="ident">mime_type_tcl</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_tex"><code class="name">var <span class="ident">mime_type_tex</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_texi"><code class="name">var <span class="ident">mime_type_texi</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_texinfo"><code class="name">var <span class="ident">mime_type_texinfo</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_tif"><code class="name">var <span class="ident">mime_type_tif</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_tiff"><code class="name">var <span class="ident">mime_type_tiff</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_tr"><code class="name">var <span class="ident">mime_type_tr</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_trig"><code class="name">var <span class="ident">mime_type_trig</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_tsv"><code class="name">var <span class="ident">mime_type_tsv</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_txt"><code class="name">var <span class="ident">mime_type_txt</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_ustar"><code class="name">var <span class="ident">mime_type_ustar</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_vcf"><code class="name">var <span class="ident">mime_type_vcf</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_vtt"><code class="name">var <span class="ident">mime_type_vtt</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_wasm"><code class="name">var <span class="ident">mime_type_wasm</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_wav"><code class="name">var <span class="ident">mime_type_wav</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_webm"><code class="name">var <span class="ident">mime_type_webm</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_webmanifest"><code class="name">var <span class="ident">mime_type_webmanifest</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_wiz"><code class="name">var <span class="ident">mime_type_wiz</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_wsdl"><code class="name">var <span class="ident">mime_type_wsdl</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_xbm"><code class="name">var <span class="ident">mime_type_xbm</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_xlb"><code class="name">var <span class="ident">mime_type_xlb</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_xls"><code class="name">var <span class="ident">mime_type_xls</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_xml"><code class="name">var <span class="ident">mime_type_xml</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_xpdl"><code class="name">var <span class="ident">mime_type_xpdl</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_xpm"><code class="name">var <span class="ident">mime_type_xpm</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_xsl"><code class="name">var <span class="ident">mime_type_xsl</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_xwd"><code class="name">var <span class="ident">mime_type_xwd</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.utils.MimeTypeEnum.mime_type_zip"><code class="name">var <span class="ident">mime_type_zip</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+</dl>
+</dd>
+</dl>
 </section>
 </article>
 <nav id="sidebar">
@@ -1068,7 +1552,6 @@ keys of <code><a title="couchdb3.utils.MIME_TYPES_MAPPING" href="#couchdb3.utils
 <li><code><a title="couchdb3.utils.COUCH_DB_RESERVED_DB_NAMES" href="#couchdb3.utils.COUCH_DB_RESERVED_DB_NAMES">COUCH_DB_RESERVED_DB_NAMES</a></code></li>
 <li><code><a title="couchdb3.utils.DEFAULT_AUTH_METHOD" href="#couchdb3.utils.DEFAULT_AUTH_METHOD">DEFAULT_AUTH_METHOD</a></code></li>
 <li><code><a title="couchdb3.utils.DEFAULT_TIMEOUT" href="#couchdb3.utils.DEFAULT_TIMEOUT">DEFAULT_TIMEOUT</a></code></li>
-<li><code><a title="couchdb3.utils.MIME_TYPES_MAPPING" href="#couchdb3.utils.MIME_TYPES_MAPPING">MIME_TYPES_MAPPING</a></code></li>
 <li><code><a title="couchdb3.utils.PATTERN_DB_NAME" href="#couchdb3.utils.PATTERN_DB_NAME">PATTERN_DB_NAME</a></code></li>
 <li><code><a title="couchdb3.utils.PATTERN_USER_ID" href="#couchdb3.utils.PATTERN_USER_ID">PATTERN_USER_ID</a></code></li>
 <li><code><a title="couchdb3.utils.VALID_AUTH_METHODS" href="#couchdb3.utils.VALID_AUTH_METHODS">VALID_AUTH_METHODS</a></code></li>
@@ -1081,7 +1564,6 @@ keys of <code><a title="couchdb3.utils.MIME_TYPES_MAPPING" href="#couchdb3.utils
 <li><code><a title="couchdb3.utils.build_query" href="#couchdb3.utils.build_query">build_query</a></code></li>
 <li><code><a title="couchdb3.utils.build_url" href="#couchdb3.utils.build_url">build_url</a></code></li>
 <li><code><a title="couchdb3.utils.check_response" href="#couchdb3.utils.check_response">check_response</a></code></li>
-<li><code><a title="couchdb3.utils.content_type_getter" href="#couchdb3.utils.content_type_getter">content_type_getter</a></code></li>
 <li><code><a title="couchdb3.utils.extract_url_data" href="#couchdb3.utils.extract_url_data">extract_url_data</a></code></li>
 <li><code><a title="couchdb3.utils.partitioned_db_resource_parser" href="#couchdb3.utils.partitioned_db_resource_parser">partitioned_db_resource_parser</a></code></li>
 <li><code><a title="couchdb3.utils.user_name_to_id" href="#couchdb3.utils.user_name_to_id">user_name_to_id</a></code></li>
@@ -1089,6 +1571,164 @@ keys of <code><a title="couchdb3.utils.MIME_TYPES_MAPPING" href="#couchdb3.utils
 <li><code><a title="couchdb3.utils.validate_db_name" href="#couchdb3.utils.validate_db_name">validate_db_name</a></code></li>
 <li><code><a title="couchdb3.utils.validate_proxy" href="#couchdb3.utils.validate_proxy">validate_proxy</a></code></li>
 <li><code><a title="couchdb3.utils.validate_user_id" href="#couchdb3.utils.validate_user_id">validate_user_id</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="couchdb3.utils.MimeTypeEnum" href="#couchdb3.utils.MimeTypeEnum">MimeTypeEnum</a></code></h4>
+<ul class="">
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_3g2" href="#couchdb3.utils.MimeTypeEnum.mime_type_3g2">mime_type_3g2</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_3gp" href="#couchdb3.utils.MimeTypeEnum.mime_type_3gp">mime_type_3gp</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_3gpp" href="#couchdb3.utils.MimeTypeEnum.mime_type_3gpp">mime_type_3gpp</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_3gpp2" href="#couchdb3.utils.MimeTypeEnum.mime_type_3gpp2">mime_type_3gpp2</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_a" href="#couchdb3.utils.MimeTypeEnum.mime_type_a">mime_type_a</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_aac" href="#couchdb3.utils.MimeTypeEnum.mime_type_aac">mime_type_aac</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_adts" href="#couchdb3.utils.MimeTypeEnum.mime_type_adts">mime_type_adts</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_ai" href="#couchdb3.utils.MimeTypeEnum.mime_type_ai">mime_type_ai</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_aif" href="#couchdb3.utils.MimeTypeEnum.mime_type_aif">mime_type_aif</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_aifc" href="#couchdb3.utils.MimeTypeEnum.mime_type_aifc">mime_type_aifc</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_aiff" href="#couchdb3.utils.MimeTypeEnum.mime_type_aiff">mime_type_aiff</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_ass" href="#couchdb3.utils.MimeTypeEnum.mime_type_ass">mime_type_ass</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_au" href="#couchdb3.utils.MimeTypeEnum.mime_type_au">mime_type_au</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_avi" href="#couchdb3.utils.MimeTypeEnum.mime_type_avi">mime_type_avi</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_avif" href="#couchdb3.utils.MimeTypeEnum.mime_type_avif">mime_type_avif</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_bat" href="#couchdb3.utils.MimeTypeEnum.mime_type_bat">mime_type_bat</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_bcpio" href="#couchdb3.utils.MimeTypeEnum.mime_type_bcpio">mime_type_bcpio</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_bin" href="#couchdb3.utils.MimeTypeEnum.mime_type_bin">mime_type_bin</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_bmp" href="#couchdb3.utils.MimeTypeEnum.mime_type_bmp">mime_type_bmp</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_c" href="#couchdb3.utils.MimeTypeEnum.mime_type_c">mime_type_c</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_cdf" href="#couchdb3.utils.MimeTypeEnum.mime_type_cdf">mime_type_cdf</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_cpio" href="#couchdb3.utils.MimeTypeEnum.mime_type_cpio">mime_type_cpio</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_csh" href="#couchdb3.utils.MimeTypeEnum.mime_type_csh">mime_type_csh</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_css" href="#couchdb3.utils.MimeTypeEnum.mime_type_css">mime_type_css</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_csv" href="#couchdb3.utils.MimeTypeEnum.mime_type_csv">mime_type_csv</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_dll" href="#couchdb3.utils.MimeTypeEnum.mime_type_dll">mime_type_dll</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_doc" href="#couchdb3.utils.MimeTypeEnum.mime_type_doc">mime_type_doc</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_dot" href="#couchdb3.utils.MimeTypeEnum.mime_type_dot">mime_type_dot</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_dvi" href="#couchdb3.utils.MimeTypeEnum.mime_type_dvi">mime_type_dvi</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_eml" href="#couchdb3.utils.MimeTypeEnum.mime_type_eml">mime_type_eml</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_eps" href="#couchdb3.utils.MimeTypeEnum.mime_type_eps">mime_type_eps</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_etx" href="#couchdb3.utils.MimeTypeEnum.mime_type_etx">mime_type_etx</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_exe" href="#couchdb3.utils.MimeTypeEnum.mime_type_exe">mime_type_exe</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_gif" href="#couchdb3.utils.MimeTypeEnum.mime_type_gif">mime_type_gif</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_gtar" href="#couchdb3.utils.MimeTypeEnum.mime_type_gtar">mime_type_gtar</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_h" href="#couchdb3.utils.MimeTypeEnum.mime_type_h">mime_type_h</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_h5" href="#couchdb3.utils.MimeTypeEnum.mime_type_h5">mime_type_h5</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_hdf" href="#couchdb3.utils.MimeTypeEnum.mime_type_hdf">mime_type_hdf</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_heic" href="#couchdb3.utils.MimeTypeEnum.mime_type_heic">mime_type_heic</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_heif" href="#couchdb3.utils.MimeTypeEnum.mime_type_heif">mime_type_heif</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_htm" href="#couchdb3.utils.MimeTypeEnum.mime_type_htm">mime_type_htm</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_html" href="#couchdb3.utils.MimeTypeEnum.mime_type_html">mime_type_html</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_ico" href="#couchdb3.utils.MimeTypeEnum.mime_type_ico">mime_type_ico</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_ief" href="#couchdb3.utils.MimeTypeEnum.mime_type_ief">mime_type_ief</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_jpe" href="#couchdb3.utils.MimeTypeEnum.mime_type_jpe">mime_type_jpe</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_jpeg" href="#couchdb3.utils.MimeTypeEnum.mime_type_jpeg">mime_type_jpeg</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_jpg" href="#couchdb3.utils.MimeTypeEnum.mime_type_jpg">mime_type_jpg</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_js" href="#couchdb3.utils.MimeTypeEnum.mime_type_js">mime_type_js</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_json" href="#couchdb3.utils.MimeTypeEnum.mime_type_json">mime_type_json</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_ksh" href="#couchdb3.utils.MimeTypeEnum.mime_type_ksh">mime_type_ksh</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_latex" href="#couchdb3.utils.MimeTypeEnum.mime_type_latex">mime_type_latex</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_loas" href="#couchdb3.utils.MimeTypeEnum.mime_type_loas">mime_type_loas</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_m1v" href="#couchdb3.utils.MimeTypeEnum.mime_type_m1v">mime_type_m1v</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_m3u" href="#couchdb3.utils.MimeTypeEnum.mime_type_m3u">mime_type_m3u</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_m3u8" href="#couchdb3.utils.MimeTypeEnum.mime_type_m3u8">mime_type_m3u8</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_man" href="#couchdb3.utils.MimeTypeEnum.mime_type_man">mime_type_man</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_me" href="#couchdb3.utils.MimeTypeEnum.mime_type_me">mime_type_me</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_mht" href="#couchdb3.utils.MimeTypeEnum.mime_type_mht">mime_type_mht</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_mhtml" href="#couchdb3.utils.MimeTypeEnum.mime_type_mhtml">mime_type_mhtml</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_mif" href="#couchdb3.utils.MimeTypeEnum.mime_type_mif">mime_type_mif</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_mjs" href="#couchdb3.utils.MimeTypeEnum.mime_type_mjs">mime_type_mjs</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_mov" href="#couchdb3.utils.MimeTypeEnum.mime_type_mov">mime_type_mov</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_movie" href="#couchdb3.utils.MimeTypeEnum.mime_type_movie">mime_type_movie</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_mp2" href="#couchdb3.utils.MimeTypeEnum.mime_type_mp2">mime_type_mp2</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_mp3" href="#couchdb3.utils.MimeTypeEnum.mime_type_mp3">mime_type_mp3</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_mp4" href="#couchdb3.utils.MimeTypeEnum.mime_type_mp4">mime_type_mp4</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_mpa" href="#couchdb3.utils.MimeTypeEnum.mime_type_mpa">mime_type_mpa</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_mpe" href="#couchdb3.utils.MimeTypeEnum.mime_type_mpe">mime_type_mpe</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_mpeg" href="#couchdb3.utils.MimeTypeEnum.mime_type_mpeg">mime_type_mpeg</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_mpg" href="#couchdb3.utils.MimeTypeEnum.mime_type_mpg">mime_type_mpg</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_ms" href="#couchdb3.utils.MimeTypeEnum.mime_type_ms">mime_type_ms</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_n3" href="#couchdb3.utils.MimeTypeEnum.mime_type_n3">mime_type_n3</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_nc" href="#couchdb3.utils.MimeTypeEnum.mime_type_nc">mime_type_nc</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_nq" href="#couchdb3.utils.MimeTypeEnum.mime_type_nq">mime_type_nq</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_nt" href="#couchdb3.utils.MimeTypeEnum.mime_type_nt">mime_type_nt</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_nws" href="#couchdb3.utils.MimeTypeEnum.mime_type_nws">mime_type_nws</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_o" href="#couchdb3.utils.MimeTypeEnum.mime_type_o">mime_type_o</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_obj" href="#couchdb3.utils.MimeTypeEnum.mime_type_obj">mime_type_obj</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_oda" href="#couchdb3.utils.MimeTypeEnum.mime_type_oda">mime_type_oda</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_opus" href="#couchdb3.utils.MimeTypeEnum.mime_type_opus">mime_type_opus</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_p12" href="#couchdb3.utils.MimeTypeEnum.mime_type_p12">mime_type_p12</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_p7c" href="#couchdb3.utils.MimeTypeEnum.mime_type_p7c">mime_type_p7c</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_pbm" href="#couchdb3.utils.MimeTypeEnum.mime_type_pbm">mime_type_pbm</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_pdf" href="#couchdb3.utils.MimeTypeEnum.mime_type_pdf">mime_type_pdf</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_pfx" href="#couchdb3.utils.MimeTypeEnum.mime_type_pfx">mime_type_pfx</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_pgm" href="#couchdb3.utils.MimeTypeEnum.mime_type_pgm">mime_type_pgm</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_pl" href="#couchdb3.utils.MimeTypeEnum.mime_type_pl">mime_type_pl</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_png" href="#couchdb3.utils.MimeTypeEnum.mime_type_png">mime_type_png</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_pnm" href="#couchdb3.utils.MimeTypeEnum.mime_type_pnm">mime_type_pnm</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_pot" href="#couchdb3.utils.MimeTypeEnum.mime_type_pot">mime_type_pot</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_ppa" href="#couchdb3.utils.MimeTypeEnum.mime_type_ppa">mime_type_ppa</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_ppm" href="#couchdb3.utils.MimeTypeEnum.mime_type_ppm">mime_type_ppm</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_pps" href="#couchdb3.utils.MimeTypeEnum.mime_type_pps">mime_type_pps</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_ppt" href="#couchdb3.utils.MimeTypeEnum.mime_type_ppt">mime_type_ppt</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_ps" href="#couchdb3.utils.MimeTypeEnum.mime_type_ps">mime_type_ps</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_pwz" href="#couchdb3.utils.MimeTypeEnum.mime_type_pwz">mime_type_pwz</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_py" href="#couchdb3.utils.MimeTypeEnum.mime_type_py">mime_type_py</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_pyc" href="#couchdb3.utils.MimeTypeEnum.mime_type_pyc">mime_type_pyc</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_pyo" href="#couchdb3.utils.MimeTypeEnum.mime_type_pyo">mime_type_pyo</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_qt" href="#couchdb3.utils.MimeTypeEnum.mime_type_qt">mime_type_qt</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_ra" href="#couchdb3.utils.MimeTypeEnum.mime_type_ra">mime_type_ra</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_ram" href="#couchdb3.utils.MimeTypeEnum.mime_type_ram">mime_type_ram</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_ras" href="#couchdb3.utils.MimeTypeEnum.mime_type_ras">mime_type_ras</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_rdf" href="#couchdb3.utils.MimeTypeEnum.mime_type_rdf">mime_type_rdf</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_rgb" href="#couchdb3.utils.MimeTypeEnum.mime_type_rgb">mime_type_rgb</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_roff" href="#couchdb3.utils.MimeTypeEnum.mime_type_roff">mime_type_roff</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_rtx" href="#couchdb3.utils.MimeTypeEnum.mime_type_rtx">mime_type_rtx</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_sgm" href="#couchdb3.utils.MimeTypeEnum.mime_type_sgm">mime_type_sgm</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_sgml" href="#couchdb3.utils.MimeTypeEnum.mime_type_sgml">mime_type_sgml</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_sh" href="#couchdb3.utils.MimeTypeEnum.mime_type_sh">mime_type_sh</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_shar" href="#couchdb3.utils.MimeTypeEnum.mime_type_shar">mime_type_shar</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_snd" href="#couchdb3.utils.MimeTypeEnum.mime_type_snd">mime_type_snd</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_so" href="#couchdb3.utils.MimeTypeEnum.mime_type_so">mime_type_so</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_src" href="#couchdb3.utils.MimeTypeEnum.mime_type_src">mime_type_src</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_srt" href="#couchdb3.utils.MimeTypeEnum.mime_type_srt">mime_type_srt</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_sv4cpio" href="#couchdb3.utils.MimeTypeEnum.mime_type_sv4cpio">mime_type_sv4cpio</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_sv4crc" href="#couchdb3.utils.MimeTypeEnum.mime_type_sv4crc">mime_type_sv4crc</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_svg" href="#couchdb3.utils.MimeTypeEnum.mime_type_svg">mime_type_svg</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_swf" href="#couchdb3.utils.MimeTypeEnum.mime_type_swf">mime_type_swf</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_t" href="#couchdb3.utils.MimeTypeEnum.mime_type_t">mime_type_t</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_tar" href="#couchdb3.utils.MimeTypeEnum.mime_type_tar">mime_type_tar</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_tcl" href="#couchdb3.utils.MimeTypeEnum.mime_type_tcl">mime_type_tcl</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_tex" href="#couchdb3.utils.MimeTypeEnum.mime_type_tex">mime_type_tex</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_texi" href="#couchdb3.utils.MimeTypeEnum.mime_type_texi">mime_type_texi</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_texinfo" href="#couchdb3.utils.MimeTypeEnum.mime_type_texinfo">mime_type_texinfo</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_tif" href="#couchdb3.utils.MimeTypeEnum.mime_type_tif">mime_type_tif</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_tiff" href="#couchdb3.utils.MimeTypeEnum.mime_type_tiff">mime_type_tiff</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_tr" href="#couchdb3.utils.MimeTypeEnum.mime_type_tr">mime_type_tr</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_trig" href="#couchdb3.utils.MimeTypeEnum.mime_type_trig">mime_type_trig</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_tsv" href="#couchdb3.utils.MimeTypeEnum.mime_type_tsv">mime_type_tsv</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_txt" href="#couchdb3.utils.MimeTypeEnum.mime_type_txt">mime_type_txt</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_ustar" href="#couchdb3.utils.MimeTypeEnum.mime_type_ustar">mime_type_ustar</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_vcf" href="#couchdb3.utils.MimeTypeEnum.mime_type_vcf">mime_type_vcf</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_vtt" href="#couchdb3.utils.MimeTypeEnum.mime_type_vtt">mime_type_vtt</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_wasm" href="#couchdb3.utils.MimeTypeEnum.mime_type_wasm">mime_type_wasm</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_wav" href="#couchdb3.utils.MimeTypeEnum.mime_type_wav">mime_type_wav</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_webm" href="#couchdb3.utils.MimeTypeEnum.mime_type_webm">mime_type_webm</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_webmanifest" href="#couchdb3.utils.MimeTypeEnum.mime_type_webmanifest">mime_type_webmanifest</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_wiz" href="#couchdb3.utils.MimeTypeEnum.mime_type_wiz">mime_type_wiz</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_wsdl" href="#couchdb3.utils.MimeTypeEnum.mime_type_wsdl">mime_type_wsdl</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_xbm" href="#couchdb3.utils.MimeTypeEnum.mime_type_xbm">mime_type_xbm</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_xlb" href="#couchdb3.utils.MimeTypeEnum.mime_type_xlb">mime_type_xlb</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_xls" href="#couchdb3.utils.MimeTypeEnum.mime_type_xls">mime_type_xls</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_xml" href="#couchdb3.utils.MimeTypeEnum.mime_type_xml">mime_type_xml</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_xpdl" href="#couchdb3.utils.MimeTypeEnum.mime_type_xpdl">mime_type_xpdl</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_xpm" href="#couchdb3.utils.MimeTypeEnum.mime_type_xpm">mime_type_xpm</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_xsl" href="#couchdb3.utils.MimeTypeEnum.mime_type_xsl">mime_type_xsl</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_xwd" href="#couchdb3.utils.MimeTypeEnum.mime_type_xwd">mime_type_xwd</a></code></li>
+<li><code><a title="couchdb3.utils.MimeTypeEnum.mime_type_zip" href="#couchdb3.utils.MimeTypeEnum.mime_type_zip">mime_type_zip</a></code></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
