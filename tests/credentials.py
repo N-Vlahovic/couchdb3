@@ -12,6 +12,7 @@ from couchdb3.utils import check_response, DEFAULT_TIMEOUT
 __all__ = [
     "ATTACHMENT_PATH_HTML",
     "ATTACHMENT_PATH_JSON",
+    "ATTACHMENT_PATH_PDF",
     "ATTACHMENT_PATH_PNG",
     "ATTACHMENT_PATH_TXT",
     "ATTACHMENT_PATH_ZIP",
@@ -50,6 +51,7 @@ ATTACHMENT_PATH_JSON: str = f"{proj_path}/tests/attachments/test.json"
 ATTACHMENT_PATH_PNG: str = f"{proj_path}/tests/attachments/test.png"
 ATTACHMENT_PATH_TXT: str = f"{proj_path}/tests/attachments/test.txt"
 ATTACHMENT_PATH_ZIP: str = f"{proj_path}/tests/attachments/test.zip"
+ATTACHMENT_PATH_PDF: str = f"{proj_path}/tests/attachments/test.pdf"
 
 
 with open(f"{proj_path}/tests/views/document-view.js", "r", encoding="utf-8") as _:
