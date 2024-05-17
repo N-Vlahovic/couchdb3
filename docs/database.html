@@ -31,13 +31,14 @@
 from __future__ import annotations
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
+import mimetypes
 import requests
 
 from .base import Base
 from .document import Document, AttachmentDocument, extract_document_id_and_rev, SecurityDocument, \
     SecurityDocumentElement
 from .exceptions import CouchDBError, NameComplianceError
-from .utils import validate_db_name, content_type_getter, DEFAULT_TIMEOUT, partitioned_db_resource_parser
+from .utils import validate_db_name, DEFAULT_TIMEOUT, partitioned_db_resource_parser
 from .view import ViewResult
 
 
@@ -758,12 +759,12 @@ class Database(Base):
             attname: str,
             path: str = None,
             *,
-            content: Any = None,
+            content: bytes = None,
+            content_type: str = None,
             rev: str = None,
     ) -&gt; Tuple[str, bool, str]:
         &#34;&#34;&#34;
         Uploads the supplied content as an attachment to the specified document.
-        The appropriate content-type is generated using `couchdb3.utils.content_type_getter`.
 
         Parameters
         ----------
@@ -774,9 +775,12 @@ class Database(Base):
         path : str
             The path ot the local file to be uploaded.
             Precisely one of the arguments `path` or `content` must be supplied.
-        content : str
+        content : bytes
             The content to be uploaded.
             Precisely one of the arguments `path` or `content` must be supplied.
+        content_type : str
+            The attachment&#39;s content-type (mime-type).
+            Must be provided when passing the `content` argument.
         rev : str
             The document&#39;s current revision. Must be supplied for existing documents.
 
@@ -790,44 +794,22 @@ class Database(Base):
         &#34;&#34;&#34;
         if (not content and not path) or (content and path):
             raise ValueError(&#34;Precisely one of the arguments \&#34;attdata\&#34; and  \&#34;attloc\&#34; must be provided.&#34;)
-        content_type = content_type_getter(data=content, file_name=path if path else attname)
+        if content and not content_type:
+            raise ValueError(&#34;Argument \&#34;content_type\&#34; cannot be empty when \&#34;content\&#34; is provided.&#34;)
         resource = f&#34;{docid}/{attname}&#34;
         query_kwargs = {&#34;rev&#34;: rev}
-        req_kwargs = {
-            &#34;headers&#34;: {
-                &#34;content-type&#34;: content_type_getter(data=content, file_name=path if path else attname)
-            }
-        }
+        content_type = content_type if content_type else mimetypes.guess_type(path)[0]
         if path:
             with open(path, &#34;rb&#34;) as file:
-                response = self._put(
-                    resource=resource,
-                    query_kwargs=query_kwargs,
-                    data=file,
-                    headers={
-                        &#34;content-type&#34;: content_type
-                    }
-                )
-        elif content_type in (&#39;application/xml&#39;):
-            req_kwargs.update({&#34;body&#34;: content})
-            response = self._put(
-                resource=resource,
-                query_kwargs=query_kwargs,
-                data=content,
-                headers={
-                    &#34;content-type&#34;: content_type
-                },
-            )      
-        else:
-            req_kwargs.update({&#34;body&#34;: content})
-            response = self._put(
-                resource=resource,
-                query_kwargs=query_kwargs,
-                body=content,
-                headers={
-                    &#34;content-type&#34;: content_type
-                },
-            )
+                content = file.read()
+        response = self._put(
+            resource=resource,
+            query_kwargs=query_kwargs,
+            data=content,
+            headers={
+                &#34;content-type&#34;: content_type
+            },
+        )
         data = response.json()
         return data[&#34;id&#34;], data[&#34;ok&#34;], data[&#34;rev&#34;]
 
@@ -1625,7 +1607,8 @@ class Partition(Database):
             attname: str,
             path: str = None,
             *,
-            content: Any = None,
+            content: bytes = None,
+            content_type: str = None,
             rev: str = None,
     ) -&gt; Tuple[str, bool, str]:
         &#34;&#34;&#34;
@@ -1637,6 +1620,7 @@ class Partition(Database):
         return super(Partition, self).put_attachment(
             docid=self.add_partition_to_str(docid),
             attname=attname,
+            content_type=content_type,
             path=path,
             content=content,
             rev=rev,
@@ -2448,12 +2432,12 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
             attname: str,
             path: str = None,
             *,
-            content: Any = None,
+            content: bytes = None,
+            content_type: str = None,
             rev: str = None,
     ) -&gt; Tuple[str, bool, str]:
         &#34;&#34;&#34;
         Uploads the supplied content as an attachment to the specified document.
-        The appropriate content-type is generated using `couchdb3.utils.content_type_getter`.
 
         Parameters
         ----------
@@ -2464,9 +2448,12 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
         path : str
             The path ot the local file to be uploaded.
             Precisely one of the arguments `path` or `content` must be supplied.
-        content : str
+        content : bytes
             The content to be uploaded.
             Precisely one of the arguments `path` or `content` must be supplied.
+        content_type : str
+            The attachment&#39;s content-type (mime-type).
+            Must be provided when passing the `content` argument.
         rev : str
             The document&#39;s current revision. Must be supplied for existing documents.
 
@@ -2480,44 +2467,22 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
         &#34;&#34;&#34;
         if (not content and not path) or (content and path):
             raise ValueError(&#34;Precisely one of the arguments \&#34;attdata\&#34; and  \&#34;attloc\&#34; must be provided.&#34;)
-        content_type = content_type_getter(data=content, file_name=path if path else attname)
+        if content and not content_type:
+            raise ValueError(&#34;Argument \&#34;content_type\&#34; cannot be empty when \&#34;content\&#34; is provided.&#34;)
         resource = f&#34;{docid}/{attname}&#34;
         query_kwargs = {&#34;rev&#34;: rev}
-        req_kwargs = {
-            &#34;headers&#34;: {
-                &#34;content-type&#34;: content_type_getter(data=content, file_name=path if path else attname)
-            }
-        }
+        content_type = content_type if content_type else mimetypes.guess_type(path)[0]
         if path:
             with open(path, &#34;rb&#34;) as file:
-                response = self._put(
-                    resource=resource,
-                    query_kwargs=query_kwargs,
-                    data=file,
-                    headers={
-                        &#34;content-type&#34;: content_type
-                    }
-                )
-        elif content_type in (&#39;application/xml&#39;):
-            req_kwargs.update({&#34;body&#34;: content})
-            response = self._put(
-                resource=resource,
-                query_kwargs=query_kwargs,
-                data=content,
-                headers={
-                    &#34;content-type&#34;: content_type
-                },
-            )      
-        else:
-            req_kwargs.update({&#34;body&#34;: content})
-            response = self._put(
-                resource=resource,
-                query_kwargs=query_kwargs,
-                body=content,
-                headers={
-                    &#34;content-type&#34;: content_type
-                },
-            )
+                content = file.read()
+        response = self._put(
+            resource=resource,
+            query_kwargs=query_kwargs,
+            data=content,
+            headers={
+                &#34;content-type&#34;: content_type
+            },
+        )
         data = response.json()
         return data[&#34;id&#34;], data[&#34;ok&#34;], data[&#34;rev&#34;]
 
@@ -3998,11 +3963,10 @@ marked as <code>_deleted=true</code> as opposed to being completely purged. For 
 </details>
 </dd>
 <dt id="couchdb3.database.Database.put_attachment"><code class="name flex">
-<span>def <span class="ident">put_attachment</span></span>(<span>self, docid: str, attname: str, path: str = None, *, content: Any = None, rev: str = None) ‑> Tuple[str, bool, str]</span>
+<span>def <span class="ident">put_attachment</span></span>(<span>self, docid: str, attname: str, path: str = None, *, content: bytes = None, content_type: str = None, rev: str = None) ‑> Tuple[str, bool, str]</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Uploads the supplied content as an attachment to the specified document.
-The appropriate content-type is generated using <code><a title="couchdb3.utils.content_type_getter" href="utils.html#couchdb3.utils.content_type_getter">content_type_getter()</a></code>.</p>
+<div class="desc"><p>Uploads the supplied content as an attachment to the specified document.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>docid</code></strong> :&ensp;<code>str</code></dt>
@@ -4012,9 +3976,12 @@ The appropriate content-type is generated using <code><a title="couchdb3.utils.c
 <dt><strong><code>path</code></strong> :&ensp;<code>str</code></dt>
 <dd>The path ot the local file to be uploaded.
 Precisely one of the arguments <code>path</code> or <code>content</code> must be supplied.</dd>
-<dt><strong><code>content</code></strong> :&ensp;<code>str</code></dt>
+<dt><strong><code>content</code></strong> :&ensp;<code>bytes</code></dt>
 <dd>The content to be uploaded.
 Precisely one of the arguments <code>path</code> or <code>content</code> must be supplied.</dd>
+<dt><strong><code>content_type</code></strong> :&ensp;<code>str</code></dt>
+<dd>The attachment's content-type (mime-type).
+Must be provided when passing the <code>content</code> argument.</dd>
 <dt><strong><code>rev</code></strong> :&ensp;<code>str</code></dt>
 <dd>The document's current revision. Must be supplied for existing documents.</dd>
 </dl>
@@ -4035,12 +4002,12 @@ Precisely one of the arguments <code>path</code> or <code>content</code> must be
         attname: str,
         path: str = None,
         *,
-        content: Any = None,
+        content: bytes = None,
+        content_type: str = None,
         rev: str = None,
 ) -&gt; Tuple[str, bool, str]:
     &#34;&#34;&#34;
     Uploads the supplied content as an attachment to the specified document.
-    The appropriate content-type is generated using `couchdb3.utils.content_type_getter`.
 
     Parameters
     ----------
@@ -4051,9 +4018,12 @@ Precisely one of the arguments <code>path</code> or <code>content</code> must be
     path : str
         The path ot the local file to be uploaded.
         Precisely one of the arguments `path` or `content` must be supplied.
-    content : str
+    content : bytes
         The content to be uploaded.
         Precisely one of the arguments `path` or `content` must be supplied.
+    content_type : str
+        The attachment&#39;s content-type (mime-type).
+        Must be provided when passing the `content` argument.
     rev : str
         The document&#39;s current revision. Must be supplied for existing documents.
 
@@ -4067,44 +4037,22 @@ Precisely one of the arguments <code>path</code> or <code>content</code> must be
     &#34;&#34;&#34;
     if (not content and not path) or (content and path):
         raise ValueError(&#34;Precisely one of the arguments \&#34;attdata\&#34; and  \&#34;attloc\&#34; must be provided.&#34;)
-    content_type = content_type_getter(data=content, file_name=path if path else attname)
+    if content and not content_type:
+        raise ValueError(&#34;Argument \&#34;content_type\&#34; cannot be empty when \&#34;content\&#34; is provided.&#34;)
     resource = f&#34;{docid}/{attname}&#34;
     query_kwargs = {&#34;rev&#34;: rev}
-    req_kwargs = {
-        &#34;headers&#34;: {
-            &#34;content-type&#34;: content_type_getter(data=content, file_name=path if path else attname)
-        }
-    }
+    content_type = content_type if content_type else mimetypes.guess_type(path)[0]
     if path:
         with open(path, &#34;rb&#34;) as file:
-            response = self._put(
-                resource=resource,
-                query_kwargs=query_kwargs,
-                data=file,
-                headers={
-                    &#34;content-type&#34;: content_type
-                }
-            )
-    elif content_type in (&#39;application/xml&#39;):
-        req_kwargs.update({&#34;body&#34;: content})
-        response = self._put(
-            resource=resource,
-            query_kwargs=query_kwargs,
-            data=content,
-            headers={
-                &#34;content-type&#34;: content_type
-            },
-        )      
-    else:
-        req_kwargs.update({&#34;body&#34;: content})
-        response = self._put(
-            resource=resource,
-            query_kwargs=query_kwargs,
-            body=content,
-            headers={
-                &#34;content-type&#34;: content_type
-            },
-        )
+            content = file.read()
+    response = self._put(
+        resource=resource,
+        query_kwargs=query_kwargs,
+        data=content,
+        headers={
+            &#34;content-type&#34;: content_type
+        },
+    )
     data = response.json()
     return data[&#34;id&#34;], data[&#34;ok&#34;], data[&#34;rev&#34;]</code></pre>
 </details>
@@ -5142,7 +5090,8 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
             attname: str,
             path: str = None,
             *,
-            content: Any = None,
+            content: bytes = None,
+            content_type: str = None,
             rev: str = None,
     ) -&gt; Tuple[str, bool, str]:
         &#34;&#34;&#34;
@@ -5154,6 +5103,7 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
         return super(Partition, self).put_attachment(
             docid=self.add_partition_to_str(docid),
             attname=attname,
+            content_type=content_type,
             path=path,
             content=content,
             rev=rev,
@@ -5632,7 +5582,7 @@ Appends the partition's ID to the document's ID.</p></div>
 </details>
 </dd>
 <dt id="couchdb3.database.Partition.put_attachment"><code class="name flex">
-<span>def <span class="ident">put_attachment</span></span>(<span>self, docid: str, attname: str, path: str = None, *, content: Any = None, rev: str = None) ‑> Tuple[str, bool, str]</span>
+<span>def <span class="ident">put_attachment</span></span>(<span>self, docid: str, attname: str, path: str = None, *, content: bytes = None, content_type: str = None, rev: str = None) ‑> Tuple[str, bool, str]</span>
 </code></dt>
 <dd>
 <div class="desc"><p>See <code><a title="couchdb3.database.Database.put_attachment" href="#couchdb3.database.Database.put_attachment">Database.put_attachment()</a></code>.</p>
@@ -5648,7 +5598,8 @@ Appends the partition's ID to the document's ID.</p></div>
         attname: str,
         path: str = None,
         *,
-        content: Any = None,
+        content: bytes = None,
+        content_type: str = None,
         rev: str = None,
 ) -&gt; Tuple[str, bool, str]:
     &#34;&#34;&#34;
@@ -5660,6 +5611,7 @@ Appends the partition's ID to the document's ID.</p></div>
     return super(Partition, self).put_attachment(
         docid=self.add_partition_to_str(docid),
         attname=attname,
+        content_type=content_type,
         path=path,
         content=content,
         rev=rev,

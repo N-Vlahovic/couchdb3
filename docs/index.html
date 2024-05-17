@@ -117,7 +117,7 @@ print(db.delete(docid=docid, rev=db.rev(docid)))  # Fetch the revision on the go
 # True
 </code></pre>
 <h3 id="working-with-partitions">Working with partitions</h3>
-<p>For a partitioned database, the <code>couchdb3.Partition</code> class offers a wrapper around partitions (acting similarly
+<p>For a partitioned database, the <code><a title="couchdb3.database.Partition" href="database.html#couchdb3.database.Partition">Partition</a></code> class offers a wrapper around partitions (acting similarly
 to collections in Mongo). </p>
 <pre><code class="language-python">from couchdb3 import Server, Database, Partition
 
@@ -277,7 +277,7 @@ print(db.delete(docid=docid, rev=db.rev(docid)))  # Fetch the revision on the go
 ```
 
 ### Working with partitions
-For a partitioned database, the `couchdb3.Partition` class offers a wrapper around partitions (acting similarly 
+For a partitioned database, the `couchdb3.database.Partition` class offers a wrapper around partitions (acting similarly 
 to collections in Mongo). 
 
 ```python

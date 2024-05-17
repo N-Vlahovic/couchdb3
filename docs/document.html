@@ -256,7 +256,7 @@ class SecurityDocument(DictBase):
         -------
         SecurityDocument : The document&#39;s admins.
         &#34;&#34;&#34;
-        return self.get(&#34;admins&#34;, SecurityDocument())
+        return self.get(&#34;admins&#34;, SecurityDocumentElement())
     
     @admins.setter
     def admins(self, value: SecurityDocumentElement) -&gt; None:
@@ -271,7 +271,7 @@ class SecurityDocument(DictBase):
         -------
         SecurityDocument : The document&#39;s members.
         &#34;&#34;&#34;
-        return self.get(&#34;members&#34;, SecurityDocument())
+        return self.get(&#34;members&#34;, SecurityDocumentElement())
 
     @members.setter
     def members(self, value: SecurityDocumentElement) -&gt; None:
@@ -655,7 +655,7 @@ def rev(self) -&gt; Optional[str]:
         -------
         SecurityDocument : The document&#39;s admins.
         &#34;&#34;&#34;
-        return self.get(&#34;admins&#34;, SecurityDocument())
+        return self.get(&#34;admins&#34;, SecurityDocumentElement())
     
     @admins.setter
     def admins(self, value: SecurityDocumentElement) -&gt; None:
@@ -670,7 +670,7 @@ def rev(self) -&gt; Optional[str]:
         -------
         SecurityDocument : The document&#39;s members.
         &#34;&#34;&#34;
-        return self.get(&#34;members&#34;, SecurityDocument())
+        return self.get(&#34;members&#34;, SecurityDocumentElement())
 
     @members.setter
     def members(self, value: SecurityDocumentElement) -&gt; None:
@@ -700,7 +700,7 @@ def admins(self) -&gt; SecurityDocumentElement:
     -------
     SecurityDocument : The document&#39;s admins.
     &#34;&#34;&#34;
-    return self.get(&#34;admins&#34;, SecurityDocument())</code></pre>
+    return self.get(&#34;admins&#34;, SecurityDocumentElement())</code></pre>
 </details>
 </dd>
 <dt id="couchdb3.document.SecurityDocument.members"><code class="name">var <span class="ident">members</span> : <a title="couchdb3.document.SecurityDocumentElement" href="#couchdb3.document.SecurityDocumentElement">SecurityDocumentElement</a></code></dt>
@@ -718,7 +718,7 @@ def members(self) -&gt; SecurityDocumentElement:
     -------
     SecurityDocument : The document&#39;s members.
     &#34;&#34;&#34;
-    return self.get(&#34;members&#34;, SecurityDocument())</code></pre>
+    return self.get(&#34;members&#34;, SecurityDocumentElement())</code></pre>
 </details>
 </dd>
 </dl>

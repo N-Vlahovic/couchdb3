@@ -3,6 +3,7 @@
 
 import atexit
 import datetime
+import mimetypes
 import random
 import string
 
@@ -12,10 +13,10 @@ from couchdb3.database import Database, Partition
 from couchdb3.document import Document, AttachmentDocument
 from couchdb3.server import Server
 from couchdb3.view import ViewResult, ViewRow
-from couchdb3.utils import user_name_to_id
+from couchdb3.utils import user_name_to_id, MimeTypeEnum
 
 from tests.credentials import ATTACHMENT_PATH_HTML, ATTACHMENT_PATH_JSON, ATTACHMENT_PATH_PNG, ATTACHMENT_PATH_TXT, \
-    ATTACHMENT_PATH_ZIP, COUCHDB_USER, COUCHDB_PASSWORD, COUCHDB0_URL, DOCUMENT_VIEW
+    ATTACHMENT_PATH_ZIP, COUCHDB_USER, COUCHDB_PASSWORD, COUCHDB0_URL, DOCUMENT_VIEW, ATTACHMENT_PATH_PDF
 
 
 def get_or_create_db(db_name: str, client: Server, partitioned: bool = False) -> Database:
@@ -61,7 +62,7 @@ class TestDatabase(unittest.TestCase):
             "_id": _id
         }
         DB.create(doc)
-        self.assertIn(_id, DB)
+        self.assertIn(_id, DB)  # noqa
 
     def test_bulk_docs(self):
         docs = [{
@@ -229,6 +230,7 @@ class TestDatabase(unittest.TestCase):
     def test_delete_attachment(self):
         docid = "test-doc-delete-attachment"
         DB.save({"_id": docid})
+        content_type = MimeTypeEnum.mime_type_json.value  # noqa
         for attname, content in [
             ("test-dict", {"hello": "world", 1: 2, 3: None}),
             ("test-str", "Hello World! 123"),
@@ -237,7 +239,8 @@ class TestDatabase(unittest.TestCase):
             result = DB.put_attachment(
                 docid=docid,
                 attname=attname,
-                content=content,
+                content=str(content).encode('utf-8'),
+                content_type=content_type,
                 rev=DB.rev(docid)
             )
             self.assertTrue(DB.delete_attachment(
@@ -246,8 +249,8 @@ class TestDatabase(unittest.TestCase):
                 rev=result[2]
             ))
 
-    def test_get_attachment(self):
-        docid = "test-doc-get-attachment"
+    def test_attachment_via_path(self):
+        docid = self.test_attachment_via_path.__name__.replace('_', '-')
         DB.save({"_id": docid})
         for attname, path in [
             ("test.html", ATTACHMENT_PATH_HTML),
@@ -255,12 +258,43 @@ class TestDatabase(unittest.TestCase):
             ("test.png", ATTACHMENT_PATH_PNG),
             ("test.txt", ATTACHMENT_PATH_TXT),
             ("test.zip", ATTACHMENT_PATH_ZIP),
+            ("test.pdf", ATTACHMENT_PATH_PDF),
         ]:
             DB.put_attachment(
                 docid=docid,
                 attname=attname,
                 path=path,
                 rev=DB.rev(docid)
+            )
+            response = DB.get_attachment(
+                docid=docid,
+                attname=attname
+            )
+            self.assertIsInstance(response, AttachmentDocument)
+            self.assertIsInstance(response.content, bytes)
+            self.assertIsInstance(response.content_length, int)
+            self.assertIsInstance(response.digest, str)
+
+    def test_attachment_via_content(self):
+        docid = self.test_attachment_via_content.__name__.replace('_', '-')
+        DB.save({"_id": docid})
+        for attname, path in [
+            ("test.html", ATTACHMENT_PATH_HTML),
+            ("test.json", ATTACHMENT_PATH_JSON),
+            ("test.png", ATTACHMENT_PATH_PNG),
+            ("test.txt", ATTACHMENT_PATH_TXT),
+            ("test.zip", ATTACHMENT_PATH_ZIP),
+            ("test.pdf", ATTACHMENT_PATH_PDF),
+        ]:
+            with open(path, 'rb') as f:
+                content = f.read()
+                content_type = mimetypes.guess_type(path)[0]
+            DB.put_attachment(
+                docid=docid,
+                attname=attname,
+                content=content,
+                content_type=content_type,
+                rev=DB.rev(docid),
             )
             response = DB.get_attachment(
                 docid=docid,
