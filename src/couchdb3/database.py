@@ -675,7 +675,7 @@ class Database(Base):
             content_encoding=response.headers.get("content-encoding"),
             content_length=response.headers.get("content-length"),
             content_type=response.headers.get("content-type"),
-            digest="md5-" + response.headers.get("content-md5"),
+            digest="md5-" + response.headers.get("ETag"),
         )
 
     def get_design(
@@ -834,7 +834,7 @@ class Database(Base):
         -------
         Tuple[str, bool, str] : The document's id ( `str`), the operation status (`bool`) and the revision ( `str`).
         """
-        if partitioned:
+        if partitioned is not None:
             options = (options or dict()).update({
                 "partitioned": partitioned
             })
