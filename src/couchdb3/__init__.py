@@ -11,7 +11,7 @@ Big parts of the documentation (and thus docstrings) have been copied from Couch
 
 ## Requirements  
 
-- Python version `>= 3.7`
+- Python version `>= 3.10`
 - CouchDB version `3.x`
 
 ## Installation
