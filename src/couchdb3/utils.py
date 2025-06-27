@@ -18,6 +18,7 @@ __all__ = [
     "basic_auth",
     "build_query",
     "build_url",
+    "rm_nones_from_dict",
     "user_name_to_id",
     "validate_auth_method",
     "validate_db_name",
@@ -30,6 +31,7 @@ __all__ = [
     "COUCHDB_REPLICATOR_DB_NAME",
     "COUCHDB_GLOBAL_CHANGES_DB_NAME",
     "COUCH_DB_RESERVED_DB_NAMES",
+    "COUCH_DB_RESERVED_DOC_FIELDS",
     "DEFAULT_AUTH_METHOD",
     "DEFAULT_TIMEOUT",
     "MimeTypeEnum",
@@ -53,6 +55,12 @@ COUCH_DB_RESERVED_DB_NAMES: Set[str] = {
     COUCHDB_GLOBAL_CHANGES_DB_NAME
 }
 """Reserved CouchDB database names."""
+
+COUCH_DB_RESERVED_DOC_FIELDS: Set[str] = {
+    "_id",
+    "_rev",
+}
+"""Reserved CouchDB document fields."""
 
 DEFAULT_AUTH_METHOD: str = "cookie"
 """The default authentication method - values to `\"cookie\"`."""
@@ -158,6 +166,22 @@ def build_url(
         path=path,
         query=build_query(**kwargs),
     )
+
+
+def rm_nones_from_dict(data: dict, /) -> dict:
+    """
+    Removes all `None` keys from a dictionary.
+
+    Parameters
+    ----------
+    data : dict
+        A dictionary.
+
+    Returns
+    -------
+    dict : A dictionary without `None` keys.
+    """
+    return {k: v for k, v in data.items() if v is not None}
 
 
 def validate_db_name(name: str) -> bool:

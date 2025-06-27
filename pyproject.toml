@@ -1,7 +1,18 @@
-[build-system]
-requires = [
-    "requests",
-    "setuptools>=42",
-    "wheel"
+[project]
+name = "couchdb3"
+version = "2.0.0"
+description = "A wrapper around the CouchDB API."
+authors = [
+    {name = "Nikolai Vlahovic",email = "vlahovic.nikolai@gmail.com"}
 ]
-build-backend = "setuptools.build_meta"
+license = {text = "MIT"}
+readme = "README.md"
+requires-python = ">= 3.10"
+dependencies = [
+    "requests (>=2.32.4,<3.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
