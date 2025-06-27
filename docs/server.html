@@ -2,18 +2,32 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.10.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.6">
 <title>couchdb3.server API documentation</title>
-<meta name="description" content="" />
-<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
-<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
-<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
-<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
-<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<meta name="description" content="">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source > summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible;min-width:max-content}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin:1em 0}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
-<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+/* Collapse source docstrings */
+setTimeout(() => {
+[...document.querySelectorAll('.hljs.language-python > .hljs-string')]
+.filter(el => el.innerHTML.length > 200 && ['"""', "'''"].includes(el.innerHTML.substring(0, 3)))
+.forEach(el => {
+let d = document.createElement('details');
+d.classList.add('hljs-string');
+d.innerHTML = '<summary>"""</summary>' + el.innerHTML.substring(3);
+el.replaceWith(d);
+});
+}, 100);
+})</script>
 </head>
 <body>
 <main>
@@ -22,495 +36,6 @@
 <h1 class="title">Module <code>couchdb3.server</code></h1>
 </header>
 <section id="section-intro">
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
-import requests
-from typing import Dict, List, Tuple, Union
-
-from .base import Base
-from .database import Database
-from .exceptions import ConflictError, CouchDBError, NotFoundError, ProxySchemeComplianceError, UserIDComplianceError
-from .utils import user_name_to_id, validate_proxy, validate_user_id, DEFAULT_TIMEOUT
-
-
-__all__ = [
-    &#34;Server&#34;
-]
-
-
-class Server(Base):
-    &#34;&#34;&#34;
-    Abstract Couchdb client
-    &#34;&#34;&#34;
-    def __init__(
-            self,
-            url: str,
-            *,
-            port: int = None,
-            user: str = None,
-            password: str = None,
-            disable_ssl_verification: bool = False,
-            auth_method: str = None,
-            timeout: int = DEFAULT_TIMEOUT,
-            session: requests.Session = None,
-    ) -&gt; None:
-        &#34;&#34;&#34;
-
-        Parameters
-        ----------
-        url : str
-            The url of the CouchDB server formatted as `scheme://user:password@host:port`. For example:
-
-                &#34;http://user:password@127.0.0.1:5984&#34;
-                &#34;https://couchdb.example.com&#34;
-        port : int
-            The port of the CouchDB server. Can also be supplied via the url.
-        user : str
-            The CouchDB admin username. Can also be supplied via the url.
-        password : str
-            The CouchDB admin password. Can also be supplied via the url.
-        disable_ssl_verification : bool
-            Controls whether to verify the server’s TLS certificate. Set to `True` when connecting to a server with
-            self-signed TLS certificates. Default `False`.
-        auth_method : str
-            Authentication method. Choices are `cookie` or `basic`. Default is `couchdb3.utils.DEFAULT_AUTH_METHOD`.
-        timeout : int
-            The default timeout for requests. Default c.f. `couchdb3.utils.DEFAULT_TIMEOUT`.
-        session: requests.Session
-            A specific session to use. Optional - if not provided, a new session will be initialized.
-        &#34;&#34;&#34;
-        super(Server, self).__init__(
-            url=url,
-            port=port,
-            user=user,
-            password=password,
-            disable_ssl_verification=disable_ssl_verification,
-            auth_method=auth_method,
-            timeout=timeout,
-            session=session,
-        )
-
-    def __getitem__(self, item) -&gt; Database:
-        return self.get(item, check=True)
-
-    def __repr__(self) -&gt; str:
-        &#34;&#34;&#34;
-        Close the session on delete.
-
-        Returns
-        -------
-        str
-        &#34;&#34;&#34;
-        return f&#34;{super(Server, self).__repr__()}: {self.url}&#34;
-
-    def active_tasks(
-            self,
-    ) -&gt; List[Dict]:
-        &#34;&#34;&#34;
-        List of running tasks, including the task type, name, status and process ID. The result is a JSON array of the
-        currently running tasks, with each task being described with a single object. Depending on operation type set
-        of response object fields might be different.
-
-        Returns
-        -------
-        List[Dict]
-        &#34;&#34;&#34;
-        return self._get(
-            resource=&#34;_active_tasks&#34;
-        ).json()
-
-    def check_user(
-            self,
-            username: str,
-            password: str
-    ) -&gt; bool:
-        &#34;&#34;&#34;
-        Checks the username/password combination by creating a `Server` instance and performing a `Server.check`
-        request.
-
-        Parameters
-        ----------
-        username : str
-            The CouchDB user&#39;s name.
-        password : str
-            The CouchDB user&#39;s password.
-
-        Returns
-        -------
-        bool : A boolean indicating if the username/password combination is valid.
-        &#34;&#34;&#34;
-        return Server(
-            url=self.url,
-            user=username,
-            password=password
-        ).check()
-
-    def save_user(
-            self,
-            name: str,
-            *,
-            user_id: str = None,
-            derived_key: str = None,
-            roles: List[str] = None,
-            password: str = None,
-            password_sha: str = None,
-            password_scheme: str = None,
-            salt: str = None,
-            iterations: int = None,
-            rev: str = None
-    ) -&gt; Tuple[bool, str, str]:
-        &#34;&#34;&#34;
-        Create or update a user. In case of a `ConflictError`, a `HEAD` request to `/_users/&lt;user_id&gt;` will be sent to
-        obtain the latest revision.
-
-        Parameters
-        ----------
-        name : str
-            User’s name aka login. Immutable e.g. you cannot rename an existing user - you have to create new one.
-        user_id : str
-            The user’s login with the special prefix `org.couchdb.user:`.
-        derived_key : str
-            PBKDF2 key derived from salt/iterations.
-        roles : List[str]
-            List of user roles. CouchDB doesn’t provide any built-in roles, so you’re free to define your own depending
-            on your needs. However, you cannot set system roles like `_admin` there. Also, only administrators may
-            assign roles to users - by default all users have no roles.
-        password : str
-            A plaintext password can be provided, but will be replaced by hashed fields before the document is actually
-            stored.
-        password_sha : str
-            Hashed password with salt. Used for `simple` password_scheme.
-        password_scheme : str
-             Password hashing scheme. May be `simple` or `pbkdf2`.
-        salt : str
-            Hash salt. Used for both `simple` and `pbkdf2` `password_scheme` options.
-        iterations : int
-            Number of iterations to derive key, used for `pbkdf2` `password_scheme`.
-        rev : str
-            The user&#39;s current revision. Needed when updating an existing user.
-
-        Returns
-        -------
-        Tuple[bool, str, str]: A tuple consisting of the following elements.
-
-          - the success status (`bool`)
-          - the user ID ( `str`)
-          - the current revision ( `str`)
-        &#34;&#34;&#34;
-        if user_id and validate_user_id(user_id=user_id) is False:
-            raise UserIDComplianceError(
-                &#34;User ID does not comply with the CouchDB requirements. &#34;
-                &#34;See https://docs.couchdb.org/en/main/intro/security.html#why-the-org-couchdb-user-prefix.&#34;
-            )
-        user_id = user_id or user_name_to_id(name)
-        body = {
-            &#34;_id&#34;: user_id,
-            &#34;_rev&#34;: rev,
-            &#34;derived_key&#34;: derived_key,
-            &#34;name&#34;: name,
-            &#34;roles&#34;: roles or [],
-            &#34;password&#34;: password,
-            &#34;password_sha&#34;: password_sha,
-            &#34;password_scheme&#34;: password_scheme,
-            &#34;salt&#34;: salt,
-            &#34;iterations&#34;: iterations,
-            &#34;type&#34;: &#34;user&#34;
-        }
-        try:
-            response = self._put(
-                resource=f&#34;_users/{user_id}&#34;,
-                body=body
-            )
-        except ConflictError:
-            body.update({&#34;_rev&#34;: self.rev(f&#34;_users/{user_id}&#34;)})
-            response = self._put(
-                resource=f&#34;_users/{user_id}&#34;,
-                body=body
-            )
-        data = response.json()
-        return data[&#34;ok&#34;], data[&#34;id&#34;], data[&#34;rev&#34;]
-
-    def all_dbs(
-            self,
-            *,
-            descending: bool = False,
-            endkey: str = None,
-            limit: int = None,
-            skip: int = 0,
-            startkey: str = None,
-    ) -&gt; List[str]:
-        &#34;&#34;&#34;
-        Get all database names.
-
-        Parameters
-        ----------
-        descending : bool
-            Return the databases in descending order by key. Default `False`.
-        endkey : str
-            Stop returning databases when the specified key is reached. Default `None`.
-        limit : int
-            Limit the number of the returned databases to the specified number. Default `None`.
-        skip : int
-            Skip this number of databases before starting to return the results. Default `0`.
-        startkey : str
-            Return databases starting with the specified key. Default `None`.
-
-        Returns
-        -------
-        List[str] : A list of database names.
-        &#34;&#34;&#34;
-        return self._get(
-            &#34;_all_dbs&#34;,
-            query_kwargs={
-                &#34;descending&#34;: descending,
-                &#34;endkey&#34;: endkey,
-                &#34;limit&#34;: limit,
-                &#34;skip&#34;: skip,
-                &#34;startkey&#34;: startkey,
-            }
-        ).json()
-
-    def create(
-            self,
-            name: str,
-            q: int = None,
-            n: int = None,
-            partitioned: bool = False,
-    ) -&gt; Database:
-        &#34;&#34;&#34;
-        Create a database.
-
-        Parameters
-        ----------
-        name : str
-            The database&#39;s name.
-        q : int
-            Shards, aka the number of range partitions. Default `None` (i.e. server default will be used: `8`, unless
-            overridden in the `cluster config`).
-        n : int
-            Replicas. The number of copies of the database in the cluster. Default `None` (i.e. server default will be
-            used: `3`, unless overridden in the `cluster config`).
-        partitioned : bool
-            Whether to create a partitioned database. Default `False`.
-
-        Returns
-        -------
-        couchdb3.database.Database
-        &#34;&#34;&#34;
-        self._put(
-            resource=name,
-            query_kwargs={
-                &#34;q&#34;: q,
-                &#34;n&#34;: n,
-                &#34;partitioned&#34;: partitioned
-            }
-        )
-        return self.get(name=name)
-
-    def dbs_info(
-            self,
-            keys: List[str]
-    ) -&gt; List[Dict]:
-        &#34;&#34;&#34;
-        Returns information of a list of the specified databases in the CouchDB instance.
-
-        Parameters
-        ----------
-        keys : List[str]
-            List of database names to be requested
-
-        Returns
-        -------
-        List[Dict] : A list dictionaries containing the corresponding database info.
-        &#34;&#34;&#34;
-        return self._post(
-            resource=&#34;_dbs_info&#34;,
-            body={
-                &#34;keys&#34;: keys
-            }
-        ).json()
-
-    def get(
-            self,
-            name: str,
-            check: bool = False
-    ) -&gt; Database:
-        &#34;&#34;&#34;
-        Get a database by name.
-
-        Parameters
-        ----------
-        name : str
-            The name of the database.
-        check : bool
-            If `True`, raise an exception if database `name` cannot be found in the server. Default `False`.
-
-        Returns
-        -------
-        couchdb3.database.Database
-
-        &#34;&#34;&#34;
-        db = Database(
-            name=name,
-            url=self.url,
-            user=self._user,
-            password=self._password,
-            disable_ssl_verification=not self.session.verify,
-            auth_method=self.auth_method,
-            session=self.session,
-        )
-        try:
-            db._head()
-        except (NotFoundError, requests.exceptions.RequestException) as error:
-            if check is True:
-                raise error
-        except CouchDBError as error:
-            raise error
-        return db
-
-    def delete(
-            self,
-            resource: str = None
-    ) -&gt; bool:
-        &#34;&#34;&#34;
-        Delete a database.
-
-        Parameters
-        ----------
-        resource : str
-            The database&#39;s name.
-
-        Returns
-        -------
-        bool: `True` upon successful deletion.
-        &#34;&#34;&#34;
-        self._delete(resource=resource)
-        return True
-
-    def replicate(
-            self,
-            source: Union[Dict, str],
-            target: Union[Dict, str],
-            replication_id: str = None,
-            cancel: bool = None,
-            continuous: bool = None,
-            create_target: bool = None,
-            create_target_params: Dict = None,
-            doc_ids: List[str] = None,
-            filter_func: str = None,
-            selector: Dict = None,
-            source_proxy: str = None,
-            target_proxy: str = None
-    ) -&gt; Dict:
-        &#34;&#34;&#34;
-        Request, configure, or stop, a replication operation. For more info, please refer to
-        [the official documentation](https://docs.couchdb.org/en/main/api/server/common.html#replicate).
-
-        Parameters
-        ----------
-        source : Union[Dict, str]
-            Fully qualified source database URL or an object which contains the full URL of the source database with
-            additional parameters like headers. Eg:
-
-                &#34;http://example.com/source_db_name&#34;
-
-            or
-
-                {“url”:”url in here”, “headers”: {“header1”:”value1”, …}}
-
-        target : Union[Dict, str]
-            Fully qualified target database URL or an object which contains the full URL of the source database with
-            additional parameters like headers. Eg:
-
-                &#34;http://example.com/target_db_name&#34;
-
-            or
-
-                {“url”:”url in here”, “headers”: {“header1”:”value1”, …}}
-
-        replication_id : str
-            The ID of the replication document.
-        cancel : bool
-            Cancels the replication.
-        continuous : bool
-            Configure the replication to be continuous.
-        create_target : bool
-            Creates the target database. Required administrator’s privileges on target server.
-        create_target_params : Dict
-            An object that contains parameters to be used when creating the target database. Can include the standard
-            `q` and `n` parameters.
-        doc_ids : List[str]
-            Array of document IDs to be synchronized. `doc_ids`, `filter` and `selector` are mutually exclusive.
-        filter_func : str
-             The name of a [filter function](https://docs.couchdb.org/en/main/ddocs/ddocs.html#filterfun).
-             `doc_ids`, `filter` and `selector` are mutually exclusive.
-        selector : Dict
-            A [selector](https://docs.couchdb.org/en/main/api/database/find.html#find-selectors) to filter documents
-            for synchronization. Has the same behavior as the
-            [selector objects](https://docs.couchdb.org/en/main/replication/replicator.html#selectorobj) in replication
-            documents. `doc_ids`, `filter` and `selector` are mutually exclusive.
-        source_proxy : str
-            Address of a proxy server through which replication from the source should occur (protocol can be `&#34;http”`
-            or `“socks5”`).
-        target_proxy : str
-            Address of a proxy server through which replication to the target should occur (protocol can be `&#34;http”`
-            or `“socks5”`).
-
-        Returns
-        -------
-        Dict : A dictionary with the following keys.
-
-          - history (`list`) - Replication history
-          - ok (`bool`) - Replication status
-          - replication_id_version (`int`) – Replication protocol version
-          - session_id (`str`) – Unique session ID
-          - source_last_seq (`int`) – Last sequence number read from source database
-        &#34;&#34;&#34;
-        if (
-                source_proxy and validate_proxy(source_proxy) is False
-        ) or (
-                target_proxy and validate_proxy(target_proxy) is False
-        ):
-            raise ProxySchemeComplianceError(&#34;Proxy has invalid scheme.&#34;)
-        if sum(bool(_) for _ in [doc_ids, filter_func, selector]) &gt; 1:
-            raise CouchDBError(&#34;Arguments \&#34;doc_ids\&#34;, \&#34;filter_func\&#34; and \&#34;selector\&#34; are mutually exclusive.&#34;)
-        return self._post(
-            resource=&#34;_replicator&#34;,
-            body={
-                &#34;_id&#34;: replication_id,
-                &#34;source&#34;: source,
-                &#34;target&#34;: target,
-                &#34;cancel&#34;: cancel,
-                &#34;continuous&#34;: continuous,
-                &#34;create_target&#34;: create_target,
-                &#34;create_target_params&#34;: create_target_params,
-                &#34;doc_ids&#34;: doc_ids,
-                &#34;filter_func&#34;: filter_func,
-                &#34;selector&#34;: selector,
-                &#34;source_proxy&#34;: source_proxy,
-                &#34;target_proxy&#34;: target_proxy
-            }
-        ).json()
-
-    def up(self) -&gt; bool:
-        &#34;&#34;&#34;
-        Check if the server is up.
-
-        Returns
-        -------
-        bool : `True` if the server is up.
-        &#34;&#34;&#34;
-        try:
-            self._get(resource=&#34;_up&#34;)
-            return True
-        except (CouchDBError, requests.exceptions.RequestException):
-            return False</code></pre>
-</details>
 </section>
 <section>
 </section>
@@ -523,33 +48,9 @@ class Server(Base):
 <dl>
 <dt id="couchdb3.server.Server"><code class="flex name class">
 <span>class <span class="ident">Server</span></span>
-<span>(</span><span>url: str, *, port: int = None, user: str = None, password: str = None, disable_ssl_verification: bool = False, auth_method: str = None, timeout: int = 300, session: requests.sessions.Session = None)</span>
+<span>(</span><span>url: str,<br>*,<br>port: int = None,<br>user: str = None,<br>password: str = None,<br>disable_ssl_verification: bool = False,<br>auth_method: str = None,<br>timeout: int = 300,<br>session: requests.sessions.Session = None)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Abstract Couchdb client</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>url</code></strong> :&ensp;<code>str</code></dt>
-<dd>The url of the CouchDB server formatted as <code>scheme://user:password@host:port</code>. For example:<pre><code>"http://user:password@127.0.0.1:5984"
-"https://couchdb.example.com"
-</code></pre>
-</dd>
-<dt><strong><code>port</code></strong> :&ensp;<code>int</code></dt>
-<dd>The port of the CouchDB server. Can also be supplied via the url.</dd>
-<dt><strong><code>user</code></strong> :&ensp;<code>str</code></dt>
-<dd>The CouchDB admin username. Can also be supplied via the url.</dd>
-<dt><strong><code>password</code></strong> :&ensp;<code>str</code></dt>
-<dd>The CouchDB admin password. Can also be supplied via the url.</dd>
-<dt><strong><code>disable_ssl_verification</code></strong> :&ensp;<code>bool</code></dt>
-<dd>Controls whether to verify the server’s TLS certificate. Set to <code>True</code> when connecting to a server with
-self-signed TLS certificates. Default <code>False</code>.</dd>
-<dt><strong><code>auth_method</code></strong> :&ensp;<code>str</code></dt>
-<dd>Authentication method. Choices are <code>cookie</code> or <code>basic</code>. Default is <code><a title="couchdb3.utils.DEFAULT_AUTH_METHOD" href="utils.html#couchdb3.utils.DEFAULT_AUTH_METHOD">DEFAULT_AUTH_METHOD</a></code>.</dd>
-<dt><strong><code>timeout</code></strong> :&ensp;<code>int</code></dt>
-<dd>The default timeout for requests. Default c.f. <code><a title="couchdb3.utils.DEFAULT_TIMEOUT" href="utils.html#couchdb3.utils.DEFAULT_TIMEOUT">DEFAULT_TIMEOUT</a></code>.</dd>
-<dt><strong><code>session</code></strong> :&ensp;<code>requests.Session</code></dt>
-<dd>A specific session to use. Optional - if not provided, a new session will be initialized.</dd>
-</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -992,7 +493,7 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
             raise CouchDBError(&#34;Arguments \&#34;doc_ids\&#34;, \&#34;filter_func\&#34; and \&#34;selector\&#34; are mutually exclusive.&#34;)
         return self._post(
             resource=&#34;_replicator&#34;,
-            body={
+            body=rm_nones_from_dict({
                 &#34;_id&#34;: replication_id,
                 &#34;source&#34;: source,
                 &#34;target&#34;: target,
@@ -1005,23 +506,57 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
                 &#34;selector&#34;: selector,
                 &#34;source_proxy&#34;: source_proxy,
                 &#34;target_proxy&#34;: target_proxy
-            }
+            }),
         ).json()
 
-    def up(self) -&gt; bool:
+    def up(
+            self,
+            raise_exception: bool = False,
+    ) -&gt; bool:
         &#34;&#34;&#34;
         Check if the server is up.
+
+        Parameters
+        ----------
+        raise_exception : bool
+            If `True`, exceptions encountered when check server will be raised.
 
         Returns
         -------
         bool : `True` if the server is up.
         &#34;&#34;&#34;
         try:
-            self._get(resource=&#34;_up&#34;)
-            return True
-        except (CouchDBError, requests.exceptions.RequestException):
+            response = self._get(resource=&#34;_up&#34;)
+            return &#39;status&#39; in response.json() and response.json()[&#39;status&#39;] == &#39;ok&#39;
+        except Exception as error:
+            if raise_exception:
+                raise error
             return False</code></pre>
 </details>
+<div class="desc"><p>Abstract Couchdb client</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>url</code></strong> :&ensp;<code>str</code></dt>
+<dd>The url of the CouchDB server formatted as <code>scheme://user:password@host:port</code>. For example:<pre><code>"http://user:password@127.0.0.1:5984"
+"https://couchdb.example.com"
+</code></pre>
+</dd>
+<dt><strong><code>port</code></strong> :&ensp;<code>int</code></dt>
+<dd>The port of the CouchDB server. Can also be supplied via the url.</dd>
+<dt><strong><code>user</code></strong> :&ensp;<code>str</code></dt>
+<dd>The CouchDB admin username. Can also be supplied via the url.</dd>
+<dt><strong><code>password</code></strong> :&ensp;<code>str</code></dt>
+<dd>The CouchDB admin password. Can also be supplied via the url.</dd>
+<dt><strong><code>disable_ssl_verification</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Controls whether to verify the server’s TLS certificate. Set to <code>True</code> when connecting to a server with
+self-signed TLS certificates. Default <code>False</code>.</dd>
+<dt><strong><code>auth_method</code></strong> :&ensp;<code>str</code></dt>
+<dd>Authentication method. Choices are <code>cookie</code> or <code>basic</code>. Default is <code><a title="couchdb3.utils.DEFAULT_AUTH_METHOD" href="utils.html#couchdb3.utils.DEFAULT_AUTH_METHOD">DEFAULT_AUTH_METHOD</a></code>.</dd>
+<dt><strong><code>timeout</code></strong> :&ensp;<code>int</code></dt>
+<dd>The default timeout for requests. Default c.f. <code><a title="couchdb3.utils.DEFAULT_TIMEOUT" href="utils.html#couchdb3.utils.DEFAULT_TIMEOUT">DEFAULT_TIMEOUT</a></code>.</dd>
+<dt><strong><code>session</code></strong> :&ensp;<code>requests.Session</code></dt>
+<dd>A specific session to use. Optional - if not provided, a new session will be initialized.</dd>
+</dl></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="couchdb3.base.Base" href="base.html#couchdb3.base.Base">Base</a></li>
@@ -1032,14 +567,6 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
 <span>def <span class="ident">active_tasks</span></span>(<span>self) ‑> List[Dict]</span>
 </code></dt>
 <dd>
-<div class="desc"><p>List of running tasks, including the task type, name, status and process ID. The result is a JSON array of the
-currently running tasks, with each task being described with a single object. Depending on operation type set
-of response object fields might be different.</p>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code>List[Dict]</code></dt>
-<dd>&nbsp;</dd>
-</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1060,27 +587,19 @@ of response object fields might be different.</p>
         resource=&#34;_active_tasks&#34;
     ).json()</code></pre>
 </details>
+<div class="desc"><p>List of running tasks, including the task type, name, status and process ID. The result is a JSON array of the
+currently running tasks, with each task being described with a single object. Depending on operation type set
+of response object fields might be different.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>List[Dict]</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
 </dd>
 <dt id="couchdb3.server.Server.all_dbs"><code class="name flex">
-<span>def <span class="ident">all_dbs</span></span>(<span>self, *, descending: bool = False, endkey: str = None, limit: int = None, skip: int = 0, startkey: str = None) ‑> List[str]</span>
+<span>def <span class="ident">all_dbs</span></span>(<span>self,<br>*,<br>descending: bool = False,<br>endkey: str = None,<br>limit: int = None,<br>skip: int = 0,<br>startkey: str = None) ‑> List[str]</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Get all database names.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>descending</code></strong> :&ensp;<code>bool</code></dt>
-<dd>Return the databases in descending order by key. Default <code>False</code>.</dd>
-<dt><strong><code>endkey</code></strong> :&ensp;<code>str</code></dt>
-<dd>Stop returning databases when the specified key is reached. Default <code>None</code>.</dd>
-<dt><strong><code>limit</code></strong> :&ensp;<code>int</code></dt>
-<dd>Limit the number of the returned databases to the specified number. Default <code>None</code>.</dd>
-<dt><strong><code>skip</code></strong> :&ensp;<code>int</code></dt>
-<dd>Skip this number of databases before starting to return the results. Default <code>0</code>.</dd>
-<dt><strong><code>startkey</code></strong> :&ensp;<code>str</code></dt>
-<dd>Return databases starting with the specified key. Default <code>None</code>.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<p>List[str] : A list of database names.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1125,22 +644,27 @@ of response object fields might be different.</p>
         }
     ).json()</code></pre>
 </details>
+<div class="desc"><p>Get all database names.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>descending</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Return the databases in descending order by key. Default <code>False</code>.</dd>
+<dt><strong><code>endkey</code></strong> :&ensp;<code>str</code></dt>
+<dd>Stop returning databases when the specified key is reached. Default <code>None</code>.</dd>
+<dt><strong><code>limit</code></strong> :&ensp;<code>int</code></dt>
+<dd>Limit the number of the returned databases to the specified number. Default <code>None</code>.</dd>
+<dt><strong><code>skip</code></strong> :&ensp;<code>int</code></dt>
+<dd>Skip this number of databases before starting to return the results. Default <code>0</code>.</dd>
+<dt><strong><code>startkey</code></strong> :&ensp;<code>str</code></dt>
+<dd>Return databases starting with the specified key. Default <code>None</code>.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>List[str] : A list of database names.</p></div>
 </dd>
 <dt id="couchdb3.server.Server.check_user"><code class="name flex">
 <span>def <span class="ident">check_user</span></span>(<span>self, username: str, password: str) ‑> bool</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Checks the username/password combination by creating a <code><a title="couchdb3.server.Server" href="#couchdb3.server.Server">Server</a></code> instance and performing a <code><a title="couchdb3.server.Server.check" href="base.html#couchdb3.base.Base.check">Base.check()</a></code>
-request.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>username</code></strong> :&ensp;<code>str</code></dt>
-<dd>The CouchDB user's name.</dd>
-<dt><strong><code>password</code></strong> :&ensp;<code>str</code></dt>
-<dd>The CouchDB user's password.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<p>bool : A boolean indicating if the username/password combination is valid.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1171,30 +695,22 @@ request.</p>
         password=password
     ).check()</code></pre>
 </details>
+<div class="desc"><p>Checks the username/password combination by creating a <code><a title="couchdb3.server.Server" href="#couchdb3.server.Server">Server</a></code> instance and performing a <code><a title="couchdb3.server.Server.check" href="base.html#couchdb3.base.Base.check">Base.check()</a></code>
+request.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>username</code></strong> :&ensp;<code>str</code></dt>
+<dd>The CouchDB user's name.</dd>
+<dt><strong><code>password</code></strong> :&ensp;<code>str</code></dt>
+<dd>The CouchDB user's password.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>bool : A boolean indicating if the username/password combination is valid.</p></div>
 </dd>
 <dt id="couchdb3.server.Server.create"><code class="name flex">
 <span>def <span class="ident">create</span></span>(<span>self, name: str, q: int = None, n: int = None, partitioned: bool = False) ‑> <a title="couchdb3.database.Database" href="database.html#couchdb3.database.Database">Database</a></span>
 </code></dt>
 <dd>
-<div class="desc"><p>Create a database.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
-<dd>The database's name.</dd>
-<dt><strong><code>q</code></strong> :&ensp;<code>int</code></dt>
-<dd>Shards, aka the number of range partitions. Default <code>None</code> (i.e. server default will be used: <code>8</code>, unless
-overridden in the <code>cluster config</code>).</dd>
-<dt><strong><code>n</code></strong> :&ensp;<code>int</code></dt>
-<dd>Replicas. The number of copies of the database in the cluster. Default <code>None</code> (i.e. server default will be
-used: <code>3</code>, unless overridden in the <code>cluster config</code>).</dd>
-<dt><strong><code>partitioned</code></strong> :&ensp;<code>bool</code></dt>
-<dd>Whether to create a partitioned database. Default <code>False</code>.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code><a title="couchdb3.database.Database" href="database.html#couchdb3.database.Database">Database</a></code></dt>
-<dd>&nbsp;</dd>
-</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1236,19 +752,30 @@ used: <code>3</code>, unless overridden in the <code>cluster config</code>).</dd
     )
     return self.get(name=name)</code></pre>
 </details>
+<div class="desc"><p>Create a database.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>The database's name.</dd>
+<dt><strong><code>q</code></strong> :&ensp;<code>int</code></dt>
+<dd>Shards, aka the number of range partitions. Default <code>None</code> (i.e. server default will be used: <code>8</code>, unless
+overridden in the <code>cluster config</code>).</dd>
+<dt><strong><code>n</code></strong> :&ensp;<code>int</code></dt>
+<dd>Replicas. The number of copies of the database in the cluster. Default <code>None</code> (i.e. server default will be
+used: <code>3</code>, unless overridden in the <code>cluster config</code>).</dd>
+<dt><strong><code>partitioned</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Whether to create a partitioned database. Default <code>False</code>.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code><a title="couchdb3.database.Database" href="database.html#couchdb3.database.Database">Database</a></code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
 </dd>
 <dt id="couchdb3.server.Server.dbs_info"><code class="name flex">
 <span>def <span class="ident">dbs_info</span></span>(<span>self, keys: List[str]) ‑> List[Dict]</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Returns information of a list of the specified databases in the CouchDB instance.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>keys</code></strong> :&ensp;<code>List[str]</code></dt>
-<dd>List of database names to be requested</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<p>List[Dict] : A list dictionaries containing the corresponding database info.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1276,19 +803,19 @@ used: <code>3</code>, unless overridden in the <code>cluster config</code>).</dd
         }
     ).json()</code></pre>
 </details>
+<div class="desc"><p>Returns information of a list of the specified databases in the CouchDB instance.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>keys</code></strong> :&ensp;<code>List[str]</code></dt>
+<dd>List of database names to be requested</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>List[Dict] : A list dictionaries containing the corresponding database info.</p></div>
 </dd>
 <dt id="couchdb3.server.Server.delete"><code class="name flex">
 <span>def <span class="ident">delete</span></span>(<span>self, resource: str = None) ‑> bool</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Delete a database.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>resource</code></strong> :&ensp;<code>str</code></dt>
-<dd>The database's name.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<p>bool: <code>True</code> upon successful deletion.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1312,24 +839,19 @@ used: <code>3</code>, unless overridden in the <code>cluster config</code>).</dd
     self._delete(resource=resource)
     return True</code></pre>
 </details>
+<div class="desc"><p>Delete a database.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>resource</code></strong> :&ensp;<code>str</code></dt>
+<dd>The database's name.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>bool: <code>True</code> upon successful deletion.</p></div>
 </dd>
 <dt id="couchdb3.server.Server.get"><code class="name flex">
 <span>def <span class="ident">get</span></span>(<span>self, name: str, check: bool = False) ‑> <a title="couchdb3.database.Database" href="database.html#couchdb3.database.Database">Database</a></span>
 </code></dt>
 <dd>
-<div class="desc"><p>Get a database by name.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
-<dd>The name of the database.</dd>
-<dt><strong><code>check</code></strong> :&ensp;<code>bool</code></dt>
-<dd>If <code>True</code>, raise an exception if database <code>name</code> cannot be found in the server. Default <code>False</code>.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<dl>
-<dt><code><a title="couchdb3.database.Database" href="database.html#couchdb3.database.Database">Database</a></code></dt>
-<dd>&nbsp;</dd>
-</dl></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1372,72 +894,24 @@ used: <code>3</code>, unless overridden in the <code>cluster config</code>).</dd
         raise error
     return db</code></pre>
 </details>
-</dd>
-<dt id="couchdb3.server.Server.replicate"><code class="name flex">
-<span>def <span class="ident">replicate</span></span>(<span>self, source: Union[Dict, str], target: Union[Dict, str], replication_id: str = None, cancel: bool = None, continuous: bool = None, create_target: bool = None, create_target_params: Dict = None, doc_ids: List[str] = None, filter_func: str = None, selector: Dict = None, source_proxy: str = None, target_proxy: str = None) ‑> Dict</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Request, configure, or stop, a replication operation. For more info, please refer to
-<a href="https://docs.couchdb.org/en/main/api/server/common.html#replicate">the official documentation</a>.</p>
+<div class="desc"><p>Get a database by name.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>source</code></strong> :&ensp;<code>Union[Dict, str]</code></dt>
-<dd>
-<p>Fully qualified source database URL or an object which contains the full URL of the source database with
-additional parameters like headers. Eg:</p>
-<pre><code>"http://example.com/source_db_name"
-</code></pre>
-<p>or</p>
-<pre><code>{“url”:”url in here”, “headers”: {“header1”:”value1”, …}}
-</code></pre>
-</dd>
-<dt><strong><code>target</code></strong> :&ensp;<code>Union[Dict, str]</code></dt>
-<dd>
-<p>Fully qualified target database URL or an object which contains the full URL of the source database with
-additional parameters like headers. Eg:</p>
-<pre><code>"http://example.com/target_db_name"
-</code></pre>
-<p>or</p>
-<pre><code>{“url”:”url in here”, “headers”: {“header1”:”value1”, …}}
-</code></pre>
-</dd>
-<dt><strong><code>replication_id</code></strong> :&ensp;<code>str</code></dt>
-<dd>The ID of the replication document.</dd>
-<dt><strong><code>cancel</code></strong> :&ensp;<code>bool</code></dt>
-<dd>Cancels the replication.</dd>
-<dt><strong><code>continuous</code></strong> :&ensp;<code>bool</code></dt>
-<dd>Configure the replication to be continuous.</dd>
-<dt><strong><code>create_target</code></strong> :&ensp;<code>bool</code></dt>
-<dd>Creates the target database. Required administrator’s privileges on target server.</dd>
-<dt><strong><code>create_target_params</code></strong> :&ensp;<code>Dict</code></dt>
-<dd>An object that contains parameters to be used when creating the target database. Can include the standard
-<code>q</code> and <code>n</code> parameters.</dd>
-<dt><strong><code>doc_ids</code></strong> :&ensp;<code>List[str]</code></dt>
-<dd>Array of document IDs to be synchronized. <code>doc_ids</code>, <code>filter</code> and <code>selector</code> are mutually exclusive.</dd>
-<dt><strong><code>filter_func</code></strong> :&ensp;<code>str</code></dt>
-<dd>The name of a <a href="https://docs.couchdb.org/en/main/ddocs/ddocs.html#filterfun">filter function</a>.
-<code>doc_ids</code>, <code>filter</code> and <code>selector</code> are mutually exclusive.</dd>
-<dt><strong><code>selector</code></strong> :&ensp;<code>Dict</code></dt>
-<dd>A <a href="https://docs.couchdb.org/en/main/api/database/find.html#find-selectors">selector</a> to filter documents
-for synchronization. Has the same behavior as the
-<a href="https://docs.couchdb.org/en/main/replication/replicator.html#selectorobj">selector objects</a> in replication
-documents. <code>doc_ids</code>, <code>filter</code> and <code>selector</code> are mutually exclusive.</dd>
-<dt><strong><code>source_proxy</code></strong> :&ensp;<code>str</code></dt>
-<dd>Address of a proxy server through which replication from the source should occur (protocol can be <code>"http”</code>
-or <code>“socks5”</code>).</dd>
-<dt><strong><code>target_proxy</code></strong> :&ensp;<code>str</code></dt>
-<dd>Address of a proxy server through which replication to the target should occur (protocol can be <code>"http”</code>
-or <code>“socks5”</code>).</dd>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>The name of the database.</dd>
+<dt><strong><code>check</code></strong> :&ensp;<code>bool</code></dt>
+<dd>If <code>True</code>, raise an exception if database <code>name</code> cannot be found in the server. Default <code>False</code>.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
-<p>Dict : A dictionary with the following keys.</p>
-<ul>
-<li>history (<code>list</code>) - Replication history</li>
-<li>ok (<code>bool</code>) - Replication status</li>
-<li>replication_id_version (<code>int</code>) – Replication protocol version</li>
-<li>session_id (<code>str</code>) – Unique session ID</li>
-<li>source_last_seq (<code>int</code>) – Last sequence number read from source database</li>
-</ul></div>
+<dl>
+<dt><code><a title="couchdb3.database.Database" href="database.html#couchdb3.database.Database">Database</a></code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+</dd>
+<dt id="couchdb3.server.Server.replicate"><code class="name flex">
+<span>def <span class="ident">replicate</span></span>(<span>self,<br>source: Dict | str,<br>target: Dict | str,<br>replication_id: str = None,<br>cancel: bool = None,<br>continuous: bool = None,<br>create_target: bool = None,<br>create_target_params: Dict = None,<br>doc_ids: List[str] = None,<br>filter_func: str = None,<br>selector: Dict = None,<br>source_proxy: str = None,<br>target_proxy: str = None) ‑> Dict</span>
+</code></dt>
+<dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1531,7 +1005,7 @@ or <code>“socks5”</code>).</dd>
         raise CouchDBError(&#34;Arguments \&#34;doc_ids\&#34;, \&#34;filter_func\&#34; and \&#34;selector\&#34; are mutually exclusive.&#34;)
     return self._post(
         resource=&#34;_replicator&#34;,
-        body={
+        body=rm_nones_from_dict({
             &#34;_id&#34;: replication_id,
             &#34;source&#34;: source,
             &#34;target&#34;: target,
@@ -1544,49 +1018,75 @@ or <code>“socks5”</code>).</dd>
             &#34;selector&#34;: selector,
             &#34;source_proxy&#34;: source_proxy,
             &#34;target_proxy&#34;: target_proxy
-        }
+        }),
     ).json()</code></pre>
 </details>
-</dd>
-<dt id="couchdb3.server.Server.save_user"><code class="name flex">
-<span>def <span class="ident">save_user</span></span>(<span>self, name: str, *, user_id: str = None, derived_key: str = None, roles: List[str] = None, password: str = None, password_sha: str = None, password_scheme: str = None, salt: str = None, iterations: int = None, rev: str = None) ‑> Tuple[bool, str, str]</span>
-</code></dt>
-<dd>
-<div class="desc"><p>Create or update a user. In case of a <code>ConflictError</code>, a <code>HEAD</code> request to <code>/_users/&lt;user_id&gt;</code> will be sent to
-obtain the latest revision.</p>
+<div class="desc"><p>Request, configure, or stop, a replication operation. For more info, please refer to
+<a href="https://docs.couchdb.org/en/main/api/server/common.html#replicate">the official documentation</a>.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
-<dd>User’s name aka login. Immutable e.g. you cannot rename an existing user - you have to create new one.</dd>
-<dt><strong><code>user_id</code></strong> :&ensp;<code>str</code></dt>
-<dd>The user’s login with the special prefix <code>org.couchdb.user:</code>.</dd>
-<dt><strong><code>derived_key</code></strong> :&ensp;<code>str</code></dt>
-<dd>PBKDF2 key derived from salt/iterations.</dd>
-<dt><strong><code>roles</code></strong> :&ensp;<code>List[str]</code></dt>
-<dd>List of user roles. CouchDB doesn’t provide any built-in roles, so you’re free to define your own depending
-on your needs. However, you cannot set system roles like <code>_admin</code> there. Also, only administrators may
-assign roles to users - by default all users have no roles.</dd>
-<dt><strong><code>password</code></strong> :&ensp;<code>str</code></dt>
-<dd>A plaintext password can be provided, but will be replaced by hashed fields before the document is actually
-stored.</dd>
-<dt><strong><code>password_sha</code></strong> :&ensp;<code>str</code></dt>
-<dd>Hashed password with salt. Used for <code>simple</code> password_scheme.</dd>
-<dt><strong><code>password_scheme</code></strong> :&ensp;<code>str</code></dt>
-<dd>Password hashing scheme. May be <code>simple</code> or <code>pbkdf2</code>.</dd>
-<dt><strong><code>salt</code></strong> :&ensp;<code>str</code></dt>
-<dd>Hash salt. Used for both <code>simple</code> and <code>pbkdf2</code> <code>password_scheme</code> options.</dd>
-<dt><strong><code>iterations</code></strong> :&ensp;<code>int</code></dt>
-<dd>Number of iterations to derive key, used for <code>pbkdf2</code> <code>password_scheme</code>.</dd>
-<dt><strong><code>rev</code></strong> :&ensp;<code>str</code></dt>
-<dd>The user's current revision. Needed when updating an existing user.</dd>
+<dt><strong><code>source</code></strong> :&ensp;<code>Union[Dict, str]</code></dt>
+<dd>
+<p>Fully qualified source database URL or an object which contains the full URL of the source database with
+additional parameters like headers. Eg:</p>
+<pre><code>"http://example.com/source_db_name"
+</code></pre>
+<p>or</p>
+<pre><code>{“url”:”url in here”, “headers”: {“header1”:”value1”, …}}
+</code></pre>
+</dd>
+<dt><strong><code>target</code></strong> :&ensp;<code>Union[Dict, str]</code></dt>
+<dd>
+<p>Fully qualified target database URL or an object which contains the full URL of the source database with
+additional parameters like headers. Eg:</p>
+<pre><code>"http://example.com/target_db_name"
+</code></pre>
+<p>or</p>
+<pre><code>{“url”:”url in here”, “headers”: {“header1”:”value1”, …}}
+</code></pre>
+</dd>
+<dt><strong><code>replication_id</code></strong> :&ensp;<code>str</code></dt>
+<dd>The ID of the replication document.</dd>
+<dt><strong><code>cancel</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Cancels the replication.</dd>
+<dt><strong><code>continuous</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Configure the replication to be continuous.</dd>
+<dt><strong><code>create_target</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Creates the target database. Required administrator’s privileges on target server.</dd>
+<dt><strong><code>create_target_params</code></strong> :&ensp;<code>Dict</code></dt>
+<dd>An object that contains parameters to be used when creating the target database. Can include the standard
+<code>q</code> and <code>n</code> parameters.</dd>
+<dt><strong><code>doc_ids</code></strong> :&ensp;<code>List[str]</code></dt>
+<dd>Array of document IDs to be synchronized. <code>doc_ids</code>, <code>filter</code> and <code>selector</code> are mutually exclusive.</dd>
+<dt><strong><code>filter_func</code></strong> :&ensp;<code>str</code></dt>
+<dd>The name of a <a href="https://docs.couchdb.org/en/main/ddocs/ddocs.html#filterfun">filter function</a>.
+<code>doc_ids</code>, <code>filter</code> and <code>selector</code> are mutually exclusive.</dd>
+<dt><strong><code>selector</code></strong> :&ensp;<code>Dict</code></dt>
+<dd>A <a href="https://docs.couchdb.org/en/main/api/database/find.html#find-selectors">selector</a> to filter documents
+for synchronization. Has the same behavior as the
+<a href="https://docs.couchdb.org/en/main/replication/replicator.html#selectorobj">selector objects</a> in replication
+documents. <code>doc_ids</code>, <code>filter</code> and <code>selector</code> are mutually exclusive.</dd>
+<dt><strong><code>source_proxy</code></strong> :&ensp;<code>str</code></dt>
+<dd>Address of a proxy server through which replication from the source should occur (protocol can be <code>"http”</code>
+or <code>“socks5”</code>).</dd>
+<dt><strong><code>target_proxy</code></strong> :&ensp;<code>str</code></dt>
+<dd>Address of a proxy server through which replication to the target should occur (protocol can be <code>"http”</code>
+or <code>“socks5”</code>).</dd>
 </dl>
 <h2 id="returns">Returns</h2>
-<p>Tuple[bool, str, str]: A tuple consisting of the following elements.</p>
+<p>Dict : A dictionary with the following keys.</p>
 <ul>
-<li>the success status (<code>bool</code>)</li>
-<li>the user ID ( <code>str</code>)</li>
-<li>the current revision ( <code>str</code>)</li>
+<li>history (<code>list</code>) - Replication history</li>
+<li>ok (<code>bool</code>) - Replication status</li>
+<li>replication_id_version (<code>int</code>) – Replication protocol version</li>
+<li>session_id (<code>str</code>) – Unique session ID</li>
+<li>source_last_seq (<code>int</code>) – Last sequence number read from source database</li>
 </ul></div>
+</dd>
+<dt id="couchdb3.server.Server.save_user"><code class="name flex">
+<span>def <span class="ident">save_user</span></span>(<span>self,<br>name: str,<br>*,<br>user_id: str = None,<br>derived_key: str = None,<br>roles: List[str] = None,<br>password: str = None,<br>password_sha: str = None,<br>password_scheme: str = None,<br>salt: str = None,<br>iterations: int = None,<br>rev: str = None) ‑> Tuple[bool, str, str]</span>
+</code></dt>
+<dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -1676,32 +1176,82 @@ stored.</dd>
     data = response.json()
     return data[&#34;ok&#34;], data[&#34;id&#34;], data[&#34;rev&#34;]</code></pre>
 </details>
+<div class="desc"><p>Create or update a user. In case of a <code>ConflictError</code>, a <code>HEAD</code> request to <code>/_users/&lt;user_id&gt;</code> will be sent to
+obtain the latest revision.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>User’s name aka login. Immutable e.g. you cannot rename an existing user - you have to create new one.</dd>
+<dt><strong><code>user_id</code></strong> :&ensp;<code>str</code></dt>
+<dd>The user’s login with the special prefix <code>org.couchdb.user:</code>.</dd>
+<dt><strong><code>derived_key</code></strong> :&ensp;<code>str</code></dt>
+<dd>PBKDF2 key derived from salt/iterations.</dd>
+<dt><strong><code>roles</code></strong> :&ensp;<code>List[str]</code></dt>
+<dd>List of user roles. CouchDB doesn’t provide any built-in roles, so you’re free to define your own depending
+on your needs. However, you cannot set system roles like <code>_admin</code> there. Also, only administrators may
+assign roles to users - by default all users have no roles.</dd>
+<dt><strong><code>password</code></strong> :&ensp;<code>str</code></dt>
+<dd>A plaintext password can be provided, but will be replaced by hashed fields before the document is actually
+stored.</dd>
+<dt><strong><code>password_sha</code></strong> :&ensp;<code>str</code></dt>
+<dd>Hashed password with salt. Used for <code>simple</code> password_scheme.</dd>
+<dt><strong><code>password_scheme</code></strong> :&ensp;<code>str</code></dt>
+<dd>Password hashing scheme. May be <code>simple</code> or <code>pbkdf2</code>.</dd>
+<dt><strong><code>salt</code></strong> :&ensp;<code>str</code></dt>
+<dd>Hash salt. Used for both <code>simple</code> and <code>pbkdf2</code> <code>password_scheme</code> options.</dd>
+<dt><strong><code>iterations</code></strong> :&ensp;<code>int</code></dt>
+<dd>Number of iterations to derive key, used for <code>pbkdf2</code> <code>password_scheme</code>.</dd>
+<dt><strong><code>rev</code></strong> :&ensp;<code>str</code></dt>
+<dd>The user's current revision. Needed when updating an existing user.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>Tuple[bool, str, str]: A tuple consisting of the following elements.</p>
+<ul>
+<li>the success status (<code>bool</code>)</li>
+<li>the user ID ( <code>str</code>)</li>
+<li>the current revision ( <code>str</code>)</li>
+</ul></div>
 </dd>
 <dt id="couchdb3.server.Server.up"><code class="name flex">
-<span>def <span class="ident">up</span></span>(<span>self) ‑> bool</span>
+<span>def <span class="ident">up</span></span>(<span>self, raise_exception: bool = False) ‑> bool</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Check if the server is up.</p>
-<h2 id="returns">Returns</h2>
-<p>bool : <code>True</code> if the server is up.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def up(self) -&gt; bool:
+<pre><code class="python">def up(
+        self,
+        raise_exception: bool = False,
+) -&gt; bool:
     &#34;&#34;&#34;
     Check if the server is up.
+
+    Parameters
+    ----------
+    raise_exception : bool
+        If `True`, exceptions encountered when check server will be raised.
 
     Returns
     -------
     bool : `True` if the server is up.
     &#34;&#34;&#34;
     try:
-        self._get(resource=&#34;_up&#34;)
-        return True
-    except (CouchDBError, requests.exceptions.RequestException):
+        response = self._get(resource=&#34;_up&#34;)
+        return &#39;status&#39; in response.json() and response.json()[&#39;status&#39;] == &#39;ok&#39;
+    except Exception as error:
+        if raise_exception:
+            raise error
         return False</code></pre>
 </details>
+<div class="desc"><p>Check if the server is up.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>raise_exception</code></strong> :&ensp;<code>bool</code></dt>
+<dd>If <code>True</code>, exceptions encountered when check server will be raised.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>bool : <code>True</code> if the server is up.</p></div>
 </dd>
 </dl>
 <h3>Inherited members</h3>
@@ -1720,7 +1270,6 @@ stored.</dd>
 </section>
 </article>
 <nav id="sidebar">
-<h1>Index</h1>
 <div class="toc">
 <ul></ul>
 </div>
@@ -1753,7 +1302,7 @@ stored.</dd>
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.6</a>.</p>
 </footer>
 </body>
 </html>
