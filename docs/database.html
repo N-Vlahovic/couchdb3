@@ -1124,6 +1124,23 @@ el.replaceWith(d);
         Returns
         -------
         `view.ViewResult`
+
+        Examples
+        --------
+        &gt;&gt;&gt; import couchdb3
+        &gt;&gt;&gt; db = couchdb3.Server(&#34;http://localhost:5984&#34;).get(&#34;mydb&#34;)
+        &gt;&gt;&gt; db.view(&#34;myddoc&#34;, &#34;myview&#34;)
+        ViewResult: {
+            &#39;total_rows&#39;: 1,
+            &#39;offset&#39;: 0,
+            &#39;rows&#39;: [
+                {
+                    &#39;id&#39;: &#39;doc-test-view&#39;,
+                    &#39;key&#39;: &#39;doc-test-view&#39;,
+                    &#39;value&#39;: None
+                }
+            ]
+        }
         &#34;&#34;&#34;
         path = partitioned_db_resource_parser(
             resource=&#34;_design&#34;,
@@ -2867,6 +2884,23 @@ Operation status.</p></div>
     Returns
     -------
     `view.ViewResult`
+
+    Examples
+    --------
+    &gt;&gt;&gt; import couchdb3
+    &gt;&gt;&gt; db = couchdb3.Server(&#34;http://localhost:5984&#34;).get(&#34;mydb&#34;)
+    &gt;&gt;&gt; db.view(&#34;myddoc&#34;, &#34;myview&#34;)
+    ViewResult: {
+        &#39;total_rows&#39;: 1,
+        &#39;offset&#39;: 0,
+        &#39;rows&#39;: [
+            {
+                &#39;id&#39;: &#39;doc-test-view&#39;,
+                &#39;key&#39;: &#39;doc-test-view&#39;,
+                &#39;value&#39;: None
+            }
+        ]
+    }
     &#34;&#34;&#34;
     path = partitioned_db_resource_parser(
         resource=&#34;_design&#34;,
@@ -2968,7 +3002,23 @@ Default is <code>None</code>.</dd>
 view reflects. Default is <code>False</code>.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
-<p><code>view.ViewResult</code></p></div>
+<p><code>view.ViewResult</code></p>
+<h2 id="examples">Examples</h2>
+<pre><code class="language-python-repl">&gt;&gt;&gt; import couchdb3
+&gt;&gt;&gt; db = couchdb3.Server(&quot;http://localhost:5984&quot;).get(&quot;mydb&quot;)
+&gt;&gt;&gt; db.view(&quot;myddoc&quot;, &quot;myview&quot;)
+ViewResult: {
+    'total_rows': 1,
+    'offset': 0,
+    'rows': [
+        {
+            'id': 'doc-test-view',
+            'key': 'doc-test-view',
+            'value': None
+        }
+    ]
+}
+</code></pre></div>
 </dd>
 </dl>
 <h3>Inherited members</h3>
