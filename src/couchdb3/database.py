@@ -10,7 +10,7 @@ from .base import Base
 from .document import Document, AttachmentDocument, extract_document_id_and_rev, SecurityDocument, \
     SecurityDocumentElement
 from .exceptions import CouchDBError, NameComplianceError
-from .utils import validate_db_name, DEFAULT_TIMEOUT, partitioned_db_resource_parser
+from .utils import validate_db_name, DEFAULT_TIMEOUT, partitioned_db_resource_parser, rm_nones_from_dict
 from .view import ViewResult
 
 
@@ -417,7 +417,7 @@ class Database(Base):
         update: bool
             Whether to update the index prior to returning the result. Default is `True`.
         stable : bool
-            Whether or not the view results should be returned from a “stable” set of shards. Default is `None`.
+            Whether the view results should be returned from a “stable” set of shards. Default is `None`.
         execution_stats : bool
             Include [execution statistics](https://docs.couchdb.org/en/main/api/database/find.html#find-statistics) in
             the query response. Default is `False`.
@@ -438,7 +438,7 @@ class Database(Base):
         """
         return self._post(
             resource="_explain",
-            body={
+            body=rm_nones_from_dict({
                 "selector": selector,
                 "limit": limit,
                 "skip": skip,
@@ -451,7 +451,7 @@ class Database(Base):
                 "update": update,
                 "stable": stable,
                 "execution_stats": execution_stats,
-            }
+            }),
         ).json()
 
     def find(
@@ -508,7 +508,7 @@ class Database(Base):
         update: bool
             Whether to update the index prior to returning the result. Default is `True`.
         stable : bool
-            Whether or not the view results should be returned from a “stable” set of shards. Default is `None`.
+            Whether the view results should be returned from a “stable” set of shards. Default is `None`.
         execution_stats : bool
             Include [execution statistics](https://docs.couchdb.org/en/main/api/database/find.html#find-statistics) in
             the query response. Default is `False`.
@@ -528,7 +528,7 @@ class Database(Base):
                 resource="_find",
                 partition=partition,
             ),
-            body={
+            body=rm_nones_from_dict({
                 "selector": selector,
                 "limit": limit,
                 "skip": skip,
@@ -541,7 +541,7 @@ class Database(Base):
                 "update": update,
                 "stable": stable,
                 "execution_stats": execution_stats,
-            }
+            }),
         ).json()
 
     def indexes(
@@ -839,7 +839,7 @@ class Database(Base):
                 "partitioned": partitioned
             })
         return self.save(
-            doc={
+            doc=rm_nones_from_dict({
                 "_id": f"_design/{ddoc}",
                 "_rev": rev,
                 "language": language,
@@ -848,8 +848,8 @@ class Database(Base):
                 "updates": updates,
                 "validate_doc_update": validate_doc_update,
                 "views": views,
-                "autoupdate": autoupdate
-            },
+                "autoupdate": autoupdate,
+            }),
             **kwargs
         )
 
@@ -937,13 +937,13 @@ class Database(Base):
         """
         data = self._post(
             resource="_index",
-            body={
+            body=rm_nones_from_dict({
                 "index": index,
                 "ddoc": ddoc,
                 "name": name,
                 "type": index_type,
                 "partitioned": partitioned
-            }
+            }),
         ).json()
         return data["result"], data["id"], data["name"]
 

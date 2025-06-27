@@ -7,7 +7,7 @@ from typing import Dict, List, Tuple, Union
 from .base import Base
 from .database import Database
 from .exceptions import ConflictError, CouchDBError, NotFoundError, ProxySchemeComplianceError, UserIDComplianceError
-from .utils import user_name_to_id, validate_proxy, validate_user_id, DEFAULT_TIMEOUT
+from .utils import user_name_to_id, validate_proxy, validate_user_id, DEFAULT_TIMEOUT, rm_nones_from_dict
 
 
 __all__ = [
@@ -453,7 +453,7 @@ class Server(Base):
             raise CouchDBError("Arguments \"doc_ids\", \"filter_func\" and \"selector\" are mutually exclusive.")
         return self._post(
             resource="_replicator",
-            body={
+            body=rm_nones_from_dict({
                 "_id": replication_id,
                 "source": source,
                 "target": target,
@@ -466,19 +466,29 @@ class Server(Base):
                 "selector": selector,
                 "source_proxy": source_proxy,
                 "target_proxy": target_proxy
-            }
+            }),
         ).json()
 
-    def up(self) -> bool:
+    def up(
+            self,
+            raise_exception: bool = False,
+    ) -> bool:
         """
         Check if the server is up.
+
+        Parameters
+        ----------
+        raise_exception : bool
+            If `True`, exceptions encountered when check server will be raised.
 
         Returns
         -------
         bool : `True` if the server is up.
         """
         try:
-            self._get(resource="_up")
-            return True
-        except (CouchDBError, requests.exceptions.RequestException):
+            response = self._get(resource="_up")
+            return 'status' in response.json() and response.json()['status'] == 'ok'
+        except Exception as error:
+            if raise_exception:
+                raise error
             return False
