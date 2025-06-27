@@ -219,7 +219,9 @@ class Base(object):
             path += root
         if body:
             if isinstance(body, dict):
-                body = {k: v for k, v in body.items() if v is not None}
+                for k in utils.COUCH_DB_RESERVED_DOC_FIELDS:
+                    if k in body and body.get(k) is None:
+                        del body[k]
         if resource:
             path += f"/{resource}"
         if auth_method == "basic":

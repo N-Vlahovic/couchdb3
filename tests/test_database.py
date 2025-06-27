@@ -368,12 +368,14 @@ class TestDatabase(unittest.TestCase):
     def test_save(self):
         doc0 = {
             "type": "test-doc-save",
-            "_id": "test-doc-save"
+            "_id": "test-doc-save",
+            "nullable": None,
         }
         _id, success, _rev = DB.save(doc0)
         self.assertIsInstance(_id, str)
         self.assertIsInstance(success, bool)
         self.assertIsInstance(_rev, str)
+        self.assertIsNone(DB[_id]['nullable'])
 
     def test_save_index(self):
         res, _id, name = DB.save_index(

@@ -21,6 +21,18 @@ class TestUtils(unittest.TestCase):
         ).url
         self.assertEqual(url0, parse.unquote(url1))
 
+    def test_rm_nones_from_dict(self):
+        none_key = 'null'
+        data = {
+            'hello': 'world',
+            'abc': 123,
+            'empty string': '',
+            none_key: None,
+        }
+        new_data = utils.rm_nones_from_dict(data)
+        self.assertIsInstance(new_data, dict)
+        self.assertNotIn(none_key, new_data)
+
     def test_extract_url_data(self):
         scheme = "http"
         user = "user"

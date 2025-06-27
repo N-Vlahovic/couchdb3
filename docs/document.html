@@ -2,18 +2,32 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
-<meta name="generator" content="pdoc 0.10.0" />
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.6">
 <title>couchdb3.document API documentation</title>
-<meta name="description" content="" />
-<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
-<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
-<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
-<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
-<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<meta name="description" content="">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source > summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible;min-width:max-content}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin:1em 0}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
 <style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
-<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+/* Collapse source docstrings */
+setTimeout(() => {
+[...document.querySelectorAll('.hljs.language-python > .hljs-string')]
+.filter(el => el.innerHTML.length > 200 && ['"""', "'''"].includes(el.innerHTML.substring(0, 3)))
+.forEach(el => {
+let d = document.createElement('details');
+d.classList.add('hljs-string');
+d.innerHTML = '<summary>"""</summary>' + el.innerHTML.substring(3);
+el.replaceWith(d);
+});
+}, 100);
+})</script>
 </head>
 <body>
 <main>
@@ -22,265 +36,6 @@
 <h1 class="title">Module <code>couchdb3.document</code></h1>
 </header>
 <section id="section-intro">
-<details class="source">
-<summary>
-<span>Expand source code</span>
-</summary>
-<pre><code class="python">#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
-from __future__ import annotations
-from typing import Dict, List, Optional, Union
-
-from .base import DictBase
-
-
-__all__ = [
-    &#34;extract_document_id_and_rev&#34;,
-    &#34;Document&#34;,
-    &#34;AttachmentDocument&#34;,
-    &#34;SecurityDocumentElement&#34;,
-    &#34;SecurityDocument&#34;
-]
-
-
-def extract_document_id_and_rev(
-        doc: Union[Dict, Document],
-        rev: bool = True
-) -&gt; Dict:
-    &#34;&#34;&#34;
-    Extract id and revision from an abstract document.
-
-    Parameters
-    ----------
-    doc : Union[Dict, Document]
-    rev : bool
-        Include documents revision.
-
-    Returns
-    -------
-    Dict : A dictionary containing the (optional) keys `id` and `rev`.
-    &#34;&#34;&#34;
-    res = {}
-    i = doc.get(&#34;_id&#34;, doc.get(&#34;id&#34;))
-    r = doc.get(&#34;_rev&#34;, doc.get(&#34;rev&#34;))
-    if i:
-        res.update({
-            &#34;id&#34;: i
-        })
-    if r and rev is True:
-        res.update({
-            &#34;rev&#34;: r
-        })
-    return res
-
-
-class Document(DictBase):
-    &#34;&#34;&#34;CouchDB Document - a wrapper around Python dictionaries.&#34;&#34;&#34;
-
-    @property
-    def id(self) -&gt; Optional[str]:
-        &#34;&#34;&#34;
-        Returns
-        -------
-        str : The document&#39;s id.
-        &#34;&#34;&#34;
-        return self.get(&#34;_id&#34;)
-
-    @id.setter
-    def id(self, value: str) -&gt; None:
-        self.update({&#34;_id&#34;: value})
-
-    @property
-    def rev(self) -&gt; Optional[str]:
-        &#34;&#34;&#34;
-        Returns
-        -------
-        str : The document&#39;s revision.
-        &#34;&#34;&#34;
-        return self.get(&#34;_rev&#34;)
-
-    @rev.setter
-    def rev(self, value: str) -&gt; None:
-        self.update({&#34;_rev&#34;: value})
-
-
-class AttachmentDocument(DictBase):
-    &#34;&#34;&#34;CouchDB Attachment Document - a wrapper around Python dictionaries.&#34;&#34;&#34;
-
-    def __init__(
-            self,
-            *args,
-            **kwargs
-    ) -&gt; None:
-        super(AttachmentDocument, self).__init__(*args, **kwargs)
-        self.content = self.get(&#34;content&#34;)
-        self.content_encoding = self.get(&#34;content_encoding&#34;)
-        self.content_length = self.get(&#34;content_length&#34;)
-        self.content_type = self.get(&#34;content_type&#34;)
-        self.digest = self.get(&#34;digest&#34;)
-
-    @property
-    def content(self) -&gt; bytes:
-        &#34;&#34;&#34;
-        Returns
-        -------
-        bytes : The attachment&#39;s content.
-        &#34;&#34;&#34;
-        return self.get(&#34;content&#34;)
-
-    @content.setter
-    def content(self, value: bytes) -&gt; None:
-        self.update({
-            &#34;content&#34;: value
-        })
-
-    @property
-    def content_encoding(self) -&gt; str:
-        &#34;&#34;&#34;
-        Returns
-        -------
-        str : The attachment&#39;s content encoding.
-        &#34;&#34;&#34;
-        return self.get(&#34;content_encoding&#34;)
-
-    @content_encoding.setter
-    def content_encoding(self, value: str) -&gt; None:
-        self.update({
-            &#34;content_encoding&#34;: value
-        })
-
-    @property
-    def content_length(self) -&gt; int:
-        &#34;&#34;&#34;
-        Returns
-        -------
-        int : The attachment&#39;s content length.
-        &#34;&#34;&#34;
-        return self.get(&#34;content_length&#34;)
-
-    @content_length.setter
-    def content_length(self, value: int) -&gt; None:
-        self.update({
-            &#34;content_length&#34;: int(value)
-        })
-
-    @property
-    def content_type(self) -&gt; str:
-        &#34;&#34;&#34;
-        Returns
-        -------
-        str : The attachment&#39;s content type.
-        &#34;&#34;&#34;
-        return self.get(&#34;content_type&#34;)
-
-    @content_type.setter
-    def content_type(self, value: str) -&gt; None:
-        self.update({
-            &#34;content_type&#34;: value
-        })
-
-    @property
-    def digest(self) -&gt; str:
-        &#34;&#34;&#34;
-        Returns
-        -------
-        str : The attachment&#39;s content digest.
-        &#34;&#34;&#34;
-        return self.get(&#34;digest&#34;)
-
-    @digest.setter
-    def digest(self, value: str) -&gt; None:
-        self.update({
-            &#34;digest&#34;: value
-        })
-
-
-class SecurityDocumentElement(DictBase):
-    &#34;&#34;&#34;CouchDB Security Document Element (representing either `&#34;admins&#34;` or `&#34;members&#34;`) - a wrapper around Python
-    dictionaries.&#34;&#34;&#34;
-
-    def add_name(self, name: str) -&gt; None:
-        self.names = sorted(set(self.names).union({name}))
-
-    def add_role(self, role: str) -&gt; None:
-        self.roles = sorted(set(self.roles).union({role}))
-
-    @property
-    def names(self) -&gt; List[str]:
-        &#34;&#34;&#34;
-        Returns
-        -------
-        List[str] : The document&#39;s names.
-        &#34;&#34;&#34;
-        return self.get(&#34;names&#34;, [])
-
-    @names.setter
-    def names(self, value) -&gt; None:
-        self.update({
-            &#34;names&#34;: value
-        })
-
-    @property
-    def roles(self) -&gt; List[str]:
-        &#34;&#34;&#34;
-        Returns
-        -------
-        List[str] : The document&#39;s roles.
-        &#34;&#34;&#34;
-        return self.get(&#34;roles&#34;, [])
-
-    @roles.setter
-    def roles(self, value) -&gt; None:
-        self.update({
-            &#34;roles&#34;: value
-        })
-    
-
-class SecurityDocument(DictBase):
-    &#34;&#34;&#34;CouchDB Security Document - a wrapper around Python dictionaries.&#34;&#34;&#34;
-    
-    def __init__(
-            self,
-            *args,
-            **kwargs
-    ) -&gt; None:
-        super(SecurityDocument, self).__init__(*args, **kwargs)
-        self.admins = SecurityDocumentElement(**self.get(&#34;admins&#34;, {}))
-        self.members = SecurityDocumentElement(**self.get(&#34;members&#34;, {}))
-    
-    @property
-    def admins(self) -&gt; SecurityDocumentElement:
-        &#34;&#34;&#34;
-        Returns
-        -------
-        SecurityDocument : The document&#39;s admins.
-        &#34;&#34;&#34;
-        return self.get(&#34;admins&#34;, SecurityDocumentElement())
-    
-    @admins.setter
-    def admins(self, value: SecurityDocumentElement) -&gt; None:
-        self.update({
-            &#34;admins&#34;: value
-        })
-
-    @property
-    def members(self) -&gt; SecurityDocumentElement:
-        &#34;&#34;&#34;
-        Returns
-        -------
-        SecurityDocument : The document&#39;s members.
-        &#34;&#34;&#34;
-        return self.get(&#34;members&#34;, SecurityDocumentElement())
-
-    @members.setter
-    def members(self, value: SecurityDocumentElement) -&gt; None:
-        self.update({
-            &#34;members&#34;: value
-        })
-
-    </code></pre>
-</details>
 </section>
 <section>
 </section>
@@ -290,19 +45,9 @@ class SecurityDocument(DictBase):
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="couchdb3.document.extract_document_id_and_rev"><code class="name flex">
-<span>def <span class="ident">extract_document_id_and_rev</span></span>(<span>doc: Union[Dict, <a title="couchdb3.document.Document" href="#couchdb3.document.Document">Document</a>], rev: bool = True) ‑> Dict</span>
+<span>def <span class="ident">extract_document_id_and_rev</span></span>(<span>doc: Union[Dict, <a title="couchdb3.document.Document" href="#couchdb3.document.Document">Document</a>],<br>rev: bool = True) ‑> Dict</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Extract id and revision from an abstract document.</p>
-<h2 id="parameters">Parameters</h2>
-<dl>
-<dt><strong><code>doc</code></strong> :&ensp;<code>Union[Dict, <a title="couchdb3.document.Document" href="#couchdb3.document.Document">Document</a>]</code></dt>
-<dd>&nbsp;</dd>
-<dt><strong><code>rev</code></strong> :&ensp;<code>bool</code></dt>
-<dd>Include documents revision.</dd>
-</dl>
-<h2 id="returns">Returns</h2>
-<p>Dict : A dictionary containing the (optional) keys <code>id</code> and <code>rev</code>.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -337,6 +82,16 @@ class SecurityDocument(DictBase):
         })
     return res</code></pre>
 </details>
+<div class="desc"><p>Extract id and revision from an abstract document.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>doc</code></strong> :&ensp;<code>Union[Dict, <a title="couchdb3.document.Document" href="#couchdb3.document.Document">Document</a>]</code></dt>
+<dd>&nbsp;</dd>
+<dt><strong><code>rev</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Include documents revision.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>Dict : A dictionary containing the (optional) keys <code>id</code> and <code>rev</code>.</p></div>
 </dd>
 </dl>
 </section>
@@ -348,7 +103,6 @@ class SecurityDocument(DictBase):
 <span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>CouchDB Attachment Document - a wrapper around Python dictionaries.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -443,6 +197,7 @@ class SecurityDocument(DictBase):
             &#34;digest&#34;: value
         })</code></pre>
 </details>
+<div class="desc"><p>CouchDB Attachment Document - a wrapper around Python dictionaries.</p></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="couchdb3.base.DictBase" href="base.html#couchdb3.base.DictBase">DictBase</a></li>
@@ -450,10 +205,8 @@ class SecurityDocument(DictBase):
 </ul>
 <h3>Instance variables</h3>
 <dl>
-<dt id="couchdb3.document.AttachmentDocument.content"><code class="name">var <span class="ident">content</span> : bytes</code></dt>
+<dt id="couchdb3.document.AttachmentDocument.content"><code class="name">prop <span class="ident">content</span> : bytes</code></dt>
 <dd>
-<div class="desc"><h2 id="returns">Returns</h2>
-<p>bytes : The attachment's content.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -467,11 +220,11 @@ def content(self) -&gt; bytes:
     &#34;&#34;&#34;
     return self.get(&#34;content&#34;)</code></pre>
 </details>
-</dd>
-<dt id="couchdb3.document.AttachmentDocument.content_encoding"><code class="name">var <span class="ident">content_encoding</span> : str</code></dt>
-<dd>
 <div class="desc"><h2 id="returns">Returns</h2>
-<p>str : The attachment's content encoding.</p></div>
+<p>bytes : The attachment's content.</p></div>
+</dd>
+<dt id="couchdb3.document.AttachmentDocument.content_encoding"><code class="name">prop <span class="ident">content_encoding</span> : str</code></dt>
+<dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -485,11 +238,11 @@ def content_encoding(self) -&gt; str:
     &#34;&#34;&#34;
     return self.get(&#34;content_encoding&#34;)</code></pre>
 </details>
-</dd>
-<dt id="couchdb3.document.AttachmentDocument.content_length"><code class="name">var <span class="ident">content_length</span> : int</code></dt>
-<dd>
 <div class="desc"><h2 id="returns">Returns</h2>
-<p>int : The attachment's content length.</p></div>
+<p>str : The attachment's content encoding.</p></div>
+</dd>
+<dt id="couchdb3.document.AttachmentDocument.content_length"><code class="name">prop <span class="ident">content_length</span> : int</code></dt>
+<dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -503,11 +256,11 @@ def content_length(self) -&gt; int:
     &#34;&#34;&#34;
     return self.get(&#34;content_length&#34;)</code></pre>
 </details>
-</dd>
-<dt id="couchdb3.document.AttachmentDocument.content_type"><code class="name">var <span class="ident">content_type</span> : str</code></dt>
-<dd>
 <div class="desc"><h2 id="returns">Returns</h2>
-<p>str : The attachment's content type.</p></div>
+<p>int : The attachment's content length.</p></div>
+</dd>
+<dt id="couchdb3.document.AttachmentDocument.content_type"><code class="name">prop <span class="ident">content_type</span> : str</code></dt>
+<dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -521,11 +274,11 @@ def content_type(self) -&gt; str:
     &#34;&#34;&#34;
     return self.get(&#34;content_type&#34;)</code></pre>
 </details>
-</dd>
-<dt id="couchdb3.document.AttachmentDocument.digest"><code class="name">var <span class="ident">digest</span> : str</code></dt>
-<dd>
 <div class="desc"><h2 id="returns">Returns</h2>
-<p>str : The attachment's content digest.</p></div>
+<p>str : The attachment's content type.</p></div>
+</dd>
+<dt id="couchdb3.document.AttachmentDocument.digest"><code class="name">prop <span class="ident">digest</span> : str</code></dt>
+<dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -539,6 +292,8 @@ def digest(self) -&gt; str:
     &#34;&#34;&#34;
     return self.get(&#34;digest&#34;)</code></pre>
 </details>
+<div class="desc"><h2 id="returns">Returns</h2>
+<p>str : The attachment's content digest.</p></div>
 </dd>
 </dl>
 </dd>
@@ -547,7 +302,6 @@ def digest(self) -&gt; str:
 <span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>CouchDB Document - a wrapper around Python dictionaries.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -581,6 +335,7 @@ def digest(self) -&gt; str:
     def rev(self, value: str) -&gt; None:
         self.update({&#34;_rev&#34;: value})</code></pre>
 </details>
+<div class="desc"><p>CouchDB Document - a wrapper around Python dictionaries.</p></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="couchdb3.base.DictBase" href="base.html#couchdb3.base.DictBase">DictBase</a></li>
@@ -588,10 +343,8 @@ def digest(self) -&gt; str:
 </ul>
 <h3>Instance variables</h3>
 <dl>
-<dt id="couchdb3.document.Document.id"><code class="name">var <span class="ident">id</span> : Optional[str]</code></dt>
+<dt id="couchdb3.document.Document.id"><code class="name">prop <span class="ident">id</span> : Optional[str]</code></dt>
 <dd>
-<div class="desc"><h2 id="returns">Returns</h2>
-<p>str : The document's id.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -605,11 +358,11 @@ def id(self) -&gt; Optional[str]:
     &#34;&#34;&#34;
     return self.get(&#34;_id&#34;)</code></pre>
 </details>
-</dd>
-<dt id="couchdb3.document.Document.rev"><code class="name">var <span class="ident">rev</span> : Optional[str]</code></dt>
-<dd>
 <div class="desc"><h2 id="returns">Returns</h2>
-<p>str : The document's revision.</p></div>
+<p>str : The document's id.</p></div>
+</dd>
+<dt id="couchdb3.document.Document.rev"><code class="name">prop <span class="ident">rev</span> : Optional[str]</code></dt>
+<dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -623,6 +376,8 @@ def rev(self) -&gt; Optional[str]:
     &#34;&#34;&#34;
     return self.get(&#34;_rev&#34;)</code></pre>
 </details>
+<div class="desc"><h2 id="returns">Returns</h2>
+<p>str : The document's revision.</p></div>
 </dd>
 </dl>
 </dd>
@@ -631,7 +386,6 @@ def rev(self) -&gt; Optional[str]:
 <span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>CouchDB Security Document - a wrapper around Python dictionaries.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -678,6 +432,7 @@ def rev(self) -&gt; Optional[str]:
             &#34;members&#34;: value
         })</code></pre>
 </details>
+<div class="desc"><p>CouchDB Security Document - a wrapper around Python dictionaries.</p></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="couchdb3.base.DictBase" href="base.html#couchdb3.base.DictBase">DictBase</a></li>
@@ -685,10 +440,8 @@ def rev(self) -&gt; Optional[str]:
 </ul>
 <h3>Instance variables</h3>
 <dl>
-<dt id="couchdb3.document.SecurityDocument.admins"><code class="name">var <span class="ident">admins</span> : <a title="couchdb3.document.SecurityDocumentElement" href="#couchdb3.document.SecurityDocumentElement">SecurityDocumentElement</a></code></dt>
+<dt id="couchdb3.document.SecurityDocument.admins"><code class="name">prop <span class="ident">admins</span> : <a title="couchdb3.document.SecurityDocumentElement" href="#couchdb3.document.SecurityDocumentElement">SecurityDocumentElement</a></code></dt>
 <dd>
-<div class="desc"><h2 id="returns">Returns</h2>
-<p>SecurityDocument : The document's admins.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -702,11 +455,11 @@ def admins(self) -&gt; SecurityDocumentElement:
     &#34;&#34;&#34;
     return self.get(&#34;admins&#34;, SecurityDocumentElement())</code></pre>
 </details>
-</dd>
-<dt id="couchdb3.document.SecurityDocument.members"><code class="name">var <span class="ident">members</span> : <a title="couchdb3.document.SecurityDocumentElement" href="#couchdb3.document.SecurityDocumentElement">SecurityDocumentElement</a></code></dt>
-<dd>
 <div class="desc"><h2 id="returns">Returns</h2>
-<p>SecurityDocument : The document's members.</p></div>
+<p>SecurityDocument : The document's admins.</p></div>
+</dd>
+<dt id="couchdb3.document.SecurityDocument.members"><code class="name">prop <span class="ident">members</span> : <a title="couchdb3.document.SecurityDocumentElement" href="#couchdb3.document.SecurityDocumentElement">SecurityDocumentElement</a></code></dt>
+<dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -720,6 +473,8 @@ def members(self) -&gt; SecurityDocumentElement:
     &#34;&#34;&#34;
     return self.get(&#34;members&#34;, SecurityDocumentElement())</code></pre>
 </details>
+<div class="desc"><h2 id="returns">Returns</h2>
+<p>SecurityDocument : The document's members.</p></div>
 </dd>
 </dl>
 </dd>
@@ -728,8 +483,6 @@ def members(self) -&gt; SecurityDocumentElement:
 <span>(</span><span>*args, **kwargs)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>CouchDB Security Document Element (representing either <code>"admins"</code> or <code>"members"</code>) - a wrapper around Python
-dictionaries.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -774,6 +527,8 @@ dictionaries.</p></div>
             &#34;roles&#34;: value
         })</code></pre>
 </details>
+<div class="desc"><p>CouchDB Security Document Element (representing either <code>"admins"</code> or <code>"members"</code>) - a wrapper around Python
+dictionaries.</p></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="couchdb3.base.DictBase" href="base.html#couchdb3.base.DictBase">DictBase</a></li>
@@ -781,10 +536,8 @@ dictionaries.</p></div>
 </ul>
 <h3>Instance variables</h3>
 <dl>
-<dt id="couchdb3.document.SecurityDocumentElement.names"><code class="name">var <span class="ident">names</span> : List[str]</code></dt>
+<dt id="couchdb3.document.SecurityDocumentElement.names"><code class="name">prop <span class="ident">names</span> : List[str]</code></dt>
 <dd>
-<div class="desc"><h2 id="returns">Returns</h2>
-<p>List[str] : The document's names.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -798,11 +551,11 @@ def names(self) -&gt; List[str]:
     &#34;&#34;&#34;
     return self.get(&#34;names&#34;, [])</code></pre>
 </details>
-</dd>
-<dt id="couchdb3.document.SecurityDocumentElement.roles"><code class="name">var <span class="ident">roles</span> : List[str]</code></dt>
-<dd>
 <div class="desc"><h2 id="returns">Returns</h2>
-<p>List[str] : The document's roles.</p></div>
+<p>List[str] : The document's names.</p></div>
+</dd>
+<dt id="couchdb3.document.SecurityDocumentElement.roles"><code class="name">prop <span class="ident">roles</span> : List[str]</code></dt>
+<dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -816,6 +569,8 @@ def roles(self) -&gt; List[str]:
     &#34;&#34;&#34;
     return self.get(&#34;roles&#34;, [])</code></pre>
 </details>
+<div class="desc"><h2 id="returns">Returns</h2>
+<p>List[str] : The document's roles.</p></div>
 </dd>
 </dl>
 <h3>Methods</h3>
@@ -824,7 +579,6 @@ def roles(self) -&gt; List[str]:
 <span>def <span class="ident">add_name</span></span>(<span>self, name: str) ‑> None</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -832,12 +586,12 @@ def roles(self) -&gt; List[str]:
 <pre><code class="python">def add_name(self, name: str) -&gt; None:
     self.names = sorted(set(self.names).union({name}))</code></pre>
 </details>
+<div class="desc"></div>
 </dd>
 <dt id="couchdb3.document.SecurityDocumentElement.add_role"><code class="name flex">
 <span>def <span class="ident">add_role</span></span>(<span>self, role: str) ‑> None</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
@@ -845,6 +599,7 @@ def roles(self) -&gt; List[str]:
 <pre><code class="python">def add_role(self, role: str) -&gt; None:
     self.roles = sorted(set(self.roles).union({role}))</code></pre>
 </details>
+<div class="desc"></div>
 </dd>
 </dl>
 </dd>
@@ -852,7 +607,6 @@ def roles(self) -&gt; List[str]:
 </section>
 </article>
 <nav id="sidebar">
-<h1>Index</h1>
 <div class="toc">
 <ul></ul>
 </div>
@@ -908,7 +662,7 @@ def roles(self) -&gt; List[str]:
 </nav>
 </main>
 <footer id="footer">
-<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.6</a>.</p>
 </footer>
 </body>
 </html>
