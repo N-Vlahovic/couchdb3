@@ -705,12 +705,14 @@ el.replaceWith(d);
             f&#34;{docid}/{attname}&#34;,
             query_kwargs={&#34;rev&#34;: rev}
         )
+        content_md5 = response.headers.get(&#34;content-md5&#34;)
+        digest_value = f&#34;md5-{content_md5}&#34; if content_md5 else None
         return AttachmentDocument(
             content=response.content,
             content_encoding=response.headers.get(&#34;content-encoding&#34;),
             content_length=response.headers.get(&#34;content-length&#34;),
             content_type=response.headers.get(&#34;content-type&#34;),
-            digest=&#34;md5-&#34; + response.headers.get(&#34;content-md5&#34;),
+            digest=digest_value,
         )
 
     def get_design(
@@ -2161,12 +2163,14 @@ revisions. Default <code>None</code>.</dd>
         f&#34;{docid}/{attname}&#34;,
         query_kwargs={&#34;rev&#34;: rev}
     )
+    content_md5 = response.headers.get(&#34;content-md5&#34;)
+    digest_value = f&#34;md5-{content_md5}&#34; if content_md5 else None
     return AttachmentDocument(
         content=response.content,
         content_encoding=response.headers.get(&#34;content-encoding&#34;),
         content_length=response.headers.get(&#34;content-length&#34;),
         content_type=response.headers.get(&#34;content-type&#34;),
-        digest=&#34;md5-&#34; + response.headers.get(&#34;content-md5&#34;),
+        digest=digest_value,
     )</code></pre>
 </details>
 <div class="desc"><p>Get a document's attachment</p>
