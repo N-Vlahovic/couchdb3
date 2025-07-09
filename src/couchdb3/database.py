@@ -670,12 +670,14 @@ class Database(Base):
             f"{docid}/{attname}",
             query_kwargs={"rev": rev}
         )
+        content_md5 = response.headers.get("content-md5")
+        digest_value = f"md5-{content_md5}" if content_md5 else None
         return AttachmentDocument(
             content=response.content,
             content_encoding=response.headers.get("content-encoding"),
             content_length=response.headers.get("content-length"),
             content_type=response.headers.get("content-type"),
-            digest="md5-" + response.headers.get("content-md5"),
+            digest=digest_value,
         )
 
     def get_design(
