@@ -6,30 +6,41 @@ from typing import Dict, List, Tuple, Union
 
 from .base import Base
 from .database import Database
-from .exceptions import ConflictError, CouchDBError, NotFoundError, ProxySchemeComplianceError, UserIDComplianceError
-from .utils import user_name_to_id, validate_proxy, validate_user_id, DEFAULT_TIMEOUT, rm_nones_from_dict
+from .exceptions import (
+    ConflictError,
+    CouchDBError,
+    NotFoundError,
+    ProxySchemeComplianceError,
+    UserIDComplianceError,
+)
+from .utils import (
+    user_name_to_id,
+    validate_proxy,
+    validate_user_id,
+    DEFAULT_TIMEOUT,
+    rm_nones_from_dict,
+)
 
 
-__all__ = [
-    "Server"
-]
+__all__ = ["Server"]
 
 
 class Server(Base):
     """
     Abstract Couchdb client
     """
+
     def __init__(
-            self,
-            url: str,
-            *,
-            port: int = None,
-            user: str = None,
-            password: str = None,
-            disable_ssl_verification: bool = False,
-            auth_method: str = None,
-            timeout: int = DEFAULT_TIMEOUT,
-            session: requests.Session = None,
+        self,
+        url: str,
+        *,
+        port: int = None,
+        user: str = None,
+        password: str = None,
+        disable_ssl_verification: bool = False,
+        auth_method: str = None,
+        timeout: int = DEFAULT_TIMEOUT,
+        session: requests.Session = None,
     ) -> None:
         """
 
@@ -81,7 +92,7 @@ class Server(Base):
         return f"{super(Server, self).__repr__()}: {self.url}"
 
     def active_tasks(
-            self,
+        self,
     ) -> List[Dict]:
         """
         List of running tasks, including the task type, name, status and process ID. The result is a JSON array of the
@@ -92,15 +103,9 @@ class Server(Base):
         -------
         List[Dict]
         """
-        return self._get(
-            resource="_active_tasks"
-        ).json()
+        return self._get(resource="_active_tasks").json()
 
-    def check_user(
-            self,
-            username: str,
-            password: str
-    ) -> bool:
+    def check_user(self, username: str, password: str) -> bool:
         """
         Checks the username/password combination by creating a `Server` instance and performing a `Server.check`
         request.
@@ -116,25 +121,21 @@ class Server(Base):
         -------
         bool : A boolean indicating if the username/password combination is valid.
         """
-        return Server(
-            url=self.url,
-            user=username,
-            password=password
-        ).check()
+        return Server(url=self.url, user=username, password=password).check()
 
     def save_user(
-            self,
-            name: str,
-            *,
-            user_id: str = None,
-            derived_key: str = None,
-            roles: List[str] = None,
-            password: str = None,
-            password_sha: str = None,
-            password_scheme: str = None,
-            salt: str = None,
-            iterations: int = None,
-            rev: str = None
+        self,
+        name: str,
+        *,
+        user_id: str = None,
+        derived_key: str = None,
+        roles: List[str] = None,
+        password: str = None,
+        password_sha: str = None,
+        password_scheme: str = None,
+        salt: str = None,
+        iterations: int = None,
+        rev: str = None,
     ) -> Tuple[bool, str, str]:
         """
         Create or update a user. In case of a `ConflictError`, a `HEAD` request to `/_users/<user_id>` will be sent to
@@ -191,30 +192,24 @@ class Server(Base):
             "password_scheme": password_scheme,
             "salt": salt,
             "iterations": iterations,
-            "type": "user"
+            "type": "user",
         }
         try:
-            response = self._put(
-                resource=f"_users/{user_id}",
-                body=body
-            )
+            response = self._put(resource=f"_users/{user_id}", body=body)
         except ConflictError:
             body.update({"_rev": self.rev(f"_users/{user_id}")})
-            response = self._put(
-                resource=f"_users/{user_id}",
-                body=body
-            )
+            response = self._put(resource=f"_users/{user_id}", body=body)
         data = response.json()
         return data["ok"], data["id"], data["rev"]
 
     def all_dbs(
-            self,
-            *,
-            descending: bool = False,
-            endkey: str = None,
-            limit: int = None,
-            skip: int = 0,
-            startkey: str = None,
+        self,
+        *,
+        descending: bool = False,
+        endkey: str = None,
+        limit: int = None,
+        skip: int = 0,
+        startkey: str = None,
     ) -> List[str]:
         """
         Get all database names.
@@ -244,15 +239,15 @@ class Server(Base):
                 "limit": limit,
                 "skip": skip,
                 "startkey": startkey,
-            }
+            },
         ).json()
 
     def create(
-            self,
-            name: str,
-            q: int = None,
-            n: int = None,
-            partitioned: bool = False,
+        self,
+        name: str,
+        q: int = None,
+        n: int = None,
+        partitioned: bool = False,
     ) -> Database:
         """
         Create a database.
@@ -275,19 +270,11 @@ class Server(Base):
         couchdb3.database.Database
         """
         self._put(
-            resource=name,
-            query_kwargs={
-                "q": q,
-                "n": n,
-                "partitioned": partitioned
-            }
+            resource=name, query_kwargs={"q": q, "n": n, "partitioned": partitioned}
         )
         return self.get(name=name)
 
-    def dbs_info(
-            self,
-            keys: List[str]
-    ) -> List[Dict]:
+    def dbs_info(self, keys: List[str]) -> List[Dict]:
         """
         Returns information of a list of the specified databases in the CouchDB instance.
 
@@ -300,18 +287,9 @@ class Server(Base):
         -------
         List[Dict] : A list dictionaries containing the corresponding database info.
         """
-        return self._post(
-            resource="_dbs_info",
-            body={
-                "keys": keys
-            }
-        ).json()
+        return self._post(resource="_dbs_info", body={"keys": keys}).json()
 
-    def get(
-            self,
-            name: str,
-            check: bool = False
-    ) -> Database:
+    def get(self, name: str, check: bool = False) -> Database:
         """
         Get a database by name.
 
@@ -345,10 +323,7 @@ class Server(Base):
             raise error
         return db
 
-    def delete(
-            self,
-            resource: str = None
-    ) -> bool:
+    def delete(self, resource: str = None) -> bool:
         """
         Delete a database.
 
@@ -365,19 +340,19 @@ class Server(Base):
         return True
 
     def replicate(
-            self,
-            source: Union[Dict, str],
-            target: Union[Dict, str],
-            replication_id: str = None,
-            cancel: bool = None,
-            continuous: bool = None,
-            create_target: bool = None,
-            create_target_params: Dict = None,
-            doc_ids: List[str] = None,
-            filter_func: str = None,
-            selector: Dict = None,
-            source_proxy: str = None,
-            target_proxy: str = None
+        self,
+        source: Union[Dict, str],
+        target: Union[Dict, str],
+        replication_id: str = None,
+        cancel: bool = None,
+        continuous: bool = None,
+        create_target: bool = None,
+        create_target_params: Dict = None,
+        doc_ids: List[str] = None,
+        filter_func: str = None,
+        selector: Dict = None,
+        source_proxy: str = None,
+        target_proxy: str = None,
     ) -> Dict:
         """
         Request, configure, or stop, a replication operation. For more info, please refer to
@@ -443,35 +418,37 @@ class Server(Base):
           - session_id (`str`) – Unique session ID
           - source_last_seq (`int`) – Last sequence number read from source database
         """
-        if (
-                source_proxy and validate_proxy(source_proxy) is False
-        ) or (
-                target_proxy and validate_proxy(target_proxy) is False
+        if (source_proxy and validate_proxy(source_proxy) is False) or (
+            target_proxy and validate_proxy(target_proxy) is False
         ):
             raise ProxySchemeComplianceError("Proxy has invalid scheme.")
         if sum(bool(_) for _ in [doc_ids, filter_func, selector]) > 1:
-            raise CouchDBError("Arguments \"doc_ids\", \"filter_func\" and \"selector\" are mutually exclusive.")
+            raise CouchDBError(
+                'Arguments "doc_ids", "filter_func" and "selector" are mutually exclusive.'
+            )
         return self._post(
             resource="_replicator",
-            body=rm_nones_from_dict({
-                "_id": replication_id,
-                "source": source,
-                "target": target,
-                "cancel": cancel,
-                "continuous": continuous,
-                "create_target": create_target,
-                "create_target_params": create_target_params,
-                "doc_ids": doc_ids,
-                "filter_func": filter_func,
-                "selector": selector,
-                "source_proxy": source_proxy,
-                "target_proxy": target_proxy
-            }),
+            body=rm_nones_from_dict(
+                {
+                    "_id": replication_id,
+                    "source": source,
+                    "target": target,
+                    "cancel": cancel,
+                    "continuous": continuous,
+                    "create_target": create_target,
+                    "create_target_params": create_target_params,
+                    "doc_ids": doc_ids,
+                    "filter_func": filter_func,
+                    "selector": selector,
+                    "source_proxy": source_proxy,
+                    "target_proxy": target_proxy,
+                }
+            ),
         ).json()
 
     def up(
-            self,
-            raise_exception: bool = False,
+        self,
+        raise_exception: bool = False,
     ) -> bool:
         """
         Check if the server is up.
@@ -487,7 +464,7 @@ class Server(Base):
         """
         try:
             response = self._get(resource="_up")
-            return 'status' in response.json() and response.json()['status'] == 'ok'
+            return "status" in response.json() and response.json()["status"] == "ok"
         except Exception as error:
             if raise_exception:
                 raise error

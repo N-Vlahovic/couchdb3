@@ -10,10 +10,7 @@ from . import exceptions
 from . import utils
 
 
-__all__ = [
-    "Base",
-    "DictBase"
-]
+__all__ = ["Base", "DictBase"]
 
 
 class Base(object):
@@ -22,16 +19,16 @@ class Base(object):
     """
 
     def __init__(
-            self,
-            url: str,
-            *,
-            port: int = None,
-            user: str = None,
-            password: str = None,
-            disable_ssl_verification: bool = False,
-            auth_method: str = None,
-            timeout: int = utils.DEFAULT_TIMEOUT,
-            session: requests.Session = None,
+        self,
+        url: str,
+        *,
+        port: int = None,
+        user: str = None,
+        password: str = None,
+        disable_ssl_verification: bool = False,
+        auth_method: str = None,
+        timeout: int = utils.DEFAULT_TIMEOUT,
+        session: requests.Session = None,
     ) -> None:
         """
 
@@ -61,7 +58,7 @@ class Base(object):
         auth_method = auth_method or utils.DEFAULT_AUTH_METHOD
         if utils.validate_auth_method(auth_method=auth_method) is False:
             raise exceptions.AuthenticationMethodError(
-                "Invalid authentication method. Possible values are \"basic\" and \"cookie\"."
+                'Invalid authentication method. Possible values are "basic" and "cookie".'
             )
         _ = utils.extract_url_data(url=url)
         user = user or _["user"]
@@ -73,13 +70,14 @@ class Base(object):
         self.session = session or requests.Session()
         self.session.verify = disable_ssl_verification is False
         # Changing the default headers
-        self.session.headers.update({
-            "Accept": "application/json",
-            "Content-type": "application/json"
-        })
+        self.session.headers.update(
+            {"Accept": "application/json", "Content-type": "application/json"}
+        )
         self._user = user
         self._password = password
-        self._auth = requests.auth.HTTPBasicAuth(user, password) if user and password else None
+        self._auth = (
+            requests.auth.HTTPBasicAuth(user, password) if user and password else None
+        )
         self.auth_method = auth_method
         self.timeout = timeout
 
@@ -176,16 +174,16 @@ class Base(object):
         return url
 
     def _request(
-            self,
-            *,
-            method: str,
-            resource: str = None,
-            body: Union[Dict, List] = None,
-            query_kwargs: Dict = None,
-            auth_method: str = None,
-            root: str = None,
-            timeout: int = None,
-            **req_kwargs
+        self,
+        *,
+        method: str,
+        resource: str = None,
+        body: Union[Dict, List] = None,
+        query_kwargs: Dict = None,
+        auth_method: str = None,
+        root: str = None,
+        timeout: int = None,
+        **req_kwargs,
     ) -> requests.Response:
         """
         Abstract request
@@ -225,9 +223,7 @@ class Base(object):
         if resource:
             path += f"/{resource}"
         if auth_method == "basic":
-            req_kwargs.update({
-                "auth": self._auth
-            })
+            req_kwargs.update({"auth": self._auth})
         elif auth_method == "cookie":
             if self._is_auth_token_expired() is True:
                 self._renew_auth_token()
@@ -238,24 +234,24 @@ class Base(object):
                 host=self.host,
                 path=path,
                 port=self.port,
-                **(query_kwargs or {})
+                **(query_kwargs or {}),
             ).url,
             json=body,
             timeout=timeout or self.timeout,
-            **req_kwargs
+            **req_kwargs,
         )
         utils.check_response(response=response)
         return response
 
     def _delete(
-            self,
-            resource: str = None,
-            *,
-            timeout: int = utils.DEFAULT_TIMEOUT,
-            query_kwargs: Dict = None,
-            auth_method: str = None,
-            root: str = None,
-            **req_kwargs
+        self,
+        resource: str = None,
+        *,
+        timeout: int = utils.DEFAULT_TIMEOUT,
+        query_kwargs: Dict = None,
+        auth_method: str = None,
+        root: str = None,
+        **req_kwargs,
     ) -> requests.Response:
         """
         DELETE request.
@@ -285,18 +281,18 @@ class Base(object):
             query_kwargs=query_kwargs,
             auth_method=auth_method,
             root=root,
-            **req_kwargs
+            **req_kwargs,
         )
 
     def _get(
-            self,
-            resource: str = None,
-            *,
-            timeout: int = utils.DEFAULT_TIMEOUT,
-            query_kwargs: Dict = None,
-            auth_method: str = None,
-            root: str = None,
-            **req_kwargs
+        self,
+        resource: str = None,
+        *,
+        timeout: int = utils.DEFAULT_TIMEOUT,
+        query_kwargs: Dict = None,
+        auth_method: str = None,
+        root: str = None,
+        **req_kwargs,
     ) -> requests.Response:
         """
         GET request
@@ -326,18 +322,18 @@ class Base(object):
             query_kwargs=query_kwargs,
             auth_method=auth_method,
             root=root,
-            **req_kwargs
+            **req_kwargs,
         )
 
     def _head(
-            self,
-            resource: str = None,
-            *,
-            timeout: int = utils.DEFAULT_TIMEOUT,
-            query_kwargs: Dict = None,
-            auth_method: str = None,
-            root: str = None,
-            **req_kwargs
+        self,
+        resource: str = None,
+        *,
+        timeout: int = utils.DEFAULT_TIMEOUT,
+        query_kwargs: Dict = None,
+        auth_method: str = None,
+        root: str = None,
+        **req_kwargs,
     ) -> requests.Response:
         """
         HEAD request
@@ -367,19 +363,19 @@ class Base(object):
             query_kwargs=query_kwargs,
             auth_method=auth_method,
             root=root,
-            **req_kwargs
+            **req_kwargs,
         )
 
     def _post(
-            self,
-            resource: str = None,
-            *,
-            body: Union[Dict, List] = None,
-            timeout: int = utils.DEFAULT_TIMEOUT,
-            query_kwargs: Dict = None,
-            auth_method: str = None,
-            root: str = None,
-            **req_kwargs
+        self,
+        resource: str = None,
+        *,
+        body: Union[Dict, List] = None,
+        timeout: int = utils.DEFAULT_TIMEOUT,
+        query_kwargs: Dict = None,
+        auth_method: str = None,
+        root: str = None,
+        **req_kwargs,
     ) -> requests.Response:
         """
         POST request
@@ -412,19 +408,19 @@ class Base(object):
             query_kwargs=query_kwargs,
             auth_method=auth_method,
             root=root,
-            **req_kwargs
+            **req_kwargs,
         )
 
     def _put(
-            self,
-            resource: str = None,
-            *,
-            body: Union[Dict, List] = None,
-            timeout: int = utils.DEFAULT_TIMEOUT,
-            query_kwargs: Dict = None,
-            auth_method: str = None,
-            root: str = None,
-            **req_kwargs
+        self,
+        resource: str = None,
+        *,
+        body: Union[Dict, List] = None,
+        timeout: int = utils.DEFAULT_TIMEOUT,
+        query_kwargs: Dict = None,
+        auth_method: str = None,
+        root: str = None,
+        **req_kwargs,
     ) -> requests.Response:
         """
         PUT request
@@ -457,7 +453,7 @@ class Base(object):
             query_kwargs=query_kwargs,
             auth_method=auth_method,
             root=root,
-            **req_kwargs
+            **req_kwargs,
         )
 
     def _is_auth_token_expired(self) -> bool:
@@ -469,9 +465,10 @@ class Base(object):
         bool : `True` if the auth token is expired.
         """
         try:
-            return next(
-                _.expires for _ in self.session.cookies if _.name == "AuthSession"
-            ) <= datetime.now(timezone.utc).timestamp()
+            return (
+                next(_.expires for _ in self.session.cookies if _.name == "AuthSession")
+                <= datetime.now(timezone.utc).timestamp()
+            )
         except StopIteration:
             return True
 
@@ -484,18 +481,12 @@ class Base(object):
         """
         self._post(
             resource="_session",
-            body={
-                "name": self._user,
-                "password": self._password
-            },
+            body={"name": self._user, "password": self._password},
             auth_method="basic",
-            root=""
+            root="",
         )
 
-    def check(
-            self,
-            resource: str = None
-    ) -> bool:
+    def check(self, resource: str = None) -> bool:
         """
         Check the server or database by sending a `HEAD` request to `/self.root`.
 
@@ -514,10 +505,7 @@ class Base(object):
         except (exceptions.CouchDBError, requests.exceptions.RequestException):
             return False
 
-    def info(
-            self,
-            partition: str = None
-    ) -> Dict:
+    def info(self, partition: str = None) -> Dict:
         """
         Return a server's or database's info by sending a `GET` request to `/self.root`.
 
@@ -530,12 +518,11 @@ class Base(object):
         -------
         Dict: A dictionary containing the server's or database's info.
         """
-        return self._get(resource=f"_partition/{partition}" if partition else None).json()
+        return self._get(
+            resource=f"_partition/{partition}" if partition else None
+        ).json()
 
-    def rev(
-            self,
-            resource: str
-    ) -> Optional[str]:
+    def rev(self, resource: str) -> Optional[str]:
         """
         Safely retrieves a resource's revision by sending a lightweight `HEAD`request and reading the response's
         `"ETag"` header.
@@ -554,7 +541,7 @@ class Base(object):
         """
         rev = None
         try:
-            rev = self._head(resource=resource).headers.get("ETag").strip("\"")
+            rev = self._head(resource=resource).headers.get("ETag").strip('"')
         except exceptions.NotFoundError:
             pass
         finally:
@@ -565,5 +552,6 @@ class DictBase(dict):
     """
     Abstract dictionary class.
     """
+
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}: {super(DictBase, self).__repr__()}"

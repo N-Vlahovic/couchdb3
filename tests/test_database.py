@@ -15,12 +15,28 @@ from couchdb3.server import Server
 from couchdb3.view import ViewResult, ViewRow
 from couchdb3.utils import user_name_to_id, MimeTypeEnum
 
-from tests.credentials import ATTACHMENT_PATH_HTML, ATTACHMENT_PATH_JSON, ATTACHMENT_PATH_PNG, ATTACHMENT_PATH_TXT, \
-    ATTACHMENT_PATH_ZIP, COUCHDB_USER, COUCHDB_PASSWORD, COUCHDB0_URL, DOCUMENT_VIEW, ATTACHMENT_PATH_PDF
+from tests.credentials import (
+    ATTACHMENT_PATH_HTML,
+    ATTACHMENT_PATH_JSON,
+    ATTACHMENT_PATH_PNG,
+    ATTACHMENT_PATH_TXT,
+    ATTACHMENT_PATH_ZIP,
+    COUCHDB_USER,
+    COUCHDB_PASSWORD,
+    COUCHDB0_URL,
+    DOCUMENT_VIEW,
+    ATTACHMENT_PATH_PDF,
+)
 
 
-def get_or_create_db(db_name: str, client: Server, partitioned: bool = False) -> Database:
-    return client.get(db_name) if db_name in client else client.create(db_name, partitioned=partitioned)
+def get_or_create_db(
+    db_name: str, client: Server, partitioned: bool = False
+) -> Database:
+    return (
+        client.get(db_name)
+        if db_name in client
+        else client.create(db_name, partitioned=partitioned)
+    )
 
 
 CLIENT: Server = Server(COUCHDB0_URL, user=COUCHDB_USER, password=COUCHDB_PASSWORD)
@@ -36,39 +52,36 @@ VIEW_ID: str = "document-view"
 
 class TestDatabase(unittest.TestCase):
     def test_all_docs(self):
-        docs = [{
-            "_id": f"test-all-docs-doc-{_}",
-            "name": f"Document {_}",
-        } for _ in range(10)]
+        docs = [
+            {
+                "_id": f"test-all-docs-doc-{_}",
+                "name": f"Document {_}",
+            }
+            for _ in range(10)
+        ]
         DB.bulk_docs(docs=docs)
         result = DB.all_docs(keys=[_["_id"] for _ in docs][:5])
         self.assertIsInstance(result, ViewResult)
-        self.assertListEqual(
-            [_["_id"] for _ in docs][:5],
-            [_.id for _ in result.rows]
-        )
-        result = DB.all_docs(
-            keys=map(lambda _: _["_id"], docs),
-            include_docs=True
-        )
+        self.assertListEqual([_["_id"] for _ in docs][:5], [_.id for _ in result.rows])
+        result = DB.all_docs(keys=map(lambda _: _["_id"], docs), include_docs=True)
         for _ in result.rows:
             self.assertIsInstance(_, ViewRow)
             self.assertTrue(_.doc)
 
     def test___contains__(self):
         _id = "test-doc-__contains__"
-        doc = {
-            "type": "test-doc-__contains__",
-            "_id": _id
-        }
+        doc = {"type": "test-doc-__contains__", "_id": _id}
         DB.create(doc)
         self.assertIn(_id, DB)  # noqa
 
     def test_bulk_docs(self):
-        docs = [{
-            "_id": f"doc-{_}",
-            "name": f"Document {_}",
-        } for _ in range(10)]
+        docs = [
+            {
+                "_id": f"doc-{_}",
+                "name": f"Document {_}",
+            }
+            for _ in range(10)
+        ]
         results = DB.bulk_docs(docs=docs)
         for doc, res in zip(docs, results):
             self.assertEqual(doc["_id"], res["id"])
@@ -76,10 +89,13 @@ class TestDatabase(unittest.TestCase):
             self.assertIsInstance(res["ok"], bool)
 
     def test_bulk_get(self):
-        docs = [{
-            "_id": f"doc-{_}",
-            "name": f"Document {_}",
-        } for _ in range(10)]
+        docs = [
+            {
+                "_id": f"doc-{_}",
+                "name": f"Document {_}",
+            }
+            for _ in range(10)
+        ]
         DB.bulk_docs(docs=docs)
         results = DB.bulk_get(docs=[{"id": _["_id"]} for _ in docs])
         for doc, res in zip(docs, results):
@@ -93,10 +109,7 @@ class TestDatabase(unittest.TestCase):
 
     def test_copy(self):
         docid = "doc-id-test-copy"
-        doc = {
-            "_id": docid,
-            "name": "Test Copy"
-        }
+        doc = {"_id": docid, "name": "Test Copy"}
         destid = f"{docid}-copy"
         DB.save(doc=doc)
         _id, ok, _rev = DB.copy(docid=docid, destid=destid)
@@ -104,10 +117,7 @@ class TestDatabase(unittest.TestCase):
         self.assertEqual(_id, destid)
 
     def test_create(self):
-        doc0 = {
-            "name": "Hello",
-            "type": "test-doc"
-        }
+        doc0 = {"name": "Hello", "type": "test-doc"}
         doc1 = doc0 | {"_id": "test-doc-id"}
         for _ in (doc0, doc1):
             _id, success, _rev = DB.create(_)
@@ -118,95 +128,64 @@ class TestDatabase(unittest.TestCase):
                 self.assertEqual(_id, _.get("_id"))
 
     def test_delete(self):
-        doc = {
-            "type": "test-doc-delete",
-            "_id": "test-doc-delete"
-        }
+        doc = {"type": "test-doc-delete", "_id": "test-doc-delete"}
         DB.create(doc)
-        result = DB.delete(
-            docid=doc.get("_id"),
-            rev=DB.rev(doc.get("_id"))
-        )
+        result = DB.delete(docid=doc.get("_id"), rev=DB.rev(doc.get("_id")))
         self.assertEqual(result, True)
 
     def test_explain(self):
-        DB.save_index(
-            index={
-                "fields": ["year"]
-            },
-            name="my-index"
-        )
-        docs = [{
-            "_id": f"explain-doc-{title.lower()}",
-            "year": year,
-            "title": title,
-        } for title, year in zip(
-            ("Inception", "The Dark Knight", "Fight Club"),
-            (2010, 2008, 1999)
-        )]
+        DB.save_index(index={"fields": ["year"]}, name="my-index")
+        docs = [
+            {
+                "_id": f"explain-doc-{title.lower()}",
+                "year": year,
+                "title": title,
+            }
+            for title, year in zip(
+                ("Inception", "The Dark Knight", "Fight Club"), (2010, 2008, 1999)
+            )
+        ]
         DB.bulk_docs(docs=docs)
         fields = ["_id", "_rev", "year", "title"]
         limit = 2
         skip = 0
         result = DB.explain(
-            selector={
-                "year": {
-                    "$lt": 2010
-                }
-            },
+            selector={"year": {"$lt": 2010}},
             limit=limit,
             skip=skip,
             fields=fields,
-            sort=[{"year": "asc"}]
+            sort=[{"year": "asc"}],
         )
-        self.assertEqual(
-            DB.name,
-            result.get("dbname")
-        )
-        self.assertEqual(
-            fields,
-            result.get("fields")
-        )
-        self.assertEqual(
-            limit,
-            result.get("limit")
-        )
-        self.assertEqual(
-            skip,
-            result.get("skip")
-        )
+        self.assertEqual(DB.name, result.get("dbname"))
+        self.assertEqual(fields, result.get("fields"))
+        self.assertEqual(limit, result.get("limit"))
+        self.assertEqual(skip, result.get("skip"))
 
     def test_find(self):
         now = datetime.datetime.now()
-        DB.save_index(
-            index={
-                "fields": ["date", "_id"]
-            },
-            name="my-index"
-        )
-        docs = [{
-            "_id": f"find-doc-{_}",
-            "date": int((now + datetime.timedelta(days=_)).timestamp()),
-            "name": f"Find Document {_}",
-        } for _ in range(10)]
+        DB.save_index(index={"fields": ["date", "_id"]}, name="my-index")
+        docs = [
+            {
+                "_id": f"find-doc-{_}",
+                "date": int((now + datetime.timedelta(days=_)).timestamp()),
+                "name": f"Find Document {_}",
+            }
+            for _ in range(10)
+        ]
         DB.bulk_docs(docs=docs)
         result = DB.find(
             selector={
-                "_id": {
-                    "$regex": "^find-.*"
-                },
-                "date": {
-                    "$gt": int((now + datetime.timedelta(days=1)).timestamp())
-                }
+                "_id": {"$regex": "^find-.*"},
+                "date": {"$gt": int((now + datetime.timedelta(days=1)).timestamp())},
             },
             limit=1,
             fields=["name", "date"],
-            sort=[{"date": "asc"}, {"_id": "asc"}]
+            sort=[{"date": "asc"}, {"_id": "asc"}],
         )
         self.assertIsInstance(result, dict)
         self.assertEqual(
             result["docs"][0]["date"],
-            int((now + datetime.timedelta(days=2)).timestamp())
+            int((now + datetime.timedelta(days=2)).timestamp()),
         )
 
     def test_indexes(self):
@@ -216,10 +195,7 @@ class TestDatabase(unittest.TestCase):
 
     def test_get(self):
         docid = "test-doc-get"
-        doc = {
-            "type": "test-doc-get",
-            "_id": docid
-        }
+        doc = {"type": "test-doc-get", "_id": docid}
         self.assertIs(DB.get(docid), None)
         DB.create(doc)
         dbdoc = DB[docid]
@@ -234,23 +210,21 @@ class TestDatabase(unittest.TestCase):
         for attname, content in [
             ("test-dict", {"hello": "world", 1: 2, 3: None}),
             ("test-str", "Hello World! 123"),
-            ("test-list", ["Hello", "World", 1, 2, 3])
+            ("test-list", ["Hello", "World", 1, 2, 3]),
         ]:
             result = DB.put_attachment(
                 docid=docid,
                 attname=attname,
-                content=str(content).encode('utf-8'),
+                content=str(content).encode("utf-8"),
                 content_type=content_type,
-                rev=DB.rev(docid)
+                rev=DB.rev(docid),
             )
-            self.assertTrue(DB.delete_attachment(
-                docid=docid,
-                attname=attname,
-                rev=result[2]
-            ))
+            self.assertTrue(
+                DB.delete_attachment(docid=docid, attname=attname, rev=result[2])
+            )
 
     def test_attachment_via_path(self):
-        docid = self.test_attachment_via_path.__name__.replace('_', '-')
+        docid = self.test_attachment_via_path.__name__.replace("_", "-")
         DB.save({"_id": docid})
         for attname, path in [
             ("test.html", ATTACHMENT_PATH_HTML),
@@ -261,22 +235,16 @@ class TestDatabase(unittest.TestCase):
             ("test.pdf", ATTACHMENT_PATH_PDF),
         ]:
             DB.put_attachment(
-                docid=docid,
-                attname=attname,
-                path=path,
-                rev=DB.rev(docid)
+                docid=docid, attname=attname, path=path, rev=DB.rev(docid)
             )
-            response = DB.get_attachment(
-                docid=docid,
-                attname=attname
-            )
+            response = DB.get_attachment(docid=docid, attname=attname)
             self.assertIsInstance(response, AttachmentDocument)
             self.assertIsInstance(response.content, bytes)
             self.assertIsInstance(response.content_length, int)
             self.assertIsInstance(response.digest, str)
 
     def test_attachment_via_content(self):
-        docid = self.test_attachment_via_content.__name__.replace('_', '-')
+        docid = self.test_attachment_via_content.__name__.replace("_", "-")
         DB.save({"_id": docid})
         for attname, path in [
             ("test.html", ATTACHMENT_PATH_HTML),
@@ -286,7 +254,7 @@ class TestDatabase(unittest.TestCase):
             ("test.zip", ATTACHMENT_PATH_ZIP),
             ("test.pdf", ATTACHMENT_PATH_PDF),
         ]:
-            with open(path, 'rb') as f:
+            with open(path, "rb") as f:
                 content = f.read()
                 content_type = mimetypes.guess_type(path)[0]
             DB.put_attachment(
@@ -296,10 +264,7 @@ class TestDatabase(unittest.TestCase):
                 content_type=content_type,
                 rev=DB.rev(docid),
             )
-            response = DB.get_attachment(
-                docid=docid,
-                attname=attname
-            )
+            response = DB.get_attachment(docid=docid, attname=attname)
             self.assertIsInstance(response, AttachmentDocument)
             self.assertIsInstance(response.content, bytes)
             self.assertIsInstance(response.content_length, int)
@@ -314,12 +279,8 @@ class TestDatabase(unittest.TestCase):
             _id, ok, _rev = db.put_design(
                 ddoc=ddoc,
                 rev=db.rev(f"_design/{ddoc}"),
-                views={
-                    VIEW_ID: {
-                        "map": DOCUMENT_VIEW
-                    }
-                },
-                partitioned=partitioned
+                views={VIEW_ID: {"map": DOCUMENT_VIEW}},
+                partitioned=partitioned,
             )
             self.assertEqual(_id, f"_design/{ddoc}")
             self.assertEqual(ok, True)
@@ -335,12 +296,8 @@ class TestDatabase(unittest.TestCase):
                 db.put_design(
                     ddoc=DDOC_ID,
                     rev=db.rev(_id),
-                    views={
-                        VIEW_ID: {
-                            "map": DOCUMENT_VIEW
-                        }
-                    },
-                    partitioned=partitioned
+                    views={VIEW_ID: {"map": DOCUMENT_VIEW}},
+                    partitioned=partitioned,
                 )
             result = DB.get_design(ddoc=DDOC_ID)
             self.assertIsInstance(result, Document)
@@ -356,10 +313,7 @@ class TestDatabase(unittest.TestCase):
             ("test.zip", ATTACHMENT_PATH_ZIP),
         ]:
             results = DB.put_attachment(
-                docid=docid,
-                attname=attname,
-                path=path,
-                rev=DB.rev(docid)
+                docid=docid, attname=attname, path=path, rev=DB.rev(docid)
             )
             self.assertEqual(results[0], docid)
             self.assertEqual(results[1], True)
@@ -375,28 +329,21 @@ class TestDatabase(unittest.TestCase):
         self.assertIsInstance(_id, str)
         self.assertIsInstance(success, bool)
         self.assertIsInstance(_rev, str)
-        self.assertIsNone(DB[_id]['nullable'])
+        self.assertIsNone(DB[_id]["nullable"])
 
     def test_save_index(self):
         res, _id, name = DB.save_index(
             index={
                 "partial_filter_selector": {
-                    "year": {
-                        "$gt": 2010
-                    },
+                    "year": {"$gt": 2010},
                     "limit": 10,
-                    "skip": 0
+                    "skip": 0,
                 },
-                "fields": [
-                    "_id",
-                    "_rev",
-                    "year",
-                    "title"
-                ]
+                "fields": ["_id", "_rev", "year", "title"],
             },
             ddoc="example-ddoc",
             name="foo-index",
-            index_type="json"
+            index_type="json",
         )
         self.assertTrue(res in {"created", "exists"})
         self.assertEqual(_id, "_design/example-ddoc")
@@ -416,14 +363,11 @@ class TestDatabase(unittest.TestCase):
         sec = DB.security()
         sec.members.add_name(read_user)
         sec.members.add_role("reader")
-        res = DB.update_security(
-            admins=sec.admins,
-            members=sec.members
-        )
+        res = DB.update_security(admins=sec.admins, members=sec.members)
         self.assertTrue(res)
         self.assertIsInstance(
             Server(COUCHDB0_URL, user=read_user, password=read_password)[DB.name],
-            Database
+            Database,
         )
 
     def test_view(self):
@@ -433,21 +377,13 @@ class TestDatabase(unittest.TestCase):
         ]:
             docid = (f"{P_ID}:" if partitioned else "") + "doc-test-view"
             if docid not in db:
-                db.save({
-                    "type": "document",
-                    "name": "",
-                    "_id": docid
-                })
+                db.save({"type": "document", "name": "", "_id": docid})
             _id = f"_design/{DDOC_ID}"
             if _id not in db:
                 db.put_design(
                     ddoc=DDOC_ID,
                     rev=db.rev(_id),
-                    views={
-                        VIEW_ID: {
-                            "map": DOCUMENT_VIEW
-                        }
-                    },
+                    views={VIEW_ID: {"map": DOCUMENT_VIEW}},
                     partitioned=partitioned,
                 )
             result = db.view(
@@ -474,5 +410,5 @@ def rm_test_db() -> None:
             CLIENT.delete(db_name)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
