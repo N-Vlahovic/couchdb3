@@ -37,12 +37,12 @@ deactivate
 
 ### TL;DR
 
-- Python `>=3.10`
+- Python `>=3.11`
 - CouchDB `3.x.x`
 - Python packages `requests setuptools>=42 wheel`
 
 ### Python Interpreter
-A Python version `>=3.10` is required as prior versions reached EoL.
+A Python version `>=3.11` is required as prior versions reached EoL.
 Also, new-ish versions are desired to be able to use the following statement
 ```python
 from __future__ import annotations
