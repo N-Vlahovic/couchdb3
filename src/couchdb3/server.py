@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import requests
-from typing import Dict, List, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 from .base import Base
 from .database import Database
@@ -34,13 +34,13 @@ class Server(Base):
         self,
         url: str,
         *,
-        port: int = None,
-        user: str = None,
-        password: str = None,
+        port: Optional[int] = None,
+        user: Optional[str] = None,
+        password: Optional[str] = None,
         disable_ssl_verification: bool = False,
-        auth_method: str = None,
-        timeout: int = DEFAULT_TIMEOUT,
-        session: requests.Session = None,
+        auth_method: Optional[str] = None,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+        session: Optional[requests.Session] = None,
     ) -> None:
         """
 
@@ -127,15 +127,15 @@ class Server(Base):
         self,
         name: str,
         *,
-        user_id: str = None,
-        derived_key: str = None,
-        roles: List[str] = None,
-        password: str = None,
-        password_sha: str = None,
-        password_scheme: str = None,
-        salt: str = None,
-        iterations: int = None,
-        rev: str = None,
+        user_id: Optional[str] = None,
+        derived_key: Optional[str] = None,
+        roles: Optional[List[str]] = None,
+        password: Optional[str] = None,
+        password_sha: Optional[str] = None,
+        password_scheme: Optional[str] = None,
+        salt: Optional[str] = None,
+        iterations: Optional[int] = None,
+        rev: Optional[str] = None,
     ) -> Tuple[bool, str, str]:
         """
         Create or update a user. In case of a `ConflictError`, a `HEAD` request to `/_users/<user_id>` will be sent to
@@ -206,10 +206,10 @@ class Server(Base):
         self,
         *,
         descending: bool = False,
-        endkey: str = None,
-        limit: int = None,
+        endkey: Optional[str] = None,
+        limit: Optional[int] = None,
         skip: int = 0,
-        startkey: str = None,
+        startkey: Optional[str] = None,
     ) -> List[str]:
         """
         Get all database names.
@@ -245,8 +245,8 @@ class Server(Base):
     def create(
         self,
         name: str,
-        q: int = None,
-        n: int = None,
+        q: Optional[int] = None,
+        n: Optional[int] = None,
         partitioned: bool = False,
     ) -> Database:
         """
@@ -323,7 +323,7 @@ class Server(Base):
             raise error
         return db
 
-    def delete(self, resource: str = None) -> bool:
+    def delete(self, resource: Optional[str] = None) -> bool:
         """
         Delete a database.
 
@@ -343,16 +343,16 @@ class Server(Base):
         self,
         source: Union[Dict, str],
         target: Union[Dict, str],
-        replication_id: str = None,
-        cancel: bool = None,
-        continuous: bool = None,
-        create_target: bool = None,
-        create_target_params: Dict = None,
-        doc_ids: List[str] = None,
-        filter_func: str = None,
-        selector: Dict = None,
-        source_proxy: str = None,
-        target_proxy: str = None,
+        replication_id: Optional[str] = None,
+        cancel: Optional[bool] = None,
+        continuous: Optional[bool] = None,
+        create_target: Optional[bool] = None,
+        create_target_params: Optional[Dict] = None,
+        doc_ids: Optional[List[str]] = None,
+        filter_func: Optional[str] = None,
+        selector: Optional[Dict] = None,
+        source_proxy: Optional[str] = None,
+        target_proxy: Optional[str] = None,
     ) -> Dict:
         """
         Request, configure, or stop, a replication operation. For more info, please refer to

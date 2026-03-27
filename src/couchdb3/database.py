@@ -39,14 +39,14 @@ class Database(Base):
         self,
         name: str,
         *,
-        url: str = None,
-        port: int = None,
-        user: str = None,
-        password: str = None,
+        url: Optional[str] = None,
+        port: Optional[int] = None,
+        user: Optional[str] = None,
+        password: Optional[str] = None,
         disable_ssl_verification: bool = False,
-        auth_method: str = None,
-        timeout: int = DEFAULT_TIMEOUT,
-        session: requests.Session = None,
+        auth_method: Optional[str] = None,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+        session: Optional[requests.Session] = None,
     ) -> None:
         """
 
@@ -85,7 +85,7 @@ class Database(Base):
             auth_method=auth_method,
             timeout=timeout,
         )
-        if validate_db_name(name=name) is False:
+        if not validate_db_name(name=name):
             raise NameComplianceError(
                 "Database name does not comply with the CouchDB requirements. "
                 "See https://docs.couchdb.org/en/latest/api/database/common.html#put--db."
@@ -107,7 +107,10 @@ class Database(Base):
         return f"{super(Database, self).__repr__()}: {self.name}"
 
     def all_docs(
-        self, partition: str = None, keys: Iterable[str] = None, **kwargs
+        self,
+        partition: Optional[str] = None,
+        keys: Optional[Iterable[str]] = None,
+        **kwargs,
     ) -> ViewResult:
         """
         Executes the built-in _all_docs view, returning all the documents in the database (or partition).
@@ -202,12 +205,12 @@ class Database(Base):
             .get("results", [])
         )
 
-    def compact(self, ddoc: str = None) -> bool:
+    def compact(self, ddoc: Optional[str] = None) -> bool:
         """
         Request compaction of the database. For more info, please refer to
         [the official documentation](https://docs.couchdb.org/en/main/api/database/compact.html#db-compact).
 
-        If the `ddoc` parameter is provided, it will compacts the view indexes associated with the specified design
+        If the `ddoc` parameter is provided, it will compact the view indexes associated with the specified design
         document.
 
         Parameters
@@ -225,7 +228,11 @@ class Database(Base):
         return self._post(resource=resource).json().get("ok")
 
     def copy(
-        self, docid: str, destid: str, rev: str = None, destrev: str = None
+        self,
+        docid: str,
+        destid: str,
+        rev: Optional[str] = None,
+        destrev: Optional[str] = None,
     ) -> Tuple[str, bool, str]:
         """
         Copy an existing document to a new or existing document. Copying a document is only possible within the same
@@ -261,7 +268,7 @@ class Database(Base):
         return data["id"], data["ok"], data["rev"]
 
     def create(
-        self, doc: Union[Dict, Document], *, batch: bool = None
+        self, doc: Union[Dict, Document], *, batch: Optional[bool] = None
     ) -> Tuple[str, bool, str]:
         """
         Create a new document.
@@ -282,7 +289,7 @@ class Database(Base):
         ).json()
         return data["id"], data["ok"], data["rev"]
 
-    def delete(self, docid: str, rev: str, *, batch: bool = None) -> bool:
+    def delete(self, docid: str, rev: str, *, batch: Optional[bool] = None) -> bool:
         """
         Delete a document.
 
@@ -337,14 +344,14 @@ class Database(Base):
         selector: Dict,
         limit: int = 25,
         skip: int = 0,
-        sort: List[Dict] = None,
-        fields: List[str] = None,
-        use_index: Union[str, List[str]] = None,
+        sort: Optional[List[Dict]] = None,
+        fields: Optional[List[str]] = None,
+        use_index: Optional[Union[str, List[str]]] = None,
         conflicts: bool = False,
         r: int = 1,
-        bookmark: str = None,
+        bookmark: Optional[str] = None,
         update: bool = True,
-        stable: bool = None,
+        stable: Optional[bool] = None,
         execution_stats: bool = False,
     ) -> Dict:
         """
@@ -429,16 +436,16 @@ class Database(Base):
         selector: Dict,
         limit: int = 25,
         skip: int = 0,
-        sort: List[Dict] = None,
-        fields: List[str] = None,
-        use_index: Union[str, List[str]] = None,
+        sort: Optional[List[Dict]] = None,
+        fields: Optional[List[str]] = None,
+        use_index: Optional[Union[str, List[str]]] = None,
         conflicts: bool = False,
         r: int = 1,
-        bookmark: str = None,
+        bookmark: Optional[str] = None,
         update: bool = True,
-        stable: bool = None,
+        stable: Optional[bool] = None,
         execution_stats: bool = False,
-        partition: str = None,
+        partition: Optional[str] = None,
     ) -> Dict:
         """
         Find documents using a declarative JSON querying syntax.
@@ -535,20 +542,20 @@ class Database(Base):
         self,
         docid: str,
         *,
-        attachments: bool = None,
-        att_encoding_info: bool = None,
-        atts_since: Iterable[str] = None,
-        conflicts: bool = None,
-        deleted_conflicts: bool = None,
-        latest: bool = None,
-        local_seq: bool = None,
-        meta: bool = None,
-        open_revs: Iterable[str] = None,
-        rev: str = None,
-        revs: bool = None,
-        revs_info: bool = None,
-        check: bool = False,
-        default_value: Any = None,
+        attachments: Optional[bool] = None,
+        att_encoding_info: Optional[bool] = None,
+        atts_since: Optional[Iterable[str]] = None,
+        conflicts: Optional[bool] = None,
+        deleted_conflicts: Optional[bool] = None,
+        latest: Optional[bool] = None,
+        local_seq: Optional[bool] = None,
+        meta: Optional[bool] = None,
+        open_revs: Optional[Iterable[str]] = None,
+        rev: Optional[str] = None,
+        revs: Optional[bool] = None,
+        revs_info: Optional[bool] = None,
+        check: Optional[bool] = None,
+        default_value: Optional[Any] = None,
     ) -> Union[Document, Any]:
         """
         Get a document by id.
@@ -614,12 +621,15 @@ class Database(Base):
                 ).json()
             )
         except (CouchDBError, requests.exceptions.RequestException) as error:
-            if check is True:
+            if check:
                 raise error
             return default_value
 
     def get_attachment(
-        self, docid: str, attname: str, rev: str = None
+        self,
+        docid: str,
+        attname: str,
+        rev: Optional[str] = None,
     ) -> AttachmentDocument:
         """
         Get a document's attachment
@@ -686,11 +696,11 @@ class Database(Base):
         self,
         docid: str,
         attname: str,
-        path: str = None,
+        path: Optional[str] = None,
         *,
-        content: bytes = None,
-        content_type: str = None,
-        rev: str = None,
+        content: Optional[bytes] = None,
+        content_type: Optional[str] = None,
+        rev: Optional[str] = None,
     ) -> Tuple[str, bool, str]:
         """
         Uploads the supplied content as an attachment to the specified document.
@@ -748,15 +758,15 @@ class Database(Base):
         self,
         ddoc: str,
         *,
-        rev: str = None,
-        language: str = None,
-        options: Dict = None,
-        filters: Dict = None,
-        updates: Dict = None,
-        validate_doc_update: str = None,
-        views: Dict = None,
-        autoupdate: bool = None,
-        partitioned: bool = None,
+        rev: Optional[str] = None,
+        language: Optional[str] = None,
+        options: Optional[Dict] = None,
+        filters: Optional[Dict] = None,
+        updates: Optional[Dict] = None,
+        validate_doc_update: Optional[str] = None,
+        views: Optional[Dict] = None,
+        autoupdate: Optional[bool] = None,
+        partitioned: Optional[bool] = None,
         **kwargs,
     ) -> Tuple[str, bool, str]:
         """
@@ -815,9 +825,9 @@ class Database(Base):
     def save(
         self,
         doc: Union[Dict, Document],
-        batch: bool = None,
-        new_edits: bool = None,
-        path: str = None,
+        batch: Optional[bool] = None,
+        new_edits: Optional[bool] = None,
+        path: Optional[str] = None,
     ) -> Tuple[str, bool, str]:
         """
         Create a new named document, or a new revision of the existing document.
@@ -858,10 +868,10 @@ class Database(Base):
     def save_index(
         self,
         index: Dict,
-        ddoc: str = None,
-        name: str = None,
-        index_type: str = "json",
-        partitioned: bool = None,
+        ddoc: Optional[str] = None,
+        name: Optional[str] = None,
+        index_type: Optional[str] = "json",
+        partitioned: Optional[bool] = None,
     ) -> Tuple[str, str, str]:
         """
         Create a new index on a database.
@@ -921,8 +931,8 @@ class Database(Base):
 
     def update_security(
         self,
-        admins: Union[Dict, SecurityDocumentElement],
-        members: Union[Dict, SecurityDocumentElement],
+        admins: Optional[Union[Dict, SecurityDocumentElement]] = None,
+        members: Optional[Union[Dict, SecurityDocumentElement]] = None,
     ) -> bool:
         """
         Update database security.
@@ -947,30 +957,30 @@ class Database(Base):
     def view(
         self,
         ddoc: str,
-        view: str = None,
+        view: Optional[str] = None,
         *,
-        partition: str = None,
-        conflicts: bool = None,
-        descending: bool = None,
-        endkey: str = None,
-        endkey_docid: str = None,
-        group: bool = None,
-        group_level: int = None,
-        include_docs: bool = None,
-        attachments: bool = None,
-        att_encoding_info: bool = None,
-        inclusive_end: bool = None,
-        key: str = None,
-        keys: Iterable[str] = None,
-        limit: int = None,
-        reduce: bool = None,
-        skip: int = None,
-        sort: bool = None,
-        stable: bool = None,
-        startkey: str = None,
-        startkey_docid: str = None,
-        update: str = None,
-        update_seq: bool = None,
+        partition: Optional[str] = None,
+        conflicts: Optional[bool] = None,
+        descending: Optional[bool] = None,
+        endkey: Optional[str] = None,
+        endkey_docid: Optional[str] = None,
+        group: Optional[bool] = None,
+        group_level: Optional[int] = None,
+        include_docs: Optional[bool] = None,
+        attachments: Optional[bool] = None,
+        att_encoding_info: Optional[bool] = None,
+        inclusive_end: Optional[bool] = None,
+        key: Optional[str] = None,
+        keys: Optional[Iterable[str]] = None,
+        limit: Optional[int] = None,
+        reduce: Optional[bool] = None,
+        skip: Optional[int] = None,
+        sort: Optional[bool] = None,
+        stable: Optional[bool] = None,
+        startkey: Optional[str] = None,
+        startkey_docid: Optional[str] = None,
+        update: Optional[str] = None,
+        update_seq: Optional[bool] = None,
     ) -> ViewResult:
         """
         Executes the specified view function from the specified design document, c.f [the official
@@ -1129,14 +1139,14 @@ class Partition(Database):
         partition_id: str,
         name: str,
         *,
-        url: str = None,
-        port: int = None,
-        user: str = None,
-        password: str = None,
+        url: Optional[str] = None,
+        port: Optional[int] = None,
+        user: Optional[str] = None,
+        password: Optional[str] = None,
         disable_ssl_verification: bool = False,
-        auth_method: str = None,
-        timeout: int = DEFAULT_TIMEOUT,
-        session: requests.Session = None,
+        auth_method: Optional[str] = None,
+        timeout: Optional[int] = None,
+        session: Optional[requests.Session] = None,
     ) -> None:
         """
 
@@ -1220,14 +1230,14 @@ class Partition(Database):
         selector: Dict,
         limit: int = 25,
         skip: int = 0,
-        sort: List[Dict] = None,
-        fields: List[str] = None,
-        use_index: Union[str, List[str]] = None,
+        sort: Optional[List[Dict]] = None,
+        fields: Optional[List[str]] = None,
+        use_index: Optional[Union[str, List[str]]] = None,
         conflicts: bool = False,
         r: int = 1,
-        bookmark: str = None,
+        bookmark: Optional[str] = None,
         update: bool = True,
-        stable: bool = None,
+        stable: Optional[bool] = None,
         execution_stats: bool = False,
     ) -> Dict:
         """
@@ -1253,30 +1263,30 @@ class Partition(Database):
     def view(
         self,
         ddoc: str,
-        view: str = None,
+        view: Optional[str] = None,
         *,
         # partition: str = None,
-        conflicts: bool = None,
-        descending: bool = None,
-        endkey: str = None,
-        endkey_docid: str = None,
-        group: bool = None,
-        group_level: int = None,
-        include_docs: bool = None,
-        attachments: bool = None,
-        att_encoding_info: bool = None,
-        inclusive_end: bool = None,
-        key: str = None,
-        keys: Iterable[str] = None,
-        limit: int = None,
-        reduce: bool = None,
-        skip: int = None,
-        sort: bool = None,
-        stable: bool = None,
-        startkey: str = None,
-        startkey_docid: str = None,
-        update: str = None,
-        update_seq: bool = None,
+        conflicts: Optional[bool] = None,
+        descending: Optional[bool] = None,
+        endkey: Optional[str] = None,
+        endkey_docid: Optional[str] = None,
+        group: Optional[bool] = None,
+        group_level: Optional[int] = None,
+        include_docs: Optional[bool] = None,
+        attachments: Optional[bool] = None,
+        att_encoding_info: Optional[bool] = None,
+        inclusive_end: Optional[bool] = None,
+        key: Optional[str] = None,
+        keys: Optional[Iterable[str]] = None,
+        limit: Optional[int] = None,
+        reduce: Optional[bool] = None,
+        skip: Optional[int] = None,
+        sort: Optional[bool] = None,
+        stable: Optional[bool] = None,
+        startkey: Optional[str] = None,
+        startkey_docid: Optional[str] = None,
+        update: Optional[str] = None,
+        update_seq: Optional[bool] = None,
     ) -> ViewResult:
         """
         Executes the specified view function from the specified design document, c.f [the official
@@ -1405,7 +1415,11 @@ class Partition(Database):
         )
 
     def copy(
-        self, docid: str, destid: str, rev: str = None, destrev: str = None
+        self,
+        docid: str,
+        destid: str,
+        rev: Optional[str] = None,
+        destrev: Optional[str] = None,
     ) -> Tuple[str, bool, str]:
         """
         See `Database.copy`.
@@ -1421,7 +1435,10 @@ class Partition(Database):
         )
 
     def create(
-        self, doc: Union[Dict, Document], *, batch: bool = None
+        self,
+        doc: Union[Dict, Document],
+        *,
+        batch: Optional[bool] = None,
     ) -> Tuple[str, bool, str]:
         """
         See `Database.create`.
@@ -1434,7 +1451,13 @@ class Partition(Database):
             batch=batch,
         )
 
-    def delete(self, docid: str, rev: str, *, batch: bool = None) -> bool:
+    def delete(
+            self,
+            docid: str,
+            rev: str,
+            *,
+            batch: Optional[bool] = None,
+    ) -> bool:
         """
         See `Database.delete`.
 
@@ -1448,7 +1471,12 @@ class Partition(Database):
         )
 
     def delete_attachment(
-        self, docid: str, attname: str, rev: str, *, batch: bool = False
+        self,
+        docid: str,
+        attname: str,
+        rev: str,
+        *,
+        batch: bool = False,
     ) -> bool:
         """
         See `Database.delete_attachment`.
@@ -1467,20 +1495,20 @@ class Partition(Database):
         self,
         docid: str,
         *,
-        attachments: bool = None,
-        att_encoding_info: bool = None,
-        atts_since: Iterable[str] = None,
-        conflicts: bool = None,
-        deleted_conflicts: bool = None,
-        latest: bool = None,
-        local_seq: bool = None,
-        meta: bool = None,
-        open_revs: Iterable[str] = None,
-        rev: str = None,
-        revs: bool = None,
-        revs_info: bool = None,
-        check: bool = False,
-        default_value: Any = None,
+        attachments: Optional[bool] = None,
+        att_encoding_info: Optional[bool] = None,
+        atts_since: Optional[Iterable[str]] = None,
+        conflicts: Optional[bool] = None,
+        deleted_conflicts: Optional[bool] = None,
+        latest: Optional[bool] = None,
+        local_seq: Optional[bool] = None,
+        meta: Optional[bool] = None,
+        open_revs: Optional[Iterable[str]] = None,
+        rev: Optional[str] = None,
+        revs: Optional[bool] = None,
+        revs_info: Optional[bool] = None,
+        check: Optional[bool] = False,
+        default_value: Optional[Any] = None,
     ) -> Union[Document, Any]:
         """
         See `Database.get`.
@@ -1507,7 +1535,10 @@ class Partition(Database):
         )
 
     def get_attachment(
-        self, docid: str, attname: str, rev: str = None
+        self,
+        docid: str,
+        attname: str,
+        rev: Optional[str] = None,
     ) -> AttachmentDocument:
         """
         See `Database.get_attachment`.
@@ -1525,11 +1556,11 @@ class Partition(Database):
         self,
         docid: str,
         attname: str,
-        path: str = None,
+        path: Optional[str] = None,
         *,
-        content: bytes = None,
-        content_type: str = None,
-        rev: str = None,
+        content: Optional[bytes] = None,
+        content_type: Optional[str] = None,
+        rev: Optional[str] = None,
     ) -> Tuple[str, bool, str]:
         """
         See `Database.put_attachment`.
@@ -1555,9 +1586,9 @@ class Partition(Database):
     def save(
         self,
         doc: Union[Dict, Document],
-        batch: bool = None,
-        new_edits: bool = None,
-        path: str = None,
+        batch: Optional[bool] = None,
+        new_edits: Optional[bool] = None,
+        path: Optional[str] = None,
     ) -> Tuple[str, bool, str]:
         """
         See `Database.save`.

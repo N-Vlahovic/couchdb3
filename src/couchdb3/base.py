@@ -22,13 +22,13 @@ class Base(object):
         self,
         url: str,
         *,
-        port: int = None,
-        user: str = None,
-        password: str = None,
+        port: Optional[int] = None,
+        user: Optional[str] = None,
+        password: Optional[str] = None,
         disable_ssl_verification: bool = False,
-        auth_method: str = None,
-        timeout: int = utils.DEFAULT_TIMEOUT,
-        session: requests.Session = None,
+        auth_method: Optional[str] = None,
+        timeout: Optional[int] = utils.DEFAULT_TIMEOUT,
+        session: Optional[requests.Session] = None,
     ) -> None:
         """
 
@@ -177,12 +177,12 @@ class Base(object):
         self,
         *,
         method: str,
-        resource: str = None,
-        body: Union[Dict, List] = None,
-        query_kwargs: Dict = None,
-        auth_method: str = None,
-        root: str = None,
-        timeout: int = None,
+        resource: Optional[str] = None,
+        body: Optional[Union[Dict, List]] = None,
+        query_kwargs: Optional[Dict] = None,
+        auth_method: Optional[str] = None,
+        root: Optional[str] = None,
+        timeout: Optional[int] = None,
         **req_kwargs,
     ) -> requests.Response:
         """
@@ -245,12 +245,12 @@ class Base(object):
 
     def _delete(
         self,
-        resource: str = None,
+        resource: Optional[str] = None,
         *,
         timeout: int = utils.DEFAULT_TIMEOUT,
-        query_kwargs: Dict = None,
-        auth_method: str = None,
-        root: str = None,
+        query_kwargs: Optional[Dict] = None,
+        auth_method: Optional[str] = None,
+        root: Optional[str] = None,
         **req_kwargs,
     ) -> requests.Response:
         """
@@ -286,12 +286,12 @@ class Base(object):
 
     def _get(
         self,
-        resource: str = None,
+        resource: Optional[str] = None,
         *,
         timeout: int = utils.DEFAULT_TIMEOUT,
-        query_kwargs: Dict = None,
-        auth_method: str = None,
-        root: str = None,
+        query_kwargs: Optional[Dict] = None,
+        auth_method: Optional[str] = None,
+        root: Optional[str] = None,
         **req_kwargs,
     ) -> requests.Response:
         """
@@ -327,12 +327,12 @@ class Base(object):
 
     def _head(
         self,
-        resource: str = None,
+        resource: Optional[str] = None,
         *,
-        timeout: int = utils.DEFAULT_TIMEOUT,
-        query_kwargs: Dict = None,
-        auth_method: str = None,
-        root: str = None,
+        timeout: Optional[int] = None,
+        query_kwargs: Optional[Dict] = None,
+        auth_method: Optional[str] = None,
+        root: Optional[str] = None,
         **req_kwargs,
     ) -> requests.Response:
         """
@@ -368,13 +368,13 @@ class Base(object):
 
     def _post(
         self,
-        resource: str = None,
+        resource: Optional[str] = None,
         *,
-        body: Union[Dict, List] = None,
-        timeout: int = utils.DEFAULT_TIMEOUT,
-        query_kwargs: Dict = None,
-        auth_method: str = None,
-        root: str = None,
+        body: Optional[Union[Dict, List]] = None,
+        timeout: Optional[int] = None,
+        query_kwargs: Optional[Dict] = None,
+        auth_method: Optional[str] = None,
+        root: Optional[str] = None,
         **req_kwargs,
     ) -> requests.Response:
         """
@@ -413,13 +413,13 @@ class Base(object):
 
     def _put(
         self,
-        resource: str = None,
+        resource: Optional[str] = None,
         *,
-        body: Union[Dict, List] = None,
-        timeout: int = utils.DEFAULT_TIMEOUT,
-        query_kwargs: Dict = None,
-        auth_method: str = None,
-        root: str = None,
+        body: Optional[Union[Dict, List]] = None,
+        timeout: Optional[int] = None,
+        query_kwargs: Optional[Dict] = None,
+        auth_method: Optional[str] = None,
+        root: Optional[str] = None,
         **req_kwargs,
     ) -> requests.Response:
         """
@@ -486,7 +486,7 @@ class Base(object):
             root="",
         )
 
-    def check(self, resource: str = None) -> bool:
+    def check(self, resource: Optional[str] = None) -> bool:
         """
         Check the server or database by sending a `HEAD` request to `/self.root`.
 
@@ -505,7 +505,7 @@ class Base(object):
         except (exceptions.CouchDBError, requests.exceptions.RequestException):
             return False
 
-    def info(self, partition: str = None) -> Dict:
+    def info(self, partition: Optional[str] = None) -> Dict:
         """
         Return a server's or database's info by sending a `GET` request to `/self.root`.
 

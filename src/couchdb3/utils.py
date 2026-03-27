@@ -338,8 +338,8 @@ def extract_url_data(url: str) -> Dict:
 
 
 def partitioned_db_resource_parser(
-    resource: str = None,
-    partition: str = None,
+    resource: Optional[str] = None,
+    partition: Optional[str] = None,
 ) -> Optional[str]:
     """
     Build resource path with optional partition ID.
