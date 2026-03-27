@@ -3,12 +3,11 @@ name = "couchdb3"
 version = "3.0.0"
 description = "A wrapper around the CouchDB API."
 authors = [{ name = "Nikolai Vlahovic", email = "vlahovic.nikolai@gmail.com" }]
-requires-python = ">= 3.10"
+requires-python = ">= 3.11"
 readme = "README.md"
 license = { text = "MIT" }
 classifiers = [
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
