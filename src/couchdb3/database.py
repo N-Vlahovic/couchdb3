@@ -1452,11 +1452,11 @@ class Partition(Database):
         )
 
     def delete(
-            self,
-            docid: str,
-            rev: str,
-            *,
-            batch: Optional[bool] = None,
+        self,
+        docid: str,
+        rev: str,
+        *,
+        batch: Optional[bool] = None,
     ) -> bool:
         """
         See `Database.delete`.
