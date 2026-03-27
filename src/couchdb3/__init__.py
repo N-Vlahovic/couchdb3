@@ -11,7 +11,7 @@ Big parts of the documentation (and thus docstrings) have been copied from Couch
 
 ## Requirements  
 
-- Python version `>= 3.10`
+- Python version `>= 3.11`
 - CouchDB version `3.x`
 
 ## Installation
@@ -161,9 +161,9 @@ partition.save({
 })
 ```
 """
-from . import exceptions
-from . import utils
-from .database import Database, Partition
-from .document import Document
-from .server import Server
-from .view import ViewResult, ViewRow
+from . import exceptions as exceptions
+from . import utils as utils
+from .database import Database as Database, Partition as Partition
+from .document import Document as Document
+from .server import Server as Server
+from .view import ViewResult as ViewResult, ViewRow as ViewRow

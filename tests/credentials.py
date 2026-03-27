@@ -21,7 +21,7 @@ __all__ = [
     "COUCHDB0_URL",
     "COUCHDB1_URL",
     "DOCUMENT_VIEW",
-    "check_alive"
+    "check_alive",
 ]
 
 
@@ -75,7 +75,13 @@ def load_env_var(name: str) -> Optional[str]:
 
 COUCHDB_USER: str = load_env_var("COUCHDB_USER") or input("CouchDB username:\n")
 COUCHDB_PASSWORD: str = load_env_var("COUCHDB_PASSWORD") or input("CouchDB password:\n")
-COUCHDB0_URL: str = DEFAULT_URL if check_alive() else (
-        load_env_var("COUCHDB_URL") or load_env_var("COUCHDB0_URL") or input("Please provide a valid CouchDB URL:\n")
+COUCHDB0_URL: str = (
+    DEFAULT_URL
+    if check_alive()
+    else (
+        load_env_var("COUCHDB_URL")
+        or load_env_var("COUCHDB0_URL")
+        or input("Please provide a valid CouchDB URL:\n")
+    )
 )
 COUCHDB1_URL: Optional[str] = load_env_var("COUCHDB1_URL") or None

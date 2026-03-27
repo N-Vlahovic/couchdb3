@@ -48,7 +48,7 @@ el.replaceWith(d);
 <dl>
 <dt id="couchdb3.database.Database"><code class="flex name class">
 <span>class <span class="ident">Database</span></span>
-<span>(</span><span>name: str,<br>*,<br>url: str = None,<br>port: int = None,<br>user: str = None,<br>password: str = None,<br>disable_ssl_verification: bool = False,<br>auth_method: str = None,<br>timeout: int = 300,<br>session: requests.Session = None)</span>
+<span>(</span><span>name: str,<br>*,<br>url: Optional[str] = None,<br>port: Optional[int] = None,<br>user: Optional[str] = None,<br>password: Optional[str] = None,<br>disable_ssl_verification: bool = False,<br>auth_method: Optional[str] = None,<br>timeout: Optional[int] = 300,<br>session: Optional[requests.Session] = None)</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -59,18 +59,19 @@ el.replaceWith(d);
     &#34;&#34;&#34;
     Abstract Couchdb database
     &#34;&#34;&#34;
+
     def __init__(
-            self,
-            name: str,
-            *,
-            url: str = None,
-            port: int = None,
-            user: str = None,
-            password: str = None,
-            disable_ssl_verification: bool = False,
-            auth_method: str = None,
-            timeout: int = DEFAULT_TIMEOUT,
-            session: requests.Session = None,
+        self,
+        name: str,
+        *,
+        url: Optional[str] = None,
+        port: Optional[int] = None,
+        user: Optional[str] = None,
+        password: Optional[str] = None,
+        disable_ssl_verification: bool = False,
+        auth_method: Optional[str] = None,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+        session: Optional[requests.Session] = None,
     ) -&gt; None:
         &#34;&#34;&#34;
 
@@ -107,9 +108,9 @@ el.replaceWith(d);
             password=password,
             disable_ssl_verification=disable_ssl_verification,
             auth_method=auth_method,
-            timeout=timeout
+            timeout=timeout,
         )
-        if validate_db_name(name=name) is False:
+        if not validate_db_name(name=name):
             raise NameComplianceError(
                 &#34;Database name does not comply with the CouchDB requirements. &#34;
                 &#34;See https://docs.couchdb.org/en/latest/api/database/common.html#put--db.&#34;
@@ -131,10 +132,10 @@ el.replaceWith(d);
         return f&#34;{super(Database, self).__repr__()}: {self.name}&#34;
 
     def all_docs(
-            self,
-            partition: str = None,
-            keys: Iterable[str] = None,
-            **kwargs
+        self,
+        partition: Optional[str] = None,
+        keys: Optional[Iterable[str]] = None,
+        **kwargs,
     ) -&gt; ViewResult:
         &#34;&#34;&#34;
         Executes the built-in _all_docs view, returning all the documents in the database (or partition).
@@ -155,13 +156,11 @@ el.replaceWith(d);
         return self.view(
             f&#34;_partition/{partition}/_all_docs&#34; if partition else &#34;_all_docs&#34;,
             keys=keys,
-            **kwargs
+            **kwargs,
         )
 
     def bulk_docs(
-            self,
-            docs: List[Union[Dict, Document]],
-            new_edits: bool = True
+        self, docs: List[Union[Dict, Document]], new_edits: bool = True
     ) -&gt; List[Dict]:
         &#34;&#34;&#34;
         The bulk document API allows you to create and update multiple documents at the same time within a single
@@ -192,17 +191,13 @@ el.replaceWith(d);
           - `rev` the document&#39;s revision
         &#34;&#34;&#34;
         return self._post(
-            resource=&#34;_bulk_docs&#34;,
-            body={
-                &#34;docs&#34;: docs,
-                &#34;new_edits&#34;: new_edits
-            }
+            resource=&#34;_bulk_docs&#34;, body={&#34;docs&#34;: docs, &#34;new_edits&#34;: new_edits}
         ).json()
 
     def bulk_get(
-            self,
-            docs: List[Union[Dict, Document]],
-            revs: bool = False,
+        self,
+        docs: List[Union[Dict, Document]],
+        revs: bool = False,
     ) -&gt; List[Dict]:
         &#34;&#34;&#34;
         This method can be called to query several documents in bulk. It is well suited for fetching a specific
@@ -225,25 +220,22 @@ el.replaceWith(d);
           the error, or `ok` key and associated value of the requested document, with the additional _revisions property
           that lists the parent revisions if `revs=true`.
         &#34;&#34;&#34;
-        return self._post(
-            resource=&#34;_bulk_get&#34;,
-            body={
-                &#34;docs&#34;: [extract_document_id_and_rev(_) for _ in docs]
-            },
-            query_kwargs={
-                &#34;revs&#34;: revs
-            }
-        ).json().get(&#34;results&#34;, [])
+        return (
+            self._post(
+                resource=&#34;_bulk_get&#34;,
+                body={&#34;docs&#34;: [extract_document_id_and_rev(_) for _ in docs]},
+                query_kwargs={&#34;revs&#34;: revs},
+            )
+            .json()
+            .get(&#34;results&#34;, [])
+        )
 
-    def compact(
-            self,
-            ddoc: str = None
-    ) -&gt; bool:
+    def compact(self, ddoc: Optional[str] = None) -&gt; bool:
         &#34;&#34;&#34;
         Request compaction of the database. For more info, please refer to
         [the official documentation](https://docs.couchdb.org/en/main/api/database/compact.html#db-compact).
 
-        If the `ddoc` parameter is provided, it will compacts the view indexes associated with the specified design
+        If the `ddoc` parameter is provided, it will compact the view indexes associated with the specified design
         document.
 
         Parameters
@@ -258,16 +250,14 @@ el.replaceWith(d);
         resource = &#34;_compact&#34;
         if ddoc:
             resource += f&#34;/{ddoc}&#34;
-        return self._post(
-            resource=resource
-        ).json().get(&#34;ok&#34;)
+        return self._post(resource=resource).json().get(&#34;ok&#34;)
 
     def copy(
-            self,
-            docid: str,
-            destid: str,
-            rev: str = None,
-            destrev: str = None
+        self,
+        docid: str,
+        destid: str,
+        rev: Optional[str] = None,
+        destrev: Optional[str] = None,
     ) -&gt; Tuple[str, bool, str]:
         &#34;&#34;&#34;
         Copy an existing document to a new or existing document. Copying a document is only possible within the same
@@ -298,17 +288,12 @@ el.replaceWith(d);
             headers={
                 &#34;Destination&#34;: destination,
             },
-            query_kwargs={
-                &#34;rev&#34;: rev
-            }
+            query_kwargs={&#34;rev&#34;: rev},
         ).json()
         return data[&#34;id&#34;], data[&#34;ok&#34;], data[&#34;rev&#34;]
 
     def create(
-            self,
-            doc: Union[Dict, Document],
-            *,
-            batch: bool = None
+        self, doc: Union[Dict, Document], *, batch: Optional[bool] = None
     ) -&gt; Tuple[str, bool, str]:
         &#34;&#34;&#34;
         Create a new document.
@@ -325,20 +310,11 @@ el.replaceWith(d);
         Tuple[str, bool, str] : A tuple consisting of the id, success message &amp; revision.
         &#34;&#34;&#34;
         data = self._post(
-            body=doc,
-            query_kwargs={
-                &#34;batch&#34;: &#34;ok&#34; if batch is True else None
-            }
+            body=doc, query_kwargs={&#34;batch&#34;: &#34;ok&#34; if batch is True else None}
         ).json()
         return data[&#34;id&#34;], data[&#34;ok&#34;], data[&#34;rev&#34;]
 
-    def delete(
-            self,
-            docid: str,
-            rev: str,
-            *,
-            batch: bool = None
-    ) -&gt; bool:
+    def delete(self, docid: str, rev: str, *, batch: Optional[bool] = None) -&gt; bool:
         &#34;&#34;&#34;
         Delete a document.
 
@@ -357,20 +333,12 @@ el.replaceWith(d);
         &#34;&#34;&#34;
         self._delete(
             resource=docid,
-            query_kwargs={
-                &#34;rev&#34;: rev,
-                &#34;batch&#34;: &#34;ok&#34; if batch is True else None
-            }
+            query_kwargs={&#34;rev&#34;: rev, &#34;batch&#34;: &#34;ok&#34; if batch is True else None},
         )
         return True
 
     def delete_attachment(
-            self,
-            docid: str,
-            attname: str,
-            rev: str,
-            *,
-            batch: bool = False
+        self, docid: str, attname: str, rev: str, *, batch: bool = False
     ) -&gt; bool:
         &#34;&#34;&#34;
         Delete an attachment.
@@ -392,27 +360,24 @@ el.replaceWith(d);
         &#34;&#34;&#34;
         self._delete(
             resource=f&#34;{docid}/{attname}&#34;,
-            query_kwargs={
-                &#34;rev&#34;: rev,
-                &#34;batch&#34;: &#34;ok&#34; if batch is True else None
-            }
+            query_kwargs={&#34;rev&#34;: rev, &#34;batch&#34;: &#34;ok&#34; if batch is True else None},
         )
         return True
 
     def explain(
-            self,
-            selector: Dict,
-            limit: int = 25,
-            skip: int = 0,
-            sort: List[Dict] = None,
-            fields: List[str] = None,
-            use_index: Union[str, List[str]] = None,
-            conflicts: bool = False,
-            r: int = 1,
-            bookmark: str = None,
-            update: bool = True,
-            stable: bool = None,
-            execution_stats: bool = False
+        self,
+        selector: Dict,
+        limit: int = 25,
+        skip: int = 0,
+        sort: Optional[List[Dict]] = None,
+        fields: Optional[List[str]] = None,
+        use_index: Optional[Union[str, List[str]]] = None,
+        conflicts: bool = False,
+        r: int = 1,
+        bookmark: Optional[str] = None,
+        update: bool = True,
+        stable: Optional[bool] = None,
+        execution_stats: bool = False,
     ) -&gt; Dict:
         &#34;&#34;&#34;
         Shows which index is being used by the query. Parameters are the same as `Database.find`.
@@ -473,37 +438,39 @@ el.replaceWith(d);
         &#34;&#34;&#34;
         return self._post(
             resource=&#34;_explain&#34;,
-            body=rm_nones_from_dict({
-                &#34;selector&#34;: selector,
-                &#34;limit&#34;: limit,
-                &#34;skip&#34;: skip,
-                &#34;sort&#34;: sort,
-                &#34;fields&#34;: fields,
-                &#34;use_index&#34;: use_index,
-                &#34;conflicts&#34;: conflicts,
-                &#34;r&#34;: r,
-                &#34;bookmark&#34;: bookmark,
-                &#34;update&#34;: update,
-                &#34;stable&#34;: stable,
-                &#34;execution_stats&#34;: execution_stats,
-            }),
+            body=rm_nones_from_dict(
+                {
+                    &#34;selector&#34;: selector,
+                    &#34;limit&#34;: limit,
+                    &#34;skip&#34;: skip,
+                    &#34;sort&#34;: sort,
+                    &#34;fields&#34;: fields,
+                    &#34;use_index&#34;: use_index,
+                    &#34;conflicts&#34;: conflicts,
+                    &#34;r&#34;: r,
+                    &#34;bookmark&#34;: bookmark,
+                    &#34;update&#34;: update,
+                    &#34;stable&#34;: stable,
+                    &#34;execution_stats&#34;: execution_stats,
+                }
+            ),
         ).json()
 
     def find(
-            self,
-            selector: Dict,
-            limit: int = 25,
-            skip: int = 0,
-            sort: List[Dict] = None,
-            fields: List[str] = None,
-            use_index: Union[str, List[str]] = None,
-            conflicts: bool = False,
-            r: int = 1,
-            bookmark: str = None,
-            update: bool = True,
-            stable: bool = None,
-            execution_stats: bool = False,
-            partition: str = None,
+        self,
+        selector: Dict,
+        limit: int = 25,
+        skip: int = 0,
+        sort: Optional[List[Dict]] = None,
+        fields: Optional[List[str]] = None,
+        use_index: Optional[Union[str, List[str]]] = None,
+        conflicts: bool = False,
+        r: int = 1,
+        bookmark: Optional[str] = None,
+        update: bool = True,
+        stable: Optional[bool] = None,
+        execution_stats: bool = False,
+        partition: Optional[str] = None,
     ) -&gt; Dict:
         &#34;&#34;&#34;
         Find documents using a declarative JSON querying syntax.
@@ -563,24 +530,26 @@ el.replaceWith(d);
                 resource=&#34;_find&#34;,
                 partition=partition,
             ),
-            body=rm_nones_from_dict({
-                &#34;selector&#34;: selector,
-                &#34;limit&#34;: limit,
-                &#34;skip&#34;: skip,
-                &#34;sort&#34;: sort,
-                &#34;fields&#34;: fields,
-                &#34;use_index&#34;: use_index,
-                &#34;conflicts&#34;: conflicts,
-                &#34;r&#34;: r,
-                &#34;bookmark&#34;: bookmark,
-                &#34;update&#34;: update,
-                &#34;stable&#34;: stable,
-                &#34;execution_stats&#34;: execution_stats,
-            }),
+            body=rm_nones_from_dict(
+                {
+                    &#34;selector&#34;: selector,
+                    &#34;limit&#34;: limit,
+                    &#34;skip&#34;: skip,
+                    &#34;sort&#34;: sort,
+                    &#34;fields&#34;: fields,
+                    &#34;use_index&#34;: use_index,
+                    &#34;conflicts&#34;: conflicts,
+                    &#34;r&#34;: r,
+                    &#34;bookmark&#34;: bookmark,
+                    &#34;update&#34;: update,
+                    &#34;stable&#34;: stable,
+                    &#34;execution_stats&#34;: execution_stats,
+                }
+            ),
         ).json()
 
     def indexes(
-            self,
+        self,
     ) -&gt; Dict:
         &#34;&#34;&#34;
         Get a list of all indexes in the database.
@@ -595,23 +564,23 @@ el.replaceWith(d);
         return self._get(resource=&#34;_index&#34;).json()
 
     def get(
-            self,
-            docid: str,
-            *,
-            attachments: bool = None,
-            att_encoding_info: bool = None,
-            atts_since: Iterable[str] = None,
-            conflicts: bool = None,
-            deleted_conflicts: bool = None,
-            latest: bool = None,
-            local_seq: bool = None,
-            meta: bool = None,
-            open_revs: Iterable[str] = None,
-            rev: str = None,
-            revs: bool = None,
-            revs_info: bool = None,
-            check: bool = False,
-            default_value: Any = None,
+        self,
+        docid: str,
+        *,
+        attachments: Optional[bool] = None,
+        att_encoding_info: Optional[bool] = None,
+        atts_since: Optional[Iterable[str]] = None,
+        conflicts: Optional[bool] = None,
+        deleted_conflicts: Optional[bool] = None,
+        latest: Optional[bool] = None,
+        local_seq: Optional[bool] = None,
+        meta: Optional[bool] = None,
+        open_revs: Optional[Iterable[str]] = None,
+        rev: Optional[str] = None,
+        revs: Optional[bool] = None,
+        revs_info: Optional[bool] = None,
+        check: Optional[bool] = None,
+        default_value: Optional[Any] = None,
     ) -&gt; Union[Document, Any]:
         &#34;&#34;&#34;
         Get a document by id.
@@ -657,33 +626,35 @@ el.replaceWith(d);
         `couchdb3.document.Document`
         &#34;&#34;&#34;
         try:
-            return Document(**self._get(
-                resource=docid,
-                query_kwargs={
-                    &#34;attachments&#34;: attachments,
-                    &#34;att_encoding_info&#34;: att_encoding_info,
-                    &#34;atts_since&#34;: atts_since,
-                    &#34;conflicts&#34;: conflicts,
-                    &#34;deleted_conflicts&#34;: deleted_conflicts,
-                    &#34;latest&#34;: latest,
-                    &#34;local_seq&#34;: local_seq,
-                    &#34;meta&#34;: meta,
-                    &#34;open_revs&#34;: open_revs,
-                    &#34;rev&#34;: rev,
-                    &#34;revs&#34;: revs,
-                    &#34;revs_info&#34;: revs_info
-                }
-            ).json())
+            return Document(
+                **self._get(
+                    resource=docid,
+                    query_kwargs={
+                        &#34;attachments&#34;: attachments,
+                        &#34;att_encoding_info&#34;: att_encoding_info,
+                        &#34;atts_since&#34;: atts_since,
+                        &#34;conflicts&#34;: conflicts,
+                        &#34;deleted_conflicts&#34;: deleted_conflicts,
+                        &#34;latest&#34;: latest,
+                        &#34;local_seq&#34;: local_seq,
+                        &#34;meta&#34;: meta,
+                        &#34;open_revs&#34;: open_revs,
+                        &#34;rev&#34;: rev,
+                        &#34;revs&#34;: revs,
+                        &#34;revs_info&#34;: revs_info,
+                    },
+                ).json()
+            )
         except (CouchDBError, requests.exceptions.RequestException) as error:
-            if check is True:
+            if check:
                 raise error
             return default_value
 
     def get_attachment(
-            self,
-            docid: str,
-            attname: str,
-            rev: str = None
+        self,
+        docid: str,
+        attname: str,
+        rev: Optional[str] = None,
     ) -&gt; AttachmentDocument:
         &#34;&#34;&#34;
         Get a document&#39;s attachment
@@ -701,10 +672,7 @@ el.replaceWith(d);
         -------
         AttachmentDocument : A `couchdb3.document.AttachmentDocument` instance.
         &#34;&#34;&#34;
-        response = self._get(
-            f&#34;{docid}/{attname}&#34;,
-            query_kwargs={&#34;rev&#34;: rev}
-        )
+        response = self._get(f&#34;{docid}/{attname}&#34;, query_kwargs={&#34;rev&#34;: rev})
         content_md5 = response.headers.get(&#34;content-md5&#34;)
         digest_value = f&#34;md5-{content_md5}&#34; if content_md5 else None
         return AttachmentDocument(
@@ -715,11 +683,7 @@ el.replaceWith(d);
             digest=digest_value,
         )
 
-    def get_design(
-            self,
-            ddoc: str,
-            **kwargs
-    ) -&gt; Document:
+    def get_design(self, ddoc: str, **kwargs) -&gt; Document:
         &#34;&#34;&#34;
         Get a design document.
 
@@ -734,15 +698,9 @@ el.replaceWith(d);
         -------
         Document : A `couchdb3.document.Document` object containing the design document&#39;s content.
         &#34;&#34;&#34;
-        return self.get(
-            docid=f&#34;_design/{ddoc}&#34;,
-            **kwargs
-        )
+        return self.get(docid=f&#34;_design/{ddoc}&#34;, **kwargs)
 
-    def purge(
-            self,
-            data: Dict
-    ) -&gt; Dict:
+    def purge(self, data: Dict) -&gt; Dict:
         &#34;&#34;&#34;
         Purge permanently the given pairs of `(id,rev)`. When deleting a (revisions of a) document, the document is
         marked as `_deleted=true` as opposed to being completely purged. For more info, please refer to
@@ -757,20 +715,17 @@ el.replaceWith(d);
         -------
 
         &#34;&#34;&#34;
-        return self._post(
-            resource=&#34;_purge&#34;,
-            body=data
-        ).json()
+        return self._post(resource=&#34;_purge&#34;, body=data).json()
 
     def put_attachment(
-            self,
-            docid: str,
-            attname: str,
-            path: str = None,
-            *,
-            content: bytes = None,
-            content_type: str = None,
-            rev: str = None,
+        self,
+        docid: str,
+        attname: str,
+        path: Optional[str] = None,
+        *,
+        content: Optional[bytes] = None,
+        content_type: Optional[str] = None,
+        rev: Optional[str] = None,
     ) -&gt; Tuple[str, bool, str]:
         &#34;&#34;&#34;
         Uploads the supplied content as an attachment to the specified document.
@@ -802,9 +757,13 @@ el.replaceWith(d);
           - the revision ( `str`)
         &#34;&#34;&#34;
         if (not content and not path) or (content and path):
-            raise ValueError(&#34;Precisely one of the arguments \&#34;attdata\&#34; and  \&#34;attloc\&#34; must be provided.&#34;)
+            raise ValueError(
+                &#39;Precisely one of the arguments &#34;attdata&#34; and  &#34;attloc&#34; must be provided.&#39;
+            )
         if content and not content_type:
-            raise ValueError(&#34;Argument \&#34;content_type\&#34; cannot be empty when \&#34;content\&#34; is provided.&#34;)
+            raise ValueError(
+                &#39;Argument &#34;content_type&#34; cannot be empty when &#34;content&#34; is provided.&#39;
+            )
         resource = f&#34;{docid}/{attname}&#34;
         query_kwargs = {&#34;rev&#34;: rev}
         content_type = content_type if content_type else mimetypes.guess_type(path)[0]
@@ -815,27 +774,25 @@ el.replaceWith(d);
             resource=resource,
             query_kwargs=query_kwargs,
             data=content,
-            headers={
-                &#34;content-type&#34;: content_type
-            },
+            headers={&#34;content-type&#34;: content_type},
         )
         data = response.json()
         return data[&#34;id&#34;], data[&#34;ok&#34;], data[&#34;rev&#34;]
 
     def put_design(
-            self,
-            ddoc: str,
-            *,
-            rev: str = None,
-            language: str = None,
-            options: Dict = None,
-            filters: Dict = None,
-            updates: Dict = None,
-            validate_doc_update: str = None,
-            views: Dict = None,
-            autoupdate: bool = None,
-            partitioned: bool = None,
-            **kwargs
+        self,
+        ddoc: str,
+        *,
+        rev: Optional[str] = None,
+        language: Optional[str] = None,
+        options: Optional[Dict] = None,
+        filters: Optional[Dict] = None,
+        updates: Optional[Dict] = None,
+        validate_doc_update: Optional[str] = None,
+        views: Optional[Dict] = None,
+        autoupdate: Optional[bool] = None,
+        partitioned: Optional[bool] = None,
+        **kwargs,
     ) -&gt; Tuple[str, bool, str]:
         &#34;&#34;&#34;
         Create or update a named design document. For more info, please refer to
@@ -872,30 +829,30 @@ el.replaceWith(d);
         Tuple[str, bool, str] : The document&#39;s id ( `str`), the operation status (`bool`) and the revision ( `str`).
         &#34;&#34;&#34;
         if partitioned:
-            options = (options or dict()).update({
-                &#34;partitioned&#34;: partitioned
-            })
+            options = (options or dict()).update({&#34;partitioned&#34;: partitioned})
         return self.save(
-            doc=rm_nones_from_dict({
-                &#34;_id&#34;: f&#34;_design/{ddoc}&#34;,
-                &#34;_rev&#34;: rev,
-                &#34;language&#34;: language,
-                &#34;options&#34;: options,
-                &#34;filters&#34;: filters,
-                &#34;updates&#34;: updates,
-                &#34;validate_doc_update&#34;: validate_doc_update,
-                &#34;views&#34;: views,
-                &#34;autoupdate&#34;: autoupdate,
-            }),
-            **kwargs
+            doc=rm_nones_from_dict(
+                {
+                    &#34;_id&#34;: f&#34;_design/{ddoc}&#34;,
+                    &#34;_rev&#34;: rev,
+                    &#34;language&#34;: language,
+                    &#34;options&#34;: options,
+                    &#34;filters&#34;: filters,
+                    &#34;updates&#34;: updates,
+                    &#34;validate_doc_update&#34;: validate_doc_update,
+                    &#34;views&#34;: views,
+                    &#34;autoupdate&#34;: autoupdate,
+                }
+            ),
+            **kwargs,
         )
 
     def save(
-            self,
-            doc: Union[Dict, Document],
-            batch: bool = None,
-            new_edits: bool = None,
-            path: str = None
+        self,
+        doc: Union[Dict, Document],
+        batch: Optional[bool] = None,
+        new_edits: Optional[bool] = None,
+        path: Optional[str] = None,
     ) -&gt; Tuple[str, bool, str]:
         &#34;&#34;&#34;
         Create a new named document, or a new revision of the existing document.
@@ -928,18 +885,18 @@ el.replaceWith(d);
             query_kwargs={
                 &#34;batch&#34;: &#34;ok&#34; if batch else None,
                 &#34;new_edits&#34;: new_edits,
-                &#34;rev&#34;: doc.get(&#34;_rev&#34;)
-            }
+                &#34;rev&#34;: doc.get(&#34;_rev&#34;),
+            },
         ).json()
         return data[&#34;id&#34;], data[&#34;ok&#34;], data[&#34;rev&#34;]
 
     def save_index(
-            self,
-            index: Dict,
-            ddoc: str = None,
-            name: str = None,
-            index_type: str = &#34;json&#34;,
-            partitioned: bool = None
+        self,
+        index: Dict,
+        ddoc: Optional[str] = None,
+        name: Optional[str] = None,
+        index_type: Optional[str] = &#34;json&#34;,
+        partitioned: Optional[bool] = None,
     ) -&gt; Tuple[str, str, str]:
         &#34;&#34;&#34;
         Create a new index on a database.
@@ -974,19 +931,19 @@ el.replaceWith(d);
         &#34;&#34;&#34;
         data = self._post(
             resource=&#34;_index&#34;,
-            body=rm_nones_from_dict({
-                &#34;index&#34;: index,
-                &#34;ddoc&#34;: ddoc,
-                &#34;name&#34;: name,
-                &#34;type&#34;: index_type,
-                &#34;partitioned&#34;: partitioned
-            }),
+            body=rm_nones_from_dict(
+                {
+                    &#34;index&#34;: index,
+                    &#34;ddoc&#34;: ddoc,
+                    &#34;name&#34;: name,
+                    &#34;type&#34;: index_type,
+                    &#34;partitioned&#34;: partitioned,
+                }
+            ),
         ).json()
         return data[&#34;result&#34;], data[&#34;id&#34;], data[&#34;name&#34;]
 
-    def security(
-            self
-    ) -&gt; SecurityDocument:
+    def security(self) -&gt; SecurityDocument:
         &#34;&#34;&#34;
         Returns the current security object from the specified database.
 
@@ -994,15 +951,13 @@ el.replaceWith(d);
         -------
         SecurityDocument : A `couchdb3.document.SecurityDocument` object.
         &#34;&#34;&#34;
-        data = self._get(
-            resource=&#34;_security&#34;
-        ).json()
+        data = self._get(resource=&#34;_security&#34;).json()
         return SecurityDocument(**data)
 
     def update_security(
-            self,
-            admins: Union[Dict, SecurityDocumentElement],
-            members: Union[Dict, SecurityDocumentElement],
+        self,
+        admins: Optional[Union[Dict, SecurityDocumentElement]] = None,
+        members: Optional[Union[Dict, SecurityDocumentElement]] = None,
     ) -&gt; bool:
         &#34;&#34;&#34;
         Update database security.
@@ -1021,40 +976,36 @@ el.replaceWith(d);
         bool :  Operation status.
         &#34;&#34;&#34;
         return self._put(
-            resource=&#34;_security&#34;,
-            body={
-                &#34;admins&#34;: admins,
-                &#34;members&#34;: members
-            }
+            resource=&#34;_security&#34;, body={&#34;admins&#34;: admins, &#34;members&#34;: members}
         ).json()[&#34;ok&#34;]
 
     def view(
-            self,
-            ddoc: str,
-            view: str = None,
-            *,
-            partition: str = None,
-            conflicts: bool = None,
-            descending: bool = None,
-            endkey: str = None,
-            endkey_docid: str = None,
-            group: bool = None,
-            group_level: int = None,
-            include_docs: bool = None,
-            attachments: bool = None,
-            att_encoding_info: bool = None,
-            inclusive_end: bool = None,
-            key: str = None,
-            keys: Iterable[str] = None,
-            limit: int = None,
-            reduce: bool = None,
-            skip: int = None,
-            sort: bool = None,
-            stable: bool = None,
-            startkey: str = None,
-            startkey_docid: str = None,
-            update: str = None,
-            update_seq: bool = None
+        self,
+        ddoc: str,
+        view: Optional[str] = None,
+        *,
+        partition: Optional[str] = None,
+        conflicts: Optional[bool] = None,
+        descending: Optional[bool] = None,
+        endkey: Optional[str] = None,
+        endkey_docid: Optional[str] = None,
+        group: Optional[bool] = None,
+        group_level: Optional[int] = None,
+        include_docs: Optional[bool] = None,
+        attachments: Optional[bool] = None,
+        att_encoding_info: Optional[bool] = None,
+        inclusive_end: Optional[bool] = None,
+        key: Optional[str] = None,
+        keys: Optional[Iterable[str]] = None,
+        limit: Optional[int] = None,
+        reduce: Optional[bool] = None,
+        skip: Optional[int] = None,
+        sort: Optional[bool] = None,
+        stable: Optional[bool] = None,
+        startkey: Optional[str] = None,
+        startkey_docid: Optional[str] = None,
+        update: Optional[str] = None,
+        update_seq: Optional[bool] = None,
     ) -&gt; ViewResult:
         &#34;&#34;&#34;
         Executes the specified view function from the specified design document, c.f [the official
@@ -1148,32 +1099,34 @@ el.replaceWith(d);
             resource=&#34;_design&#34;,
             partition=partition,
         )
-        return ViewResult(**self._get(
-            resource=f&#34;{path}/{ddoc}/_view/{view}&#34; if (ddoc and view) else ddoc,
-            query_kwargs={
-                &#34;conflicts&#34;: conflicts,
-                &#34;descending&#34;: descending,
-                &#34;endkey&#34;: endkey,
-                &#34;endkey_docid&#34;: endkey_docid,
-                &#34;group&#34;: group,
-                &#34;group_level&#34;: group_level,
-                &#34;include_docs&#34;: include_docs,
-                &#34;attachments&#34;: attachments,
-                &#34;att_encoding_info&#34;: att_encoding_info,
-                &#34;inclusive_end&#34;: inclusive_end,
-                &#34;key&#34;: key,
-                &#34;keys&#34;: keys,
-                &#34;limit&#34;: limit,
-                &#34;reduce&#34;: reduce,
-                &#34;skip&#34;: skip,
-                &#34;sorted&#34;: sort,
-                &#34;stable&#34;: stable,
-                &#34;startkey&#34;: startkey,
-                &#34;startkey_docid&#34;: startkey_docid,
-                &#34;update&#34;: update,
-                &#34;update_seq&#34;: update_seq
-            }
-        ).json())
+        return ViewResult(
+            **self._get(
+                resource=f&#34;{path}/{ddoc}/_view/{view}&#34; if (ddoc and view) else ddoc,
+                query_kwargs={
+                    &#34;conflicts&#34;: conflicts,
+                    &#34;descending&#34;: descending,
+                    &#34;endkey&#34;: endkey,
+                    &#34;endkey_docid&#34;: endkey_docid,
+                    &#34;group&#34;: group,
+                    &#34;group_level&#34;: group_level,
+                    &#34;include_docs&#34;: include_docs,
+                    &#34;attachments&#34;: attachments,
+                    &#34;att_encoding_info&#34;: att_encoding_info,
+                    &#34;inclusive_end&#34;: inclusive_end,
+                    &#34;key&#34;: key,
+                    &#34;keys&#34;: keys,
+                    &#34;limit&#34;: limit,
+                    &#34;reduce&#34;: reduce,
+                    &#34;skip&#34;: skip,
+                    &#34;sorted&#34;: sort,
+                    &#34;stable&#34;: stable,
+                    &#34;startkey&#34;: startkey,
+                    &#34;startkey_docid&#34;: startkey_docid,
+                    &#34;update&#34;: update,
+                    &#34;update_seq&#34;: update_seq,
+                },
+            ).json()
+        )
 
     def get_partition(self, partition_id: str) -&gt; Partition:
         &#34;&#34;&#34;
@@ -1237,7 +1190,7 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
 <h3>Methods</h3>
 <dl>
 <dt id="couchdb3.database.Database.all_docs"><code class="name flex">
-<span>def <span class="ident">all_docs</span></span>(<span>self, partition: str = None, keys: Iterable[str] = None, **kwargs) ‑> <a title="couchdb3.view.ViewResult" href="view.html#couchdb3.view.ViewResult">ViewResult</a></span>
+<span>def <span class="ident">all_docs</span></span>(<span>self,<br>partition: Optional[str] = None,<br>keys: Optional[Iterable[str]] = None,<br>**kwargs) ‑> <a title="couchdb3.view.ViewResult" href="view.html#couchdb3.view.ViewResult">ViewResult</a></span>
 </code></dt>
 <dd>
 <details class="source">
@@ -1245,10 +1198,10 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def all_docs(
-        self,
-        partition: str = None,
-        keys: Iterable[str] = None,
-        **kwargs
+    self,
+    partition: Optional[str] = None,
+    keys: Optional[Iterable[str]] = None,
+    **kwargs,
 ) -&gt; ViewResult:
     &#34;&#34;&#34;
     Executes the built-in _all_docs view, returning all the documents in the database (or partition).
@@ -1269,7 +1222,7 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
     return self.view(
         f&#34;_partition/{partition}/_all_docs&#34; if partition else &#34;_all_docs&#34;,
         keys=keys,
-        **kwargs
+        **kwargs,
     )</code></pre>
 </details>
 <div class="desc"><p>Executes the built-in _all_docs view, returning all the documents in the database (or partition).</p>
@@ -1297,9 +1250,7 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def bulk_docs(
-        self,
-        docs: List[Union[Dict, Document]],
-        new_edits: bool = True
+    self, docs: List[Union[Dict, Document]], new_edits: bool = True
 ) -&gt; List[Dict]:
     &#34;&#34;&#34;
     The bulk document API allows you to create and update multiple documents at the same time within a single
@@ -1330,11 +1281,7 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
       - `rev` the document&#39;s revision
     &#34;&#34;&#34;
     return self._post(
-        resource=&#34;_bulk_docs&#34;,
-        body={
-            &#34;docs&#34;: docs,
-            &#34;new_edits&#34;: new_edits
-        }
+        resource=&#34;_bulk_docs&#34;, body={&#34;docs&#34;: docs, &#34;new_edits&#34;: new_edits}
     ).json()</code></pre>
 </details>
 <div class="desc"><p>The bulk document API allows you to create and update multiple documents at the same time within a single
@@ -1369,9 +1316,9 @@ document values.</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def bulk_get(
-        self,
-        docs: List[Union[Dict, Document]],
-        revs: bool = False,
+    self,
+    docs: List[Union[Dict, Document]],
+    revs: bool = False,
 ) -&gt; List[Dict]:
     &#34;&#34;&#34;
     This method can be called to query several documents in bulk. It is well suited for fetching a specific
@@ -1394,15 +1341,15 @@ document values.</p>
       the error, or `ok` key and associated value of the requested document, with the additional _revisions property
       that lists the parent revisions if `revs=true`.
     &#34;&#34;&#34;
-    return self._post(
-        resource=&#34;_bulk_get&#34;,
-        body={
-            &#34;docs&#34;: [extract_document_id_and_rev(_) for _ in docs]
-        },
-        query_kwargs={
-            &#34;revs&#34;: revs
-        }
-    ).json().get(&#34;results&#34;, [])</code></pre>
+    return (
+        self._post(
+            resource=&#34;_bulk_get&#34;,
+            body={&#34;docs&#34;: [extract_document_id_and_rev(_) for _ in docs]},
+            query_kwargs={&#34;revs&#34;: revs},
+        )
+        .json()
+        .get(&#34;results&#34;, [])
+    )</code></pre>
 </details>
 <div class="desc"><p>This method can be called to query several documents in bulk. It is well suited for fetching a specific
 revision of documents, as replicators do for example, or for getting revision history.</p>
@@ -1424,22 +1371,19 @@ that lists the parent revisions if <code>revs=true</code>.</li>
 </ul></div>
 </dd>
 <dt id="couchdb3.database.Database.compact"><code class="name flex">
-<span>def <span class="ident">compact</span></span>(<span>self, ddoc: str = None) ‑> bool</span>
+<span>def <span class="ident">compact</span></span>(<span>self, ddoc: Optional[str] = None) ‑> bool</span>
 </code></dt>
 <dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def compact(
-        self,
-        ddoc: str = None
-) -&gt; bool:
+<pre><code class="python">def compact(self, ddoc: Optional[str] = None) -&gt; bool:
     &#34;&#34;&#34;
     Request compaction of the database. For more info, please refer to
     [the official documentation](https://docs.couchdb.org/en/main/api/database/compact.html#db-compact).
 
-    If the `ddoc` parameter is provided, it will compacts the view indexes associated with the specified design
+    If the `ddoc` parameter is provided, it will compact the view indexes associated with the specified design
     document.
 
     Parameters
@@ -1454,13 +1398,11 @@ that lists the parent revisions if <code>revs=true</code>.</li>
     resource = &#34;_compact&#34;
     if ddoc:
         resource += f&#34;/{ddoc}&#34;
-    return self._post(
-        resource=resource
-    ).json().get(&#34;ok&#34;)</code></pre>
+    return self._post(resource=resource).json().get(&#34;ok&#34;)</code></pre>
 </details>
 <div class="desc"><p>Request compaction of the database. For more info, please refer to
 <a href="https://docs.couchdb.org/en/main/api/database/compact.html#db-compact">the official documentation</a>.</p>
-<p>If the <code>ddoc</code> parameter is provided, it will compacts the view indexes associated with the specified design
+<p>If the <code>ddoc</code> parameter is provided, it will compact the view indexes associated with the specified design
 document.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
@@ -1471,7 +1413,7 @@ document.</p>
 <p>bool: <code>True</code> upon compaction request successfully sent.</p></div>
 </dd>
 <dt id="couchdb3.database.Database.copy"><code class="name flex">
-<span>def <span class="ident">copy</span></span>(<span>self, docid: str, destid: str, rev: str = None, destrev: str = None) ‑> Tuple[str, bool, str]</span>
+<span>def <span class="ident">copy</span></span>(<span>self,<br>docid: str,<br>destid: str,<br>rev: Optional[str] = None,<br>destrev: Optional[str] = None) ‑> Tuple[str, bool, str]</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -1479,11 +1421,11 @@ document.</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def copy(
-        self,
-        docid: str,
-        destid: str,
-        rev: str = None,
-        destrev: str = None
+    self,
+    docid: str,
+    destid: str,
+    rev: Optional[str] = None,
+    destrev: Optional[str] = None,
 ) -&gt; Tuple[str, bool, str]:
     &#34;&#34;&#34;
     Copy an existing document to a new or existing document. Copying a document is only possible within the same
@@ -1514,9 +1456,7 @@ document.</p>
         headers={
             &#34;Destination&#34;: destination,
         },
-        query_kwargs={
-            &#34;rev&#34;: rev
-        }
+        query_kwargs={&#34;rev&#34;: rev},
     ).json()
     return data[&#34;id&#34;], data[&#34;ok&#34;], data[&#34;rev&#34;]</code></pre>
 </details>
@@ -1538,7 +1478,7 @@ database. For more info, please refer to
 <p>Tuple[str, bool, str] : A tuple consisting of the id, success message &amp; revision.</p></div>
 </dd>
 <dt id="couchdb3.database.Database.create"><code class="name flex">
-<span>def <span class="ident">create</span></span>(<span>self, doc: Union[Dict, Document], *, batch: bool = None) ‑> Tuple[str, bool, str]</span>
+<span>def <span class="ident">create</span></span>(<span>self, doc: Union[Dict, Document], *, batch: Optional[bool] = None) ‑> Tuple[str, bool, str]</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -1546,10 +1486,7 @@ database. For more info, please refer to
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def create(
-        self,
-        doc: Union[Dict, Document],
-        *,
-        batch: bool = None
+    self, doc: Union[Dict, Document], *, batch: Optional[bool] = None
 ) -&gt; Tuple[str, bool, str]:
     &#34;&#34;&#34;
     Create a new document.
@@ -1566,10 +1503,7 @@ database. For more info, please refer to
     Tuple[str, bool, str] : A tuple consisting of the id, success message &amp; revision.
     &#34;&#34;&#34;
     data = self._post(
-        body=doc,
-        query_kwargs={
-            &#34;batch&#34;: &#34;ok&#34; if batch is True else None
-        }
+        body=doc, query_kwargs={&#34;batch&#34;: &#34;ok&#34; if batch is True else None}
     ).json()
     return data[&#34;id&#34;], data[&#34;ok&#34;], data[&#34;rev&#34;]</code></pre>
 </details>
@@ -1585,20 +1519,14 @@ database. For more info, please refer to
 <p>Tuple[str, bool, str] : A tuple consisting of the id, success message &amp; revision.</p></div>
 </dd>
 <dt id="couchdb3.database.Database.delete"><code class="name flex">
-<span>def <span class="ident">delete</span></span>(<span>self, docid: str, rev: str, *, batch: bool = None) ‑> bool</span>
+<span>def <span class="ident">delete</span></span>(<span>self, docid: str, rev: str, *, batch: Optional[bool] = None) ‑> bool</span>
 </code></dt>
 <dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def delete(
-        self,
-        docid: str,
-        rev: str,
-        *,
-        batch: bool = None
-) -&gt; bool:
+<pre><code class="python">def delete(self, docid: str, rev: str, *, batch: Optional[bool] = None) -&gt; bool:
     &#34;&#34;&#34;
     Delete a document.
 
@@ -1617,10 +1545,7 @@ database. For more info, please refer to
     &#34;&#34;&#34;
     self._delete(
         resource=docid,
-        query_kwargs={
-            &#34;rev&#34;: rev,
-            &#34;batch&#34;: &#34;ok&#34; if batch is True else None
-        }
+        query_kwargs={&#34;rev&#34;: rev, &#34;batch&#34;: &#34;ok&#34; if batch is True else None},
     )
     return True</code></pre>
 </details>
@@ -1646,12 +1571,7 @@ database. For more info, please refer to
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def delete_attachment(
-        self,
-        docid: str,
-        attname: str,
-        rev: str,
-        *,
-        batch: bool = False
+    self, docid: str, attname: str, rev: str, *, batch: bool = False
 ) -&gt; bool:
     &#34;&#34;&#34;
     Delete an attachment.
@@ -1673,10 +1593,7 @@ database. For more info, please refer to
     &#34;&#34;&#34;
     self._delete(
         resource=f&#34;{docid}/{attname}&#34;,
-        query_kwargs={
-            &#34;rev&#34;: rev,
-            &#34;batch&#34;: &#34;ok&#34; if batch is True else None
-        }
+        query_kwargs={&#34;rev&#34;: rev, &#34;batch&#34;: &#34;ok&#34; if batch is True else None},
     )
     return True</code></pre>
 </details>
@@ -1696,7 +1613,7 @@ database. For more info, please refer to
 <p>bool : <code>True</code> upon successful deletion.</p></div>
 </dd>
 <dt id="couchdb3.database.Database.explain"><code class="name flex">
-<span>def <span class="ident">explain</span></span>(<span>self,<br>selector: Dict,<br>limit: int = 25,<br>skip: int = 0,<br>sort: List[Dict] = None,<br>fields: List[str] = None,<br>use_index: Union[str, List[str]] = None,<br>conflicts: bool = False,<br>r: int = 1,<br>bookmark: str = None,<br>update: bool = True,<br>stable: bool = None,<br>execution_stats: bool = False) ‑> Dict</span>
+<span>def <span class="ident">explain</span></span>(<span>self,<br>selector: Dict,<br>limit: int = 25,<br>skip: int = 0,<br>sort: Optional[List[Dict]] = None,<br>fields: Optional[List[str]] = None,<br>use_index: Optional[Union[str, List[str]]] = None,<br>conflicts: bool = False,<br>r: int = 1,<br>bookmark: Optional[str] = None,<br>update: bool = True,<br>stable: Optional[bool] = None,<br>execution_stats: bool = False) ‑> Dict</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -1704,19 +1621,19 @@ database. For more info, please refer to
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def explain(
-        self,
-        selector: Dict,
-        limit: int = 25,
-        skip: int = 0,
-        sort: List[Dict] = None,
-        fields: List[str] = None,
-        use_index: Union[str, List[str]] = None,
-        conflicts: bool = False,
-        r: int = 1,
-        bookmark: str = None,
-        update: bool = True,
-        stable: bool = None,
-        execution_stats: bool = False
+    self,
+    selector: Dict,
+    limit: int = 25,
+    skip: int = 0,
+    sort: Optional[List[Dict]] = None,
+    fields: Optional[List[str]] = None,
+    use_index: Optional[Union[str, List[str]]] = None,
+    conflicts: bool = False,
+    r: int = 1,
+    bookmark: Optional[str] = None,
+    update: bool = True,
+    stable: Optional[bool] = None,
+    execution_stats: bool = False,
 ) -&gt; Dict:
     &#34;&#34;&#34;
     Shows which index is being used by the query. Parameters are the same as `Database.find`.
@@ -1777,20 +1694,22 @@ database. For more info, please refer to
     &#34;&#34;&#34;
     return self._post(
         resource=&#34;_explain&#34;,
-        body=rm_nones_from_dict({
-            &#34;selector&#34;: selector,
-            &#34;limit&#34;: limit,
-            &#34;skip&#34;: skip,
-            &#34;sort&#34;: sort,
-            &#34;fields&#34;: fields,
-            &#34;use_index&#34;: use_index,
-            &#34;conflicts&#34;: conflicts,
-            &#34;r&#34;: r,
-            &#34;bookmark&#34;: bookmark,
-            &#34;update&#34;: update,
-            &#34;stable&#34;: stable,
-            &#34;execution_stats&#34;: execution_stats,
-        }),
+        body=rm_nones_from_dict(
+            {
+                &#34;selector&#34;: selector,
+                &#34;limit&#34;: limit,
+                &#34;skip&#34;: skip,
+                &#34;sort&#34;: sort,
+                &#34;fields&#34;: fields,
+                &#34;use_index&#34;: use_index,
+                &#34;conflicts&#34;: conflicts,
+                &#34;r&#34;: r,
+                &#34;bookmark&#34;: bookmark,
+                &#34;update&#34;: update,
+                &#34;stable&#34;: stable,
+                &#34;execution_stats&#34;: execution_stats,
+            }
+        ),
     ).json()</code></pre>
 </details>
 <div class="desc"><p>Shows which index is being used by the query. Parameters are the same as <code><a title="couchdb3.database.Database.find" href="#couchdb3.database.Database.find">Database.find()</a></code>.</p>
@@ -1848,7 +1767,7 @@ the query response. Default is <code>False</code>.</dd>
 </ul></div>
 </dd>
 <dt id="couchdb3.database.Database.find"><code class="name flex">
-<span>def <span class="ident">find</span></span>(<span>self,<br>selector: Dict,<br>limit: int = 25,<br>skip: int = 0,<br>sort: List[Dict] = None,<br>fields: List[str] = None,<br>use_index: Union[str, List[str]] = None,<br>conflicts: bool = False,<br>r: int = 1,<br>bookmark: str = None,<br>update: bool = True,<br>stable: bool = None,<br>execution_stats: bool = False,<br>partition: str = None) ‑> Dict</span>
+<span>def <span class="ident">find</span></span>(<span>self,<br>selector: Dict,<br>limit: int = 25,<br>skip: int = 0,<br>sort: Optional[List[Dict]] = None,<br>fields: Optional[List[str]] = None,<br>use_index: Optional[Union[str, List[str]]] = None,<br>conflicts: bool = False,<br>r: int = 1,<br>bookmark: Optional[str] = None,<br>update: bool = True,<br>stable: Optional[bool] = None,<br>execution_stats: bool = False,<br>partition: Optional[str] = None) ‑> Dict</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -1856,20 +1775,20 @@ the query response. Default is <code>False</code>.</dd>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def find(
-        self,
-        selector: Dict,
-        limit: int = 25,
-        skip: int = 0,
-        sort: List[Dict] = None,
-        fields: List[str] = None,
-        use_index: Union[str, List[str]] = None,
-        conflicts: bool = False,
-        r: int = 1,
-        bookmark: str = None,
-        update: bool = True,
-        stable: bool = None,
-        execution_stats: bool = False,
-        partition: str = None,
+    self,
+    selector: Dict,
+    limit: int = 25,
+    skip: int = 0,
+    sort: Optional[List[Dict]] = None,
+    fields: Optional[List[str]] = None,
+    use_index: Optional[Union[str, List[str]]] = None,
+    conflicts: bool = False,
+    r: int = 1,
+    bookmark: Optional[str] = None,
+    update: bool = True,
+    stable: Optional[bool] = None,
+    execution_stats: bool = False,
+    partition: Optional[str] = None,
 ) -&gt; Dict:
     &#34;&#34;&#34;
     Find documents using a declarative JSON querying syntax.
@@ -1929,20 +1848,22 @@ the query response. Default is <code>False</code>.</dd>
             resource=&#34;_find&#34;,
             partition=partition,
         ),
-        body=rm_nones_from_dict({
-            &#34;selector&#34;: selector,
-            &#34;limit&#34;: limit,
-            &#34;skip&#34;: skip,
-            &#34;sort&#34;: sort,
-            &#34;fields&#34;: fields,
-            &#34;use_index&#34;: use_index,
-            &#34;conflicts&#34;: conflicts,
-            &#34;r&#34;: r,
-            &#34;bookmark&#34;: bookmark,
-            &#34;update&#34;: update,
-            &#34;stable&#34;: stable,
-            &#34;execution_stats&#34;: execution_stats,
-        }),
+        body=rm_nones_from_dict(
+            {
+                &#34;selector&#34;: selector,
+                &#34;limit&#34;: limit,
+                &#34;skip&#34;: skip,
+                &#34;sort&#34;: sort,
+                &#34;fields&#34;: fields,
+                &#34;use_index&#34;: use_index,
+                &#34;conflicts&#34;: conflicts,
+                &#34;r&#34;: r,
+                &#34;bookmark&#34;: bookmark,
+                &#34;update&#34;: update,
+                &#34;stable&#34;: stable,
+                &#34;execution_stats&#34;: execution_stats,
+            }
+        ),
     ).json()</code></pre>
 </details>
 <div class="desc"><p>Find documents using a declarative JSON querying syntax.</p>
@@ -1997,7 +1918,7 @@ the query response. Default is <code>False</code>.</dd>
 </ul></div>
 </dd>
 <dt id="couchdb3.database.Database.get"><code class="name flex">
-<span>def <span class="ident">get</span></span>(<span>self,<br>docid: str,<br>*,<br>attachments: bool = None,<br>att_encoding_info: bool = None,<br>atts_since: Iterable[str] = None,<br>conflicts: bool = None,<br>deleted_conflicts: bool = None,<br>latest: bool = None,<br>local_seq: bool = None,<br>meta: bool = None,<br>open_revs: Iterable[str] = None,<br>rev: str = None,<br>revs: bool = None,<br>revs_info: bool = None,<br>check: bool = False,<br>default_value: Any = None) ‑> <a title="couchdb3.document.Document" href="document.html#couchdb3.document.Document">Document</a> | Any</span>
+<span>def <span class="ident">get</span></span>(<span>self,<br>docid: str,<br>*,<br>attachments: Optional[bool] = None,<br>att_encoding_info: Optional[bool] = None,<br>atts_since: Optional[Iterable[str]] = None,<br>conflicts: Optional[bool] = None,<br>deleted_conflicts: Optional[bool] = None,<br>latest: Optional[bool] = None,<br>local_seq: Optional[bool] = None,<br>meta: Optional[bool] = None,<br>open_revs: Optional[Iterable[str]] = None,<br>rev: Optional[str] = None,<br>revs: Optional[bool] = None,<br>revs_info: Optional[bool] = None,<br>check: Optional[bool] = None,<br>default_value: Optional[Any] = None) ‑> <a title="couchdb3.document.Document" href="document.html#couchdb3.document.Document">Document</a> | Any</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -2005,23 +1926,23 @@ the query response. Default is <code>False</code>.</dd>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get(
-        self,
-        docid: str,
-        *,
-        attachments: bool = None,
-        att_encoding_info: bool = None,
-        atts_since: Iterable[str] = None,
-        conflicts: bool = None,
-        deleted_conflicts: bool = None,
-        latest: bool = None,
-        local_seq: bool = None,
-        meta: bool = None,
-        open_revs: Iterable[str] = None,
-        rev: str = None,
-        revs: bool = None,
-        revs_info: bool = None,
-        check: bool = False,
-        default_value: Any = None,
+    self,
+    docid: str,
+    *,
+    attachments: Optional[bool] = None,
+    att_encoding_info: Optional[bool] = None,
+    atts_since: Optional[Iterable[str]] = None,
+    conflicts: Optional[bool] = None,
+    deleted_conflicts: Optional[bool] = None,
+    latest: Optional[bool] = None,
+    local_seq: Optional[bool] = None,
+    meta: Optional[bool] = None,
+    open_revs: Optional[Iterable[str]] = None,
+    rev: Optional[str] = None,
+    revs: Optional[bool] = None,
+    revs_info: Optional[bool] = None,
+    check: Optional[bool] = None,
+    default_value: Optional[Any] = None,
 ) -&gt; Union[Document, Any]:
     &#34;&#34;&#34;
     Get a document by id.
@@ -2067,25 +1988,27 @@ the query response. Default is <code>False</code>.</dd>
     `couchdb3.document.Document`
     &#34;&#34;&#34;
     try:
-        return Document(**self._get(
-            resource=docid,
-            query_kwargs={
-                &#34;attachments&#34;: attachments,
-                &#34;att_encoding_info&#34;: att_encoding_info,
-                &#34;atts_since&#34;: atts_since,
-                &#34;conflicts&#34;: conflicts,
-                &#34;deleted_conflicts&#34;: deleted_conflicts,
-                &#34;latest&#34;: latest,
-                &#34;local_seq&#34;: local_seq,
-                &#34;meta&#34;: meta,
-                &#34;open_revs&#34;: open_revs,
-                &#34;rev&#34;: rev,
-                &#34;revs&#34;: revs,
-                &#34;revs_info&#34;: revs_info
-            }
-        ).json())
+        return Document(
+            **self._get(
+                resource=docid,
+                query_kwargs={
+                    &#34;attachments&#34;: attachments,
+                    &#34;att_encoding_info&#34;: att_encoding_info,
+                    &#34;atts_since&#34;: atts_since,
+                    &#34;conflicts&#34;: conflicts,
+                    &#34;deleted_conflicts&#34;: deleted_conflicts,
+                    &#34;latest&#34;: latest,
+                    &#34;local_seq&#34;: local_seq,
+                    &#34;meta&#34;: meta,
+                    &#34;open_revs&#34;: open_revs,
+                    &#34;rev&#34;: rev,
+                    &#34;revs&#34;: revs,
+                    &#34;revs_info&#34;: revs_info,
+                },
+            ).json()
+        )
     except (CouchDBError, requests.exceptions.RequestException) as error:
-        if check is True:
+        if check:
             raise error
         return default_value</code></pre>
 </details>
@@ -2130,7 +2053,7 @@ revisions. Default <code>None</code>.</dd>
 <p><code><a title="couchdb3.document.Document" href="document.html#couchdb3.document.Document">Document</a></code></p></div>
 </dd>
 <dt id="couchdb3.database.Database.get_attachment"><code class="name flex">
-<span>def <span class="ident">get_attachment</span></span>(<span>self, docid: str, attname: str, rev: str = None) ‑> <a title="couchdb3.document.AttachmentDocument" href="document.html#couchdb3.document.AttachmentDocument">AttachmentDocument</a></span>
+<span>def <span class="ident">get_attachment</span></span>(<span>self, docid: str, attname: str, rev: Optional[str] = None) ‑> <a title="couchdb3.document.AttachmentDocument" href="document.html#couchdb3.document.AttachmentDocument">AttachmentDocument</a></span>
 </code></dt>
 <dd>
 <details class="source">
@@ -2138,10 +2061,10 @@ revisions. Default <code>None</code>.</dd>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_attachment(
-        self,
-        docid: str,
-        attname: str,
-        rev: str = None
+    self,
+    docid: str,
+    attname: str,
+    rev: Optional[str] = None,
 ) -&gt; AttachmentDocument:
     &#34;&#34;&#34;
     Get a document&#39;s attachment
@@ -2159,10 +2082,7 @@ revisions. Default <code>None</code>.</dd>
     -------
     AttachmentDocument : A `couchdb3.document.AttachmentDocument` instance.
     &#34;&#34;&#34;
-    response = self._get(
-        f&#34;{docid}/{attname}&#34;,
-        query_kwargs={&#34;rev&#34;: rev}
-    )
+    response = self._get(f&#34;{docid}/{attname}&#34;, query_kwargs={&#34;rev&#34;: rev})
     content_md5 = response.headers.get(&#34;content-md5&#34;)
     digest_value = f&#34;md5-{content_md5}&#34; if content_md5 else None
     return AttachmentDocument(
@@ -2194,11 +2114,7 @@ revisions. Default <code>None</code>.</dd>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get_design(
-        self,
-        ddoc: str,
-        **kwargs
-) -&gt; Document:
+<pre><code class="python">def get_design(self, ddoc: str, **kwargs) -&gt; Document:
     &#34;&#34;&#34;
     Get a design document.
 
@@ -2213,10 +2129,7 @@ revisions. Default <code>None</code>.</dd>
     -------
     Document : A `couchdb3.document.Document` object containing the design document&#39;s content.
     &#34;&#34;&#34;
-    return self.get(
-        docid=f&#34;_design/{ddoc}&#34;,
-        **kwargs
-    )</code></pre>
+    return self.get(docid=f&#34;_design/{ddoc}&#34;, **kwargs)</code></pre>
 </details>
 <div class="desc"><p>Get a design document.</p>
 <h2 id="parameters">Parameters</h2>
@@ -2280,7 +2193,7 @@ revisions. Default <code>None</code>.</dd>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def indexes(
-        self,
+    self,
 ) -&gt; Dict:
     &#34;&#34;&#34;
     Get a list of all indexes in the database.
@@ -2310,10 +2223,7 @@ revisions. Default <code>None</code>.</dd>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def purge(
-        self,
-        data: Dict
-) -&gt; Dict:
+<pre><code class="python">def purge(self, data: Dict) -&gt; Dict:
     &#34;&#34;&#34;
     Purge permanently the given pairs of `(id,rev)`. When deleting a (revisions of a) document, the document is
     marked as `_deleted=true` as opposed to being completely purged. For more info, please refer to
@@ -2328,10 +2238,7 @@ revisions. Default <code>None</code>.</dd>
     -------
 
     &#34;&#34;&#34;
-    return self._post(
-        resource=&#34;_purge&#34;,
-        body=data
-    ).json()</code></pre>
+    return self._post(resource=&#34;_purge&#34;, body=data).json()</code></pre>
 </details>
 <div class="desc"><p>Purge permanently the given pairs of <code>(id,rev)</code>. When deleting a (revisions of a) document, the document is
 marked as <code>_deleted=true</code> as opposed to being completely purged. For more info, please refer to
@@ -2344,7 +2251,7 @@ marked as <code>_deleted=true</code> as opposed to being completely purged. For 
 <h2 id="returns">Returns</h2></div>
 </dd>
 <dt id="couchdb3.database.Database.put_attachment"><code class="name flex">
-<span>def <span class="ident">put_attachment</span></span>(<span>self,<br>docid: str,<br>attname: str,<br>path: str = None,<br>*,<br>content: bytes = None,<br>content_type: str = None,<br>rev: str = None) ‑> Tuple[str, bool, str]</span>
+<span>def <span class="ident">put_attachment</span></span>(<span>self,<br>docid: str,<br>attname: str,<br>path: Optional[str] = None,<br>*,<br>content: Optional[bytes] = None,<br>content_type: Optional[str] = None,<br>rev: Optional[str] = None) ‑> Tuple[str, bool, str]</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -2352,14 +2259,14 @@ marked as <code>_deleted=true</code> as opposed to being completely purged. For 
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def put_attachment(
-        self,
-        docid: str,
-        attname: str,
-        path: str = None,
-        *,
-        content: bytes = None,
-        content_type: str = None,
-        rev: str = None,
+    self,
+    docid: str,
+    attname: str,
+    path: Optional[str] = None,
+    *,
+    content: Optional[bytes] = None,
+    content_type: Optional[str] = None,
+    rev: Optional[str] = None,
 ) -&gt; Tuple[str, bool, str]:
     &#34;&#34;&#34;
     Uploads the supplied content as an attachment to the specified document.
@@ -2391,9 +2298,13 @@ marked as <code>_deleted=true</code> as opposed to being completely purged. For 
       - the revision ( `str`)
     &#34;&#34;&#34;
     if (not content and not path) or (content and path):
-        raise ValueError(&#34;Precisely one of the arguments \&#34;attdata\&#34; and  \&#34;attloc\&#34; must be provided.&#34;)
+        raise ValueError(
+            &#39;Precisely one of the arguments &#34;attdata&#34; and  &#34;attloc&#34; must be provided.&#39;
+        )
     if content and not content_type:
-        raise ValueError(&#34;Argument \&#34;content_type\&#34; cannot be empty when \&#34;content\&#34; is provided.&#34;)
+        raise ValueError(
+            &#39;Argument &#34;content_type&#34; cannot be empty when &#34;content&#34; is provided.&#39;
+        )
     resource = f&#34;{docid}/{attname}&#34;
     query_kwargs = {&#34;rev&#34;: rev}
     content_type = content_type if content_type else mimetypes.guess_type(path)[0]
@@ -2404,9 +2315,7 @@ marked as <code>_deleted=true</code> as opposed to being completely purged. For 
         resource=resource,
         query_kwargs=query_kwargs,
         data=content,
-        headers={
-            &#34;content-type&#34;: content_type
-        },
+        headers={&#34;content-type&#34;: content_type},
     )
     data = response.json()
     return data[&#34;id&#34;], data[&#34;ok&#34;], data[&#34;rev&#34;]</code></pre>
@@ -2439,7 +2348,7 @@ Must be provided when passing the <code>content</code> argument.</dd>
 </ul></div>
 </dd>
 <dt id="couchdb3.database.Database.put_design"><code class="name flex">
-<span>def <span class="ident">put_design</span></span>(<span>self,<br>ddoc: str,<br>*,<br>rev: str = None,<br>language: str = None,<br>options: Dict = None,<br>filters: Dict = None,<br>updates: Dict = None,<br>validate_doc_update: str = None,<br>views: Dict = None,<br>autoupdate: bool = None,<br>partitioned: bool = None,<br>**kwargs) ‑> Tuple[str, bool, str]</span>
+<span>def <span class="ident">put_design</span></span>(<span>self,<br>ddoc: str,<br>*,<br>rev: Optional[str] = None,<br>language: Optional[str] = None,<br>options: Optional[Dict] = None,<br>filters: Optional[Dict] = None,<br>updates: Optional[Dict] = None,<br>validate_doc_update: Optional[str] = None,<br>views: Optional[Dict] = None,<br>autoupdate: Optional[bool] = None,<br>partitioned: Optional[bool] = None,<br>**kwargs) ‑> Tuple[str, bool, str]</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -2447,19 +2356,19 @@ Must be provided when passing the <code>content</code> argument.</dd>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def put_design(
-        self,
-        ddoc: str,
-        *,
-        rev: str = None,
-        language: str = None,
-        options: Dict = None,
-        filters: Dict = None,
-        updates: Dict = None,
-        validate_doc_update: str = None,
-        views: Dict = None,
-        autoupdate: bool = None,
-        partitioned: bool = None,
-        **kwargs
+    self,
+    ddoc: str,
+    *,
+    rev: Optional[str] = None,
+    language: Optional[str] = None,
+    options: Optional[Dict] = None,
+    filters: Optional[Dict] = None,
+    updates: Optional[Dict] = None,
+    validate_doc_update: Optional[str] = None,
+    views: Optional[Dict] = None,
+    autoupdate: Optional[bool] = None,
+    partitioned: Optional[bool] = None,
+    **kwargs,
 ) -&gt; Tuple[str, bool, str]:
     &#34;&#34;&#34;
     Create or update a named design document. For more info, please refer to
@@ -2496,22 +2405,22 @@ Must be provided when passing the <code>content</code> argument.</dd>
     Tuple[str, bool, str] : The document&#39;s id ( `str`), the operation status (`bool`) and the revision ( `str`).
     &#34;&#34;&#34;
     if partitioned:
-        options = (options or dict()).update({
-            &#34;partitioned&#34;: partitioned
-        })
+        options = (options or dict()).update({&#34;partitioned&#34;: partitioned})
     return self.save(
-        doc=rm_nones_from_dict({
-            &#34;_id&#34;: f&#34;_design/{ddoc}&#34;,
-            &#34;_rev&#34;: rev,
-            &#34;language&#34;: language,
-            &#34;options&#34;: options,
-            &#34;filters&#34;: filters,
-            &#34;updates&#34;: updates,
-            &#34;validate_doc_update&#34;: validate_doc_update,
-            &#34;views&#34;: views,
-            &#34;autoupdate&#34;: autoupdate,
-        }),
-        **kwargs
+        doc=rm_nones_from_dict(
+            {
+                &#34;_id&#34;: f&#34;_design/{ddoc}&#34;,
+                &#34;_rev&#34;: rev,
+                &#34;language&#34;: language,
+                &#34;options&#34;: options,
+                &#34;filters&#34;: filters,
+                &#34;updates&#34;: updates,
+                &#34;validate_doc_update&#34;: validate_doc_update,
+                &#34;views&#34;: views,
+                &#34;autoupdate&#34;: autoupdate,
+            }
+        ),
+        **kwargs,
     )</code></pre>
 </details>
 <div class="desc"><p>Create or update a named design document. For more info, please refer to
@@ -2547,7 +2456,7 @@ design document functions.</dd>
 <p>Tuple[str, bool, str] : The document's id ( <code>str</code>), the operation status (<code>bool</code>) and the revision ( <code>str</code>).</p></div>
 </dd>
 <dt id="couchdb3.database.Database.save"><code class="name flex">
-<span>def <span class="ident">save</span></span>(<span>self,<br>doc: Union[Dict, Document],<br>batch: bool = None,<br>new_edits: bool = None,<br>path: str = None) ‑> Tuple[str, bool, str]</span>
+<span>def <span class="ident">save</span></span>(<span>self,<br>doc: Union[Dict, Document],<br>batch: Optional[bool] = None,<br>new_edits: Optional[bool] = None,<br>path: Optional[str] = None) ‑> Tuple[str, bool, str]</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -2555,11 +2464,11 @@ design document functions.</dd>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def save(
-        self,
-        doc: Union[Dict, Document],
-        batch: bool = None,
-        new_edits: bool = None,
-        path: str = None
+    self,
+    doc: Union[Dict, Document],
+    batch: Optional[bool] = None,
+    new_edits: Optional[bool] = None,
+    path: Optional[str] = None,
 ) -&gt; Tuple[str, bool, str]:
     &#34;&#34;&#34;
     Create a new named document, or a new revision of the existing document.
@@ -2592,8 +2501,8 @@ design document functions.</dd>
         query_kwargs={
             &#34;batch&#34;: &#34;ok&#34; if batch else None,
             &#34;new_edits&#34;: new_edits,
-            &#34;rev&#34;: doc.get(&#34;_rev&#34;)
-        }
+            &#34;rev&#34;: doc.get(&#34;_rev&#34;),
+        },
     ).json()
     return data[&#34;id&#34;], data[&#34;ok&#34;], data[&#34;rev&#34;]</code></pre>
 </details>
@@ -2616,7 +2525,7 @@ to the creation of conflicts.</dd>
 <p>Tuple[str, bool, str] : The document's id ( <code>str</code>), the operation status (<code>bool</code>) and the revision ( <code>str</code>).</p></div>
 </dd>
 <dt id="couchdb3.database.Database.save_index"><code class="name flex">
-<span>def <span class="ident">save_index</span></span>(<span>self,<br>index: Dict,<br>ddoc: str = None,<br>name: str = None,<br>index_type: str = 'json',<br>partitioned: bool = None) ‑> Tuple[str, str, str]</span>
+<span>def <span class="ident">save_index</span></span>(<span>self,<br>index: Dict,<br>ddoc: Optional[str] = None,<br>name: Optional[str] = None,<br>index_type: Optional[str] = 'json',<br>partitioned: Optional[bool] = None) ‑> Tuple[str, str, str]</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -2624,12 +2533,12 @@ to the creation of conflicts.</dd>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def save_index(
-        self,
-        index: Dict,
-        ddoc: str = None,
-        name: str = None,
-        index_type: str = &#34;json&#34;,
-        partitioned: bool = None
+    self,
+    index: Dict,
+    ddoc: Optional[str] = None,
+    name: Optional[str] = None,
+    index_type: Optional[str] = &#34;json&#34;,
+    partitioned: Optional[bool] = None,
 ) -&gt; Tuple[str, str, str]:
     &#34;&#34;&#34;
     Create a new index on a database.
@@ -2664,13 +2573,15 @@ to the creation of conflicts.</dd>
     &#34;&#34;&#34;
     data = self._post(
         resource=&#34;_index&#34;,
-        body=rm_nones_from_dict({
-            &#34;index&#34;: index,
-            &#34;ddoc&#34;: ddoc,
-            &#34;name&#34;: name,
-            &#34;type&#34;: index_type,
-            &#34;partitioned&#34;: partitioned
-        }),
+        body=rm_nones_from_dict(
+            {
+                &#34;index&#34;: index,
+                &#34;ddoc&#34;: ddoc,
+                &#34;name&#34;: name,
+                &#34;type&#34;: index_type,
+                &#34;partitioned&#34;: partitioned,
+            }
+        ),
     ).json()
     return data[&#34;result&#34;], data[&#34;id&#34;], data[&#34;name&#34;]</code></pre>
 </details>
@@ -2712,9 +2623,7 @@ database, an error occurs.</dd>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def security(
-        self
-) -&gt; SecurityDocument:
+<pre><code class="python">def security(self) -&gt; SecurityDocument:
     &#34;&#34;&#34;
     Returns the current security object from the specified database.
 
@@ -2722,9 +2631,7 @@ database, an error occurs.</dd>
     -------
     SecurityDocument : A `couchdb3.document.SecurityDocument` object.
     &#34;&#34;&#34;
-    data = self._get(
-        resource=&#34;_security&#34;
-    ).json()
+    data = self._get(resource=&#34;_security&#34;).json()
     return SecurityDocument(**data)</code></pre>
 </details>
 <div class="desc"><p>Returns the current security object from the specified database.</p>
@@ -2732,7 +2639,7 @@ database, an error occurs.</dd>
 <p>SecurityDocument : A <code><a title="couchdb3.document.SecurityDocument" href="document.html#couchdb3.document.SecurityDocument">SecurityDocument</a></code> object.</p></div>
 </dd>
 <dt id="couchdb3.database.Database.update_security"><code class="name flex">
-<span>def <span class="ident">update_security</span></span>(<span>self,<br>admins: Union[Dict, SecurityDocumentElement],<br>members: Union[Dict, SecurityDocumentElement]) ‑> bool</span>
+<span>def <span class="ident">update_security</span></span>(<span>self,<br>admins: Optional[Union[Dict, SecurityDocumentElement]] = None,<br>members: Optional[Union[Dict, SecurityDocumentElement]] = None) ‑> bool</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -2740,9 +2647,9 @@ database, an error occurs.</dd>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def update_security(
-        self,
-        admins: Union[Dict, SecurityDocumentElement],
-        members: Union[Dict, SecurityDocumentElement],
+    self,
+    admins: Optional[Union[Dict, SecurityDocumentElement]] = None,
+    members: Optional[Union[Dict, SecurityDocumentElement]] = None,
 ) -&gt; bool:
     &#34;&#34;&#34;
     Update database security.
@@ -2761,11 +2668,7 @@ database, an error occurs.</dd>
     bool :  Operation status.
     &#34;&#34;&#34;
     return self._put(
-        resource=&#34;_security&#34;,
-        body={
-            &#34;admins&#34;: admins,
-            &#34;members&#34;: members
-        }
+        resource=&#34;_security&#34;, body={&#34;admins&#34;: admins, &#34;members&#34;: members}
     ).json()[&#34;ok&#34;]</code></pre>
 </details>
 <div class="desc"><p>Update database security.</p>
@@ -2783,7 +2686,7 @@ documentation</a> for more info.</dd>
 Operation status.</p></div>
 </dd>
 <dt id="couchdb3.database.Database.view"><code class="name flex">
-<span>def <span class="ident">view</span></span>(<span>self,<br>ddoc: str,<br>view: str = None,<br>*,<br>partition: str = None,<br>conflicts: bool = None,<br>descending: bool = None,<br>endkey: str = None,<br>endkey_docid: str = None,<br>group: bool = None,<br>group_level: int = None,<br>include_docs: bool = None,<br>attachments: bool = None,<br>att_encoding_info: bool = None,<br>inclusive_end: bool = None,<br>key: str = None,<br>keys: Iterable[str] = None,<br>limit: int = None,<br>reduce: bool = None,<br>skip: int = None,<br>sort: bool = None,<br>stable: bool = None,<br>startkey: str = None,<br>startkey_docid: str = None,<br>update: str = None,<br>update_seq: bool = None) ‑> <a title="couchdb3.view.ViewResult" href="view.html#couchdb3.view.ViewResult">ViewResult</a></span>
+<span>def <span class="ident">view</span></span>(<span>self,<br>ddoc: str,<br>view: Optional[str] = None,<br>*,<br>partition: Optional[str] = None,<br>conflicts: Optional[bool] = None,<br>descending: Optional[bool] = None,<br>endkey: Optional[str] = None,<br>endkey_docid: Optional[str] = None,<br>group: Optional[bool] = None,<br>group_level: Optional[int] = None,<br>include_docs: Optional[bool] = None,<br>attachments: Optional[bool] = None,<br>att_encoding_info: Optional[bool] = None,<br>inclusive_end: Optional[bool] = None,<br>key: Optional[str] = None,<br>keys: Optional[Iterable[str]] = None,<br>limit: Optional[int] = None,<br>reduce: Optional[bool] = None,<br>skip: Optional[int] = None,<br>sort: Optional[bool] = None,<br>stable: Optional[bool] = None,<br>startkey: Optional[str] = None,<br>startkey_docid: Optional[str] = None,<br>update: Optional[str] = None,<br>update_seq: Optional[bool] = None) ‑> <a title="couchdb3.view.ViewResult" href="view.html#couchdb3.view.ViewResult">ViewResult</a></span>
 </code></dt>
 <dd>
 <details class="source">
@@ -2791,32 +2694,32 @@ Operation status.</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def view(
-        self,
-        ddoc: str,
-        view: str = None,
-        *,
-        partition: str = None,
-        conflicts: bool = None,
-        descending: bool = None,
-        endkey: str = None,
-        endkey_docid: str = None,
-        group: bool = None,
-        group_level: int = None,
-        include_docs: bool = None,
-        attachments: bool = None,
-        att_encoding_info: bool = None,
-        inclusive_end: bool = None,
-        key: str = None,
-        keys: Iterable[str] = None,
-        limit: int = None,
-        reduce: bool = None,
-        skip: int = None,
-        sort: bool = None,
-        stable: bool = None,
-        startkey: str = None,
-        startkey_docid: str = None,
-        update: str = None,
-        update_seq: bool = None
+    self,
+    ddoc: str,
+    view: Optional[str] = None,
+    *,
+    partition: Optional[str] = None,
+    conflicts: Optional[bool] = None,
+    descending: Optional[bool] = None,
+    endkey: Optional[str] = None,
+    endkey_docid: Optional[str] = None,
+    group: Optional[bool] = None,
+    group_level: Optional[int] = None,
+    include_docs: Optional[bool] = None,
+    attachments: Optional[bool] = None,
+    att_encoding_info: Optional[bool] = None,
+    inclusive_end: Optional[bool] = None,
+    key: Optional[str] = None,
+    keys: Optional[Iterable[str]] = None,
+    limit: Optional[int] = None,
+    reduce: Optional[bool] = None,
+    skip: Optional[int] = None,
+    sort: Optional[bool] = None,
+    stable: Optional[bool] = None,
+    startkey: Optional[str] = None,
+    startkey_docid: Optional[str] = None,
+    update: Optional[str] = None,
+    update_seq: Optional[bool] = None,
 ) -&gt; ViewResult:
     &#34;&#34;&#34;
     Executes the specified view function from the specified design document, c.f [the official
@@ -2910,32 +2813,34 @@ Operation status.</p></div>
         resource=&#34;_design&#34;,
         partition=partition,
     )
-    return ViewResult(**self._get(
-        resource=f&#34;{path}/{ddoc}/_view/{view}&#34; if (ddoc and view) else ddoc,
-        query_kwargs={
-            &#34;conflicts&#34;: conflicts,
-            &#34;descending&#34;: descending,
-            &#34;endkey&#34;: endkey,
-            &#34;endkey_docid&#34;: endkey_docid,
-            &#34;group&#34;: group,
-            &#34;group_level&#34;: group_level,
-            &#34;include_docs&#34;: include_docs,
-            &#34;attachments&#34;: attachments,
-            &#34;att_encoding_info&#34;: att_encoding_info,
-            &#34;inclusive_end&#34;: inclusive_end,
-            &#34;key&#34;: key,
-            &#34;keys&#34;: keys,
-            &#34;limit&#34;: limit,
-            &#34;reduce&#34;: reduce,
-            &#34;skip&#34;: skip,
-            &#34;sorted&#34;: sort,
-            &#34;stable&#34;: stable,
-            &#34;startkey&#34;: startkey,
-            &#34;startkey_docid&#34;: startkey_docid,
-            &#34;update&#34;: update,
-            &#34;update_seq&#34;: update_seq
-        }
-    ).json())</code></pre>
+    return ViewResult(
+        **self._get(
+            resource=f&#34;{path}/{ddoc}/_view/{view}&#34; if (ddoc and view) else ddoc,
+            query_kwargs={
+                &#34;conflicts&#34;: conflicts,
+                &#34;descending&#34;: descending,
+                &#34;endkey&#34;: endkey,
+                &#34;endkey_docid&#34;: endkey_docid,
+                &#34;group&#34;: group,
+                &#34;group_level&#34;: group_level,
+                &#34;include_docs&#34;: include_docs,
+                &#34;attachments&#34;: attachments,
+                &#34;att_encoding_info&#34;: att_encoding_info,
+                &#34;inclusive_end&#34;: inclusive_end,
+                &#34;key&#34;: key,
+                &#34;keys&#34;: keys,
+                &#34;limit&#34;: limit,
+                &#34;reduce&#34;: reduce,
+                &#34;skip&#34;: skip,
+                &#34;sorted&#34;: sort,
+                &#34;stable&#34;: stable,
+                &#34;startkey&#34;: startkey,
+                &#34;startkey_docid&#34;: startkey_docid,
+                &#34;update&#34;: update,
+                &#34;update_seq&#34;: update_seq,
+            },
+        ).json()
+    )</code></pre>
 </details>
 <div class="desc"><p>Executes the specified view function from the specified design document, c.f <a href="https://docs.couchdb.org/en/main/api/ddoc/views.html#db-design-design-doc-view-view-name">the official
 documentation</a>.</p>
@@ -3039,7 +2944,7 @@ ViewResult: {
 </dd>
 <dt id="couchdb3.database.Partition"><code class="flex name class">
 <span>class <span class="ident">Partition</span></span>
-<span>(</span><span>partition_id: str,<br>name: str,<br>*,<br>url: str = None,<br>port: int = None,<br>user: str = None,<br>password: str = None,<br>disable_ssl_verification: bool = False,<br>auth_method: str = None,<br>timeout: int = 300,<br>session: requests.Session = None)</span>
+<span>(</span><span>partition_id: str,<br>name: str,<br>*,<br>url: Optional[str] = None,<br>port: Optional[int] = None,<br>user: Optional[str] = None,<br>password: Optional[str] = None,<br>disable_ssl_verification: bool = False,<br>auth_method: Optional[str] = None,<br>timeout: Optional[int] = None,<br>session: Optional[requests.Session] = None)</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -3050,19 +2955,20 @@ ViewResult: {
     &#34;&#34;&#34;
     Abstract Couchdb partition
     &#34;&#34;&#34;
+
     def __init__(
-            self,
-            partition_id: str,
-            name: str,
-            *,
-            url: str = None,
-            port: int = None,
-            user: str = None,
-            password: str = None,
-            disable_ssl_verification: bool = False,
-            auth_method: str = None,
-            timeout: int = DEFAULT_TIMEOUT,
-            session: requests.Session = None,
+        self,
+        partition_id: str,
+        name: str,
+        *,
+        url: Optional[str] = None,
+        port: Optional[int] = None,
+        user: Optional[str] = None,
+        password: Optional[str] = None,
+        disable_ssl_verification: bool = False,
+        auth_method: Optional[str] = None,
+        timeout: Optional[int] = None,
+        session: Optional[requests.Session] = None,
     ) -&gt; None:
         &#34;&#34;&#34;
 
@@ -3100,7 +3006,7 @@ ViewResult: {
             password=password,
             disable_ssl_verification=disable_ssl_verification,
             auth_method=auth_method,
-            timeout=timeout
+            timeout=timeout,
         )
         self.partition_id = partition_id
         # self.root = f&#34;{name}/_partition/{partition_id}&#34;
@@ -3108,11 +3014,7 @@ ViewResult: {
     def __repr__(self) -&gt; str:
         return f&#34;{super(Partition, self).__repr__()}/{self.partition_id}&#34;
 
-    def all_docs(
-            self,
-            keys: Iterable[str] = None,
-            **kwargs
-    ) -&gt; ViewResult:
+    def all_docs(self, keys: Iterable[str] = None, **kwargs) -&gt; ViewResult:
         &#34;&#34;&#34;
         Executes the built-in _all_docs view, returning all the documents in the partition.
 
@@ -3127,11 +3029,13 @@ ViewResult: {
         -------
         ViewResult
         &#34;&#34;&#34;
-        return super(Partition, self).all_docs(partition=self.partition_id, keys=keys, **kwargs)
+        return super(Partition, self).all_docs(
+            partition=self.partition_id, keys=keys, **kwargs
+        )
 
     # noinspection PyMethodOverriding
     def info(
-            self,
+        self,
     ) -&gt; Dict:
         &#34;&#34;&#34;
         Return the partition&#39;s info by sending a `GET` request to `/self.root`.
@@ -3144,19 +3048,19 @@ ViewResult: {
 
     # noinspection PyMethodOverriding
     def find(
-            self,
-            selector: Dict,
-            limit: int = 25,
-            skip: int = 0,
-            sort: List[Dict] = None,
-            fields: List[str] = None,
-            use_index: Union[str, List[str]] = None,
-            conflicts: bool = False,
-            r: int = 1,
-            bookmark: str = None,
-            update: bool = True,
-            stable: bool = None,
-            execution_stats: bool = False
+        self,
+        selector: Dict,
+        limit: int = 25,
+        skip: int = 0,
+        sort: Optional[List[Dict]] = None,
+        fields: Optional[List[str]] = None,
+        use_index: Optional[Union[str, List[str]]] = None,
+        conflicts: bool = False,
+        r: int = 1,
+        bookmark: Optional[str] = None,
+        update: bool = True,
+        stable: Optional[bool] = None,
+        execution_stats: bool = False,
     ) -&gt; Dict:
         &#34;&#34;&#34;
         See `Database.find`.
@@ -3179,32 +3083,32 @@ ViewResult: {
 
     # noinspection PyMethodOverriding
     def view(
-            self,
-            ddoc: str,
-            view: str = None,
-            *,
-            # partition: str = None,
-            conflicts: bool = None,
-            descending: bool = None,
-            endkey: str = None,
-            endkey_docid: str = None,
-            group: bool = None,
-            group_level: int = None,
-            include_docs: bool = None,
-            attachments: bool = None,
-            att_encoding_info: bool = None,
-            inclusive_end: bool = None,
-            key: str = None,
-            keys: Iterable[str] = None,
-            limit: int = None,
-            reduce: bool = None,
-            skip: int = None,
-            sort: bool = None,
-            stable: bool = None,
-            startkey: str = None,
-            startkey_docid: str = None,
-            update: str = None,
-            update_seq: bool = None
+        self,
+        ddoc: str,
+        view: Optional[str] = None,
+        *,
+        # partition: str = None,
+        conflicts: Optional[bool] = None,
+        descending: Optional[bool] = None,
+        endkey: Optional[str] = None,
+        endkey_docid: Optional[str] = None,
+        group: Optional[bool] = None,
+        group_level: Optional[int] = None,
+        include_docs: Optional[bool] = None,
+        attachments: Optional[bool] = None,
+        att_encoding_info: Optional[bool] = None,
+        inclusive_end: Optional[bool] = None,
+        key: Optional[str] = None,
+        keys: Optional[Iterable[str]] = None,
+        limit: Optional[int] = None,
+        reduce: Optional[bool] = None,
+        skip: Optional[int] = None,
+        sort: Optional[bool] = None,
+        stable: Optional[bool] = None,
+        startkey: Optional[str] = None,
+        startkey_docid: Optional[str] = None,
+        update: Optional[str] = None,
+        update_seq: Optional[bool] = None,
     ) -&gt; ViewResult:
         &#34;&#34;&#34;
         Executes the specified view function from the specified design document, c.f [the official
@@ -3299,13 +3203,11 @@ ViewResult: {
             startkey=startkey,
             startkey_docid=startkey_docid,
             update=update,
-            update_seq=update_seq
+            update_seq=update_seq,
         )
 
     def bulk_docs(
-            self,
-            docs: List[Union[Dict, Document]],
-            new_edits: bool = True
+        self, docs: List[Union[Dict, Document]], new_edits: bool = True
     ) -&gt; List[Dict]:
         &#34;&#34;&#34;
         See `Database.bulk_docs`.
@@ -3319,9 +3221,9 @@ ViewResult: {
         )
 
     def bulk_get(
-            self,
-            docs: List[Union[Dict, Document]],
-            revs: bool = False,
+        self,
+        docs: List[Union[Dict, Document]],
+        revs: bool = False,
     ) -&gt; List[Dict]:
         &#34;&#34;&#34;
         See `Database.bulk_get`.
@@ -3335,11 +3237,11 @@ ViewResult: {
         )
 
     def copy(
-            self,
-            docid: str,
-            destid: str,
-            rev: str = None,
-            destrev: str = None
+        self,
+        docid: str,
+        destid: str,
+        rev: Optional[str] = None,
+        destrev: Optional[str] = None,
     ) -&gt; Tuple[str, bool, str]:
         &#34;&#34;&#34;
         See `Database.copy`.
@@ -3355,10 +3257,10 @@ ViewResult: {
         )
 
     def create(
-            self,
-            doc: Union[Dict, Document],
-            *,
-            batch: bool = None
+        self,
+        doc: Union[Dict, Document],
+        *,
+        batch: Optional[bool] = None,
     ) -&gt; Tuple[str, bool, str]:
         &#34;&#34;&#34;
         See `Database.create`.
@@ -3372,11 +3274,11 @@ ViewResult: {
         )
 
     def delete(
-            self,
-            docid: str,
-            rev: str,
-            *,
-            batch: bool = None
+        self,
+        docid: str,
+        rev: str,
+        *,
+        batch: Optional[bool] = None,
     ) -&gt; bool:
         &#34;&#34;&#34;
         See `Database.delete`.
@@ -3391,12 +3293,12 @@ ViewResult: {
         )
 
     def delete_attachment(
-            self,
-            docid: str,
-            attname: str,
-            rev: str,
-            *,
-            batch: bool = False
+        self,
+        docid: str,
+        attname: str,
+        rev: str,
+        *,
+        batch: bool = False,
     ) -&gt; bool:
         &#34;&#34;&#34;
         See `Database.delete_attachment`.
@@ -3412,23 +3314,23 @@ ViewResult: {
         )
 
     def get(
-            self,
-            docid: str,
-            *,
-            attachments: bool = None,
-            att_encoding_info: bool = None,
-            atts_since: Iterable[str] = None,
-            conflicts: bool = None,
-            deleted_conflicts: bool = None,
-            latest: bool = None,
-            local_seq: bool = None,
-            meta: bool = None,
-            open_revs: Iterable[str] = None,
-            rev: str = None,
-            revs: bool = None,
-            revs_info: bool = None,
-            check: bool = False,
-            default_value: Any = None,
+        self,
+        docid: str,
+        *,
+        attachments: Optional[bool] = None,
+        att_encoding_info: Optional[bool] = None,
+        atts_since: Optional[Iterable[str]] = None,
+        conflicts: Optional[bool] = None,
+        deleted_conflicts: Optional[bool] = None,
+        latest: Optional[bool] = None,
+        local_seq: Optional[bool] = None,
+        meta: Optional[bool] = None,
+        open_revs: Optional[Iterable[str]] = None,
+        rev: Optional[str] = None,
+        revs: Optional[bool] = None,
+        revs_info: Optional[bool] = None,
+        check: Optional[bool] = False,
+        default_value: Optional[Any] = None,
     ) -&gt; Union[Document, Any]:
         &#34;&#34;&#34;
         See `Database.get`.
@@ -3455,10 +3357,10 @@ ViewResult: {
         )
 
     def get_attachment(
-            self,
-            docid: str,
-            attname: str,
-            rev: str = None
+        self,
+        docid: str,
+        attname: str,
+        rev: Optional[str] = None,
     ) -&gt; AttachmentDocument:
         &#34;&#34;&#34;
         See `Database.get_attachment`.
@@ -3473,14 +3375,14 @@ ViewResult: {
         )
 
     def put_attachment(
-            self,
-            docid: str,
-            attname: str,
-            path: str = None,
-            *,
-            content: bytes = None,
-            content_type: str = None,
-            rev: str = None,
+        self,
+        docid: str,
+        attname: str,
+        path: Optional[str] = None,
+        *,
+        content: Optional[bytes] = None,
+        content_type: Optional[str] = None,
+        rev: Optional[str] = None,
     ) -&gt; Tuple[str, bool, str]:
         &#34;&#34;&#34;
         See `Database.put_attachment`.
@@ -3497,21 +3399,18 @@ ViewResult: {
             rev=rev,
         )
 
-    def rev(
-            self,
-            resource: str
-    ) -&gt; Optional[str]:
+    def rev(self, resource: str) -&gt; Optional[str]:
         &#34;&#34;&#34;
         See `Database.rev`.
         &#34;&#34;&#34;
         return super(Partition, self).rev(self.add_partition_to_str(resource))
 
     def save(
-            self,
-            doc: Union[Dict, Document],
-            batch: bool = None,
-            new_edits: bool = None,
-            path: str = None
+        self,
+        doc: Union[Dict, Document],
+        batch: Optional[bool] = None,
+        new_edits: Optional[bool] = None,
+        path: Optional[str] = None,
     ) -&gt; Tuple[str, bool, str]:
         &#34;&#34;&#34;
         See `Database.save`.
@@ -3626,11 +3525,7 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def all_docs(
-        self,
-        keys: Iterable[str] = None,
-        **kwargs
-) -&gt; ViewResult:
+<pre><code class="python">def all_docs(self, keys: Iterable[str] = None, **kwargs) -&gt; ViewResult:
     &#34;&#34;&#34;
     Executes the built-in _all_docs view, returning all the documents in the partition.
 
@@ -3645,7 +3540,9 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
     -------
     ViewResult
     &#34;&#34;&#34;
-    return super(Partition, self).all_docs(partition=self.partition_id, keys=keys, **kwargs)</code></pre>
+    return super(Partition, self).all_docs(
+        partition=self.partition_id, keys=keys, **kwargs
+    )</code></pre>
 </details>
 <div class="desc"><p>Executes the built-in _all_docs view, returning all the documents in the partition.</p>
 <h2 id="parameters">Parameters</h2>
@@ -3670,9 +3567,7 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def bulk_docs(
-        self,
-        docs: List[Union[Dict, Document]],
-        new_edits: bool = True
+    self, docs: List[Union[Dict, Document]], new_edits: bool = True
 ) -&gt; List[Dict]:
     &#34;&#34;&#34;
     See `Database.bulk_docs`.
@@ -3698,9 +3593,9 @@ Appends the partition's ID to the documents' ID.</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def bulk_get(
-        self,
-        docs: List[Union[Dict, Document]],
-        revs: bool = False,
+    self,
+    docs: List[Union[Dict, Document]],
+    revs: bool = False,
 ) -&gt; List[Dict]:
     &#34;&#34;&#34;
     See `Database.bulk_get`.
@@ -3718,7 +3613,7 @@ Appends the partition's ID to the documents' ID.</p></div>
 Appends the partition's ID to the documents' ID.</p></div>
 </dd>
 <dt id="couchdb3.database.Partition.copy"><code class="name flex">
-<span>def <span class="ident">copy</span></span>(<span>self, docid: str, destid: str, rev: str = None, destrev: str = None) ‑> Tuple[str, bool, str]</span>
+<span>def <span class="ident">copy</span></span>(<span>self,<br>docid: str,<br>destid: str,<br>rev: Optional[str] = None,<br>destrev: Optional[str] = None) ‑> Tuple[str, bool, str]</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -3726,11 +3621,11 @@ Appends the partition's ID to the documents' ID.</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def copy(
-        self,
-        docid: str,
-        destid: str,
-        rev: str = None,
-        destrev: str = None
+    self,
+    docid: str,
+    destid: str,
+    rev: Optional[str] = None,
+    destrev: Optional[str] = None,
 ) -&gt; Tuple[str, bool, str]:
     &#34;&#34;&#34;
     See `Database.copy`.
@@ -3750,7 +3645,7 @@ Appends the partition's ID to the documents' ID.</p></div>
 Appends the partition's ID to the document's ID.</p></div>
 </dd>
 <dt id="couchdb3.database.Partition.create"><code class="name flex">
-<span>def <span class="ident">create</span></span>(<span>self, doc: Union[Dict, Document], *, batch: bool = None) ‑> Tuple[str, bool, str]</span>
+<span>def <span class="ident">create</span></span>(<span>self, doc: Union[Dict, Document], *, batch: Optional[bool] = None) ‑> Tuple[str, bool, str]</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -3758,10 +3653,10 @@ Appends the partition's ID to the document's ID.</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def create(
-        self,
-        doc: Union[Dict, Document],
-        *,
-        batch: bool = None
+    self,
+    doc: Union[Dict, Document],
+    *,
+    batch: Optional[bool] = None,
 ) -&gt; Tuple[str, bool, str]:
     &#34;&#34;&#34;
     See `Database.create`.
@@ -3779,7 +3674,7 @@ Appends the partition's ID to the document's ID.</p></div>
 Appends the partition's ID to the document's ID.</p></div>
 </dd>
 <dt id="couchdb3.database.Partition.delete"><code class="name flex">
-<span>def <span class="ident">delete</span></span>(<span>self, docid: str, rev: str, *, batch: bool = None) ‑> bool</span>
+<span>def <span class="ident">delete</span></span>(<span>self, docid: str, rev: str, *, batch: Optional[bool] = None) ‑> bool</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -3787,11 +3682,11 @@ Appends the partition's ID to the document's ID.</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def delete(
-        self,
-        docid: str,
-        rev: str,
-        *,
-        batch: bool = None
+    self,
+    docid: str,
+    rev: str,
+    *,
+    batch: Optional[bool] = None,
 ) -&gt; bool:
     &#34;&#34;&#34;
     See `Database.delete`.
@@ -3818,12 +3713,12 @@ Appends the partition's ID to the document's ID.</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def delete_attachment(
-        self,
-        docid: str,
-        attname: str,
-        rev: str,
-        *,
-        batch: bool = False
+    self,
+    docid: str,
+    attname: str,
+    rev: str,
+    *,
+    batch: bool = False,
 ) -&gt; bool:
     &#34;&#34;&#34;
     See `Database.delete_attachment`.
@@ -3843,7 +3738,7 @@ Appends the partition's ID to the document's ID.</p></div>
 Appends the partition's ID to the document's ID.</p></div>
 </dd>
 <dt id="couchdb3.database.Partition.find"><code class="name flex">
-<span>def <span class="ident">find</span></span>(<span>self,<br>selector: Dict,<br>limit: int = 25,<br>skip: int = 0,<br>sort: List[Dict] = None,<br>fields: List[str] = None,<br>use_index: Union[str, List[str]] = None,<br>conflicts: bool = False,<br>r: int = 1,<br>bookmark: str = None,<br>update: bool = True,<br>stable: bool = None,<br>execution_stats: bool = False) ‑> Dict</span>
+<span>def <span class="ident">find</span></span>(<span>self,<br>selector: Dict,<br>limit: int = 25,<br>skip: int = 0,<br>sort: Optional[List[Dict]] = None,<br>fields: Optional[List[str]] = None,<br>use_index: Optional[Union[str, List[str]]] = None,<br>conflicts: bool = False,<br>r: int = 1,<br>bookmark: Optional[str] = None,<br>update: bool = True,<br>stable: Optional[bool] = None,<br>execution_stats: bool = False) ‑> Dict</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -3851,19 +3746,19 @@ Appends the partition's ID to the document's ID.</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def find(
-        self,
-        selector: Dict,
-        limit: int = 25,
-        skip: int = 0,
-        sort: List[Dict] = None,
-        fields: List[str] = None,
-        use_index: Union[str, List[str]] = None,
-        conflicts: bool = False,
-        r: int = 1,
-        bookmark: str = None,
-        update: bool = True,
-        stable: bool = None,
-        execution_stats: bool = False
+    self,
+    selector: Dict,
+    limit: int = 25,
+    skip: int = 0,
+    sort: Optional[List[Dict]] = None,
+    fields: Optional[List[str]] = None,
+    use_index: Optional[Union[str, List[str]]] = None,
+    conflicts: bool = False,
+    r: int = 1,
+    bookmark: Optional[str] = None,
+    update: bool = True,
+    stable: Optional[bool] = None,
+    execution_stats: bool = False,
 ) -&gt; Dict:
     &#34;&#34;&#34;
     See `Database.find`.
@@ -3887,7 +3782,7 @@ Appends the partition's ID to the document's ID.</p></div>
 <div class="desc"><p>See <code><a title="couchdb3.database.Database.find" href="#couchdb3.database.Database.find">Database.find()</a></code>.</p></div>
 </dd>
 <dt id="couchdb3.database.Partition.get"><code class="name flex">
-<span>def <span class="ident">get</span></span>(<span>self,<br>docid: str,<br>*,<br>attachments: bool = None,<br>att_encoding_info: bool = None,<br>atts_since: Iterable[str] = None,<br>conflicts: bool = None,<br>deleted_conflicts: bool = None,<br>latest: bool = None,<br>local_seq: bool = None,<br>meta: bool = None,<br>open_revs: Iterable[str] = None,<br>rev: str = None,<br>revs: bool = None,<br>revs_info: bool = None,<br>check: bool = False,<br>default_value: Any = None) ‑> <a title="couchdb3.document.Document" href="document.html#couchdb3.document.Document">Document</a> | Any</span>
+<span>def <span class="ident">get</span></span>(<span>self,<br>docid: str,<br>*,<br>attachments: Optional[bool] = None,<br>att_encoding_info: Optional[bool] = None,<br>atts_since: Optional[Iterable[str]] = None,<br>conflicts: Optional[bool] = None,<br>deleted_conflicts: Optional[bool] = None,<br>latest: Optional[bool] = None,<br>local_seq: Optional[bool] = None,<br>meta: Optional[bool] = None,<br>open_revs: Optional[Iterable[str]] = None,<br>rev: Optional[str] = None,<br>revs: Optional[bool] = None,<br>revs_info: Optional[bool] = None,<br>check: Optional[bool] = False,<br>default_value: Optional[Any] = None) ‑> <a title="couchdb3.document.Document" href="document.html#couchdb3.document.Document">Document</a> | Any</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -3895,23 +3790,23 @@ Appends the partition's ID to the document's ID.</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get(
-        self,
-        docid: str,
-        *,
-        attachments: bool = None,
-        att_encoding_info: bool = None,
-        atts_since: Iterable[str] = None,
-        conflicts: bool = None,
-        deleted_conflicts: bool = None,
-        latest: bool = None,
-        local_seq: bool = None,
-        meta: bool = None,
-        open_revs: Iterable[str] = None,
-        rev: str = None,
-        revs: bool = None,
-        revs_info: bool = None,
-        check: bool = False,
-        default_value: Any = None,
+    self,
+    docid: str,
+    *,
+    attachments: Optional[bool] = None,
+    att_encoding_info: Optional[bool] = None,
+    atts_since: Optional[Iterable[str]] = None,
+    conflicts: Optional[bool] = None,
+    deleted_conflicts: Optional[bool] = None,
+    latest: Optional[bool] = None,
+    local_seq: Optional[bool] = None,
+    meta: Optional[bool] = None,
+    open_revs: Optional[Iterable[str]] = None,
+    rev: Optional[str] = None,
+    revs: Optional[bool] = None,
+    revs_info: Optional[bool] = None,
+    check: Optional[bool] = False,
+    default_value: Optional[Any] = None,
 ) -&gt; Union[Document, Any]:
     &#34;&#34;&#34;
     See `Database.get`.
@@ -3942,7 +3837,7 @@ Appends the partition's ID to the document's ID.</p></div>
 Appends the partition's ID to the document's ID.</p></div>
 </dd>
 <dt id="couchdb3.database.Partition.get_attachment"><code class="name flex">
-<span>def <span class="ident">get_attachment</span></span>(<span>self, docid: str, attname: str, rev: str = None) ‑> <a title="couchdb3.document.AttachmentDocument" href="document.html#couchdb3.document.AttachmentDocument">AttachmentDocument</a></span>
+<span>def <span class="ident">get_attachment</span></span>(<span>self, docid: str, attname: str, rev: Optional[str] = None) ‑> <a title="couchdb3.document.AttachmentDocument" href="document.html#couchdb3.document.AttachmentDocument">AttachmentDocument</a></span>
 </code></dt>
 <dd>
 <details class="source">
@@ -3950,10 +3845,10 @@ Appends the partition's ID to the document's ID.</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def get_attachment(
-        self,
-        docid: str,
-        attname: str,
-        rev: str = None
+    self,
+    docid: str,
+    attname: str,
+    rev: Optional[str] = None,
 ) -&gt; AttachmentDocument:
     &#34;&#34;&#34;
     See `Database.get_attachment`.
@@ -3980,7 +3875,7 @@ Appends the partition's ID to the document's ID.</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def info(
-        self,
+    self,
 ) -&gt; Dict:
     &#34;&#34;&#34;
     Return the partition&#39;s info by sending a `GET` request to `/self.root`.
@@ -3996,7 +3891,7 @@ Appends the partition's ID to the document's ID.</p></div>
 <p>Dict: A dictionary containing the server's or database's info.</p></div>
 </dd>
 <dt id="couchdb3.database.Partition.put_attachment"><code class="name flex">
-<span>def <span class="ident">put_attachment</span></span>(<span>self,<br>docid: str,<br>attname: str,<br>path: str = None,<br>*,<br>content: bytes = None,<br>content_type: str = None,<br>rev: str = None) ‑> Tuple[str, bool, str]</span>
+<span>def <span class="ident">put_attachment</span></span>(<span>self,<br>docid: str,<br>attname: str,<br>path: Optional[str] = None,<br>*,<br>content: Optional[bytes] = None,<br>content_type: Optional[str] = None,<br>rev: Optional[str] = None) ‑> Tuple[str, bool, str]</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -4004,14 +3899,14 @@ Appends the partition's ID to the document's ID.</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def put_attachment(
-        self,
-        docid: str,
-        attname: str,
-        path: str = None,
-        *,
-        content: bytes = None,
-        content_type: str = None,
-        rev: str = None,
+    self,
+    docid: str,
+    attname: str,
+    path: Optional[str] = None,
+    *,
+    content: Optional[bytes] = None,
+    content_type: Optional[str] = None,
+    rev: Optional[str] = None,
 ) -&gt; Tuple[str, bool, str]:
     &#34;&#34;&#34;
     See `Database.put_attachment`.
@@ -4040,10 +3935,7 @@ Appends the partition's ID to the document's ID.</p></div>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def rev(
-        self,
-        resource: str
-) -&gt; Optional[str]:
+<pre><code class="python">def rev(self, resource: str) -&gt; Optional[str]:
     &#34;&#34;&#34;
     See `Database.rev`.
     &#34;&#34;&#34;
@@ -4052,7 +3944,7 @@ Appends the partition's ID to the document's ID.</p></div>
 <div class="desc"><p>See <code><a title="couchdb3.database.Database.rev" href="base.html#couchdb3.base.Base.rev">Base.rev()</a></code>.</p></div>
 </dd>
 <dt id="couchdb3.database.Partition.save"><code class="name flex">
-<span>def <span class="ident">save</span></span>(<span>self,<br>doc: Union[Dict, Document],<br>batch: bool = None,<br>new_edits: bool = None,<br>path: str = None) ‑> Tuple[str, bool, str]</span>
+<span>def <span class="ident">save</span></span>(<span>self,<br>doc: Union[Dict, Document],<br>batch: Optional[bool] = None,<br>new_edits: Optional[bool] = None,<br>path: Optional[str] = None) ‑> Tuple[str, bool, str]</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -4060,11 +3952,11 @@ Appends the partition's ID to the document's ID.</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def save(
-        self,
-        doc: Union[Dict, Document],
-        batch: bool = None,
-        new_edits: bool = None,
-        path: str = None
+    self,
+    doc: Union[Dict, Document],
+    batch: Optional[bool] = None,
+    new_edits: Optional[bool] = None,
+    path: Optional[str] = None,
 ) -&gt; Tuple[str, bool, str]:
     &#34;&#34;&#34;
     See `Database.save`.
@@ -4084,7 +3976,7 @@ Appends the partition's ID to the document's ID.</p></div>
 Appends the partition's ID to the document's ID.</p></div>
 </dd>
 <dt id="couchdb3.database.Partition.view"><code class="name flex">
-<span>def <span class="ident">view</span></span>(<span>self,<br>ddoc: str,<br>view: str = None,<br>*,<br>conflicts: bool = None,<br>descending: bool = None,<br>endkey: str = None,<br>endkey_docid: str = None,<br>group: bool = None,<br>group_level: int = None,<br>include_docs: bool = None,<br>attachments: bool = None,<br>att_encoding_info: bool = None,<br>inclusive_end: bool = None,<br>key: str = None,<br>keys: Iterable[str] = None,<br>limit: int = None,<br>reduce: bool = None,<br>skip: int = None,<br>sort: bool = None,<br>stable: bool = None,<br>startkey: str = None,<br>startkey_docid: str = None,<br>update: str = None,<br>update_seq: bool = None) ‑> <a title="couchdb3.view.ViewResult" href="view.html#couchdb3.view.ViewResult">ViewResult</a></span>
+<span>def <span class="ident">view</span></span>(<span>self,<br>ddoc: str,<br>view: Optional[str] = None,<br>*,<br>conflicts: Optional[bool] = None,<br>descending: Optional[bool] = None,<br>endkey: Optional[str] = None,<br>endkey_docid: Optional[str] = None,<br>group: Optional[bool] = None,<br>group_level: Optional[int] = None,<br>include_docs: Optional[bool] = None,<br>attachments: Optional[bool] = None,<br>att_encoding_info: Optional[bool] = None,<br>inclusive_end: Optional[bool] = None,<br>key: Optional[str] = None,<br>keys: Optional[Iterable[str]] = None,<br>limit: Optional[int] = None,<br>reduce: Optional[bool] = None,<br>skip: Optional[int] = None,<br>sort: Optional[bool] = None,<br>stable: Optional[bool] = None,<br>startkey: Optional[str] = None,<br>startkey_docid: Optional[str] = None,<br>update: Optional[str] = None,<br>update_seq: Optional[bool] = None) ‑> <a title="couchdb3.view.ViewResult" href="view.html#couchdb3.view.ViewResult">ViewResult</a></span>
 </code></dt>
 <dd>
 <details class="source">
@@ -4092,32 +3984,32 @@ Appends the partition's ID to the document's ID.</p></div>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def view(
-        self,
-        ddoc: str,
-        view: str = None,
-        *,
-        # partition: str = None,
-        conflicts: bool = None,
-        descending: bool = None,
-        endkey: str = None,
-        endkey_docid: str = None,
-        group: bool = None,
-        group_level: int = None,
-        include_docs: bool = None,
-        attachments: bool = None,
-        att_encoding_info: bool = None,
-        inclusive_end: bool = None,
-        key: str = None,
-        keys: Iterable[str] = None,
-        limit: int = None,
-        reduce: bool = None,
-        skip: int = None,
-        sort: bool = None,
-        stable: bool = None,
-        startkey: str = None,
-        startkey_docid: str = None,
-        update: str = None,
-        update_seq: bool = None
+    self,
+    ddoc: str,
+    view: Optional[str] = None,
+    *,
+    # partition: str = None,
+    conflicts: Optional[bool] = None,
+    descending: Optional[bool] = None,
+    endkey: Optional[str] = None,
+    endkey_docid: Optional[str] = None,
+    group: Optional[bool] = None,
+    group_level: Optional[int] = None,
+    include_docs: Optional[bool] = None,
+    attachments: Optional[bool] = None,
+    att_encoding_info: Optional[bool] = None,
+    inclusive_end: Optional[bool] = None,
+    key: Optional[str] = None,
+    keys: Optional[Iterable[str]] = None,
+    limit: Optional[int] = None,
+    reduce: Optional[bool] = None,
+    skip: Optional[int] = None,
+    sort: Optional[bool] = None,
+    stable: Optional[bool] = None,
+    startkey: Optional[str] = None,
+    startkey_docid: Optional[str] = None,
+    update: Optional[str] = None,
+    update_seq: Optional[bool] = None,
 ) -&gt; ViewResult:
     &#34;&#34;&#34;
     Executes the specified view function from the specified design document, c.f [the official
@@ -4212,7 +4104,7 @@ Appends the partition's ID to the document's ID.</p></div>
         startkey=startkey,
         startkey_docid=startkey_docid,
         update=update,
-        update_seq=update_seq
+        update_seq=update_seq,
     )</code></pre>
 </details>
 <div class="desc"><p>Executes the specified view function from the specified design document, c.f <a href="https://docs.couchdb.org/en/main/api/ddoc/views.html#db-design-design-doc-view-view-name">the official

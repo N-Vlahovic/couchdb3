@@ -48,7 +48,7 @@ el.replaceWith(d);
 <dl>
 <dt id="couchdb3.base.Base"><code class="flex name class">
 <span>class <span class="ident">Base</span></span>
-<span>(</span><span>url: str,<br>*,<br>port: int = None,<br>user: str = None,<br>password: str = None,<br>disable_ssl_verification: bool = False,<br>auth_method: str = None,<br>timeout: int = 300,<br>session: requests.sessions.Session = None)</span>
+<span>(</span><span>url: str,<br>*,<br>port: int | None = None,<br>user: str | None = None,<br>password: str | None = None,<br>disable_ssl_verification: bool = False,<br>auth_method: str | None = None,<br>timeout: int | None = 300,<br>session: requests.sessions.Session | None = None)</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -61,16 +61,16 @@ el.replaceWith(d);
     &#34;&#34;&#34;
 
     def __init__(
-            self,
-            url: str,
-            *,
-            port: int = None,
-            user: str = None,
-            password: str = None,
-            disable_ssl_verification: bool = False,
-            auth_method: str = None,
-            timeout: int = utils.DEFAULT_TIMEOUT,
-            session: requests.Session = None,
+        self,
+        url: str,
+        *,
+        port: Optional[int] = None,
+        user: Optional[str] = None,
+        password: Optional[str] = None,
+        disable_ssl_verification: bool = False,
+        auth_method: Optional[str] = None,
+        timeout: Optional[int] = utils.DEFAULT_TIMEOUT,
+        session: Optional[requests.Session] = None,
     ) -&gt; None:
         &#34;&#34;&#34;
 
@@ -100,7 +100,7 @@ el.replaceWith(d);
         auth_method = auth_method or utils.DEFAULT_AUTH_METHOD
         if utils.validate_auth_method(auth_method=auth_method) is False:
             raise exceptions.AuthenticationMethodError(
-                &#34;Invalid authentication method. Possible values are \&#34;basic\&#34; and \&#34;cookie\&#34;.&#34;
+                &#39;Invalid authentication method. Possible values are &#34;basic&#34; and &#34;cookie&#34;.&#39;
             )
         _ = utils.extract_url_data(url=url)
         user = user or _[&#34;user&#34;]
@@ -112,13 +112,14 @@ el.replaceWith(d);
         self.session = session or requests.Session()
         self.session.verify = disable_ssl_verification is False
         # Changing the default headers
-        self.session.headers.update({
-            &#34;Accept&#34;: &#34;application/json&#34;,
-            &#34;Content-type&#34;: &#34;application/json&#34;
-        })
+        self.session.headers.update(
+            {&#34;Accept&#34;: &#34;application/json&#34;, &#34;Content-type&#34;: &#34;application/json&#34;}
+        )
         self._user = user
         self._password = password
-        self._auth = requests.auth.HTTPBasicAuth(user, password) if user and password else None
+        self._auth = (
+            requests.auth.HTTPBasicAuth(user, password) if user and password else None
+        )
         self.auth_method = auth_method
         self.timeout = timeout
 
@@ -215,16 +216,16 @@ el.replaceWith(d);
         return url
 
     def _request(
-            self,
-            *,
-            method: str,
-            resource: str = None,
-            body: Union[Dict, List] = None,
-            query_kwargs: Dict = None,
-            auth_method: str = None,
-            root: str = None,
-            timeout: int = None,
-            **req_kwargs
+        self,
+        *,
+        method: str,
+        resource: Optional[str] = None,
+        body: Optional[Union[Dict, List]] = None,
+        query_kwargs: Optional[Dict] = None,
+        auth_method: Optional[str] = None,
+        root: Optional[str] = None,
+        timeout: Optional[int] = None,
+        **req_kwargs,
     ) -&gt; requests.Response:
         &#34;&#34;&#34;
         Abstract request
@@ -264,9 +265,7 @@ el.replaceWith(d);
         if resource:
             path += f&#34;/{resource}&#34;
         if auth_method == &#34;basic&#34;:
-            req_kwargs.update({
-                &#34;auth&#34;: self._auth
-            })
+            req_kwargs.update({&#34;auth&#34;: self._auth})
         elif auth_method == &#34;cookie&#34;:
             if self._is_auth_token_expired() is True:
                 self._renew_auth_token()
@@ -277,24 +276,24 @@ el.replaceWith(d);
                 host=self.host,
                 path=path,
                 port=self.port,
-                **(query_kwargs or {})
+                **(query_kwargs or {}),
             ).url,
             json=body,
             timeout=timeout or self.timeout,
-            **req_kwargs
+            **req_kwargs,
         )
         utils.check_response(response=response)
         return response
 
     def _delete(
-            self,
-            resource: str = None,
-            *,
-            timeout: int = utils.DEFAULT_TIMEOUT,
-            query_kwargs: Dict = None,
-            auth_method: str = None,
-            root: str = None,
-            **req_kwargs
+        self,
+        resource: Optional[str] = None,
+        *,
+        timeout: int = utils.DEFAULT_TIMEOUT,
+        query_kwargs: Optional[Dict] = None,
+        auth_method: Optional[str] = None,
+        root: Optional[str] = None,
+        **req_kwargs,
     ) -&gt; requests.Response:
         &#34;&#34;&#34;
         DELETE request.
@@ -324,18 +323,18 @@ el.replaceWith(d);
             query_kwargs=query_kwargs,
             auth_method=auth_method,
             root=root,
-            **req_kwargs
+            **req_kwargs,
         )
 
     def _get(
-            self,
-            resource: str = None,
-            *,
-            timeout: int = utils.DEFAULT_TIMEOUT,
-            query_kwargs: Dict = None,
-            auth_method: str = None,
-            root: str = None,
-            **req_kwargs
+        self,
+        resource: Optional[str] = None,
+        *,
+        timeout: int = utils.DEFAULT_TIMEOUT,
+        query_kwargs: Optional[Dict] = None,
+        auth_method: Optional[str] = None,
+        root: Optional[str] = None,
+        **req_kwargs,
     ) -&gt; requests.Response:
         &#34;&#34;&#34;
         GET request
@@ -365,18 +364,18 @@ el.replaceWith(d);
             query_kwargs=query_kwargs,
             auth_method=auth_method,
             root=root,
-            **req_kwargs
+            **req_kwargs,
         )
 
     def _head(
-            self,
-            resource: str = None,
-            *,
-            timeout: int = utils.DEFAULT_TIMEOUT,
-            query_kwargs: Dict = None,
-            auth_method: str = None,
-            root: str = None,
-            **req_kwargs
+        self,
+        resource: Optional[str] = None,
+        *,
+        timeout: Optional[int] = None,
+        query_kwargs: Optional[Dict] = None,
+        auth_method: Optional[str] = None,
+        root: Optional[str] = None,
+        **req_kwargs,
     ) -&gt; requests.Response:
         &#34;&#34;&#34;
         HEAD request
@@ -406,19 +405,19 @@ el.replaceWith(d);
             query_kwargs=query_kwargs,
             auth_method=auth_method,
             root=root,
-            **req_kwargs
+            **req_kwargs,
         )
 
     def _post(
-            self,
-            resource: str = None,
-            *,
-            body: Union[Dict, List] = None,
-            timeout: int = utils.DEFAULT_TIMEOUT,
-            query_kwargs: Dict = None,
-            auth_method: str = None,
-            root: str = None,
-            **req_kwargs
+        self,
+        resource: Optional[str] = None,
+        *,
+        body: Optional[Union[Dict, List]] = None,
+        timeout: Optional[int] = None,
+        query_kwargs: Optional[Dict] = None,
+        auth_method: Optional[str] = None,
+        root: Optional[str] = None,
+        **req_kwargs,
     ) -&gt; requests.Response:
         &#34;&#34;&#34;
         POST request
@@ -451,19 +450,19 @@ el.replaceWith(d);
             query_kwargs=query_kwargs,
             auth_method=auth_method,
             root=root,
-            **req_kwargs
+            **req_kwargs,
         )
 
     def _put(
-            self,
-            resource: str = None,
-            *,
-            body: Union[Dict, List] = None,
-            timeout: int = utils.DEFAULT_TIMEOUT,
-            query_kwargs: Dict = None,
-            auth_method: str = None,
-            root: str = None,
-            **req_kwargs
+        self,
+        resource: Optional[str] = None,
+        *,
+        body: Optional[Union[Dict, List]] = None,
+        timeout: Optional[int] = None,
+        query_kwargs: Optional[Dict] = None,
+        auth_method: Optional[str] = None,
+        root: Optional[str] = None,
+        **req_kwargs,
     ) -&gt; requests.Response:
         &#34;&#34;&#34;
         PUT request
@@ -496,7 +495,7 @@ el.replaceWith(d);
             query_kwargs=query_kwargs,
             auth_method=auth_method,
             root=root,
-            **req_kwargs
+            **req_kwargs,
         )
 
     def _is_auth_token_expired(self) -&gt; bool:
@@ -508,9 +507,10 @@ el.replaceWith(d);
         bool : `True` if the auth token is expired.
         &#34;&#34;&#34;
         try:
-            return next(
-                _.expires for _ in self.session.cookies if _.name == &#34;AuthSession&#34;
-            ) &lt;= datetime.now(timezone.utc).timestamp()
+            return (
+                next(_.expires for _ in self.session.cookies if _.name == &#34;AuthSession&#34;)
+                &lt;= datetime.now(timezone.utc).timestamp()
+            )
         except StopIteration:
             return True
 
@@ -523,18 +523,12 @@ el.replaceWith(d);
         &#34;&#34;&#34;
         self._post(
             resource=&#34;_session&#34;,
-            body={
-                &#34;name&#34;: self._user,
-                &#34;password&#34;: self._password
-            },
+            body={&#34;name&#34;: self._user, &#34;password&#34;: self._password},
             auth_method=&#34;basic&#34;,
-            root=&#34;&#34;
+            root=&#34;&#34;,
         )
 
-    def check(
-            self,
-            resource: str = None
-    ) -&gt; bool:
+    def check(self, resource: Optional[str] = None) -&gt; bool:
         &#34;&#34;&#34;
         Check the server or database by sending a `HEAD` request to `/self.root`.
 
@@ -553,10 +547,7 @@ el.replaceWith(d);
         except (exceptions.CouchDBError, requests.exceptions.RequestException):
             return False
 
-    def info(
-            self,
-            partition: str = None
-    ) -&gt; Dict:
+    def info(self, partition: Optional[str] = None) -&gt; Dict:
         &#34;&#34;&#34;
         Return a server&#39;s or database&#39;s info by sending a `GET` request to `/self.root`.
 
@@ -569,12 +560,11 @@ el.replaceWith(d);
         -------
         Dict: A dictionary containing the server&#39;s or database&#39;s info.
         &#34;&#34;&#34;
-        return self._get(resource=f&#34;_partition/{partition}&#34; if partition else None).json()
+        return self._get(
+            resource=f&#34;_partition/{partition}&#34; if partition else None
+        ).json()
 
-    def rev(
-            self,
-            resource: str
-    ) -&gt; Optional[str]:
+    def rev(self, resource: str) -&gt; Optional[str]:
         &#34;&#34;&#34;
         Safely retrieves a resource&#39;s revision by sending a lightweight `HEAD`request and reading the response&#39;s
         `&#34;ETag&#34;` header.
@@ -593,7 +583,7 @@ el.replaceWith(d);
         &#34;&#34;&#34;
         rev = None
         try:
-            rev = self._head(resource=resource).headers.get(&#34;ETag&#34;).strip(&#34;\&#34;&#34;)
+            rev = self._head(resource=resource).headers.get(&#34;ETag&#34;).strip(&#39;&#34;&#39;)
         except exceptions.NotFoundError:
             pass
         finally:
@@ -670,17 +660,14 @@ def url(self) -&gt; str:
 <h3>Methods</h3>
 <dl>
 <dt id="couchdb3.base.Base.check"><code class="name flex">
-<span>def <span class="ident">check</span></span>(<span>self, resource: str = None) ‑> bool</span>
+<span>def <span class="ident">check</span></span>(<span>self, resource: str | None = None) ‑> bool</span>
 </code></dt>
 <dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def check(
-        self,
-        resource: str = None
-) -&gt; bool:
+<pre><code class="python">def check(self, resource: Optional[str] = None) -&gt; bool:
     &#34;&#34;&#34;
     Check the server or database by sending a `HEAD` request to `/self.root`.
 
@@ -709,17 +696,14 @@ def url(self) -&gt; str:
 <p>bool: <code>True</code> if the server is up or the database exists.</p></div>
 </dd>
 <dt id="couchdb3.base.Base.info"><code class="name flex">
-<span>def <span class="ident">info</span></span>(<span>self, partition: str = None) ‑> Dict</span>
+<span>def <span class="ident">info</span></span>(<span>self, partition: str | None = None) ‑> Dict</span>
 </code></dt>
 <dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def info(
-        self,
-        partition: str = None
-) -&gt; Dict:
+<pre><code class="python">def info(self, partition: Optional[str] = None) -&gt; Dict:
     &#34;&#34;&#34;
     Return a server&#39;s or database&#39;s info by sending a `GET` request to `/self.root`.
 
@@ -732,7 +716,9 @@ def url(self) -&gt; str:
     -------
     Dict: A dictionary containing the server&#39;s or database&#39;s info.
     &#34;&#34;&#34;
-    return self._get(resource=f&#34;_partition/{partition}&#34; if partition else None).json()</code></pre>
+    return self._get(
+        resource=f&#34;_partition/{partition}&#34; if partition else None
+    ).json()</code></pre>
 </details>
 <div class="desc"><p>Return a server's or database's info by sending a <code>GET</code> request to <code>/self.root</code>.</p>
 <h2 id="parameters">Parameters</h2>
@@ -751,10 +737,7 @@ def url(self) -&gt; str:
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def rev(
-        self,
-        resource: str
-) -&gt; Optional[str]:
+<pre><code class="python">def rev(self, resource: str) -&gt; Optional[str]:
     &#34;&#34;&#34;
     Safely retrieves a resource&#39;s revision by sending a lightweight `HEAD`request and reading the response&#39;s
     `&#34;ETag&#34;` header.
@@ -773,7 +756,7 @@ def url(self) -&gt; str:
     &#34;&#34;&#34;
     rev = None
     try:
-        rev = self._head(resource=resource).headers.get(&#34;ETag&#34;).strip(&#34;\&#34;&#34;)
+        rev = self._head(resource=resource).headers.get(&#34;ETag&#34;).strip(&#39;&#34;&#39;)
     except exceptions.NotFoundError:
         pass
     finally:
@@ -806,6 +789,7 @@ def url(self) -&gt; str:
     &#34;&#34;&#34;
     Abstract dictionary class.
     &#34;&#34;&#34;
+
     def __repr__(self) -&gt; str:
         return f&#34;{self.__class__.__name__}: {super(DictBase, self).__repr__()}&#34;</code></pre>
 </details>

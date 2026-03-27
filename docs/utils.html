@@ -99,10 +99,7 @@ el.replaceWith(d);
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def basic_auth(
-        user: str,
-        password: str
-) -&gt; str:
+<pre><code class="python">def basic_auth(user: str, password: str) -&gt; str:
     &#34;&#34;&#34;
     Create basic authentication headers value.
 
@@ -139,7 +136,7 @@ el.replaceWith(d);
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def build_query(
-        **kwargs,
+    **kwargs,
 ) -&gt; Optional[str]:
     &#34;&#34;&#34;
 
@@ -151,7 +148,9 @@ el.replaceWith(d);
     -------
     str : A string containing the keyword-args encoded as URL query-params.
     &#34;&#34;&#34;
-    return parse.urlencode({key: _handler(val) for key, val in kwargs.items() if val is not None})</code></pre>
+    return parse.urlencode(
+        {key: _handler(val) for key, val in kwargs.items() if val is not None}
+    )</code></pre>
 </details>
 <div class="desc"><h2 id="parameters">Parameters</h2>
 <dl>
@@ -170,12 +169,12 @@ el.replaceWith(d);
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def build_url(
-        *,
-        scheme: str,
-        host: str,
-        path: str = None,
-        port: int = None,
-        **kwargs,
+    *,
+    scheme: str,
+    host: str,
+    path: str = None,
+    port: int = None,
+    **kwargs,
 ) -&gt; Url:
     &#34;&#34;&#34;
     Build a URL using the provided scheme, host, path &amp; kwargs.
@@ -254,10 +253,10 @@ el.replaceWith(d);
     try:
         response.raise_for_status()
     except (
-            ConnectionError,
-            TimeoutError,
-            requests.exceptions.ConnectionError,
-            requests.exceptions.HTTPError,
+        ConnectionError,
+        TimeoutError,
+        requests.exceptions.ConnectionError,
+        requests.exceptions.HTTPError,
     ) as err:
         if response.status_code in exceptions.STATUS_CODE_ERROR_MAPPING:
             _ = exceptions.STATUS_CODE_ERROR_MAPPING[response.status_code]
@@ -325,10 +324,12 @@ el.replaceWith(d);
     return {
         &#34;scheme&#34;: parsed.scheme,
         &#34;user&#34;: parsed.auth.split(&#34;:&#34;)[0] if hasattr(parsed.auth, &#34;split&#34;) else None,
-        &#34;password&#34;: parsed.auth.split(&#34;:&#34;)[1] if hasattr(parsed.auth, &#34;split&#34;) else None,
+        &#34;password&#34;: parsed.auth.split(&#34;:&#34;)[1]
+        if hasattr(parsed.auth, &#34;split&#34;)
+        else None,
         &#34;host&#34;: parsed.host,
         &#34;port&#34;: parsed.port,
-        &#34;path&#34;: parsed.path
+        &#34;path&#34;: parsed.path,
     }</code></pre>
 </details>
 <div class="desc"><p>Extract scheme, credentials, host, port &amp; path from a URL.</p>
@@ -349,7 +350,7 @@ el.replaceWith(d);
 </ul></div>
 </dd>
 <dt id="couchdb3.utils.partitioned_db_resource_parser"><code class="name flex">
-<span>def <span class="ident">partitioned_db_resource_parser</span></span>(<span>resource: str = None, partition: str = None) ‑> str | None</span>
+<span>def <span class="ident">partitioned_db_resource_parser</span></span>(<span>resource: str | None = None, partition: str | None = None) ‑> str | None</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -357,8 +358,8 @@ el.replaceWith(d);
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def partitioned_db_resource_parser(
-        resource: str = None,
-        partition: str = None,
+    resource: Optional[str] = None,
+    partition: Optional[str] = None,
 ) -&gt; Optional[str]:
     &#34;&#34;&#34;
     Build resource path with optional partition ID.

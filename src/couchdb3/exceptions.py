@@ -23,7 +23,7 @@ __all__ = [
     "RequestRangeNotSatisfiableError",
     "ExpectationFailedError",
     "InternalServerError",
-    "STATUS_CODE_ERROR_MAPPING"
+    "STATUS_CODE_ERROR_MAPPING",
 ]
 
 
@@ -128,5 +128,5 @@ STATUS_CODE_ERROR_MAPPING: Dict = {
     415: UnsupportedMediaTypeError,
     416: RequestRangeNotSatisfiableError,
     417: ExpectationFailedError,
-    500: InternalServerError
+    500: InternalServerError,
 }

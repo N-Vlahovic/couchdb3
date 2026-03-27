@@ -59,6 +59,7 @@ el.replaceWith(d);
     &#34;&#34;&#34;
     View result object.
     &#34;&#34;&#34;
+
     def __init__(self, *args, **kwargs) -&gt; None:
         super(ViewResult, self).__init__(*args, **kwargs)
         self.offset = self.get(&#34;offset&#34;, 0)
@@ -181,6 +182,7 @@ def total_rows(self) -&gt; int:
     &#34;&#34;&#34;
     View row object.
     &#34;&#34;&#34;
+
     def __init__(self, *args, **kwargs) -&gt; None:
         super(ViewRow, self).__init__(*args, **kwargs)
         self.doc = self.get(&#34;doc&#34;, None)

@@ -12,14 +12,11 @@ __all__ = [
     "Document",
     "AttachmentDocument",
     "SecurityDocumentElement",
-    "SecurityDocument"
+    "SecurityDocument",
 ]
 
 
-def extract_document_id_and_rev(
-        doc: Union[Dict, Document],
-        rev: bool = True
-) -> Dict:
+def extract_document_id_and_rev(doc: Union[Dict, Document], rev: bool = True) -> Dict:
     """
     Extract id and revision from an abstract document.
 
@@ -37,13 +34,9 @@ def extract_document_id_and_rev(
     i = doc.get("_id", doc.get("id"))
     r = doc.get("_rev", doc.get("rev"))
     if i:
-        res.update({
-            "id": i
-        })
+        res.update({"id": i})
     if r and rev is True:
-        res.update({
-            "rev": r
-        })
+        res.update({"rev": r})
     return res
 
 
@@ -80,11 +73,7 @@ class Document(DictBase):
 class AttachmentDocument(DictBase):
     """CouchDB Attachment Document - a wrapper around Python dictionaries."""
 
-    def __init__(
-            self,
-            *args,
-            **kwargs
-    ) -> None:
+    def __init__(self, *args, **kwargs) -> None:
         super(AttachmentDocument, self).__init__(*args, **kwargs)
         self.content = self.get("content")
         self.content_encoding = self.get("content_encoding")
@@ -103,9 +92,7 @@ class AttachmentDocument(DictBase):
 
     @content.setter
     def content(self, value: bytes) -> None:
-        self.update({
-            "content": value
-        })
+        self.update({"content": value})
 
     @property
     def content_encoding(self) -> str:
@@ -118,9 +105,7 @@ class AttachmentDocument(DictBase):
 
     @content_encoding.setter
     def content_encoding(self, value: str) -> None:
-        self.update({
-            "content_encoding": value
-        })
+        self.update({"content_encoding": value})
 
     @property
     def content_length(self) -> int:
@@ -133,9 +118,7 @@ class AttachmentDocument(DictBase):
 
     @content_length.setter
     def content_length(self, value: int) -> None:
-        self.update({
-            "content_length": int(value)
-        })
+        self.update({"content_length": int(value)})
 
     @property
     def content_type(self) -> str:
@@ -148,9 +131,7 @@ class AttachmentDocument(DictBase):
 
     @content_type.setter
     def content_type(self, value: str) -> None:
-        self.update({
-            "content_type": value
-        })
+        self.update({"content_type": value})
 
     @property
     def digest(self) -> str:
@@ -163,9 +144,7 @@ class AttachmentDocument(DictBase):
 
     @digest.setter
     def digest(self, value: str) -> None:
-        self.update({
-            "digest": value
-        })
+        self.update({"digest": value})
 
 
 class SecurityDocumentElement(DictBase):
@@ -189,9 +168,7 @@ class SecurityDocumentElement(DictBase):
 
     @names.setter
     def names(self, value) -> None:
-        self.update({
-            "names": value
-        })
+        self.update({"names": value})
 
     @property
     def roles(self) -> List[str]:
@@ -204,23 +181,17 @@ class SecurityDocumentElement(DictBase):
 
     @roles.setter
     def roles(self, value) -> None:
-        self.update({
-            "roles": value
-        })
-    
+        self.update({"roles": value})
+
 
 class SecurityDocument(DictBase):
     """CouchDB Security Document - a wrapper around Python dictionaries."""
-    
-    def __init__(
-            self,
-            *args,
-            **kwargs
-    ) -> None:
+
+    def __init__(self, *args, **kwargs) -> None:
         super(SecurityDocument, self).__init__(*args, **kwargs)
         self.admins = SecurityDocumentElement(**self.get("admins", {}))
         self.members = SecurityDocumentElement(**self.get("members", {}))
-    
+
     @property
     def admins(self) -> SecurityDocumentElement:
         """
@@ -229,12 +200,10 @@ class SecurityDocument(DictBase):
         SecurityDocument : The document's admins.
         """
         return self.get("admins", SecurityDocumentElement())
-    
+
     @admins.setter
     def admins(self, value: SecurityDocumentElement) -> None:
-        self.update({
-            "admins": value
-        })
+        self.update({"admins": value})
 
     @property
     def members(self) -> SecurityDocumentElement:
@@ -247,8 +216,4 @@ class SecurityDocument(DictBase):
 
     @members.setter
     def members(self, value: SecurityDocumentElement) -> None:
-        self.update({
-            "members": value
-        })
-
-    
+        self.update({"members": value})

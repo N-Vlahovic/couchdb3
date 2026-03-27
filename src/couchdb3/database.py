@@ -7,10 +7,20 @@ import mimetypes
 import requests
 
 from .base import Base
-from .document import Document, AttachmentDocument, extract_document_id_and_rev, SecurityDocument, \
-    SecurityDocumentElement
+from .document import (
+    Document,
+    AttachmentDocument,
+    extract_document_id_and_rev,
+    SecurityDocument,
+    SecurityDocumentElement,
+)
 from .exceptions import CouchDBError, NameComplianceError
-from .utils import validate_db_name, DEFAULT_TIMEOUT, partitioned_db_resource_parser, rm_nones_from_dict
+from .utils import (
+    validate_db_name,
+    DEFAULT_TIMEOUT,
+    partitioned_db_resource_parser,
+    rm_nones_from_dict,
+)
 from .view import ViewResult
 
 
@@ -24,18 +34,19 @@ class Database(Base):
     """
     Abstract Couchdb database
     """
+
     def __init__(
-            self,
-            name: str,
-            *,
-            url: str = None,
-            port: int = None,
-            user: str = None,
-            password: str = None,
-            disable_ssl_verification: bool = False,
-            auth_method: str = None,
-            timeout: int = DEFAULT_TIMEOUT,
-            session: requests.Session = None,
+        self,
+        name: str,
+        *,
+        url: Optional[str] = None,
+        port: Optional[int] = None,
+        user: Optional[str] = None,
+        password: Optional[str] = None,
+        disable_ssl_verification: bool = False,
+        auth_method: Optional[str] = None,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+        session: Optional[requests.Session] = None,
     ) -> None:
         """
 
@@ -72,9 +83,9 @@ class Database(Base):
             password=password,
             disable_ssl_verification=disable_ssl_verification,
             auth_method=auth_method,
-            timeout=timeout
+            timeout=timeout,
         )
-        if validate_db_name(name=name) is False:
+        if not validate_db_name(name=name):
             raise NameComplianceError(
                 "Database name does not comply with the CouchDB requirements. "
                 "See https://docs.couchdb.org/en/latest/api/database/common.html#put--db."
@@ -96,10 +107,10 @@ class Database(Base):
         return f"{super(Database, self).__repr__()}: {self.name}"
 
     def all_docs(
-            self,
-            partition: str = None,
-            keys: Iterable[str] = None,
-            **kwargs
+        self,
+        partition: Optional[str] = None,
+        keys: Optional[Iterable[str]] = None,
+        **kwargs,
     ) -> ViewResult:
         """
         Executes the built-in _all_docs view, returning all the documents in the database (or partition).
@@ -120,13 +131,11 @@ class Database(Base):
         return self.view(
             f"_partition/{partition}/_all_docs" if partition else "_all_docs",
             keys=keys,
-            **kwargs
+            **kwargs,
         )
 
     def bulk_docs(
-            self,
-            docs: List[Union[Dict, Document]],
-            new_edits: bool = True
+        self, docs: List[Union[Dict, Document]], new_edits: bool = True
     ) -> List[Dict]:
         """
         The bulk document API allows you to create and update multiple documents at the same time within a single
@@ -157,17 +166,13 @@ class Database(Base):
           - `rev` the document's revision
         """
         return self._post(
-            resource="_bulk_docs",
-            body={
-                "docs": docs,
-                "new_edits": new_edits
-            }
+            resource="_bulk_docs", body={"docs": docs, "new_edits": new_edits}
         ).json()
 
     def bulk_get(
-            self,
-            docs: List[Union[Dict, Document]],
-            revs: bool = False,
+        self,
+        docs: List[Union[Dict, Document]],
+        revs: bool = False,
     ) -> List[Dict]:
         """
         This method can be called to query several documents in bulk. It is well suited for fetching a specific
@@ -190,25 +195,22 @@ class Database(Base):
           the error, or `ok` key and associated value of the requested document, with the additional _revisions property
           that lists the parent revisions if `revs=true`.
         """
-        return self._post(
-            resource="_bulk_get",
-            body={
-                "docs": [extract_document_id_and_rev(_) for _ in docs]
-            },
-            query_kwargs={
-                "revs": revs
-            }
-        ).json().get("results", [])
+        return (
+            self._post(
+                resource="_bulk_get",
+                body={"docs": [extract_document_id_and_rev(_) for _ in docs]},
+                query_kwargs={"revs": revs},
+            )
+            .json()
+            .get("results", [])
+        )
 
-    def compact(
-            self,
-            ddoc: str = None
-    ) -> bool:
+    def compact(self, ddoc: Optional[str] = None) -> bool:
         """
         Request compaction of the database. For more info, please refer to
         [the official documentation](https://docs.couchdb.org/en/main/api/database/compact.html#db-compact).
 
-        If the `ddoc` parameter is provided, it will compacts the view indexes associated with the specified design
+        If the `ddoc` parameter is provided, it will compact the view indexes associated with the specified design
         document.
 
         Parameters
@@ -223,16 +225,14 @@ class Database(Base):
         resource = "_compact"
         if ddoc:
             resource += f"/{ddoc}"
-        return self._post(
-            resource=resource
-        ).json().get("ok")
+        return self._post(resource=resource).json().get("ok")
 
     def copy(
-            self,
-            docid: str,
-            destid: str,
-            rev: str = None,
-            destrev: str = None
+        self,
+        docid: str,
+        destid: str,
+        rev: Optional[str] = None,
+        destrev: Optional[str] = None,
     ) -> Tuple[str, bool, str]:
         """
         Copy an existing document to a new or existing document. Copying a document is only possible within the same
@@ -263,17 +263,12 @@ class Database(Base):
             headers={
                 "Destination": destination,
             },
-            query_kwargs={
-                "rev": rev
-            }
+            query_kwargs={"rev": rev},
         ).json()
         return data["id"], data["ok"], data["rev"]
 
     def create(
-            self,
-            doc: Union[Dict, Document],
-            *,
-            batch: bool = None
+        self, doc: Union[Dict, Document], *, batch: Optional[bool] = None
     ) -> Tuple[str, bool, str]:
         """
         Create a new document.
@@ -290,20 +285,11 @@ class Database(Base):
         Tuple[str, bool, str] : A tuple consisting of the id, success message & revision.
         """
         data = self._post(
-            body=doc,
-            query_kwargs={
-                "batch": "ok" if batch is True else None
-            }
+            body=doc, query_kwargs={"batch": "ok" if batch is True else None}
         ).json()
         return data["id"], data["ok"], data["rev"]
 
-    def delete(
-            self,
-            docid: str,
-            rev: str,
-            *,
-            batch: bool = None
-    ) -> bool:
+    def delete(self, docid: str, rev: str, *, batch: Optional[bool] = None) -> bool:
         """
         Delete a document.
 
@@ -322,20 +308,12 @@ class Database(Base):
         """
         self._delete(
             resource=docid,
-            query_kwargs={
-                "rev": rev,
-                "batch": "ok" if batch is True else None
-            }
+            query_kwargs={"rev": rev, "batch": "ok" if batch is True else None},
         )
         return True
 
     def delete_attachment(
-            self,
-            docid: str,
-            attname: str,
-            rev: str,
-            *,
-            batch: bool = False
+        self, docid: str, attname: str, rev: str, *, batch: bool = False
     ) -> bool:
         """
         Delete an attachment.
@@ -357,27 +335,24 @@ class Database(Base):
         """
         self._delete(
             resource=f"{docid}/{attname}",
-            query_kwargs={
-                "rev": rev,
-                "batch": "ok" if batch is True else None
-            }
+            query_kwargs={"rev": rev, "batch": "ok" if batch is True else None},
         )
         return True
 
     def explain(
-            self,
-            selector: Dict,
-            limit: int = 25,
-            skip: int = 0,
-            sort: List[Dict] = None,
-            fields: List[str] = None,
-            use_index: Union[str, List[str]] = None,
-            conflicts: bool = False,
-            r: int = 1,
-            bookmark: str = None,
-            update: bool = True,
-            stable: bool = None,
-            execution_stats: bool = False
+        self,
+        selector: Dict,
+        limit: int = 25,
+        skip: int = 0,
+        sort: Optional[List[Dict]] = None,
+        fields: Optional[List[str]] = None,
+        use_index: Optional[Union[str, List[str]]] = None,
+        conflicts: bool = False,
+        r: int = 1,
+        bookmark: Optional[str] = None,
+        update: bool = True,
+        stable: Optional[bool] = None,
+        execution_stats: bool = False,
     ) -> Dict:
         """
         Shows which index is being used by the query. Parameters are the same as `Database.find`.
@@ -438,37 +413,39 @@ class Database(Base):
         """
         return self._post(
             resource="_explain",
-            body=rm_nones_from_dict({
-                "selector": selector,
-                "limit": limit,
-                "skip": skip,
-                "sort": sort,
-                "fields": fields,
-                "use_index": use_index,
-                "conflicts": conflicts,
-                "r": r,
-                "bookmark": bookmark,
-                "update": update,
-                "stable": stable,
-                "execution_stats": execution_stats,
-            }),
+            body=rm_nones_from_dict(
+                {
+                    "selector": selector,
+                    "limit": limit,
+                    "skip": skip,
+                    "sort": sort,
+                    "fields": fields,
+                    "use_index": use_index,
+                    "conflicts": conflicts,
+                    "r": r,
+                    "bookmark": bookmark,
+                    "update": update,
+                    "stable": stable,
+                    "execution_stats": execution_stats,
+                }
+            ),
         ).json()
 
     def find(
-            self,
-            selector: Dict,
-            limit: int = 25,
-            skip: int = 0,
-            sort: List[Dict] = None,
-            fields: List[str] = None,
-            use_index: Union[str, List[str]] = None,
-            conflicts: bool = False,
-            r: int = 1,
-            bookmark: str = None,
-            update: bool = True,
-            stable: bool = None,
-            execution_stats: bool = False,
-            partition: str = None,
+        self,
+        selector: Dict,
+        limit: int = 25,
+        skip: int = 0,
+        sort: Optional[List[Dict]] = None,
+        fields: Optional[List[str]] = None,
+        use_index: Optional[Union[str, List[str]]] = None,
+        conflicts: bool = False,
+        r: int = 1,
+        bookmark: Optional[str] = None,
+        update: bool = True,
+        stable: Optional[bool] = None,
+        execution_stats: bool = False,
+        partition: Optional[str] = None,
     ) -> Dict:
         """
         Find documents using a declarative JSON querying syntax.
@@ -528,24 +505,26 @@ class Database(Base):
                 resource="_find",
                 partition=partition,
             ),
-            body=rm_nones_from_dict({
-                "selector": selector,
-                "limit": limit,
-                "skip": skip,
-                "sort": sort,
-                "fields": fields,
-                "use_index": use_index,
-                "conflicts": conflicts,
-                "r": r,
-                "bookmark": bookmark,
-                "update": update,
-                "stable": stable,
-                "execution_stats": execution_stats,
-            }),
+            body=rm_nones_from_dict(
+                {
+                    "selector": selector,
+                    "limit": limit,
+                    "skip": skip,
+                    "sort": sort,
+                    "fields": fields,
+                    "use_index": use_index,
+                    "conflicts": conflicts,
+                    "r": r,
+                    "bookmark": bookmark,
+                    "update": update,
+                    "stable": stable,
+                    "execution_stats": execution_stats,
+                }
+            ),
         ).json()
 
     def indexes(
-            self,
+        self,
     ) -> Dict:
         """
         Get a list of all indexes in the database.
@@ -560,23 +539,23 @@ class Database(Base):
         return self._get(resource="_index").json()
 
     def get(
-            self,
-            docid: str,
-            *,
-            attachments: bool = None,
-            att_encoding_info: bool = None,
-            atts_since: Iterable[str] = None,
-            conflicts: bool = None,
-            deleted_conflicts: bool = None,
-            latest: bool = None,
-            local_seq: bool = None,
-            meta: bool = None,
-            open_revs: Iterable[str] = None,
-            rev: str = None,
-            revs: bool = None,
-            revs_info: bool = None,
-            check: bool = False,
-            default_value: Any = None,
+        self,
+        docid: str,
+        *,
+        attachments: Optional[bool] = None,
+        att_encoding_info: Optional[bool] = None,
+        atts_since: Optional[Iterable[str]] = None,
+        conflicts: Optional[bool] = None,
+        deleted_conflicts: Optional[bool] = None,
+        latest: Optional[bool] = None,
+        local_seq: Optional[bool] = None,
+        meta: Optional[bool] = None,
+        open_revs: Optional[Iterable[str]] = None,
+        rev: Optional[str] = None,
+        revs: Optional[bool] = None,
+        revs_info: Optional[bool] = None,
+        check: Optional[bool] = None,
+        default_value: Optional[Any] = None,
     ) -> Union[Document, Any]:
         """
         Get a document by id.
@@ -622,33 +601,35 @@ class Database(Base):
         `couchdb3.document.Document`
         """
         try:
-            return Document(**self._get(
-                resource=docid,
-                query_kwargs={
-                    "attachments": attachments,
-                    "att_encoding_info": att_encoding_info,
-                    "atts_since": atts_since,
-                    "conflicts": conflicts,
-                    "deleted_conflicts": deleted_conflicts,
-                    "latest": latest,
-                    "local_seq": local_seq,
-                    "meta": meta,
-                    "open_revs": open_revs,
-                    "rev": rev,
-                    "revs": revs,
-                    "revs_info": revs_info
-                }
-            ).json())
+            return Document(
+                **self._get(
+                    resource=docid,
+                    query_kwargs={
+                        "attachments": attachments,
+                        "att_encoding_info": att_encoding_info,
+                        "atts_since": atts_since,
+                        "conflicts": conflicts,
+                        "deleted_conflicts": deleted_conflicts,
+                        "latest": latest,
+                        "local_seq": local_seq,
+                        "meta": meta,
+                        "open_revs": open_revs,
+                        "rev": rev,
+                        "revs": revs,
+                        "revs_info": revs_info,
+                    },
+                ).json()
+            )
         except (CouchDBError, requests.exceptions.RequestException) as error:
-            if check is True:
+            if check:
                 raise error
             return default_value
 
     def get_attachment(
-            self,
-            docid: str,
-            attname: str,
-            rev: str = None
+        self,
+        docid: str,
+        attname: str,
+        rev: Optional[str] = None,
     ) -> AttachmentDocument:
         """
         Get a document's attachment
@@ -666,10 +647,7 @@ class Database(Base):
         -------
         AttachmentDocument : A `couchdb3.document.AttachmentDocument` instance.
         """
-        response = self._get(
-            f"{docid}/{attname}",
-            query_kwargs={"rev": rev}
-        )
+        response = self._get(f"{docid}/{attname}", query_kwargs={"rev": rev})
         content_md5 = response.headers.get("content-md5")
         digest_value = f"md5-{content_md5}" if content_md5 else None
         return AttachmentDocument(
@@ -680,11 +658,7 @@ class Database(Base):
             digest=digest_value,
         )
 
-    def get_design(
-            self,
-            ddoc: str,
-            **kwargs
-    ) -> Document:
+    def get_design(self, ddoc: str, **kwargs) -> Document:
         """
         Get a design document.
 
@@ -699,15 +673,9 @@ class Database(Base):
         -------
         Document : A `couchdb3.document.Document` object containing the design document's content.
         """
-        return self.get(
-            docid=f"_design/{ddoc}",
-            **kwargs
-        )
+        return self.get(docid=f"_design/{ddoc}", **kwargs)
 
-    def purge(
-            self,
-            data: Dict
-    ) -> Dict:
+    def purge(self, data: Dict) -> Dict:
         """
         Purge permanently the given pairs of `(id,rev)`. When deleting a (revisions of a) document, the document is
         marked as `_deleted=true` as opposed to being completely purged. For more info, please refer to
@@ -722,20 +690,17 @@ class Database(Base):
         -------
 
         """
-        return self._post(
-            resource="_purge",
-            body=data
-        ).json()
+        return self._post(resource="_purge", body=data).json()
 
     def put_attachment(
-            self,
-            docid: str,
-            attname: str,
-            path: str = None,
-            *,
-            content: bytes = None,
-            content_type: str = None,
-            rev: str = None,
+        self,
+        docid: str,
+        attname: str,
+        path: Optional[str] = None,
+        *,
+        content: Optional[bytes] = None,
+        content_type: Optional[str] = None,
+        rev: Optional[str] = None,
     ) -> Tuple[str, bool, str]:
         """
         Uploads the supplied content as an attachment to the specified document.
@@ -767,9 +732,13 @@ class Database(Base):
           - the revision ( `str`)
         """
         if (not content and not path) or (content and path):
-            raise ValueError("Precisely one of the arguments \"attdata\" and  \"attloc\" must be provided.")
+            raise ValueError(
+                'Precisely one of the arguments "attdata" and  "attloc" must be provided.'
+            )
         if content and not content_type:
-            raise ValueError("Argument \"content_type\" cannot be empty when \"content\" is provided.")
+            raise ValueError(
+                'Argument "content_type" cannot be empty when "content" is provided.'
+            )
         resource = f"{docid}/{attname}"
         query_kwargs = {"rev": rev}
         content_type = content_type if content_type else mimetypes.guess_type(path)[0]
@@ -780,27 +749,25 @@ class Database(Base):
             resource=resource,
             query_kwargs=query_kwargs,
             data=content,
-            headers={
-                "content-type": content_type
-            },
+            headers={"content-type": content_type},
         )
         data = response.json()
         return data["id"], data["ok"], data["rev"]
 
     def put_design(
-            self,
-            ddoc: str,
-            *,
-            rev: str = None,
-            language: str = None,
-            options: Dict = None,
-            filters: Dict = None,
-            updates: Dict = None,
-            validate_doc_update: str = None,
-            views: Dict = None,
-            autoupdate: bool = None,
-            partitioned: bool = None,
-            **kwargs
+        self,
+        ddoc: str,
+        *,
+        rev: Optional[str] = None,
+        language: Optional[str] = None,
+        options: Optional[Dict] = None,
+        filters: Optional[Dict] = None,
+        updates: Optional[Dict] = None,
+        validate_doc_update: Optional[str] = None,
+        views: Optional[Dict] = None,
+        autoupdate: Optional[bool] = None,
+        partitioned: Optional[bool] = None,
+        **kwargs,
     ) -> Tuple[str, bool, str]:
         """
         Create or update a named design document. For more info, please refer to
@@ -837,30 +804,30 @@ class Database(Base):
         Tuple[str, bool, str] : The document's id ( `str`), the operation status (`bool`) and the revision ( `str`).
         """
         if partitioned:
-            options = (options or dict()).update({
-                "partitioned": partitioned
-            })
+            options = (options or dict()).update({"partitioned": partitioned})
         return self.save(
-            doc=rm_nones_from_dict({
-                "_id": f"_design/{ddoc}",
-                "_rev": rev,
-                "language": language,
-                "options": options,
-                "filters": filters,
-                "updates": updates,
-                "validate_doc_update": validate_doc_update,
-                "views": views,
-                "autoupdate": autoupdate,
-            }),
-            **kwargs
+            doc=rm_nones_from_dict(
+                {
+                    "_id": f"_design/{ddoc}",
+                    "_rev": rev,
+                    "language": language,
+                    "options": options,
+                    "filters": filters,
+                    "updates": updates,
+                    "validate_doc_update": validate_doc_update,
+                    "views": views,
+                    "autoupdate": autoupdate,
+                }
+            ),
+            **kwargs,
         )
 
     def save(
-            self,
-            doc: Union[Dict, Document],
-            batch: bool = None,
-            new_edits: bool = None,
-            path: str = None
+        self,
+        doc: Union[Dict, Document],
+        batch: Optional[bool] = None,
+        new_edits: Optional[bool] = None,
+        path: Optional[str] = None,
     ) -> Tuple[str, bool, str]:
         """
         Create a new named document, or a new revision of the existing document.
@@ -893,18 +860,18 @@ class Database(Base):
             query_kwargs={
                 "batch": "ok" if batch else None,
                 "new_edits": new_edits,
-                "rev": doc.get("_rev")
-            }
+                "rev": doc.get("_rev"),
+            },
         ).json()
         return data["id"], data["ok"], data["rev"]
 
     def save_index(
-            self,
-            index: Dict,
-            ddoc: str = None,
-            name: str = None,
-            index_type: str = "json",
-            partitioned: bool = None
+        self,
+        index: Dict,
+        ddoc: Optional[str] = None,
+        name: Optional[str] = None,
+        index_type: Optional[str] = "json",
+        partitioned: Optional[bool] = None,
     ) -> Tuple[str, str, str]:
         """
         Create a new index on a database.
@@ -939,19 +906,19 @@ class Database(Base):
         """
         data = self._post(
             resource="_index",
-            body=rm_nones_from_dict({
-                "index": index,
-                "ddoc": ddoc,
-                "name": name,
-                "type": index_type,
-                "partitioned": partitioned
-            }),
+            body=rm_nones_from_dict(
+                {
+                    "index": index,
+                    "ddoc": ddoc,
+                    "name": name,
+                    "type": index_type,
+                    "partitioned": partitioned,
+                }
+            ),
         ).json()
         return data["result"], data["id"], data["name"]
 
-    def security(
-            self
-    ) -> SecurityDocument:
+    def security(self) -> SecurityDocument:
         """
         Returns the current security object from the specified database.
 
@@ -959,15 +926,13 @@ class Database(Base):
         -------
         SecurityDocument : A `couchdb3.document.SecurityDocument` object.
         """
-        data = self._get(
-            resource="_security"
-        ).json()
+        data = self._get(resource="_security").json()
         return SecurityDocument(**data)
 
     def update_security(
-            self,
-            admins: Union[Dict, SecurityDocumentElement],
-            members: Union[Dict, SecurityDocumentElement],
+        self,
+        admins: Optional[Union[Dict, SecurityDocumentElement]] = None,
+        members: Optional[Union[Dict, SecurityDocumentElement]] = None,
     ) -> bool:
         """
         Update database security.
@@ -986,40 +951,36 @@ class Database(Base):
         bool :  Operation status.
         """
         return self._put(
-            resource="_security",
-            body={
-                "admins": admins,
-                "members": members
-            }
+            resource="_security", body={"admins": admins, "members": members}
         ).json()["ok"]
 
     def view(
-            self,
-            ddoc: str,
-            view: str = None,
-            *,
-            partition: str = None,
-            conflicts: bool = None,
-            descending: bool = None,
-            endkey: str = None,
-            endkey_docid: str = None,
-            group: bool = None,
-            group_level: int = None,
-            include_docs: bool = None,
-            attachments: bool = None,
-            att_encoding_info: bool = None,
-            inclusive_end: bool = None,
-            key: str = None,
-            keys: Iterable[str] = None,
-            limit: int = None,
-            reduce: bool = None,
-            skip: int = None,
-            sort: bool = None,
-            stable: bool = None,
-            startkey: str = None,
-            startkey_docid: str = None,
-            update: str = None,
-            update_seq: bool = None
+        self,
+        ddoc: str,
+        view: Optional[str] = None,
+        *,
+        partition: Optional[str] = None,
+        conflicts: Optional[bool] = None,
+        descending: Optional[bool] = None,
+        endkey: Optional[str] = None,
+        endkey_docid: Optional[str] = None,
+        group: Optional[bool] = None,
+        group_level: Optional[int] = None,
+        include_docs: Optional[bool] = None,
+        attachments: Optional[bool] = None,
+        att_encoding_info: Optional[bool] = None,
+        inclusive_end: Optional[bool] = None,
+        key: Optional[str] = None,
+        keys: Optional[Iterable[str]] = None,
+        limit: Optional[int] = None,
+        reduce: Optional[bool] = None,
+        skip: Optional[int] = None,
+        sort: Optional[bool] = None,
+        stable: Optional[bool] = None,
+        startkey: Optional[str] = None,
+        startkey_docid: Optional[str] = None,
+        update: Optional[str] = None,
+        update_seq: Optional[bool] = None,
     ) -> ViewResult:
         """
         Executes the specified view function from the specified design document, c.f [the official
@@ -1113,32 +1074,34 @@ class Database(Base):
             resource="_design",
             partition=partition,
         )
-        return ViewResult(**self._get(
-            resource=f"{path}/{ddoc}/_view/{view}" if (ddoc and view) else ddoc,
-            query_kwargs={
-                "conflicts": conflicts,
-                "descending": descending,
-                "endkey": endkey,
-                "endkey_docid": endkey_docid,
-                "group": group,
-                "group_level": group_level,
-                "include_docs": include_docs,
-                "attachments": attachments,
-                "att_encoding_info": att_encoding_info,
-                "inclusive_end": inclusive_end,
-                "key": key,
-                "keys": keys,
-                "limit": limit,
-                "reduce": reduce,
-                "skip": skip,
-                "sorted": sort,
-                "stable": stable,
-                "startkey": startkey,
-                "startkey_docid": startkey_docid,
-                "update": update,
-                "update_seq": update_seq
-            }
-        ).json())
+        return ViewResult(
+            **self._get(
+                resource=f"{path}/{ddoc}/_view/{view}" if (ddoc and view) else ddoc,
+                query_kwargs={
+                    "conflicts": conflicts,
+                    "descending": descending,
+                    "endkey": endkey,
+                    "endkey_docid": endkey_docid,
+                    "group": group,
+                    "group_level": group_level,
+                    "include_docs": include_docs,
+                    "attachments": attachments,
+                    "att_encoding_info": att_encoding_info,
+                    "inclusive_end": inclusive_end,
+                    "key": key,
+                    "keys": keys,
+                    "limit": limit,
+                    "reduce": reduce,
+                    "skip": skip,
+                    "sorted": sort,
+                    "stable": stable,
+                    "startkey": startkey,
+                    "startkey_docid": startkey_docid,
+                    "update": update,
+                    "update_seq": update_seq,
+                },
+            ).json()
+        )
 
     def get_partition(self, partition_id: str) -> Partition:
         """
@@ -1170,19 +1133,20 @@ class Partition(Database):
     """
     Abstract Couchdb partition
     """
+
     def __init__(
-            self,
-            partition_id: str,
-            name: str,
-            *,
-            url: str = None,
-            port: int = None,
-            user: str = None,
-            password: str = None,
-            disable_ssl_verification: bool = False,
-            auth_method: str = None,
-            timeout: int = DEFAULT_TIMEOUT,
-            session: requests.Session = None,
+        self,
+        partition_id: str,
+        name: str,
+        *,
+        url: Optional[str] = None,
+        port: Optional[int] = None,
+        user: Optional[str] = None,
+        password: Optional[str] = None,
+        disable_ssl_verification: bool = False,
+        auth_method: Optional[str] = None,
+        timeout: Optional[int] = None,
+        session: Optional[requests.Session] = None,
     ) -> None:
         """
 
@@ -1220,7 +1184,7 @@ class Partition(Database):
             password=password,
             disable_ssl_verification=disable_ssl_verification,
             auth_method=auth_method,
-            timeout=timeout
+            timeout=timeout,
         )
         self.partition_id = partition_id
         # self.root = f"{name}/_partition/{partition_id}"
@@ -1228,11 +1192,7 @@ class Partition(Database):
     def __repr__(self) -> str:
         return f"{super(Partition, self).__repr__()}/{self.partition_id}"
 
-    def all_docs(
-            self,
-            keys: Iterable[str] = None,
-            **kwargs
-    ) -> ViewResult:
+    def all_docs(self, keys: Iterable[str] = None, **kwargs) -> ViewResult:
         """
         Executes the built-in _all_docs view, returning all the documents in the partition.
 
@@ -1247,11 +1207,13 @@ class Partition(Database):
         -------
         ViewResult
         """
-        return super(Partition, self).all_docs(partition=self.partition_id, keys=keys, **kwargs)
+        return super(Partition, self).all_docs(
+            partition=self.partition_id, keys=keys, **kwargs
+        )
 
     # noinspection PyMethodOverriding
     def info(
-            self,
+        self,
     ) -> Dict:
         """
         Return the partition's info by sending a `GET` request to `/self.root`.
@@ -1264,19 +1226,19 @@ class Partition(Database):
 
     # noinspection PyMethodOverriding
     def find(
-            self,
-            selector: Dict,
-            limit: int = 25,
-            skip: int = 0,
-            sort: List[Dict] = None,
-            fields: List[str] = None,
-            use_index: Union[str, List[str]] = None,
-            conflicts: bool = False,
-            r: int = 1,
-            bookmark: str = None,
-            update: bool = True,
-            stable: bool = None,
-            execution_stats: bool = False
+        self,
+        selector: Dict,
+        limit: int = 25,
+        skip: int = 0,
+        sort: Optional[List[Dict]] = None,
+        fields: Optional[List[str]] = None,
+        use_index: Optional[Union[str, List[str]]] = None,
+        conflicts: bool = False,
+        r: int = 1,
+        bookmark: Optional[str] = None,
+        update: bool = True,
+        stable: Optional[bool] = None,
+        execution_stats: bool = False,
     ) -> Dict:
         """
         See `Database.find`.
@@ -1299,32 +1261,32 @@ class Partition(Database):
 
     # noinspection PyMethodOverriding
     def view(
-            self,
-            ddoc: str,
-            view: str = None,
-            *,
-            # partition: str = None,
-            conflicts: bool = None,
-            descending: bool = None,
-            endkey: str = None,
-            endkey_docid: str = None,
-            group: bool = None,
-            group_level: int = None,
-            include_docs: bool = None,
-            attachments: bool = None,
-            att_encoding_info: bool = None,
-            inclusive_end: bool = None,
-            key: str = None,
-            keys: Iterable[str] = None,
-            limit: int = None,
-            reduce: bool = None,
-            skip: int = None,
-            sort: bool = None,
-            stable: bool = None,
-            startkey: str = None,
-            startkey_docid: str = None,
-            update: str = None,
-            update_seq: bool = None
+        self,
+        ddoc: str,
+        view: Optional[str] = None,
+        *,
+        # partition: str = None,
+        conflicts: Optional[bool] = None,
+        descending: Optional[bool] = None,
+        endkey: Optional[str] = None,
+        endkey_docid: Optional[str] = None,
+        group: Optional[bool] = None,
+        group_level: Optional[int] = None,
+        include_docs: Optional[bool] = None,
+        attachments: Optional[bool] = None,
+        att_encoding_info: Optional[bool] = None,
+        inclusive_end: Optional[bool] = None,
+        key: Optional[str] = None,
+        keys: Optional[Iterable[str]] = None,
+        limit: Optional[int] = None,
+        reduce: Optional[bool] = None,
+        skip: Optional[int] = None,
+        sort: Optional[bool] = None,
+        stable: Optional[bool] = None,
+        startkey: Optional[str] = None,
+        startkey_docid: Optional[str] = None,
+        update: Optional[str] = None,
+        update_seq: Optional[bool] = None,
     ) -> ViewResult:
         """
         Executes the specified view function from the specified design document, c.f [the official
@@ -1419,13 +1381,11 @@ class Partition(Database):
             startkey=startkey,
             startkey_docid=startkey_docid,
             update=update,
-            update_seq=update_seq
+            update_seq=update_seq,
         )
 
     def bulk_docs(
-            self,
-            docs: List[Union[Dict, Document]],
-            new_edits: bool = True
+        self, docs: List[Union[Dict, Document]], new_edits: bool = True
     ) -> List[Dict]:
         """
         See `Database.bulk_docs`.
@@ -1439,9 +1399,9 @@ class Partition(Database):
         )
 
     def bulk_get(
-            self,
-            docs: List[Union[Dict, Document]],
-            revs: bool = False,
+        self,
+        docs: List[Union[Dict, Document]],
+        revs: bool = False,
     ) -> List[Dict]:
         """
         See `Database.bulk_get`.
@@ -1455,11 +1415,11 @@ class Partition(Database):
         )
 
     def copy(
-            self,
-            docid: str,
-            destid: str,
-            rev: str = None,
-            destrev: str = None
+        self,
+        docid: str,
+        destid: str,
+        rev: Optional[str] = None,
+        destrev: Optional[str] = None,
     ) -> Tuple[str, bool, str]:
         """
         See `Database.copy`.
@@ -1475,10 +1435,10 @@ class Partition(Database):
         )
 
     def create(
-            self,
-            doc: Union[Dict, Document],
-            *,
-            batch: bool = None
+        self,
+        doc: Union[Dict, Document],
+        *,
+        batch: Optional[bool] = None,
     ) -> Tuple[str, bool, str]:
         """
         See `Database.create`.
@@ -1492,11 +1452,11 @@ class Partition(Database):
         )
 
     def delete(
-            self,
-            docid: str,
-            rev: str,
-            *,
-            batch: bool = None
+        self,
+        docid: str,
+        rev: str,
+        *,
+        batch: Optional[bool] = None,
     ) -> bool:
         """
         See `Database.delete`.
@@ -1511,12 +1471,12 @@ class Partition(Database):
         )
 
     def delete_attachment(
-            self,
-            docid: str,
-            attname: str,
-            rev: str,
-            *,
-            batch: bool = False
+        self,
+        docid: str,
+        attname: str,
+        rev: str,
+        *,
+        batch: bool = False,
     ) -> bool:
         """
         See `Database.delete_attachment`.
@@ -1532,23 +1492,23 @@ class Partition(Database):
         )
 
     def get(
-            self,
-            docid: str,
-            *,
-            attachments: bool = None,
-            att_encoding_info: bool = None,
-            atts_since: Iterable[str] = None,
-            conflicts: bool = None,
-            deleted_conflicts: bool = None,
-            latest: bool = None,
-            local_seq: bool = None,
-            meta: bool = None,
-            open_revs: Iterable[str] = None,
-            rev: str = None,
-            revs: bool = None,
-            revs_info: bool = None,
-            check: bool = False,
-            default_value: Any = None,
+        self,
+        docid: str,
+        *,
+        attachments: Optional[bool] = None,
+        att_encoding_info: Optional[bool] = None,
+        atts_since: Optional[Iterable[str]] = None,
+        conflicts: Optional[bool] = None,
+        deleted_conflicts: Optional[bool] = None,
+        latest: Optional[bool] = None,
+        local_seq: Optional[bool] = None,
+        meta: Optional[bool] = None,
+        open_revs: Optional[Iterable[str]] = None,
+        rev: Optional[str] = None,
+        revs: Optional[bool] = None,
+        revs_info: Optional[bool] = None,
+        check: Optional[bool] = False,
+        default_value: Optional[Any] = None,
     ) -> Union[Document, Any]:
         """
         See `Database.get`.
@@ -1575,10 +1535,10 @@ class Partition(Database):
         )
 
     def get_attachment(
-            self,
-            docid: str,
-            attname: str,
-            rev: str = None
+        self,
+        docid: str,
+        attname: str,
+        rev: Optional[str] = None,
     ) -> AttachmentDocument:
         """
         See `Database.get_attachment`.
@@ -1593,14 +1553,14 @@ class Partition(Database):
         )
 
     def put_attachment(
-            self,
-            docid: str,
-            attname: str,
-            path: str = None,
-            *,
-            content: bytes = None,
-            content_type: str = None,
-            rev: str = None,
+        self,
+        docid: str,
+        attname: str,
+        path: Optional[str] = None,
+        *,
+        content: Optional[bytes] = None,
+        content_type: Optional[str] = None,
+        rev: Optional[str] = None,
     ) -> Tuple[str, bool, str]:
         """
         See `Database.put_attachment`.
@@ -1617,21 +1577,18 @@ class Partition(Database):
             rev=rev,
         )
 
-    def rev(
-            self,
-            resource: str
-    ) -> Optional[str]:
+    def rev(self, resource: str) -> Optional[str]:
         """
         See `Database.rev`.
         """
         return super(Partition, self).rev(self.add_partition_to_str(resource))
 
     def save(
-            self,
-            doc: Union[Dict, Document],
-            batch: bool = None,
-            new_edits: bool = None,
-            path: str = None
+        self,
+        doc: Union[Dict, Document],
+        batch: Optional[bool] = None,
+        new_edits: Optional[bool] = None,
+        path: Optional[str] = None,
     ) -> Tuple[str, bool, str]:
         """
         See `Database.save`.

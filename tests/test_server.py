@@ -33,7 +33,9 @@ class TestClient(unittest.TestCase):
             self.assertIsInstance(_, str)
 
     def test_check_user(self):
-        self.assertTrue(CLIENT.check_user(username=COUCHDB_USER, password=COUCHDB_PASSWORD))
+        self.assertTrue(
+            CLIENT.check_user(username=COUCHDB_USER, password=COUCHDB_PASSWORD)
+        )
 
     def test_create(self):
         db = CLIENT.create(name=TEST_DB_NAME, partitioned=True)
@@ -72,7 +74,7 @@ class TestClient(unittest.TestCase):
             source=CLIENT.get(TEST_DB_NAME).url,
             target=target_db,
             continuous=True,
-            create_target=True
+            create_target=True,
         )
         self.assertTrue(result.get("ok"))
 
@@ -83,9 +85,7 @@ class TestClient(unittest.TestCase):
     def test_save_user(self):
         user_id = "org.couchdb.user:john"
         ok, _id, _rev = CLIENT.save_user(
-            user_id=user_id,
-            name="john",
-            password="secret123"
+            user_id=user_id, name="john", password="secret123"
         )
         self.assertEqual(ok, True)
         self.assertEqual(_id, user_id)
@@ -96,7 +96,9 @@ class TestClient(unittest.TestCase):
         self.assertFalse(Server("http://admin:secret@localhost:1234").up())
 
     def test_with_context(self):
-        with Server(url=COUCHDB0_URL, user=COUCHDB_USER, password=COUCHDB_PASSWORD) as client:
+        with Server(
+            url=COUCHDB0_URL, user=COUCHDB_USER, password=COUCHDB_PASSWORD
+        ) as client:
             self.assertIsInstance(client, Server)
 
 
@@ -105,13 +107,10 @@ def rm_test_db() -> None:
     """
     Removing temporary test database.
     """
-    for dbname in [
-        TEST_DB_NAME,
-        f"{TEST_DB_NAME}-rep"
-    ]:
+    for dbname in [TEST_DB_NAME, f"{TEST_DB_NAME}-rep"]:
         if dbname in CLIENT:
             CLIENT.delete(dbname)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
