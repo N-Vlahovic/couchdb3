@@ -1,16 +1,19 @@
 [project]
 name = "couchdb3"
-version = "2.0.2"
+version = "3.0.0"
 description = "A wrapper around the CouchDB API."
-authors = [
-    {name = "Nikolai Vlahovic",email = "vlahovic.nikolai@gmail.com"}
-]
-license = {text = "MIT"}
+authors = [{ name = "Nikolai Vlahovic", email = "vlahovic.nikolai@gmail.com" }]
+requires-python = ">= 3.11"
 readme = "README.md"
-requires-python = ">= 3.10"
-dependencies = [
-    "requests (>=2.32.4,<3.0.0)"
+license = { text = "MIT" }
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
 ]
+dependencies = ["requests (>=2.32.4,<3.0.0)"]
 
 [project.urls]
 Homepage = "https://github.com/N-Vlahovic/couchdb3"
@@ -19,5 +22,5 @@ Repository = "https://github.com/N-Vlahovic/couchdb3.git"
 Issues = "https://github.com/N-Vlahovic/couchdb3/issues"
 
 [build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["uv_build>=0.10.9,<0.11.0"]
+build-backend = "uv_build"

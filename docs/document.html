@@ -52,10 +52,7 @@ el.replaceWith(d);
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def extract_document_id_and_rev(
-        doc: Union[Dict, Document],
-        rev: bool = True
-) -&gt; Dict:
+<pre><code class="python">def extract_document_id_and_rev(doc: Union[Dict, Document], rev: bool = True) -&gt; Dict:
     &#34;&#34;&#34;
     Extract id and revision from an abstract document.
 
@@ -73,13 +70,9 @@ el.replaceWith(d);
     i = doc.get(&#34;_id&#34;, doc.get(&#34;id&#34;))
     r = doc.get(&#34;_rev&#34;, doc.get(&#34;rev&#34;))
     if i:
-        res.update({
-            &#34;id&#34;: i
-        })
+        res.update({&#34;id&#34;: i})
     if r and rev is True:
-        res.update({
-            &#34;rev&#34;: r
-        })
+        res.update({&#34;rev&#34;: r})
     return res</code></pre>
 </details>
 <div class="desc"><p>Extract id and revision from an abstract document.</p>
@@ -110,11 +103,7 @@ el.replaceWith(d);
 <pre><code class="python">class AttachmentDocument(DictBase):
     &#34;&#34;&#34;CouchDB Attachment Document - a wrapper around Python dictionaries.&#34;&#34;&#34;
 
-    def __init__(
-            self,
-            *args,
-            **kwargs
-    ) -&gt; None:
+    def __init__(self, *args, **kwargs) -&gt; None:
         super(AttachmentDocument, self).__init__(*args, **kwargs)
         self.content = self.get(&#34;content&#34;)
         self.content_encoding = self.get(&#34;content_encoding&#34;)
@@ -133,9 +122,7 @@ el.replaceWith(d);
 
     @content.setter
     def content(self, value: bytes) -&gt; None:
-        self.update({
-            &#34;content&#34;: value
-        })
+        self.update({&#34;content&#34;: value})
 
     @property
     def content_encoding(self) -&gt; str:
@@ -148,9 +135,7 @@ el.replaceWith(d);
 
     @content_encoding.setter
     def content_encoding(self, value: str) -&gt; None:
-        self.update({
-            &#34;content_encoding&#34;: value
-        })
+        self.update({&#34;content_encoding&#34;: value})
 
     @property
     def content_length(self) -&gt; int:
@@ -163,9 +148,7 @@ el.replaceWith(d);
 
     @content_length.setter
     def content_length(self, value: int) -&gt; None:
-        self.update({
-            &#34;content_length&#34;: int(value)
-        })
+        self.update({&#34;content_length&#34;: int(value)})
 
     @property
     def content_type(self) -&gt; str:
@@ -178,9 +161,7 @@ el.replaceWith(d);
 
     @content_type.setter
     def content_type(self, value: str) -&gt; None:
-        self.update({
-            &#34;content_type&#34;: value
-        })
+        self.update({&#34;content_type&#34;: value})
 
     @property
     def digest(self) -&gt; str:
@@ -193,9 +174,7 @@ el.replaceWith(d);
 
     @digest.setter
     def digest(self, value: str) -&gt; None:
-        self.update({
-            &#34;digest&#34;: value
-        })</code></pre>
+        self.update({&#34;digest&#34;: value})</code></pre>
 </details>
 <div class="desc"><p>CouchDB Attachment Document - a wrapper around Python dictionaries.</p></div>
 <h3>Ancestors</h3>
@@ -392,16 +371,12 @@ def rev(self) -&gt; Optional[str]:
 </summary>
 <pre><code class="python">class SecurityDocument(DictBase):
     &#34;&#34;&#34;CouchDB Security Document - a wrapper around Python dictionaries.&#34;&#34;&#34;
-    
-    def __init__(
-            self,
-            *args,
-            **kwargs
-    ) -&gt; None:
+
+    def __init__(self, *args, **kwargs) -&gt; None:
         super(SecurityDocument, self).__init__(*args, **kwargs)
         self.admins = SecurityDocumentElement(**self.get(&#34;admins&#34;, {}))
         self.members = SecurityDocumentElement(**self.get(&#34;members&#34;, {}))
-    
+
     @property
     def admins(self) -&gt; SecurityDocumentElement:
         &#34;&#34;&#34;
@@ -410,12 +385,10 @@ def rev(self) -&gt; Optional[str]:
         SecurityDocument : The document&#39;s admins.
         &#34;&#34;&#34;
         return self.get(&#34;admins&#34;, SecurityDocumentElement())
-    
+
     @admins.setter
     def admins(self, value: SecurityDocumentElement) -&gt; None:
-        self.update({
-            &#34;admins&#34;: value
-        })
+        self.update({&#34;admins&#34;: value})
 
     @property
     def members(self) -&gt; SecurityDocumentElement:
@@ -428,9 +401,7 @@ def rev(self) -&gt; Optional[str]:
 
     @members.setter
     def members(self, value: SecurityDocumentElement) -&gt; None:
-        self.update({
-            &#34;members&#34;: value
-        })</code></pre>
+        self.update({&#34;members&#34;: value})</code></pre>
 </details>
 <div class="desc"><p>CouchDB Security Document - a wrapper around Python dictionaries.</p></div>
 <h3>Ancestors</h3>
@@ -508,9 +479,7 @@ def members(self) -&gt; SecurityDocumentElement:
 
     @names.setter
     def names(self, value) -&gt; None:
-        self.update({
-            &#34;names&#34;: value
-        })
+        self.update({&#34;names&#34;: value})
 
     @property
     def roles(self) -&gt; List[str]:
@@ -523,9 +492,7 @@ def members(self) -&gt; SecurityDocumentElement:
 
     @roles.setter
     def roles(self, value) -&gt; None:
-        self.update({
-            &#34;roles&#34;: value
-        })</code></pre>
+        self.update({&#34;roles&#34;: value})</code></pre>
 </details>
 <div class="desc"><p>CouchDB Security Document Element (representing either <code>"admins"</code> or <code>"members"</code>) - a wrapper around Python
 dictionaries.</p></div>

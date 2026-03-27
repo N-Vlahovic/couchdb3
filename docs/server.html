@@ -48,7 +48,7 @@ el.replaceWith(d);
 <dl>
 <dt id="couchdb3.server.Server"><code class="flex name class">
 <span>class <span class="ident">Server</span></span>
-<span>(</span><span>url: str,<br>*,<br>port: int = None,<br>user: str = None,<br>password: str = None,<br>disable_ssl_verification: bool = False,<br>auth_method: str = None,<br>timeout: int = 300,<br>session: requests.sessions.Session = None)</span>
+<span>(</span><span>url: str,<br>*,<br>port: int | None = None,<br>user: str | None = None,<br>password: str | None = None,<br>disable_ssl_verification: bool = False,<br>auth_method: str | None = None,<br>timeout: int | None = 300,<br>session: requests.sessions.Session | None = None)</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -59,17 +59,18 @@ el.replaceWith(d);
     &#34;&#34;&#34;
     Abstract Couchdb client
     &#34;&#34;&#34;
+
     def __init__(
-            self,
-            url: str,
-            *,
-            port: int = None,
-            user: str = None,
-            password: str = None,
-            disable_ssl_verification: bool = False,
-            auth_method: str = None,
-            timeout: int = DEFAULT_TIMEOUT,
-            session: requests.Session = None,
+        self,
+        url: str,
+        *,
+        port: Optional[int] = None,
+        user: Optional[str] = None,
+        password: Optional[str] = None,
+        disable_ssl_verification: bool = False,
+        auth_method: Optional[str] = None,
+        timeout: Optional[int] = DEFAULT_TIMEOUT,
+        session: Optional[requests.Session] = None,
     ) -&gt; None:
         &#34;&#34;&#34;
 
@@ -121,7 +122,7 @@ el.replaceWith(d);
         return f&#34;{super(Server, self).__repr__()}: {self.url}&#34;
 
     def active_tasks(
-            self,
+        self,
     ) -&gt; List[Dict]:
         &#34;&#34;&#34;
         List of running tasks, including the task type, name, status and process ID. The result is a JSON array of the
@@ -132,15 +133,9 @@ el.replaceWith(d);
         -------
         List[Dict]
         &#34;&#34;&#34;
-        return self._get(
-            resource=&#34;_active_tasks&#34;
-        ).json()
+        return self._get(resource=&#34;_active_tasks&#34;).json()
 
-    def check_user(
-            self,
-            username: str,
-            password: str
-    ) -&gt; bool:
+    def check_user(self, username: str, password: str) -&gt; bool:
         &#34;&#34;&#34;
         Checks the username/password combination by creating a `Server` instance and performing a `Server.check`
         request.
@@ -156,25 +151,21 @@ el.replaceWith(d);
         -------
         bool : A boolean indicating if the username/password combination is valid.
         &#34;&#34;&#34;
-        return Server(
-            url=self.url,
-            user=username,
-            password=password
-        ).check()
+        return Server(url=self.url, user=username, password=password).check()
 
     def save_user(
-            self,
-            name: str,
-            *,
-            user_id: str = None,
-            derived_key: str = None,
-            roles: List[str] = None,
-            password: str = None,
-            password_sha: str = None,
-            password_scheme: str = None,
-            salt: str = None,
-            iterations: int = None,
-            rev: str = None
+        self,
+        name: str,
+        *,
+        user_id: Optional[str] = None,
+        derived_key: Optional[str] = None,
+        roles: Optional[List[str]] = None,
+        password: Optional[str] = None,
+        password_sha: Optional[str] = None,
+        password_scheme: Optional[str] = None,
+        salt: Optional[str] = None,
+        iterations: Optional[int] = None,
+        rev: Optional[str] = None,
     ) -&gt; Tuple[bool, str, str]:
         &#34;&#34;&#34;
         Create or update a user. In case of a `ConflictError`, a `HEAD` request to `/_users/&lt;user_id&gt;` will be sent to
@@ -231,30 +222,24 @@ el.replaceWith(d);
             &#34;password_scheme&#34;: password_scheme,
             &#34;salt&#34;: salt,
             &#34;iterations&#34;: iterations,
-            &#34;type&#34;: &#34;user&#34;
+            &#34;type&#34;: &#34;user&#34;,
         }
         try:
-            response = self._put(
-                resource=f&#34;_users/{user_id}&#34;,
-                body=body
-            )
+            response = self._put(resource=f&#34;_users/{user_id}&#34;, body=body)
         except ConflictError:
             body.update({&#34;_rev&#34;: self.rev(f&#34;_users/{user_id}&#34;)})
-            response = self._put(
-                resource=f&#34;_users/{user_id}&#34;,
-                body=body
-            )
+            response = self._put(resource=f&#34;_users/{user_id}&#34;, body=body)
         data = response.json()
         return data[&#34;ok&#34;], data[&#34;id&#34;], data[&#34;rev&#34;]
 
     def all_dbs(
-            self,
-            *,
-            descending: bool = False,
-            endkey: str = None,
-            limit: int = None,
-            skip: int = 0,
-            startkey: str = None,
+        self,
+        *,
+        descending: bool = False,
+        endkey: Optional[str] = None,
+        limit: Optional[int] = None,
+        skip: int = 0,
+        startkey: Optional[str] = None,
     ) -&gt; List[str]:
         &#34;&#34;&#34;
         Get all database names.
@@ -284,15 +269,15 @@ el.replaceWith(d);
                 &#34;limit&#34;: limit,
                 &#34;skip&#34;: skip,
                 &#34;startkey&#34;: startkey,
-            }
+            },
         ).json()
 
     def create(
-            self,
-            name: str,
-            q: int = None,
-            n: int = None,
-            partitioned: bool = False,
+        self,
+        name: str,
+        q: Optional[int] = None,
+        n: Optional[int] = None,
+        partitioned: bool = False,
     ) -&gt; Database:
         &#34;&#34;&#34;
         Create a database.
@@ -315,19 +300,11 @@ el.replaceWith(d);
         couchdb3.database.Database
         &#34;&#34;&#34;
         self._put(
-            resource=name,
-            query_kwargs={
-                &#34;q&#34;: q,
-                &#34;n&#34;: n,
-                &#34;partitioned&#34;: partitioned
-            }
+            resource=name, query_kwargs={&#34;q&#34;: q, &#34;n&#34;: n, &#34;partitioned&#34;: partitioned}
         )
         return self.get(name=name)
 
-    def dbs_info(
-            self,
-            keys: List[str]
-    ) -&gt; List[Dict]:
+    def dbs_info(self, keys: List[str]) -&gt; List[Dict]:
         &#34;&#34;&#34;
         Returns information of a list of the specified databases in the CouchDB instance.
 
@@ -340,18 +317,9 @@ el.replaceWith(d);
         -------
         List[Dict] : A list dictionaries containing the corresponding database info.
         &#34;&#34;&#34;
-        return self._post(
-            resource=&#34;_dbs_info&#34;,
-            body={
-                &#34;keys&#34;: keys
-            }
-        ).json()
+        return self._post(resource=&#34;_dbs_info&#34;, body={&#34;keys&#34;: keys}).json()
 
-    def get(
-            self,
-            name: str,
-            check: bool = False
-    ) -&gt; Database:
+    def get(self, name: str, check: bool = False) -&gt; Database:
         &#34;&#34;&#34;
         Get a database by name.
 
@@ -385,10 +353,7 @@ el.replaceWith(d);
             raise error
         return db
 
-    def delete(
-            self,
-            resource: str = None
-    ) -&gt; bool:
+    def delete(self, resource: Optional[str] = None) -&gt; bool:
         &#34;&#34;&#34;
         Delete a database.
 
@@ -405,19 +370,19 @@ el.replaceWith(d);
         return True
 
     def replicate(
-            self,
-            source: Union[Dict, str],
-            target: Union[Dict, str],
-            replication_id: str = None,
-            cancel: bool = None,
-            continuous: bool = None,
-            create_target: bool = None,
-            create_target_params: Dict = None,
-            doc_ids: List[str] = None,
-            filter_func: str = None,
-            selector: Dict = None,
-            source_proxy: str = None,
-            target_proxy: str = None
+        self,
+        source: Union[Dict, str],
+        target: Union[Dict, str],
+        replication_id: Optional[str] = None,
+        cancel: Optional[bool] = None,
+        continuous: Optional[bool] = None,
+        create_target: Optional[bool] = None,
+        create_target_params: Optional[Dict] = None,
+        doc_ids: Optional[List[str]] = None,
+        filter_func: Optional[str] = None,
+        selector: Optional[Dict] = None,
+        source_proxy: Optional[str] = None,
+        target_proxy: Optional[str] = None,
     ) -&gt; Dict:
         &#34;&#34;&#34;
         Request, configure, or stop, a replication operation. For more info, please refer to
@@ -483,35 +448,37 @@ el.replaceWith(d);
           - session_id (`str`) – Unique session ID
           - source_last_seq (`int`) – Last sequence number read from source database
         &#34;&#34;&#34;
-        if (
-                source_proxy and validate_proxy(source_proxy) is False
-        ) or (
-                target_proxy and validate_proxy(target_proxy) is False
+        if (source_proxy and validate_proxy(source_proxy) is False) or (
+            target_proxy and validate_proxy(target_proxy) is False
         ):
             raise ProxySchemeComplianceError(&#34;Proxy has invalid scheme.&#34;)
         if sum(bool(_) for _ in [doc_ids, filter_func, selector]) &gt; 1:
-            raise CouchDBError(&#34;Arguments \&#34;doc_ids\&#34;, \&#34;filter_func\&#34; and \&#34;selector\&#34; are mutually exclusive.&#34;)
+            raise CouchDBError(
+                &#39;Arguments &#34;doc_ids&#34;, &#34;filter_func&#34; and &#34;selector&#34; are mutually exclusive.&#39;
+            )
         return self._post(
             resource=&#34;_replicator&#34;,
-            body=rm_nones_from_dict({
-                &#34;_id&#34;: replication_id,
-                &#34;source&#34;: source,
-                &#34;target&#34;: target,
-                &#34;cancel&#34;: cancel,
-                &#34;continuous&#34;: continuous,
-                &#34;create_target&#34;: create_target,
-                &#34;create_target_params&#34;: create_target_params,
-                &#34;doc_ids&#34;: doc_ids,
-                &#34;filter_func&#34;: filter_func,
-                &#34;selector&#34;: selector,
-                &#34;source_proxy&#34;: source_proxy,
-                &#34;target_proxy&#34;: target_proxy
-            }),
+            body=rm_nones_from_dict(
+                {
+                    &#34;_id&#34;: replication_id,
+                    &#34;source&#34;: source,
+                    &#34;target&#34;: target,
+                    &#34;cancel&#34;: cancel,
+                    &#34;continuous&#34;: continuous,
+                    &#34;create_target&#34;: create_target,
+                    &#34;create_target_params&#34;: create_target_params,
+                    &#34;doc_ids&#34;: doc_ids,
+                    &#34;filter_func&#34;: filter_func,
+                    &#34;selector&#34;: selector,
+                    &#34;source_proxy&#34;: source_proxy,
+                    &#34;target_proxy&#34;: target_proxy,
+                }
+            ),
         ).json()
 
     def up(
-            self,
-            raise_exception: bool = False,
+        self,
+        raise_exception: bool = False,
     ) -&gt; bool:
         &#34;&#34;&#34;
         Check if the server is up.
@@ -527,7 +494,7 @@ el.replaceWith(d);
         &#34;&#34;&#34;
         try:
             response = self._get(resource=&#34;_up&#34;)
-            return &#39;status&#39; in response.json() and response.json()[&#39;status&#39;] == &#39;ok&#39;
+            return &#34;status&#34; in response.json() and response.json()[&#34;status&#34;] == &#34;ok&#34;
         except Exception as error:
             if raise_exception:
                 raise error
@@ -572,7 +539,7 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def active_tasks(
-        self,
+    self,
 ) -&gt; List[Dict]:
     &#34;&#34;&#34;
     List of running tasks, including the task type, name, status and process ID. The result is a JSON array of the
@@ -583,9 +550,7 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
     -------
     List[Dict]
     &#34;&#34;&#34;
-    return self._get(
-        resource=&#34;_active_tasks&#34;
-    ).json()</code></pre>
+    return self._get(resource=&#34;_active_tasks&#34;).json()</code></pre>
 </details>
 <div class="desc"><p>List of running tasks, including the task type, name, status and process ID. The result is a JSON array of the
 currently running tasks, with each task being described with a single object. Depending on operation type set
@@ -597,7 +562,7 @@ of response object fields might be different.</p>
 </dl></div>
 </dd>
 <dt id="couchdb3.server.Server.all_dbs"><code class="name flex">
-<span>def <span class="ident">all_dbs</span></span>(<span>self,<br>*,<br>descending: bool = False,<br>endkey: str = None,<br>limit: int = None,<br>skip: int = 0,<br>startkey: str = None) ‑> List[str]</span>
+<span>def <span class="ident">all_dbs</span></span>(<span>self,<br>*,<br>descending: bool = False,<br>endkey: str | None = None,<br>limit: int | None = None,<br>skip: int = 0,<br>startkey: str | None = None) ‑> List[str]</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -605,13 +570,13 @@ of response object fields might be different.</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def all_dbs(
-        self,
-        *,
-        descending: bool = False,
-        endkey: str = None,
-        limit: int = None,
-        skip: int = 0,
-        startkey: str = None,
+    self,
+    *,
+    descending: bool = False,
+    endkey: Optional[str] = None,
+    limit: Optional[int] = None,
+    skip: int = 0,
+    startkey: Optional[str] = None,
 ) -&gt; List[str]:
     &#34;&#34;&#34;
     Get all database names.
@@ -641,7 +606,7 @@ of response object fields might be different.</p>
             &#34;limit&#34;: limit,
             &#34;skip&#34;: skip,
             &#34;startkey&#34;: startkey,
-        }
+        },
     ).json()</code></pre>
 </details>
 <div class="desc"><p>Get all database names.</p>
@@ -669,11 +634,7 @@ of response object fields might be different.</p>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def check_user(
-        self,
-        username: str,
-        password: str
-) -&gt; bool:
+<pre><code class="python">def check_user(self, username: str, password: str) -&gt; bool:
     &#34;&#34;&#34;
     Checks the username/password combination by creating a `Server` instance and performing a `Server.check`
     request.
@@ -689,11 +650,7 @@ of response object fields might be different.</p>
     -------
     bool : A boolean indicating if the username/password combination is valid.
     &#34;&#34;&#34;
-    return Server(
-        url=self.url,
-        user=username,
-        password=password
-    ).check()</code></pre>
+    return Server(url=self.url, user=username, password=password).check()</code></pre>
 </details>
 <div class="desc"><p>Checks the username/password combination by creating a <code><a title="couchdb3.server.Server" href="#couchdb3.server.Server">Server</a></code> instance and performing a <code><a title="couchdb3.server.Server.check" href="base.html#couchdb3.base.Base.check">Base.check()</a></code>
 request.</p>
@@ -708,7 +665,7 @@ request.</p>
 <p>bool : A boolean indicating if the username/password combination is valid.</p></div>
 </dd>
 <dt id="couchdb3.server.Server.create"><code class="name flex">
-<span>def <span class="ident">create</span></span>(<span>self, name: str, q: int = None, n: int = None, partitioned: bool = False) ‑> <a title="couchdb3.database.Database" href="database.html#couchdb3.database.Database">Database</a></span>
+<span>def <span class="ident">create</span></span>(<span>self,<br>name: str,<br>q: int | None = None,<br>n: int | None = None,<br>partitioned: bool = False) ‑> <a title="couchdb3.database.Database" href="database.html#couchdb3.database.Database">Database</a></span>
 </code></dt>
 <dd>
 <details class="source">
@@ -716,11 +673,11 @@ request.</p>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def create(
-        self,
-        name: str,
-        q: int = None,
-        n: int = None,
-        partitioned: bool = False,
+    self,
+    name: str,
+    q: Optional[int] = None,
+    n: Optional[int] = None,
+    partitioned: bool = False,
 ) -&gt; Database:
     &#34;&#34;&#34;
     Create a database.
@@ -743,12 +700,7 @@ request.</p>
     couchdb3.database.Database
     &#34;&#34;&#34;
     self._put(
-        resource=name,
-        query_kwargs={
-            &#34;q&#34;: q,
-            &#34;n&#34;: n,
-            &#34;partitioned&#34;: partitioned
-        }
+        resource=name, query_kwargs={&#34;q&#34;: q, &#34;n&#34;: n, &#34;partitioned&#34;: partitioned}
     )
     return self.get(name=name)</code></pre>
 </details>
@@ -780,10 +732,7 @@ used: <code>3</code>, unless overridden in the <code>cluster config</code>).</dd
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def dbs_info(
-        self,
-        keys: List[str]
-) -&gt; List[Dict]:
+<pre><code class="python">def dbs_info(self, keys: List[str]) -&gt; List[Dict]:
     &#34;&#34;&#34;
     Returns information of a list of the specified databases in the CouchDB instance.
 
@@ -796,12 +745,7 @@ used: <code>3</code>, unless overridden in the <code>cluster config</code>).</dd
     -------
     List[Dict] : A list dictionaries containing the corresponding database info.
     &#34;&#34;&#34;
-    return self._post(
-        resource=&#34;_dbs_info&#34;,
-        body={
-            &#34;keys&#34;: keys
-        }
-    ).json()</code></pre>
+    return self._post(resource=&#34;_dbs_info&#34;, body={&#34;keys&#34;: keys}).json()</code></pre>
 </details>
 <div class="desc"><p>Returns information of a list of the specified databases in the CouchDB instance.</p>
 <h2 id="parameters">Parameters</h2>
@@ -813,17 +757,14 @@ used: <code>3</code>, unless overridden in the <code>cluster config</code>).</dd
 <p>List[Dict] : A list dictionaries containing the corresponding database info.</p></div>
 </dd>
 <dt id="couchdb3.server.Server.delete"><code class="name flex">
-<span>def <span class="ident">delete</span></span>(<span>self, resource: str = None) ‑> bool</span>
+<span>def <span class="ident">delete</span></span>(<span>self, resource: str | None = None) ‑> bool</span>
 </code></dt>
 <dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def delete(
-        self,
-        resource: str = None
-) -&gt; bool:
+<pre><code class="python">def delete(self, resource: Optional[str] = None) -&gt; bool:
     &#34;&#34;&#34;
     Delete a database.
 
@@ -856,11 +797,7 @@ used: <code>3</code>, unless overridden in the <code>cluster config</code>).</dd
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def get(
-        self,
-        name: str,
-        check: bool = False
-) -&gt; Database:
+<pre><code class="python">def get(self, name: str, check: bool = False) -&gt; Database:
     &#34;&#34;&#34;
     Get a database by name.
 
@@ -909,7 +846,7 @@ used: <code>3</code>, unless overridden in the <code>cluster config</code>).</dd
 </dl></div>
 </dd>
 <dt id="couchdb3.server.Server.replicate"><code class="name flex">
-<span>def <span class="ident">replicate</span></span>(<span>self,<br>source: Dict | str,<br>target: Dict | str,<br>replication_id: str = None,<br>cancel: bool = None,<br>continuous: bool = None,<br>create_target: bool = None,<br>create_target_params: Dict = None,<br>doc_ids: List[str] = None,<br>filter_func: str = None,<br>selector: Dict = None,<br>source_proxy: str = None,<br>target_proxy: str = None) ‑> Dict</span>
+<span>def <span class="ident">replicate</span></span>(<span>self,<br>source: Dict | str,<br>target: Dict | str,<br>replication_id: str | None = None,<br>cancel: bool | None = None,<br>continuous: bool | None = None,<br>create_target: bool | None = None,<br>create_target_params: Dict | None = None,<br>doc_ids: List[str] | None = None,<br>filter_func: str | None = None,<br>selector: Dict | None = None,<br>source_proxy: str | None = None,<br>target_proxy: str | None = None) ‑> Dict</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -917,19 +854,19 @@ used: <code>3</code>, unless overridden in the <code>cluster config</code>).</dd
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def replicate(
-        self,
-        source: Union[Dict, str],
-        target: Union[Dict, str],
-        replication_id: str = None,
-        cancel: bool = None,
-        continuous: bool = None,
-        create_target: bool = None,
-        create_target_params: Dict = None,
-        doc_ids: List[str] = None,
-        filter_func: str = None,
-        selector: Dict = None,
-        source_proxy: str = None,
-        target_proxy: str = None
+    self,
+    source: Union[Dict, str],
+    target: Union[Dict, str],
+    replication_id: Optional[str] = None,
+    cancel: Optional[bool] = None,
+    continuous: Optional[bool] = None,
+    create_target: Optional[bool] = None,
+    create_target_params: Optional[Dict] = None,
+    doc_ids: Optional[List[str]] = None,
+    filter_func: Optional[str] = None,
+    selector: Optional[Dict] = None,
+    source_proxy: Optional[str] = None,
+    target_proxy: Optional[str] = None,
 ) -&gt; Dict:
     &#34;&#34;&#34;
     Request, configure, or stop, a replication operation. For more info, please refer to
@@ -995,30 +932,32 @@ used: <code>3</code>, unless overridden in the <code>cluster config</code>).</dd
       - session_id (`str`) – Unique session ID
       - source_last_seq (`int`) – Last sequence number read from source database
     &#34;&#34;&#34;
-    if (
-            source_proxy and validate_proxy(source_proxy) is False
-    ) or (
-            target_proxy and validate_proxy(target_proxy) is False
+    if (source_proxy and validate_proxy(source_proxy) is False) or (
+        target_proxy and validate_proxy(target_proxy) is False
     ):
         raise ProxySchemeComplianceError(&#34;Proxy has invalid scheme.&#34;)
     if sum(bool(_) for _ in [doc_ids, filter_func, selector]) &gt; 1:
-        raise CouchDBError(&#34;Arguments \&#34;doc_ids\&#34;, \&#34;filter_func\&#34; and \&#34;selector\&#34; are mutually exclusive.&#34;)
+        raise CouchDBError(
+            &#39;Arguments &#34;doc_ids&#34;, &#34;filter_func&#34; and &#34;selector&#34; are mutually exclusive.&#39;
+        )
     return self._post(
         resource=&#34;_replicator&#34;,
-        body=rm_nones_from_dict({
-            &#34;_id&#34;: replication_id,
-            &#34;source&#34;: source,
-            &#34;target&#34;: target,
-            &#34;cancel&#34;: cancel,
-            &#34;continuous&#34;: continuous,
-            &#34;create_target&#34;: create_target,
-            &#34;create_target_params&#34;: create_target_params,
-            &#34;doc_ids&#34;: doc_ids,
-            &#34;filter_func&#34;: filter_func,
-            &#34;selector&#34;: selector,
-            &#34;source_proxy&#34;: source_proxy,
-            &#34;target_proxy&#34;: target_proxy
-        }),
+        body=rm_nones_from_dict(
+            {
+                &#34;_id&#34;: replication_id,
+                &#34;source&#34;: source,
+                &#34;target&#34;: target,
+                &#34;cancel&#34;: cancel,
+                &#34;continuous&#34;: continuous,
+                &#34;create_target&#34;: create_target,
+                &#34;create_target_params&#34;: create_target_params,
+                &#34;doc_ids&#34;: doc_ids,
+                &#34;filter_func&#34;: filter_func,
+                &#34;selector&#34;: selector,
+                &#34;source_proxy&#34;: source_proxy,
+                &#34;target_proxy&#34;: target_proxy,
+            }
+        ),
     ).json()</code></pre>
 </details>
 <div class="desc"><p>Request, configure, or stop, a replication operation. For more info, please refer to
@@ -1084,7 +1023,7 @@ or <code>“socks5”</code>).</dd>
 </ul></div>
 </dd>
 <dt id="couchdb3.server.Server.save_user"><code class="name flex">
-<span>def <span class="ident">save_user</span></span>(<span>self,<br>name: str,<br>*,<br>user_id: str = None,<br>derived_key: str = None,<br>roles: List[str] = None,<br>password: str = None,<br>password_sha: str = None,<br>password_scheme: str = None,<br>salt: str = None,<br>iterations: int = None,<br>rev: str = None) ‑> Tuple[bool, str, str]</span>
+<span>def <span class="ident">save_user</span></span>(<span>self,<br>name: str,<br>*,<br>user_id: str | None = None,<br>derived_key: str | None = None,<br>roles: List[str] | None = None,<br>password: str | None = None,<br>password_sha: str | None = None,<br>password_scheme: str | None = None,<br>salt: str | None = None,<br>iterations: int | None = None,<br>rev: str | None = None) ‑> Tuple[bool, str, str]</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -1092,18 +1031,18 @@ or <code>“socks5”</code>).</dd>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def save_user(
-        self,
-        name: str,
-        *,
-        user_id: str = None,
-        derived_key: str = None,
-        roles: List[str] = None,
-        password: str = None,
-        password_sha: str = None,
-        password_scheme: str = None,
-        salt: str = None,
-        iterations: int = None,
-        rev: str = None
+    self,
+    name: str,
+    *,
+    user_id: Optional[str] = None,
+    derived_key: Optional[str] = None,
+    roles: Optional[List[str]] = None,
+    password: Optional[str] = None,
+    password_sha: Optional[str] = None,
+    password_scheme: Optional[str] = None,
+    salt: Optional[str] = None,
+    iterations: Optional[int] = None,
+    rev: Optional[str] = None,
 ) -&gt; Tuple[bool, str, str]:
     &#34;&#34;&#34;
     Create or update a user. In case of a `ConflictError`, a `HEAD` request to `/_users/&lt;user_id&gt;` will be sent to
@@ -1160,19 +1099,13 @@ or <code>“socks5”</code>).</dd>
         &#34;password_scheme&#34;: password_scheme,
         &#34;salt&#34;: salt,
         &#34;iterations&#34;: iterations,
-        &#34;type&#34;: &#34;user&#34;
+        &#34;type&#34;: &#34;user&#34;,
     }
     try:
-        response = self._put(
-            resource=f&#34;_users/{user_id}&#34;,
-            body=body
-        )
+        response = self._put(resource=f&#34;_users/{user_id}&#34;, body=body)
     except ConflictError:
         body.update({&#34;_rev&#34;: self.rev(f&#34;_users/{user_id}&#34;)})
-        response = self._put(
-            resource=f&#34;_users/{user_id}&#34;,
-            body=body
-        )
+        response = self._put(resource=f&#34;_users/{user_id}&#34;, body=body)
     data = response.json()
     return data[&#34;ok&#34;], data[&#34;id&#34;], data[&#34;rev&#34;]</code></pre>
 </details>
@@ -1221,8 +1154,8 @@ stored.</dd>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def up(
-        self,
-        raise_exception: bool = False,
+    self,
+    raise_exception: bool = False,
 ) -&gt; bool:
     &#34;&#34;&#34;
     Check if the server is up.
@@ -1238,7 +1171,7 @@ stored.</dd>
     &#34;&#34;&#34;
     try:
         response = self._get(resource=&#34;_up&#34;)
-        return &#39;status&#39; in response.json() and response.json()[&#39;status&#39;] == &#39;ok&#39;
+        return &#34;status&#34; in response.json() and response.json()[&#34;status&#34;] == &#34;ok&#34;
     except Exception as error:
         if raise_exception:
             raise error

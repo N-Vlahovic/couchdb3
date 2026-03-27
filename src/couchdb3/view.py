@@ -11,6 +11,7 @@ class ViewRow(DictBase):
     """
     View row object.
     """
+
     def __init__(self, *args, **kwargs) -> None:
         super(ViewRow, self).__init__(*args, **kwargs)
         self.doc = self.get("doc", None)
@@ -75,6 +76,7 @@ class ViewResult(DictBase):
     """
     View result object.
     """
+
     def __init__(self, *args, **kwargs) -> None:
         super(ViewResult, self).__init__(*args, **kwargs)
         self.offset = self.get("offset", 0)

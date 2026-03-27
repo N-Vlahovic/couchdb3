@@ -52,7 +52,7 @@ COUCHDB_GLOBAL_CHANGES_DB_NAME: str = "_global_changes"
 COUCH_DB_RESERVED_DB_NAMES: Set[str] = {
     COUCHDB_USERS_DB_NAME,
     COUCHDB_REPLICATOR_DB_NAME,
-    COUCHDB_GLOBAL_CHANGES_DB_NAME
+    COUCHDB_GLOBAL_CHANGES_DB_NAME,
 }
 """Reserved CouchDB database names."""
 
@@ -69,8 +69,8 @@ DEFAULT_TIMEOUT: int = 300
 """The default timeout set in requests - values to `300`."""
 
 MimeTypeEnum: Type[Enum] = Enum(
-    'MimeTypeEnum',
-    {'mime_type_' + k.removeprefix('.'): v for k, v in mimetypes.types_map.items()}
+    "MimeTypeEnum",
+    {"mime_type_" + k.removeprefix("."): v for k, v in mimetypes.types_map.items()},
 )
 """An Enum containing all existing mime types."""
 
@@ -87,7 +87,7 @@ VALID_SCHEMES: Set[str] = {"http", "https", "socks5"}
 
 def _handler(x: Any) -> str:
     if isinstance(x, (Generator, map, list, set, tuple)):
-        return "[%s]" % ",".join(f"\"{_handler(_)}\"" for _ in x)
+        return "[%s]" % ",".join(f'"{_handler(_)}"' for _ in x)
     elif isinstance(x, dict):
         return str({key: _handler(val) for key, val in x.items()})
     elif isinstance(x, bool):
@@ -95,10 +95,7 @@ def _handler(x: Any) -> str:
     return str(x)
 
 
-def basic_auth(
-        user: str,
-        password: str
-) -> str:
+def basic_auth(user: str, password: str) -> str:
     """
     Create basic authentication headers value.
 
@@ -117,7 +114,7 @@ def basic_auth(
 
 
 def build_query(
-        **kwargs,
+    **kwargs,
 ) -> Optional[str]:
     """
 
@@ -129,16 +126,18 @@ def build_query(
     -------
     str : A string containing the keyword-args encoded as URL query-params.
     """
-    return parse.urlencode({key: _handler(val) for key, val in kwargs.items() if val is not None})
+    return parse.urlencode(
+        {key: _handler(val) for key, val in kwargs.items() if val is not None}
+    )
 
 
 def build_url(
-        *,
-        scheme: str,
-        host: str,
-        path: str = None,
-        port: int = None,
-        **kwargs,
+    *,
+    scheme: str,
+    host: str,
+    path: str = None,
+    port: int = None,
+    **kwargs,
 ) -> Url:
     """
     Build a URL using the provided scheme, host, path & kwargs.
@@ -289,10 +288,10 @@ def check_response(response: requests.Response) -> None:
     try:
         response.raise_for_status()
     except (
-            ConnectionError,
-            TimeoutError,
-            requests.exceptions.ConnectionError,
-            requests.exceptions.HTTPError,
+        ConnectionError,
+        TimeoutError,
+        requests.exceptions.ConnectionError,
+        requests.exceptions.HTTPError,
     ) as err:
         if response.status_code in exceptions.STATUS_CODE_ERROR_MAPPING:
             _ = exceptions.STATUS_CODE_ERROR_MAPPING[response.status_code]
@@ -329,16 +328,18 @@ def extract_url_data(url: str) -> Dict:
     return {
         "scheme": parsed.scheme,
         "user": parsed.auth.split(":")[0] if hasattr(parsed.auth, "split") else None,
-        "password": parsed.auth.split(":")[1] if hasattr(parsed.auth, "split") else None,
+        "password": parsed.auth.split(":")[1]
+        if hasattr(parsed.auth, "split")
+        else None,
         "host": parsed.host,
         "port": parsed.port,
-        "path": parsed.path
+        "path": parsed.path,
     }
 
 
 def partitioned_db_resource_parser(
-        resource: str = None,
-        partition: str = None,
+    resource: Optional[str] = None,
+    partition: Optional[str] = None,
 ) -> Optional[str]:
     """
     Build resource path with optional partition ID.
