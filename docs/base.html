@@ -586,8 +586,7 @@ el.replaceWith(d);
             rev = self._head(resource=resource).headers.get(&#34;ETag&#34;).strip(&#39;&#34;&#39;)
         except exceptions.NotFoundError:
             pass
-        finally:
-            return rev</code></pre>
+        return rev</code></pre>
 </details>
 <div class="desc"><p>Abstract base class</p>
 <h2 id="parameters">Parameters</h2>
@@ -759,8 +758,7 @@ def url(self) -&gt; str:
         rev = self._head(resource=resource).headers.get(&#34;ETag&#34;).strip(&#39;&#34;&#39;)
     except exceptions.NotFoundError:
         pass
-    finally:
-        return rev</code></pre>
+    return rev</code></pre>
 </details>
 <div class="desc"><p>Safely retrieves a resource's revision by sending a lightweight <code>HEAD</code>request and reading the response's
 <code>"ETag"</code> header.</p>

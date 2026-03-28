@@ -544,8 +544,7 @@ class Base(object):
             rev = self._head(resource=resource).headers.get("ETag").strip('"')
         except exceptions.NotFoundError:
             pass
-        finally:
-            return rev
+        return rev
 
 
 class DictBase(dict):
