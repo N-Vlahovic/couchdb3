@@ -1002,8 +1002,8 @@ el.replaceWith(d);
         skip: Optional[int] = None,
         sort: Optional[bool] = None,
         stable: Optional[bool] = None,
-        startkey: Optional[str] = None,
-        startkey_docid: Optional[str] = None,
+        startkey: Optional[Any] = None,
+        startkey_docid: Optional[Any] = None,
         update: Optional[str] = None,
         update_seq: Optional[bool] = None,
     ) -&gt; ViewResult:
@@ -1058,9 +1058,9 @@ el.replaceWith(d);
             `total_rows` and `offset` fields are not available when this is set to `False`. Default is `None`.
         stable : bool
             Whether or not the view results should be returned from a stable set of shards. Default is `None`.
-        startkey : str
+        startkey : Any
             Return records starting with the specified key. Default is `None`
-        startkey_docid : str
+        startkey_docid : Any
             Return records starting with the specified document ID. Ignored if `startkey` is not set. Default is `None`
         update : str
             Whether or not the view in question should be updated prior to responding to the user. Supported values:
@@ -2686,7 +2686,7 @@ documentation</a> for more info.</dd>
 Operation status.</p></div>
 </dd>
 <dt id="couchdb3.database.Database.view"><code class="name flex">
-<span>def <span class="ident">view</span></span>(<span>self,<br>ddoc: str,<br>view: Optional[str] = None,<br>*,<br>partition: Optional[str] = None,<br>conflicts: Optional[bool] = None,<br>descending: Optional[bool] = None,<br>endkey: Optional[str] = None,<br>endkey_docid: Optional[str] = None,<br>group: Optional[bool] = None,<br>group_level: Optional[int] = None,<br>include_docs: Optional[bool] = None,<br>attachments: Optional[bool] = None,<br>att_encoding_info: Optional[bool] = None,<br>inclusive_end: Optional[bool] = None,<br>key: Optional[str] = None,<br>keys: Optional[Iterable[str]] = None,<br>limit: Optional[int] = None,<br>reduce: Optional[bool] = None,<br>skip: Optional[int] = None,<br>sort: Optional[bool] = None,<br>stable: Optional[bool] = None,<br>startkey: Optional[str] = None,<br>startkey_docid: Optional[str] = None,<br>update: Optional[str] = None,<br>update_seq: Optional[bool] = None) ‑> <a title="couchdb3.view.ViewResult" href="view.html#couchdb3.view.ViewResult">ViewResult</a></span>
+<span>def <span class="ident">view</span></span>(<span>self,<br>ddoc: str,<br>view: Optional[str] = None,<br>*,<br>partition: Optional[str] = None,<br>conflicts: Optional[bool] = None,<br>descending: Optional[bool] = None,<br>endkey: Optional[str] = None,<br>endkey_docid: Optional[str] = None,<br>group: Optional[bool] = None,<br>group_level: Optional[int] = None,<br>include_docs: Optional[bool] = None,<br>attachments: Optional[bool] = None,<br>att_encoding_info: Optional[bool] = None,<br>inclusive_end: Optional[bool] = None,<br>key: Optional[str] = None,<br>keys: Optional[Iterable[str]] = None,<br>limit: Optional[int] = None,<br>reduce: Optional[bool] = None,<br>skip: Optional[int] = None,<br>sort: Optional[bool] = None,<br>stable: Optional[bool] = None,<br>startkey: Optional[Any] = None,<br>startkey_docid: Optional[Any] = None,<br>update: Optional[str] = None,<br>update_seq: Optional[bool] = None) ‑> <a title="couchdb3.view.ViewResult" href="view.html#couchdb3.view.ViewResult">ViewResult</a></span>
 </code></dt>
 <dd>
 <details class="source">
@@ -2716,8 +2716,8 @@ Operation status.</p></div>
     skip: Optional[int] = None,
     sort: Optional[bool] = None,
     stable: Optional[bool] = None,
-    startkey: Optional[str] = None,
-    startkey_docid: Optional[str] = None,
+    startkey: Optional[Any] = None,
+    startkey_docid: Optional[Any] = None,
     update: Optional[str] = None,
     update_seq: Optional[bool] = None,
 ) -&gt; ViewResult:
@@ -2772,9 +2772,9 @@ Operation status.</p></div>
         `total_rows` and `offset` fields are not available when this is set to `False`. Default is `None`.
     stable : bool
         Whether or not the view results should be returned from a stable set of shards. Default is `None`.
-    startkey : str
+    startkey : Any
         Return records starting with the specified key. Default is `None`
-    startkey_docid : str
+    startkey_docid : Any
         Return records starting with the specified document ID. Ignored if `startkey` is not set. Default is `None`
     update : str
         Whether or not the view in question should be updated prior to responding to the user. Supported values:
@@ -2892,9 +2892,9 @@ Default is <code>None</code>.</dd>
 <code>total_rows</code> and <code>offset</code> fields are not available when this is set to <code>False</code>. Default is <code>None</code>.</dd>
 <dt><strong><code>stable</code></strong> :&ensp;<code>bool</code></dt>
 <dd>Whether or not the view results should be returned from a stable set of shards. Default is <code>None</code>.</dd>
-<dt><strong><code>startkey</code></strong> :&ensp;<code>str</code></dt>
+<dt><strong><code>startkey</code></strong> :&ensp;<code>Any</code></dt>
 <dd>Return records starting with the specified key. Default is <code>None</code></dd>
-<dt><strong><code>startkey_docid</code></strong> :&ensp;<code>str</code></dt>
+<dt><strong><code>startkey_docid</code></strong> :&ensp;<code>Any</code></dt>
 <dd>Return records starting with the specified document ID. Ignored if <code>startkey</code> is not set. Default is <code>None</code></dd>
 <dt><strong><code>update</code></strong> :&ensp;<code>str</code></dt>
 <dd>
@@ -3105,8 +3105,8 @@ ViewResult: {
         skip: Optional[int] = None,
         sort: Optional[bool] = None,
         stable: Optional[bool] = None,
-        startkey: Optional[str] = None,
-        startkey_docid: Optional[str] = None,
+        startkey: Optional[Any] = None,
+        startkey_docid: Optional[Any] = None,
         update: Optional[str] = None,
         update_seq: Optional[bool] = None,
     ) -&gt; ViewResult:
@@ -3159,9 +3159,9 @@ ViewResult: {
             `total_rows` and `offset` fields are not available when this is set to `False`. Default is `None`.
         stable : bool
             Whether or not the view results should be returned from a stable set of shards. Default is `None`.
-        startkey : str
+        startkey : Any
             Return records starting with the specified key. Default is `None`
-        startkey_docid : str
+        startkey_docid : Any
             Return records starting with the specified document ID. Ignored if `startkey` is not set. Default is `None`
         update : str
             Whether or not the view in question should be updated prior to responding to the user. Supported values:
@@ -3976,7 +3976,7 @@ Appends the partition's ID to the document's ID.</p></div>
 Appends the partition's ID to the document's ID.</p></div>
 </dd>
 <dt id="couchdb3.database.Partition.view"><code class="name flex">
-<span>def <span class="ident">view</span></span>(<span>self,<br>ddoc: str,<br>view: Optional[str] = None,<br>*,<br>conflicts: Optional[bool] = None,<br>descending: Optional[bool] = None,<br>endkey: Optional[str] = None,<br>endkey_docid: Optional[str] = None,<br>group: Optional[bool] = None,<br>group_level: Optional[int] = None,<br>include_docs: Optional[bool] = None,<br>attachments: Optional[bool] = None,<br>att_encoding_info: Optional[bool] = None,<br>inclusive_end: Optional[bool] = None,<br>key: Optional[str] = None,<br>keys: Optional[Iterable[str]] = None,<br>limit: Optional[int] = None,<br>reduce: Optional[bool] = None,<br>skip: Optional[int] = None,<br>sort: Optional[bool] = None,<br>stable: Optional[bool] = None,<br>startkey: Optional[str] = None,<br>startkey_docid: Optional[str] = None,<br>update: Optional[str] = None,<br>update_seq: Optional[bool] = None) ‑> <a title="couchdb3.view.ViewResult" href="view.html#couchdb3.view.ViewResult">ViewResult</a></span>
+<span>def <span class="ident">view</span></span>(<span>self,<br>ddoc: str,<br>view: Optional[str] = None,<br>*,<br>conflicts: Optional[bool] = None,<br>descending: Optional[bool] = None,<br>endkey: Optional[str] = None,<br>endkey_docid: Optional[str] = None,<br>group: Optional[bool] = None,<br>group_level: Optional[int] = None,<br>include_docs: Optional[bool] = None,<br>attachments: Optional[bool] = None,<br>att_encoding_info: Optional[bool] = None,<br>inclusive_end: Optional[bool] = None,<br>key: Optional[str] = None,<br>keys: Optional[Iterable[str]] = None,<br>limit: Optional[int] = None,<br>reduce: Optional[bool] = None,<br>skip: Optional[int] = None,<br>sort: Optional[bool] = None,<br>stable: Optional[bool] = None,<br>startkey: Optional[Any] = None,<br>startkey_docid: Optional[Any] = None,<br>update: Optional[str] = None,<br>update_seq: Optional[bool] = None) ‑> <a title="couchdb3.view.ViewResult" href="view.html#couchdb3.view.ViewResult">ViewResult</a></span>
 </code></dt>
 <dd>
 <details class="source">
@@ -4006,8 +4006,8 @@ Appends the partition's ID to the document's ID.</p></div>
     skip: Optional[int] = None,
     sort: Optional[bool] = None,
     stable: Optional[bool] = None,
-    startkey: Optional[str] = None,
-    startkey_docid: Optional[str] = None,
+    startkey: Optional[Any] = None,
+    startkey_docid: Optional[Any] = None,
     update: Optional[str] = None,
     update_seq: Optional[bool] = None,
 ) -&gt; ViewResult:
@@ -4060,9 +4060,9 @@ Appends the partition's ID to the document's ID.</p></div>
         `total_rows` and `offset` fields are not available when this is set to `False`. Default is `None`.
     stable : bool
         Whether or not the view results should be returned from a stable set of shards. Default is `None`.
-    startkey : str
+    startkey : Any
         Return records starting with the specified key. Default is `None`
-    startkey_docid : str
+    startkey_docid : Any
         Return records starting with the specified document ID. Ignored if `startkey` is not set. Default is `None`
     update : str
         Whether or not the view in question should be updated prior to responding to the user. Supported values:
@@ -4155,9 +4155,9 @@ Default is <code>None</code>.</dd>
 <code>total_rows</code> and <code>offset</code> fields are not available when this is set to <code>False</code>. Default is <code>None</code>.</dd>
 <dt><strong><code>stable</code></strong> :&ensp;<code>bool</code></dt>
 <dd>Whether or not the view results should be returned from a stable set of shards. Default is <code>None</code>.</dd>
-<dt><strong><code>startkey</code></strong> :&ensp;<code>str</code></dt>
+<dt><strong><code>startkey</code></strong> :&ensp;<code>Any</code></dt>
 <dd>Return records starting with the specified key. Default is <code>None</code></dd>
-<dt><strong><code>startkey_docid</code></strong> :&ensp;<code>str</code></dt>
+<dt><strong><code>startkey_docid</code></strong> :&ensp;<code>Any</code></dt>
 <dd>Return records starting with the specified document ID. Ignored if <code>startkey</code> is not set. Default is <code>None</code></dd>
 <dt><strong><code>update</code></strong> :&ensp;<code>str</code></dt>
 <dd>

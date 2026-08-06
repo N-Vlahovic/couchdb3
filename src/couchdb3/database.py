@@ -977,8 +977,8 @@ class Database(Base):
         skip: Optional[int] = None,
         sort: Optional[bool] = None,
         stable: Optional[bool] = None,
-        startkey: Optional[str] = None,
-        startkey_docid: Optional[str] = None,
+        startkey: Optional[Any] = None,
+        startkey_docid: Optional[Any] = None,
         update: Optional[str] = None,
         update_seq: Optional[bool] = None,
     ) -> ViewResult:
@@ -1033,9 +1033,9 @@ class Database(Base):
             `total_rows` and `offset` fields are not available when this is set to `False`. Default is `None`.
         stable : bool
             Whether or not the view results should be returned from a stable set of shards. Default is `None`.
-        startkey : str
+        startkey : Any
             Return records starting with the specified key. Default is `None`
-        startkey_docid : str
+        startkey_docid : Any
             Return records starting with the specified document ID. Ignored if `startkey` is not set. Default is `None`
         update : str
             Whether or not the view in question should be updated prior to responding to the user. Supported values:
@@ -1283,8 +1283,8 @@ class Partition(Database):
         skip: Optional[int] = None,
         sort: Optional[bool] = None,
         stable: Optional[bool] = None,
-        startkey: Optional[str] = None,
-        startkey_docid: Optional[str] = None,
+        startkey: Optional[Any] = None,
+        startkey_docid: Optional[Any] = None,
         update: Optional[str] = None,
         update_seq: Optional[bool] = None,
     ) -> ViewResult:
@@ -1337,9 +1337,9 @@ class Partition(Database):
             `total_rows` and `offset` fields are not available when this is set to `False`. Default is `None`.
         stable : bool
             Whether or not the view results should be returned from a stable set of shards. Default is `None`.
-        startkey : str
+        startkey : Any
             Return records starting with the specified key. Default is `None`
-        startkey_docid : str
+        startkey_docid : Any
             Return records starting with the specified document ID. Ignored if `startkey` is not set. Default is `None`
         update : str
             Whether or not the view in question should be updated prior to responding to the user. Supported values:
