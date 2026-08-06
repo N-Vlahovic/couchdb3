@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-python3 -m pip install --upgrade twine
+uv add twine
 mkdir -p archive
 mv dist/* archive
 python3 -m build
