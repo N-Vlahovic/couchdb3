@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-python3 -m pip install --upgrade build
+uv add build
 if [ -z "$(ls -A dist)" ]; then
 	echo "dist folder empty"
 else
