@@ -988,7 +988,7 @@ el.replaceWith(d);
         conflicts: Optional[bool] = None,
         descending: Optional[bool] = None,
         endkey: Optional[Any] = None,
-        endkey_docid: Optional[Any] = None,
+        endkey_docid: Optional[str] = None,
         group: Optional[bool] = None,
         group_level: Optional[int] = None,
         include_docs: Optional[bool] = None,
@@ -1003,7 +1003,7 @@ el.replaceWith(d);
         sort: Optional[bool] = None,
         stable: Optional[bool] = None,
         startkey: Optional[Any] = None,
-        startkey_docid: Optional[Any] = None,
+        startkey_docid: Optional[str] = None,
         update: Optional[str] = None,
         update_seq: Optional[bool] = None,
     ) -&gt; ViewResult:
@@ -1023,7 +1023,7 @@ el.replaceWith(d);
             Include conflicts information in response. Ignored if `include_docs` isn’t `True`. Default is `None`.
         descending : bool
             Return the documents in descending order by key. Default is `None`.
-        endkey : str
+        endkey : Any
              Stop returning records when the specified key is reached. Default is `None`
         endkey_docid: str
             Stop returning records when the specified document ID is reached. Ignored if `endkey` is not set. Default
@@ -1060,7 +1060,7 @@ el.replaceWith(d);
             Whether or not the view results should be returned from a stable set of shards. Default is `None`.
         startkey : Any
             Return records starting with the specified key. Default is `None`
-        startkey_docid : Any
+        startkey_docid : str
             Return records starting with the specified document ID. Ignored if `startkey` is not set. Default is `None`
         update : str
             Whether or not the view in question should be updated prior to responding to the user. Supported values:
@@ -2686,7 +2686,7 @@ documentation</a> for more info.</dd>
 Operation status.</p></div>
 </dd>
 <dt id="couchdb3.database.Database.view"><code class="name flex">
-<span>def <span class="ident">view</span></span>(<span>self,<br>ddoc: str,<br>view: Optional[str] = None,<br>*,<br>partition: Optional[str] = None,<br>conflicts: Optional[bool] = None,<br>descending: Optional[bool] = None,<br>endkey: Optional[Any] = None,<br>endkey_docid: Optional[Any] = None,<br>group: Optional[bool] = None,<br>group_level: Optional[int] = None,<br>include_docs: Optional[bool] = None,<br>attachments: Optional[bool] = None,<br>att_encoding_info: Optional[bool] = None,<br>inclusive_end: Optional[bool] = None,<br>key: Optional[str] = None,<br>keys: Optional[Iterable[str]] = None,<br>limit: Optional[int] = None,<br>reduce: Optional[bool] = None,<br>skip: Optional[int] = None,<br>sort: Optional[bool] = None,<br>stable: Optional[bool] = None,<br>startkey: Optional[Any] = None,<br>startkey_docid: Optional[Any] = None,<br>update: Optional[str] = None,<br>update_seq: Optional[bool] = None) ‑> <a title="couchdb3.view.ViewResult" href="view.html#couchdb3.view.ViewResult">ViewResult</a></span>
+<span>def <span class="ident">view</span></span>(<span>self,<br>ddoc: str,<br>view: Optional[str] = None,<br>*,<br>partition: Optional[str] = None,<br>conflicts: Optional[bool] = None,<br>descending: Optional[bool] = None,<br>endkey: Optional[Any] = None,<br>endkey_docid: Optional[str] = None,<br>group: Optional[bool] = None,<br>group_level: Optional[int] = None,<br>include_docs: Optional[bool] = None,<br>attachments: Optional[bool] = None,<br>att_encoding_info: Optional[bool] = None,<br>inclusive_end: Optional[bool] = None,<br>key: Optional[str] = None,<br>keys: Optional[Iterable[str]] = None,<br>limit: Optional[int] = None,<br>reduce: Optional[bool] = None,<br>skip: Optional[int] = None,<br>sort: Optional[bool] = None,<br>stable: Optional[bool] = None,<br>startkey: Optional[Any] = None,<br>startkey_docid: Optional[str] = None,<br>update: Optional[str] = None,<br>update_seq: Optional[bool] = None) ‑> <a title="couchdb3.view.ViewResult" href="view.html#couchdb3.view.ViewResult">ViewResult</a></span>
 </code></dt>
 <dd>
 <details class="source">
@@ -2702,7 +2702,7 @@ Operation status.</p></div>
     conflicts: Optional[bool] = None,
     descending: Optional[bool] = None,
     endkey: Optional[Any] = None,
-    endkey_docid: Optional[Any] = None,
+    endkey_docid: Optional[str] = None,
     group: Optional[bool] = None,
     group_level: Optional[int] = None,
     include_docs: Optional[bool] = None,
@@ -2717,7 +2717,7 @@ Operation status.</p></div>
     sort: Optional[bool] = None,
     stable: Optional[bool] = None,
     startkey: Optional[Any] = None,
-    startkey_docid: Optional[Any] = None,
+    startkey_docid: Optional[str] = None,
     update: Optional[str] = None,
     update_seq: Optional[bool] = None,
 ) -&gt; ViewResult:
@@ -2737,7 +2737,7 @@ Operation status.</p></div>
         Include conflicts information in response. Ignored if `include_docs` isn’t `True`. Default is `None`.
     descending : bool
         Return the documents in descending order by key. Default is `None`.
-    endkey : str
+    endkey : Any
          Stop returning records when the specified key is reached. Default is `None`
     endkey_docid: str
         Stop returning records when the specified document ID is reached. Ignored if `endkey` is not set. Default
@@ -2774,7 +2774,7 @@ Operation status.</p></div>
         Whether or not the view results should be returned from a stable set of shards. Default is `None`.
     startkey : Any
         Return records starting with the specified key. Default is `None`
-    startkey_docid : Any
+    startkey_docid : str
         Return records starting with the specified document ID. Ignored if `startkey` is not set. Default is `None`
     update : str
         Whether or not the view in question should be updated prior to responding to the user. Supported values:
@@ -2856,7 +2856,7 @@ documentation</a>.</p>
 <dd>Include conflicts information in response. Ignored if <code>include_docs</code> isn’t <code>True</code>. Default is <code>None</code>.</dd>
 <dt><strong><code>descending</code></strong> :&ensp;<code>bool</code></dt>
 <dd>Return the documents in descending order by key. Default is <code>None</code>.</dd>
-<dt><strong><code>endkey</code></strong> :&ensp;<code>str</code></dt>
+<dt><strong><code>endkey</code></strong> :&ensp;<code>Any</code></dt>
 <dd>Stop returning records when the specified key is reached. Default is <code>None</code></dd>
 <dt><strong><code>endkey_docid</code></strong> :&ensp;<code>str</code></dt>
 <dd>Stop returning records when the specified document ID is reached. Ignored if <code>endkey</code> is not set. Default
@@ -2894,7 +2894,7 @@ Default is <code>None</code>.</dd>
 <dd>Whether or not the view results should be returned from a stable set of shards. Default is <code>None</code>.</dd>
 <dt><strong><code>startkey</code></strong> :&ensp;<code>Any</code></dt>
 <dd>Return records starting with the specified key. Default is <code>None</code></dd>
-<dt><strong><code>startkey_docid</code></strong> :&ensp;<code>Any</code></dt>
+<dt><strong><code>startkey_docid</code></strong> :&ensp;<code>str</code></dt>
 <dd>Return records starting with the specified document ID. Ignored if <code>startkey</code> is not set. Default is <code>None</code></dd>
 <dt><strong><code>update</code></strong> :&ensp;<code>str</code></dt>
 <dd>
@@ -3091,7 +3091,7 @@ ViewResult: {
         conflicts: Optional[bool] = None,
         descending: Optional[bool] = None,
         endkey: Optional[Any] = None,
-        endkey_docid: Optional[Any] = None,
+        endkey_docid: Optional[str] = None,
         group: Optional[bool] = None,
         group_level: Optional[int] = None,
         include_docs: Optional[bool] = None,
@@ -3106,7 +3106,7 @@ ViewResult: {
         sort: Optional[bool] = None,
         stable: Optional[bool] = None,
         startkey: Optional[Any] = None,
-        startkey_docid: Optional[Any] = None,
+        startkey_docid: Optional[str] = None,
         update: Optional[str] = None,
         update_seq: Optional[bool] = None,
     ) -&gt; ViewResult:
@@ -3124,7 +3124,7 @@ ViewResult: {
             Include conflicts information in response. Ignored if `include_docs` isn’t `True`. Default is `None`.
         descending : bool
             Return the documents in descending order by key. Default is `None`.
-        endkey : str
+        endkey : Any
              Stop returning records when the specified key is reached. Default is `None`
         endkey_docid: str
             Stop returning records when the specified document ID is reached. Ignored if `endkey` is not set. Default
@@ -3976,7 +3976,7 @@ Appends the partition's ID to the document's ID.</p></div>
 Appends the partition's ID to the document's ID.</p></div>
 </dd>
 <dt id="couchdb3.database.Partition.view"><code class="name flex">
-<span>def <span class="ident">view</span></span>(<span>self,<br>ddoc: str,<br>view: Optional[str] = None,<br>*,<br>conflicts: Optional[bool] = None,<br>descending: Optional[bool] = None,<br>endkey: Optional[Any] = None,<br>endkey_docid: Optional[Any] = None,<br>group: Optional[bool] = None,<br>group_level: Optional[int] = None,<br>include_docs: Optional[bool] = None,<br>attachments: Optional[bool] = None,<br>att_encoding_info: Optional[bool] = None,<br>inclusive_end: Optional[bool] = None,<br>key: Optional[str] = None,<br>keys: Optional[Iterable[str]] = None,<br>limit: Optional[int] = None,<br>reduce: Optional[bool] = None,<br>skip: Optional[int] = None,<br>sort: Optional[bool] = None,<br>stable: Optional[bool] = None,<br>startkey: Optional[Any] = None,<br>startkey_docid: Optional[Any] = None,<br>update: Optional[str] = None,<br>update_seq: Optional[bool] = None) ‑> <a title="couchdb3.view.ViewResult" href="view.html#couchdb3.view.ViewResult">ViewResult</a></span>
+<span>def <span class="ident">view</span></span>(<span>self,<br>ddoc: str,<br>view: Optional[str] = None,<br>*,<br>conflicts: Optional[bool] = None,<br>descending: Optional[bool] = None,<br>endkey: Optional[Any] = None,<br>endkey_docid: Optional[str] = None,<br>group: Optional[bool] = None,<br>group_level: Optional[int] = None,<br>include_docs: Optional[bool] = None,<br>attachments: Optional[bool] = None,<br>att_encoding_info: Optional[bool] = None,<br>inclusive_end: Optional[bool] = None,<br>key: Optional[str] = None,<br>keys: Optional[Iterable[str]] = None,<br>limit: Optional[int] = None,<br>reduce: Optional[bool] = None,<br>skip: Optional[int] = None,<br>sort: Optional[bool] = None,<br>stable: Optional[bool] = None,<br>startkey: Optional[Any] = None,<br>startkey_docid: Optional[str] = None,<br>update: Optional[str] = None,<br>update_seq: Optional[bool] = None) ‑> <a title="couchdb3.view.ViewResult" href="view.html#couchdb3.view.ViewResult">ViewResult</a></span>
 </code></dt>
 <dd>
 <details class="source">
@@ -3992,7 +3992,7 @@ Appends the partition's ID to the document's ID.</p></div>
     conflicts: Optional[bool] = None,
     descending: Optional[bool] = None,
     endkey: Optional[Any] = None,
-    endkey_docid: Optional[Any] = None,
+    endkey_docid: Optional[str] = None,
     group: Optional[bool] = None,
     group_level: Optional[int] = None,
     include_docs: Optional[bool] = None,
@@ -4007,7 +4007,7 @@ Appends the partition's ID to the document's ID.</p></div>
     sort: Optional[bool] = None,
     stable: Optional[bool] = None,
     startkey: Optional[Any] = None,
-    startkey_docid: Optional[Any] = None,
+    startkey_docid: Optional[str] = None,
     update: Optional[str] = None,
     update_seq: Optional[bool] = None,
 ) -&gt; ViewResult:
@@ -4025,7 +4025,7 @@ Appends the partition's ID to the document's ID.</p></div>
         Include conflicts information in response. Ignored if `include_docs` isn’t `True`. Default is `None`.
     descending : bool
         Return the documents in descending order by key. Default is `None`.
-    endkey : str
+    endkey : Any
          Stop returning records when the specified key is reached. Default is `None`
     endkey_docid: str
         Stop returning records when the specified document ID is reached. Ignored if `endkey` is not set. Default
@@ -4119,7 +4119,7 @@ documentation</a>.</p>
 <dd>Include conflicts information in response. Ignored if <code>include_docs</code> isn’t <code>True</code>. Default is <code>None</code>.</dd>
 <dt><strong><code>descending</code></strong> :&ensp;<code>bool</code></dt>
 <dd>Return the documents in descending order by key. Default is <code>None</code>.</dd>
-<dt><strong><code>endkey</code></strong> :&ensp;<code>str</code></dt>
+<dt><strong><code>endkey</code></strong> :&ensp;<code>Any</code></dt>
 <dd>Stop returning records when the specified key is reached. Default is <code>None</code></dd>
 <dt><strong><code>endkey_docid</code></strong> :&ensp;<code>str</code></dt>
 <dd>Stop returning records when the specified document ID is reached. Ignored if <code>endkey</code> is not set. Default

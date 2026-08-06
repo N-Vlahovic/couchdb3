@@ -963,7 +963,7 @@ class Database(Base):
         conflicts: Optional[bool] = None,
         descending: Optional[bool] = None,
         endkey: Optional[Any] = None,
-        endkey_docid: Optional[Any] = None,
+        endkey_docid: Optional[str] = None,
         group: Optional[bool] = None,
         group_level: Optional[int] = None,
         include_docs: Optional[bool] = None,
@@ -978,7 +978,7 @@ class Database(Base):
         sort: Optional[bool] = None,
         stable: Optional[bool] = None,
         startkey: Optional[Any] = None,
-        startkey_docid: Optional[Any] = None,
+        startkey_docid: Optional[str] = None,
         update: Optional[str] = None,
         update_seq: Optional[bool] = None,
     ) -> ViewResult:
@@ -998,7 +998,7 @@ class Database(Base):
             Include conflicts information in response. Ignored if `include_docs` isn’t `True`. Default is `None`.
         descending : bool
             Return the documents in descending order by key. Default is `None`.
-        endkey : str
+        endkey : Any
              Stop returning records when the specified key is reached. Default is `None`
         endkey_docid: str
             Stop returning records when the specified document ID is reached. Ignored if `endkey` is not set. Default
@@ -1035,7 +1035,7 @@ class Database(Base):
             Whether or not the view results should be returned from a stable set of shards. Default is `None`.
         startkey : Any
             Return records starting with the specified key. Default is `None`
-        startkey_docid : Any
+        startkey_docid : str
             Return records starting with the specified document ID. Ignored if `startkey` is not set. Default is `None`
         update : str
             Whether or not the view in question should be updated prior to responding to the user. Supported values:
@@ -1269,7 +1269,7 @@ class Partition(Database):
         conflicts: Optional[bool] = None,
         descending: Optional[bool] = None,
         endkey: Optional[Any] = None,
-        endkey_docid: Optional[Any] = None,
+        endkey_docid: Optional[str] = None,
         group: Optional[bool] = None,
         group_level: Optional[int] = None,
         include_docs: Optional[bool] = None,
@@ -1284,7 +1284,7 @@ class Partition(Database):
         sort: Optional[bool] = None,
         stable: Optional[bool] = None,
         startkey: Optional[Any] = None,
-        startkey_docid: Optional[Any] = None,
+        startkey_docid: Optional[str] = None,
         update: Optional[str] = None,
         update_seq: Optional[bool] = None,
     ) -> ViewResult:
@@ -1302,7 +1302,7 @@ class Partition(Database):
             Include conflicts information in response. Ignored if `include_docs` isn’t `True`. Default is `None`.
         descending : bool
             Return the documents in descending order by key. Default is `None`.
-        endkey : str
+        endkey : Any
              Stop returning records when the specified key is reached. Default is `None`
         endkey_docid: str
             Stop returning records when the specified document ID is reached. Ignored if `endkey` is not set. Default
