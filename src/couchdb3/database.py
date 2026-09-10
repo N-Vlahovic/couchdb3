@@ -127,6 +127,14 @@ class Database(Base):
         Returns
         -------
         ViewResult
+
+        Examples
+        --------
+        >>> db.all_docs()
+        >>> db.all_docs(include_docs=True)
+        >>> for row in db.all_docs(include_docs=True).rows:
+        ...     print(row.id, row.doc)
+        >>> db.all_docs(keys=["id-1", "id-2"], include_docs=True)
         """
         return self.view(
             f"_partition/{partition}/_all_docs" if partition else "_all_docs",
@@ -194,6 +202,12 @@ class Database(Base):
           - `docs` contains a single-item array of objects, each of which has either an `error` key and value describing
           the error, or `ok` key and associated value of the requested document, with the additional _revisions property
           that lists the parent revisions if `revs=true`.
+
+        Examples
+        --------
+        >>> results = db.bulk_get(docs=[{"id": "id-1"}, {"id": "id-2"}])
+        >>> for item in results:
+        ...     print(item["id"], item["docs"][0]["ok"])
         """
         return (
             self._post(
@@ -499,6 +513,13 @@ class Database(Base):
           - `bookmark`
           - `docs`
           - `warning`
+
+        Examples
+        --------
+        >>> db.save_index({"fields": ["type", "name"]}, ddoc="my-ddoc", name="type-name-idx")
+        >>> result = db.find({"type": {"$eq": "post"}}, fields=["_id", "name"], limit=10)
+        >>> for doc in result["docs"]:
+        ...     print(doc)
         """
         return self._post(
             resource=partitioned_db_resource_parser(
@@ -599,6 +620,13 @@ class Database(Base):
         Returns
         -------
         `couchdb3.document.Document`
+
+        Examples
+        --------
+        >>> doc = db.get("mydoc-id")          # returns Document or None
+        >>> doc = db["mydoc-id"]              # subscript shorthand; raises KeyError if not found
+        >>> doc = db.get("missing-id")        # returns None
+        >>> doc = db.get("missing-id", check=True)  # raises CouchDBError if not found
         """
         try:
             return Document(
@@ -802,6 +830,14 @@ class Database(Base):
         Returns
         -------
         Tuple[str, bool, str] : The document's id ( `str`), the operation status (`bool`) and the revision ( `str`).
+
+        Examples
+        --------
+        >>> db.put_design("my-ddoc", views={
+        ...     "my-view": {
+        ...         "map": "function(doc) { if (doc.type === 'post') emit(doc._id, null); }"
+        ...     }
+        ... })
         """
         if partitioned:
             options = (options or dict()).update({"partitioned": partitioned})
@@ -903,6 +939,14 @@ class Database(Base):
           `"exists"`.
           - id (`str`) – Id of the design document the index was created in.
           - name (`str`) – Name of the index created.
+
+        Examples
+        --------
+        >>> result, id, name = db.save_index(
+        ...     {"fields": ["type", "name"]},
+        ...     ddoc="my-ddoc",
+        ...     name="type-name-idx",
+        ... )
         """
         data = self._post(
             resource="_index",
@@ -1069,6 +1113,9 @@ class Database(Base):
                 }
             ]
         }
+        >>> result = db.view("my-ddoc", "my-view", include_docs=True, limit=10)
+        >>> for row in result.rows:
+        ...     print(row.id, row.key, row.value, row.doc)
         """
         path = partitioned_db_resource_parser(
             resource="_design",

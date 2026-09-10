@@ -130,6 +130,57 @@ print(db.save(mydoc))
 print(db.delete(docid=docid, rev=db.rev(docid)))  # Fetch the revision on the go
 # True
 </code></pre>
+<h3 id="fetching-documents">Fetching documents</h3>
+<pre><code class="language-python"># Fetch a single document (returns None if not found)
+doc = db.get(&quot;mydoc-id&quot;)
+
+# Subscript shorthand (raises KeyError if not found)
+doc = db[&quot;mydoc-id&quot;]
+
+# Fetch all documents (metadata only)
+result = db.all_docs()  # ViewResult
+
+# Fetch all documents with full bodies
+result = db.all_docs(include_docs=True)
+for row in result.rows:
+    print(row.id, row.doc)
+
+# Fetch specific documents by ID
+result = db.all_docs(keys=[&quot;id-1&quot;, &quot;id-2&quot;], include_docs=True)
+
+# Batch fetch by ID
+result = db.bulk_get(docs=[{&quot;id&quot;: &quot;id-1&quot;}, {&quot;id&quot;: &quot;id-2&quot;}])
+for item in result:
+    print(item[&quot;id&quot;], item[&quot;docs&quot;][0][&quot;ok&quot;])
+</code></pre>
+<h3 id="views">Views</h3>
+<pre><code class="language-python"># 1. Create a design document with a map function
+db.put_design(&quot;my-ddoc&quot;, views={
+    &quot;my-view&quot;: {
+        &quot;map&quot;: &quot;function(doc) { if (doc.type === 'post') emit(doc._id, null); }&quot;
+    }
+})
+
+# 2. Query the view
+result = db.view(&quot;my-ddoc&quot;, &quot;my-view&quot;)                        # ViewResult
+result = db.view(&quot;my-ddoc&quot;, &quot;my-view&quot;, include_docs=True, limit=10)
+
+# 3. Iterate results
+for row in result.rows:
+    print(row.id, row.key, row.value)
+</code></pre>
+<h3 id="mango-queries">Mango queries</h3>
+<pre><code class="language-python"># 1. Create an index
+db.save_index({&quot;fields&quot;: [&quot;type&quot;, &quot;name&quot;]}, ddoc=&quot;my-ddoc&quot;, name=&quot;type-name-idx&quot;)
+
+# 2. Query with a selector
+result = db.find({&quot;type&quot;: {&quot;$eq&quot;: &quot;post&quot;}}, fields=[&quot;_id&quot;, &quot;name&quot;], limit=10)
+for doc in result[&quot;docs&quot;]:
+    print(doc)
+
+# 3. Inspect the query plan
+plan = db.explain({&quot;type&quot;: {&quot;$eq&quot;: &quot;post&quot;}}, limit=10)
+</code></pre>
 <h3 id="working-with-partitions">Working with partitions</h3>
 <p>For a partitioned database, the <code><a title="couchdb3.database.Partition" href="database.html#couchdb3.database.Partition">Partition</a></code> class offers a wrapper around partitions (acting similarly
 to collections in Mongo). </p>
@@ -216,6 +267,9 @@ partition.save({
 <li><a href="#creating-a-document">Creating a document</a></li>
 <li><a href="#updating-a-document">Updating a document</a></li>
 <li><a href="#deleting-a-document">Deleting a document</a></li>
+<li><a href="#fetching-documents">Fetching documents</a></li>
+<li><a href="#views">Views</a></li>
+<li><a href="#mango-queries">Mango queries</a></li>
 <li><a href="#working-with-partitions">Working with partitions</a></li>
 </ul>
 </li>
