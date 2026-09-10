@@ -122,6 +122,63 @@ print(db.delete(docid=docid, rev=db.rev(docid)))  # Fetch the revision on the go
 # True
 ```
 
+### Fetching documents
+```python
+# Fetch a single document (returns None if not found)
+doc = db.get("mydoc-id")
+
+# Subscript shorthand (raises KeyError if not found)
+doc = db["mydoc-id"]
+
+# Fetch all documents (metadata only)
+result = db.all_docs()  # ViewResult
+
+# Fetch all documents with full bodies
+result = db.all_docs(include_docs=True)
+for row in result.rows:
+    print(row.id, row.doc)
+
+# Fetch specific documents by ID
+result = db.all_docs(keys=["id-1", "id-2"], include_docs=True)
+
+# Batch fetch by ID
+result = db.bulk_get(docs=[{"id": "id-1"}, {"id": "id-2"}])
+for item in result:
+    print(item["id"], item["docs"][0]["ok"])
+```
+
+### Views
+```python
+# 1. Create a design document with a map function
+db.put_design("my-ddoc", views={
+    "my-view": {
+        "map": "function(doc) { if (doc.type === 'post') emit(doc._id, null); }"
+    }
+})
+
+# 2. Query the view
+result = db.view("my-ddoc", "my-view")                        # ViewResult
+result = db.view("my-ddoc", "my-view", include_docs=True, limit=10)
+
+# 3. Iterate results
+for row in result.rows:
+    print(row.id, row.key, row.value)
+```
+
+### Mango queries
+```python
+# 1. Create an index
+db.save_index({"fields": ["type", "name"]}, ddoc="my-ddoc", name="type-name-idx")
+
+# 2. Query with a selector
+result = db.find({"type": {"$eq": "post"}}, fields=["_id", "name"], limit=10)
+for doc in result["docs"]:
+    print(doc)
+
+# 3. Inspect the query plan
+plan = db.explain({"type": {"$eq": "post"}}, limit=10)
+```
+
 ### Working with partitions
 For a partitioned database, the `couchdb3.database.Partition` class offers a wrapper around partitions (acting similarly 
 to collections in Mongo). 
