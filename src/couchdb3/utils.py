@@ -1,44 +1,43 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 import base64
-from collections.abc import Generator
-from enum import Enum
 import mimetypes
 import re
-import requests
-from typing import Any, Dict, Optional, Set, Type
+from collections.abc import Generator
+from enum import Enum
+from typing import Any
 from urllib import parse
-from urllib3.util import Url, parse_url
+from urllib.parse import urlparse
+
+import httpx
 
 from . import exceptions
 
-
 __all__ = [
+    "COUCHDB_GLOBAL_CHANGES_DB_NAME",
+    "COUCHDB_REPLICATOR_DB_NAME",
+    "COUCHDB_USERS_DB_NAME",
+    "COUCH_DB_RESERVED_DB_NAMES",
+    "COUCH_DB_RESERVED_DOC_FIELDS",
+    "DEFAULT_AUTH_METHOD",
+    "DEFAULT_TIMEOUT",
+    "PATTERN_DB_NAME",
+    "PATTERN_USER_ID",
+    "VALID_AUTH_METHODS",
+    "VALID_SCHEMES",
+    "MimeTypeEnum",
     "basic_auth",
     "build_query",
     "build_url",
+    "check_response",
+    "extract_url_data",
+    "partitioned_db_resource_parser",
     "rm_nones_from_dict",
     "user_name_to_id",
     "validate_auth_method",
     "validate_db_name",
     "validate_proxy",
     "validate_user_id",
-    "check_response",
-    "extract_url_data",
-    "partitioned_db_resource_parser",
-    "COUCHDB_USERS_DB_NAME",
-    "COUCHDB_REPLICATOR_DB_NAME",
-    "COUCHDB_GLOBAL_CHANGES_DB_NAME",
-    "COUCH_DB_RESERVED_DB_NAMES",
-    "COUCH_DB_RESERVED_DOC_FIELDS",
-    "DEFAULT_AUTH_METHOD",
-    "DEFAULT_TIMEOUT",
-    "MimeTypeEnum",
-    "PATTERN_DB_NAME",
-    "PATTERN_USER_ID",
-    "VALID_AUTH_METHODS",
-    "VALID_SCHEMES",
 ]
 
 
@@ -49,14 +48,14 @@ COUCHDB_REPLICATOR_DB_NAME: str = "_replicator"
 COUCHDB_GLOBAL_CHANGES_DB_NAME: str = "_global_changes"
 """Reserved CouchDB global changes database name."""
 
-COUCH_DB_RESERVED_DB_NAMES: Set[str] = {
+COUCH_DB_RESERVED_DB_NAMES: set[str] = {
     COUCHDB_USERS_DB_NAME,
     COUCHDB_REPLICATOR_DB_NAME,
     COUCHDB_GLOBAL_CHANGES_DB_NAME,
 }
 """Reserved CouchDB database names."""
 
-COUCH_DB_RESERVED_DOC_FIELDS: Set[str] = {
+COUCH_DB_RESERVED_DOC_FIELDS: set[str] = {
     "_id",
     "_rev",
 }
@@ -68,7 +67,7 @@ DEFAULT_AUTH_METHOD: str = "cookie"
 DEFAULT_TIMEOUT: int = 300
 """The default timeout set in requests - values to `300`."""
 
-MimeTypeEnum: Type[Enum] = Enum(
+MimeTypeEnum: type[Enum] = Enum(
     "MimeTypeEnum",
     {"mime_type_" + k.removeprefix("."): v for k, v in mimetypes.types_map.items()},
 )
@@ -79,9 +78,9 @@ PATTERN_DB_NAME: re.Pattern = re.compile(r"^[a-z][a-z0-9_$()+/-]*$")
 PATTERN_USER_ID: re.Pattern = re.compile(r"^org\.couchdb\.user:.*")
 """The pattern for valid user IDs."""
 
-VALID_AUTH_METHODS: Set[str] = {"basic", "cookie"}
+VALID_AUTH_METHODS: set[str] = {"basic", "cookie"}
 """The valid auth method arguments. Possible values are `\"basic\"` or `\"cookie\"`."""
-VALID_SCHEMES: Set[str] = {"http", "https", "socks5"}
+VALID_SCHEMES: set[str] = {"http", "https", "socks5"}
 """The valid TCP schemes. Possible values are `\"http\"` or `\"https\"` or `\"socks5\"`."""
 
 
@@ -115,7 +114,7 @@ def basic_auth(user: str, password: str) -> str:
 
 def build_query(
     **kwargs,
-) -> Optional[str]:
+) -> str | None:
     """
 
     Parameters
@@ -138,7 +137,7 @@ def build_url(
     path: str = None,
     port: int = None,
     **kwargs,
-) -> Url:
+) -> str:
     """
     Build a URL using the provided scheme, host, path & kwargs.
 
@@ -156,15 +155,16 @@ def build_url(
         Arbitrary keyword-args to be passed as query-params in a URL.
     Returns
     -------
-    Url : An instance of `Url`.
+    str : The fully constructed URL string.
     """
-    return Url(
-        scheme=scheme,
-        host=host,
-        port=port,
-        path=path,
-        query=build_query(**kwargs),
-    )
+    host_part = f"{host}:{port}" if port else host
+    base = f"{scheme}://{host_part}"
+    if path:
+        base += f"/{path.lstrip('/')}"
+    query = build_query(**kwargs)
+    if query:
+        base += f"?{query}"
+    return base
 
 
 def rm_nones_from_dict(data: dict, /) -> dict:
@@ -227,7 +227,7 @@ def validate_proxy(proxy: str) -> bool:
     -------
     bool : `True` if the provided proxy is CouchDB compliant.
     """
-    return parse_url(proxy).scheme in VALID_SCHEMES
+    return urlparse(proxy).scheme in VALID_SCHEMES
 
 
 def validate_user_id(user_id: str) -> bool:
@@ -263,14 +263,14 @@ def user_name_to_id(name: str) -> str:
     return f"org.couchdb.user:{name}"
 
 
-def check_response(response: requests.Response) -> None:
+def check_response(response: httpx.Response) -> None:
     """
     Check if a request yields a successful response.
 
     Parameters
     ----------
-    response : requests.Response
-        A `requests.Response` object.
+    response : httpx.Response
+        An `httpx.Response` object.
     Returns
     -------
     None
@@ -281,8 +281,8 @@ def check_response(response: requests.Response) -> None:
     - couchdb3.error.CouchDBError
     - ConnectionError
     - TimeoutError
-    - requests.exceptions.ConnectionError
-    - requests.exceptions.HTTPError
+    - httpx.ConnectError
+    - httpx.HTTPStatusError
 
     """
     try:
@@ -290,19 +290,19 @@ def check_response(response: requests.Response) -> None:
     except (
         ConnectionError,
         TimeoutError,
-        requests.exceptions.ConnectionError,
-        requests.exceptions.HTTPError,
+        httpx.ConnectError,
+        httpx.HTTPStatusError,
     ) as err:
         if response.status_code in exceptions.STATUS_CODE_ERROR_MAPPING:
             _ = exceptions.STATUS_CODE_ERROR_MAPPING[response.status_code]
             if _:
                 raise _(response.text)
             else:
-                return None
+                return
         raise err
 
 
-def extract_url_data(url: str) -> Dict:
+def extract_url_data(url: str) -> dict:
     """
     Extract scheme, credentials, host, port & path from a URL.
 
@@ -324,23 +324,21 @@ def extract_url_data(url: str) -> Dict:
     """
     if not any(url.startswith(_) for _ in VALID_SCHEMES):
         url = f"http://{url}"
-    parsed = parse_url(url)
+    parsed = urlparse(url)
     return {
         "scheme": parsed.scheme,
-        "user": parsed.auth.split(":")[0] if hasattr(parsed.auth, "split") else None,
-        "password": parsed.auth.split(":")[1]
-        if hasattr(parsed.auth, "split")
-        else None,
-        "host": parsed.host,
+        "user": parsed.username or None,
+        "password": parsed.password or None,
+        "host": parsed.hostname,
         "port": parsed.port,
-        "path": parsed.path,
+        "path": parsed.path or None,
     }
 
 
 def partitioned_db_resource_parser(
-    resource: Optional[str] = None,
-    partition: Optional[str] = None,
-) -> Optional[str]:
+    resource: str | None = None,
+    partition: str | None = None,
+) -> str | None:
     """
     Build resource path with optional partition ID.
 

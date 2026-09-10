@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
-import requests
-from typing import Dict, List, Optional, Tuple, Union
+
+import httpx
 
 from .base import Base
 from .database import Database
@@ -14,13 +13,12 @@ from .exceptions import (
     UserIDComplianceError,
 )
 from .utils import (
+    DEFAULT_TIMEOUT,
+    rm_nones_from_dict,
     user_name_to_id,
     validate_proxy,
     validate_user_id,
-    DEFAULT_TIMEOUT,
-    rm_nones_from_dict,
 )
-
 
 __all__ = ["Server"]
 
@@ -34,13 +32,13 @@ class Server(Base):
         self,
         url: str,
         *,
-        port: Optional[int] = None,
-        user: Optional[str] = None,
-        password: Optional[str] = None,
+        port: int | None = None,
+        user: str | None = None,
+        password: str | None = None,
         disable_ssl_verification: bool = False,
-        auth_method: Optional[str] = None,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
-        session: Optional[requests.Session] = None,
+        auth_method: str | None = None,
+        timeout: int | None = DEFAULT_TIMEOUT,
+        session: httpx.Client | None = None,
     ) -> None:
         """
 
@@ -58,16 +56,16 @@ class Server(Base):
         password : str
             The CouchDB admin password. Can also be supplied via the url.
         disable_ssl_verification : bool
-            Controls whether to verify the server’s TLS certificate. Set to `True` when connecting to a server with
+            Controls whether to verify the server's TLS certificate. Set to `True` when connecting to a server with
             self-signed TLS certificates. Default `False`.
         auth_method : str
             Authentication method. Choices are `cookie` or `basic`. Default is `couchdb3.utils.DEFAULT_AUTH_METHOD`.
         timeout : int
             The default timeout for requests. Default c.f. `couchdb3.utils.DEFAULT_TIMEOUT`.
-        session: requests.Session
-            A specific session to use. Optional - if not provided, a new session will be initialized.
+        session: httpx.Client
+            A specific client to use. Optional - if not provided, a new client will be initialized.
         """
-        super(Server, self).__init__(
+        super().__init__(
             url=url,
             port=port,
             user=user,
@@ -89,11 +87,11 @@ class Server(Base):
         -------
         str
         """
-        return f"{super(Server, self).__repr__()}: {self.url}"
+        return f"{super().__repr__()}: {self.url}"
 
     def active_tasks(
         self,
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """
         List of running tasks, including the task type, name, status and process ID. The result is a JSON array of the
         currently running tasks, with each task being described with a single object. Depending on operation type set
@@ -127,16 +125,16 @@ class Server(Base):
         self,
         name: str,
         *,
-        user_id: Optional[str] = None,
-        derived_key: Optional[str] = None,
-        roles: Optional[List[str]] = None,
-        password: Optional[str] = None,
-        password_sha: Optional[str] = None,
-        password_scheme: Optional[str] = None,
-        salt: Optional[str] = None,
-        iterations: Optional[int] = None,
-        rev: Optional[str] = None,
-    ) -> Tuple[bool, str, str]:
+        user_id: str | None = None,
+        derived_key: str | None = None,
+        roles: list[str] | None = None,
+        password: str | None = None,
+        password_sha: str | None = None,
+        password_scheme: str | None = None,
+        salt: str | None = None,
+        iterations: int | None = None,
+        rev: str | None = None,
+    ) -> tuple[bool, str, str]:
         """
         Create or update a user. In case of a `ConflictError`, a `HEAD` request to `/_users/<user_id>` will be sent to
         obtain the latest revision.
@@ -206,11 +204,11 @@ class Server(Base):
         self,
         *,
         descending: bool = False,
-        endkey: Optional[str] = None,
-        limit: Optional[int] = None,
+        endkey: str | None = None,
+        limit: int | None = None,
         skip: int = 0,
-        startkey: Optional[str] = None,
-    ) -> List[str]:
+        startkey: str | None = None,
+    ) -> list[str]:
         """
         Get all database names.
 
@@ -245,8 +243,8 @@ class Server(Base):
     def create(
         self,
         name: str,
-        q: Optional[int] = None,
-        n: Optional[int] = None,
+        q: int | None = None,
+        n: int | None = None,
         partitioned: bool = False,
     ) -> Database:
         """
@@ -274,7 +272,7 @@ class Server(Base):
         )
         return self.get(name=name)
 
-    def dbs_info(self, keys: List[str]) -> List[Dict]:
+    def dbs_info(self, keys: list[str]) -> list[dict]:
         """
         Returns information of a list of the specified databases in the CouchDB instance.
 
@@ -310,20 +308,20 @@ class Server(Base):
             url=self.url,
             user=self._user,
             password=self._password,
-            disable_ssl_verification=not self.session.verify,
+            disable_ssl_verification=self.disable_ssl_verification,
             auth_method=self.auth_method,
             session=self.session,
         )
         try:
             db._head()
-        except (NotFoundError, requests.exceptions.RequestException) as error:
+        except (NotFoundError, httpx.RequestError) as error:
             if check is True:
                 raise error
         except CouchDBError as error:
             raise error
         return db
 
-    def delete(self, resource: Optional[str] = None) -> bool:
+    def delete(self, resource: str | None = None) -> bool:
         """
         Delete a database.
 
@@ -341,19 +339,19 @@ class Server(Base):
 
     def replicate(
         self,
-        source: Union[Dict, str],
-        target: Union[Dict, str],
-        replication_id: Optional[str] = None,
-        cancel: Optional[bool] = None,
-        continuous: Optional[bool] = None,
-        create_target: Optional[bool] = None,
-        create_target_params: Optional[Dict] = None,
-        doc_ids: Optional[List[str]] = None,
-        filter_func: Optional[str] = None,
-        selector: Optional[Dict] = None,
-        source_proxy: Optional[str] = None,
-        target_proxy: Optional[str] = None,
-    ) -> Dict:
+        source: dict | str,
+        target: dict | str,
+        replication_id: str | None = None,
+        cancel: bool | None = None,
+        continuous: bool | None = None,
+        create_target: bool | None = None,
+        create_target_params: dict | None = None,
+        doc_ids: list[str] | None = None,
+        filter_func: str | None = None,
+        selector: dict | None = None,
+        source_proxy: str | None = None,
+        target_proxy: str | None = None,
+    ) -> dict:
         """
         Request, configure, or stop, a replication operation. For more info, please refer to
         [the official documentation](https://docs.couchdb.org/en/main/api/server/common.html#replicate).

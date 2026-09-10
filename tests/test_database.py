@@ -1,31 +1,28 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 import atexit
 import datetime
 import mimetypes
 import random
 import string
-
 import unittest
 
 from couchdb3.database import Database, Partition
-from couchdb3.document import Document, AttachmentDocument
+from couchdb3.document import AttachmentDocument, Document
 from couchdb3.server import Server
+from couchdb3.utils import MimeTypeEnum, user_name_to_id
 from couchdb3.view import ViewResult, ViewRow
-from couchdb3.utils import user_name_to_id, MimeTypeEnum
-
 from tests.credentials import (
     ATTACHMENT_PATH_HTML,
     ATTACHMENT_PATH_JSON,
+    ATTACHMENT_PATH_PDF,
     ATTACHMENT_PATH_PNG,
     ATTACHMENT_PATH_TXT,
     ATTACHMENT_PATH_ZIP,
-    COUCHDB_USER,
-    COUCHDB_PASSWORD,
     COUCHDB0_URL,
+    COUCHDB_PASSWORD,
+    COUCHDB_USER,
     DOCUMENT_VIEW,
-    ATTACHMENT_PATH_PDF,
 )
 
 
@@ -72,7 +69,7 @@ class TestDatabase(unittest.TestCase):
         _id = "test-doc-__contains__"
         doc = {"type": "test-doc-__contains__", "_id": _id}
         DB.create(doc)
-        self.assertIn(_id, DB)  # noqa
+        self.assertIn(_id, DB)
 
     def test_bulk_docs(self):
         docs = [
@@ -206,7 +203,7 @@ class TestDatabase(unittest.TestCase):
     def test_delete_attachment(self):
         docid = "test-doc-delete-attachment"
         DB.save({"_id": docid})
-        content_type = MimeTypeEnum.mime_type_json.value  # noqa
+        content_type = MimeTypeEnum.mime_type_json.value
         for attname, content in [
             ("test-dict", {"hello": "world", 1: 2, 3: None}),
             ("test-str", "Hello World! 123"),

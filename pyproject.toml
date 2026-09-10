@@ -1,6 +1,6 @@
 [project]
 name = "couchdb3"
-version = "3.0.4"
+version = "3.1.0"
 description = "A wrapper around the CouchDB API."
 authors = [{ name = "Nikolai Vlahovic", email = "vlahovic.REDACTED_USERlai@gmail.com" }]
 requires-python = ">= 3.11"
@@ -16,9 +16,15 @@ classifiers = [
 ]
 dependencies = [
     "build>=1.5.0",
+    "httpx>=0.27,<1.0",
+    "pdoc3>=0.11.6",
+]
+
+[project.optional-dependencies]
+dev = [
+    "build>=1.5.0",
     "pdoc>=16.0.0",
     "pdoc3>=0.11.6",
-    "requests (>=2.32.4,<3.0.0)",
     "setuptools>=83.0.0",
     "twine>=7.0.0",
 ]

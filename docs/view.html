@@ -61,7 +61,7 @@ el.replaceWith(d);
     &#34;&#34;&#34;
 
     def __init__(self, *args, **kwargs) -&gt; None:
-        super(ViewResult, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.offset = self.get(&#34;offset&#34;, 0)
         self.rows = self.get(&#34;rows&#34;, [])
         self.total_rows = self.get(&#34;total_rows&#34;, 0)
@@ -80,7 +80,7 @@ el.replaceWith(d);
         self._offset = value
 
     @property
-    def rows(self) -&gt; List[ViewRow]:
+    def rows(self) -&gt; list[ViewRow]:
         &#34;&#34;&#34;
         Returns
         -------
@@ -89,7 +89,7 @@ el.replaceWith(d);
         return self._rows
 
     @rows.setter
-    def rows(self, value: List[ViewRow]) -&gt; None:
+    def rows(self, value: list[ViewRow]) -&gt; None:
         self._rows = [ViewRow(**_) for _ in value]
 
     @property
@@ -131,14 +131,14 @@ def offset(self) -&gt; int:
 <div class="desc"><h2 id="returns">Returns</h2>
 <p>int : The view's offset.</p></div>
 </dd>
-<dt id="couchdb3.view.ViewResult.rows"><code class="name">prop <span class="ident">rows</span> : List[<a title="couchdb3.view.ViewRow" href="#couchdb3.view.ViewRow">ViewRow</a>]</code></dt>
+<dt id="couchdb3.view.ViewResult.rows"><code class="name">prop <span class="ident">rows</span> : list[<a title="couchdb3.view.ViewRow" href="#couchdb3.view.ViewRow">ViewRow</a>]</code></dt>
 <dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
-def rows(self) -&gt; List[ViewRow]:
+def rows(self) -&gt; list[ViewRow]:
     &#34;&#34;&#34;
     Returns
     -------
@@ -184,14 +184,14 @@ def total_rows(self) -&gt; int:
     &#34;&#34;&#34;
 
     def __init__(self, *args, **kwargs) -&gt; None:
-        super(ViewRow, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.doc = self.get(&#34;doc&#34;, None)
         self.id = self.get(&#34;id&#34;, None)
         self.key = self.get(&#34;key&#34;, None)
         self.value = self.get(&#34;value&#34;, None)
 
     @property
-    def doc(self) -&gt; Optional[Document]:
+    def doc(self) -&gt; Document | None:
         &#34;&#34;&#34;
         Returns
         -------
@@ -200,7 +200,7 @@ def total_rows(self) -&gt; int:
         return self._doc
 
     @doc.setter
-    def doc(self, value: Union[Dict, Document]) -&gt; None:
+    def doc(self, value: dict | Document) -&gt; None:
         self._doc = Document(**value) if value else None
 
     @property
@@ -230,7 +230,7 @@ def total_rows(self) -&gt; int:
         self._key = value
 
     @property
-    def value(self) -&gt; Optional[Any]:
+    def value(self) -&gt; Any | None:
         &#34;&#34;&#34;
         Returns
         -------
@@ -257,7 +257,7 @@ def total_rows(self) -&gt; int:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
-def doc(self) -&gt; Optional[Document]:
+def doc(self) -&gt; Document | None:
     &#34;&#34;&#34;
     Returns
     -------
@@ -311,7 +311,7 @@ def key(self) -&gt; str:
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
-def value(self) -&gt; Optional[Any]:
+def value(self) -&gt; Any | None:
     &#34;&#34;&#34;
     Returns
     -------

@@ -1,29 +1,26 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-
-from typing import Dict
 
 
 __all__ = [
-    "CouchDBError",
-    "AuthenticationMethodError",
-    "NameComplianceError",
-    "ProxySchemeComplianceError",
-    "UserIDComplianceError",
-    "BadRequestError",
-    "UnauthorizedError",
-    "ForbiddenError",
-    "NotFoundError",
-    "MethodNotAllowedError",
-    "NotAcceptableError",
-    "ConflictError",
-    "PreconditionFailedError",
-    "RequestEntityTooLargeError",
-    "UnsupportedMediaTypeError",
-    "RequestRangeNotSatisfiableError",
-    "ExpectationFailedError",
-    "InternalServerError",
     "STATUS_CODE_ERROR_MAPPING",
+    "AuthenticationMethodError",
+    "BadRequestError",
+    "ConflictError",
+    "CouchDBError",
+    "ExpectationFailedError",
+    "ForbiddenError",
+    "InternalServerError",
+    "MethodNotAllowedError",
+    "NameComplianceError",
+    "NotAcceptableError",
+    "NotFoundError",
+    "PreconditionFailedError",
+    "ProxySchemeComplianceError",
+    "RequestEntityTooLargeError",
+    "RequestRangeNotSatisfiableError",
+    "UnauthorizedError",
+    "UnsupportedMediaTypeError",
+    "UserIDComplianceError",
 ]
 
 
@@ -111,7 +108,7 @@ class InternalServerError(CouchDBError):
     part of the request."""
 
 
-STATUS_CODE_ERROR_MAPPING: Dict = {
+STATUS_CODE_ERROR_MAPPING: dict = {
     200: None,
     201: None,
     202: None,

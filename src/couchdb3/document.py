@@ -1,22 +1,19 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 from __future__ import annotations
-from typing import Dict, List, Optional, Union
 
 from .base import DictBase
 
-
 __all__ = [
-    "extract_document_id_and_rev",
-    "Document",
     "AttachmentDocument",
-    "SecurityDocumentElement",
+    "Document",
     "SecurityDocument",
+    "SecurityDocumentElement",
+    "extract_document_id_and_rev",
 ]
 
 
-def extract_document_id_and_rev(doc: Union[Dict, Document], rev: bool = True) -> Dict:
+def extract_document_id_and_rev(doc: dict | Document, rev: bool = True) -> dict:
     """
     Extract id and revision from an abstract document.
 
@@ -44,7 +41,7 @@ class Document(DictBase):
     """CouchDB Document - a wrapper around Python dictionaries."""
 
     @property
-    def id(self) -> Optional[str]:
+    def id(self) -> str | None:
         """
         Returns
         -------
@@ -57,7 +54,7 @@ class Document(DictBase):
         self.update({"_id": value})
 
     @property
-    def rev(self) -> Optional[str]:
+    def rev(self) -> str | None:
         """
         Returns
         -------
@@ -74,7 +71,7 @@ class AttachmentDocument(DictBase):
     """CouchDB Attachment Document - a wrapper around Python dictionaries."""
 
     def __init__(self, *args, **kwargs) -> None:
-        super(AttachmentDocument, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.content = self.get("content")
         self.content_encoding = self.get("content_encoding")
         self.content_length = self.get("content_length")
@@ -158,7 +155,7 @@ class SecurityDocumentElement(DictBase):
         self.roles = sorted(set(self.roles).union({role}))
 
     @property
-    def names(self) -> List[str]:
+    def names(self) -> list[str]:
         """
         Returns
         -------
@@ -171,7 +168,7 @@ class SecurityDocumentElement(DictBase):
         self.update({"names": value})
 
     @property
-    def roles(self) -> List[str]:
+    def roles(self) -> list[str]:
         """
         Returns
         -------
@@ -188,7 +185,7 @@ class SecurityDocument(DictBase):
     """CouchDB Security Document - a wrapper around Python dictionaries."""
 
     def __init__(self, *args, **kwargs) -> None:
-        super(SecurityDocument, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.admins = SecurityDocumentElement(**self.get("admins", {}))
         self.members = SecurityDocumentElement(**self.get("members", {}))
 

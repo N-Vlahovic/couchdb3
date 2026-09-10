@@ -1,19 +1,15 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
-from datetime import datetime, timezone
-import requests
-import requests.auth
-from typing import Dict, List, Optional, Union
+from datetime import UTC, datetime
 
-from . import exceptions
-from . import utils
+import httpx
 
+from . import exceptions, utils
 
 __all__ = ["Base", "DictBase"]
 
 
-class Base(object):
+class Base:
     """
     Abstract base class
     """
@@ -22,13 +18,13 @@ class Base(object):
         self,
         url: str,
         *,
-        port: Optional[int] = None,
-        user: Optional[str] = None,
-        password: Optional[str] = None,
+        port: int | None = None,
+        user: str | None = None,
+        password: str | None = None,
         disable_ssl_verification: bool = False,
-        auth_method: Optional[str] = None,
-        timeout: Optional[int] = utils.DEFAULT_TIMEOUT,
-        session: Optional[requests.Session] = None,
+        auth_method: str | None = None,
+        timeout: int | None = utils.DEFAULT_TIMEOUT,
+        session: httpx.Client | None = None,
     ) -> None:
         """
 
@@ -46,14 +42,14 @@ class Base(object):
         password : str
             The CouchDB admin password. Can also be supplied via the url.
         disable_ssl_verification : bool
-            Controls whether to verify the server’s TLS certificate. Set to `True` when connecting to a server with
+            Controls whether to verify the server's TLS certificate. Set to `True` when connecting to a server with
             self-signed TLS certificates. Default `False`.
         auth_method : str
             Authentication method. Choices are `cookie` or `basic`. Default is `couchdb3.utils.DEFAULT_AUTH_METHOD`.
         timeout : int
             The default timeout for requests. Default c.f. `couchdb3.utils.DEFAULT_TIMEOUT`.
-        session: requests.Session
-            A specific session to use. Optional - if not provided, a new session will be initialized.
+        session: httpx.Client
+            A specific client to use. Optional - if not provided, a new client will be initialized.
         """
         auth_method = auth_method or utils.DEFAULT_AUTH_METHOD
         if utils.validate_auth_method(auth_method=auth_method) is False:
@@ -67,16 +63,23 @@ class Base(object):
         self.host = _["host"]
         self.port = port or _["port"]
         self.root = None
-        self.session = session or requests.Session()
-        self.session.verify = disable_ssl_verification is False
-        # Changing the default headers
-        self.session.headers.update(
-            {"Accept": "application/json", "Content-type": "application/json"}
-        )
+        self.disable_ssl_verification = disable_ssl_verification
+        # NOTE: httpx.Client takes verify and headers at construction time, unlike
+        # requests.Session where they can be set as mutable attributes post-construction.
+        # Track ownership so that child objects sharing a parent's session don't close it.
+        if session is not None:
+            self.session = session
+            self._owns_session = False
+        else:
+            self.session = httpx.Client(
+                verify=disable_ssl_verification is False,
+                headers={"Accept": "application/json", "Content-type": "application/json"},
+            )
+            self._owns_session = True
         self._user = user
         self._password = password
         self._auth = (
-            requests.auth.HTTPBasicAuth(user, password) if user and password else None
+            httpx.BasicAuth(user, password) if user and password else None
         )
         self.auth_method = auth_method
         self.timeout = timeout
@@ -116,13 +119,14 @@ class Base(object):
 
     def __del__(self) -> None:
         """
-        Close the session on delete.
+        Close the session on delete (only if this instance owns it).
 
         Returns
         -------
         None
         """
-        self.session.close()
+        if getattr(self, "_owns_session", False):
+            self.session.close()
 
     def __enter__(self):
         """
@@ -142,7 +146,8 @@ class Base(object):
         -------
         None
         """
-        self.session.close()
+        if self._owns_session:
+            self.session.close()  # httpx.Client.close() — same interface as requests.Session
 
     def __repr__(self) -> str:
         """
@@ -177,14 +182,14 @@ class Base(object):
         self,
         *,
         method: str,
-        resource: Optional[str] = None,
-        body: Optional[Union[Dict, List]] = None,
-        query_kwargs: Optional[Dict] = None,
-        auth_method: Optional[str] = None,
-        root: Optional[str] = None,
-        timeout: Optional[int] = None,
+        resource: str | None = None,
+        body: dict | list | None = None,
+        query_kwargs: dict | None = None,
+        auth_method: str | None = None,
+        root: str | None = None,
+        timeout: int | None = None,
         **req_kwargs,
-    ) -> requests.Response:
+    ) -> httpx.Response:
         """
         Abstract request
 
@@ -205,10 +210,10 @@ class Base(object):
         timeout : int
             The request's timeout. Default c.f. `couchdb3.utils.DEFAULT_TIMEOUT`.
         req_kwargs
-            Further `requests.request` keyword parameters.
+            Further `httpx.Client.request` keyword parameters.
         Returns
         -------
-        requests.Response
+        httpx.Response
         """
         auth_method = auth_method or self.auth_method
         root = root if isinstance(root, str) else self.root
@@ -235,7 +240,7 @@ class Base(object):
                 path=path,
                 port=self.port,
                 **(query_kwargs or {}),
-            ).url,
+            ),
             json=body,
             timeout=timeout or self.timeout,
             **req_kwargs,
@@ -245,14 +250,14 @@ class Base(object):
 
     def _delete(
         self,
-        resource: Optional[str] = None,
+        resource: str | None = None,
         *,
         timeout: int = utils.DEFAULT_TIMEOUT,
-        query_kwargs: Optional[Dict] = None,
-        auth_method: Optional[str] = None,
-        root: Optional[str] = None,
+        query_kwargs: dict | None = None,
+        auth_method: str | None = None,
+        root: str | None = None,
         **req_kwargs,
-    ) -> requests.Response:
+    ) -> httpx.Response:
         """
         DELETE request.
 
@@ -269,10 +274,10 @@ class Base(object):
         root : str
             A root relative to the server's URL, e.g. `"dbname"`. Default is `None`.
         req_kwargs
-            Further `requests.request` keyword parameters.
+            Further `httpx.Client.request` keyword parameters.
         Returns
         -------
-        requests.Response
+        httpx.Response
         """
         return self._request(
             method="DELETE",
@@ -286,14 +291,14 @@ class Base(object):
 
     def _get(
         self,
-        resource: Optional[str] = None,
+        resource: str | None = None,
         *,
         timeout: int = utils.DEFAULT_TIMEOUT,
-        query_kwargs: Optional[Dict] = None,
-        auth_method: Optional[str] = None,
-        root: Optional[str] = None,
+        query_kwargs: dict | None = None,
+        auth_method: str | None = None,
+        root: str | None = None,
         **req_kwargs,
-    ) -> requests.Response:
+    ) -> httpx.Response:
         """
         GET request
 
@@ -310,10 +315,10 @@ class Base(object):
         root : str
             A root relative to the server's URL, e.g. `"dbname"`. Default is `None`.
         req_kwargs
-            Further `requests.request` keyword parameters.
+            Further `httpx.Client.request` keyword parameters.
         Returns
         -------
-        requests.Response
+        httpx.Response
         """
         return self._request(
             method="GET",
@@ -327,14 +332,14 @@ class Base(object):
 
     def _head(
         self,
-        resource: Optional[str] = None,
+        resource: str | None = None,
         *,
-        timeout: Optional[int] = None,
-        query_kwargs: Optional[Dict] = None,
-        auth_method: Optional[str] = None,
-        root: Optional[str] = None,
+        timeout: int | None = None,
+        query_kwargs: dict | None = None,
+        auth_method: str | None = None,
+        root: str | None = None,
         **req_kwargs,
-    ) -> requests.Response:
+    ) -> httpx.Response:
         """
         HEAD request
 
@@ -351,10 +356,10 @@ class Base(object):
         root : str
             A root relative to the server's URL, e.g. `"dbname"`. Default is `None`.
         req_kwargs
-            Further `requests.request` keyword parameters.
+            Further `httpx.Client.request` keyword parameters.
         Returns
         -------
-        requests.Response
+        httpx.Response
         """
         return self._request(
             method="HEAD",
@@ -368,15 +373,15 @@ class Base(object):
 
     def _post(
         self,
-        resource: Optional[str] = None,
+        resource: str | None = None,
         *,
-        body: Optional[Union[Dict, List]] = None,
-        timeout: Optional[int] = None,
-        query_kwargs: Optional[Dict] = None,
-        auth_method: Optional[str] = None,
-        root: Optional[str] = None,
+        body: dict | list | None = None,
+        timeout: int | None = None,
+        query_kwargs: dict | None = None,
+        auth_method: str | None = None,
+        root: str | None = None,
         **req_kwargs,
-    ) -> requests.Response:
+    ) -> httpx.Response:
         """
         POST request
 
@@ -395,10 +400,10 @@ class Base(object):
         root : str
             A root relative to the server's URL, e.g. `"dbname"`. Default is `None`.
         req_kwargs
-            Further `requests.request` keyword parameters.
+            Further `httpx.Client.request` keyword parameters.
         Returns
         -------
-        requests.Response
+        httpx.Response
         """
         return self._request(
             method="POST",
@@ -413,15 +418,15 @@ class Base(object):
 
     def _put(
         self,
-        resource: Optional[str] = None,
+        resource: str | None = None,
         *,
-        body: Optional[Union[Dict, List]] = None,
-        timeout: Optional[int] = None,
-        query_kwargs: Optional[Dict] = None,
-        auth_method: Optional[str] = None,
-        root: Optional[str] = None,
+        body: dict | list | None = None,
+        timeout: int | None = None,
+        query_kwargs: dict | None = None,
+        auth_method: str | None = None,
+        root: str | None = None,
         **req_kwargs,
-    ) -> requests.Response:
+    ) -> httpx.Response:
         """
         PUT request
 
@@ -440,10 +445,10 @@ class Base(object):
         root : str
             A root relative to the server's URL, e.g. `"dbname"`. Default is `None`.
         req_kwargs
-            Further `requests.request` keyword parameters.
+            Further `httpx.Client.request` keyword parameters.
         Returns
         -------
-        requests.Response
+        httpx.Response
         """
         return self._request(
             method="PUT",
@@ -465,9 +470,15 @@ class Base(object):
         bool : `True` if the auth token is expired.
         """
         try:
+            # httpx.Client.cookies.jar yields http.cookiejar.Cookie objects which
+            # carry the .name and .expires attributes we need.
             return (
-                next(_.expires for _ in self.session.cookies if _.name == "AuthSession")
-                <= datetime.now(timezone.utc).timestamp()
+                next(
+                    _.expires
+                    for _ in self.session.cookies.jar
+                    if _.name == "AuthSession"
+                )
+                <= datetime.now(UTC).timestamp()
             )
         except StopIteration:
             return True
@@ -486,7 +497,7 @@ class Base(object):
             root="",
         )
 
-    def check(self, resource: Optional[str] = None) -> bool:
+    def check(self, resource: str | None = None) -> bool:
         """
         Check the server or database by sending a `HEAD` request to `/self.root`.
 
@@ -502,10 +513,10 @@ class Base(object):
         try:
             utils.check_response(self._head(resource=resource))
             return True
-        except (exceptions.CouchDBError, requests.exceptions.RequestException):
+        except (exceptions.CouchDBError, httpx.RequestError):
             return False
 
-    def info(self, partition: Optional[str] = None) -> Dict:
+    def info(self, partition: str | None = None) -> dict:
         """
         Return a server's or database's info by sending a `GET` request to `/self.root`.
 
@@ -522,7 +533,7 @@ class Base(object):
             resource=f"_partition/{partition}" if partition else None
         ).json()
 
-    def rev(self, resource: str) -> Optional[str]:
+    def rev(self, resource: str) -> str | None:
         """
         Safely retrieves a resource's revision by sending a lightweight `HEAD`request and reading the response's
         `"ETag"` header.
@@ -553,4 +564,4 @@ class DictBase(dict):
     """
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}: {super(DictBase, self).__repr__()}"
+        return f"{self.__class__.__name__}: {super().__repr__()}"

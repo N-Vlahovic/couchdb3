@@ -1,0 +1,21 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "instructions": [
+    "README.md",
+    "contributing.md"
+  ],
+  "command": {
+    "test": {
+      "description": "Run the full test suite (requires COUCHDB_USER, COUCHDB_PASSWORD, COUCHDB_URL in env or .env).",
+      "template": "make test"
+    },
+    "build": {
+      "description": "Build the python distribution package.",
+      "template": "make build"
+    },
+    "docs": {
+      "description": "Generate HTML documentation via pdoc3.",
+      "template": "make html"
+    }
+  }
+}

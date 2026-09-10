@@ -163,7 +163,9 @@ partition.save({
 """
 from . import exceptions as exceptions
 from . import utils as utils
-from .database import Database as Database, Partition as Partition
+from .database import Database as Database
+from .database import Partition as Partition
 from .document import Document as Document
 from .server import Server as Server
-from .view import ViewResult as ViewResult, ViewRow as ViewRow
+from .view import ViewResult as ViewResult
+from .view import ViewRow as ViewRow

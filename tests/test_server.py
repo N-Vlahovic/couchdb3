@@ -1,14 +1,11 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 import atexit
 import unittest
 
 from couchdb3.database import Database
 from couchdb3.server import Server
 from couchdb3.utils import COUCH_DB_RESERVED_DB_NAMES
-
-from tests.credentials import COUCHDB_USER, COUCHDB_PASSWORD, COUCHDB0_URL
-
+from tests.credentials import COUCHDB0_URL, COUCHDB_PASSWORD, COUCHDB_USER
 
 TEST_DB_NAME: str = "test-db"
 CLIENT: Server = Server(url=COUCHDB0_URL, user=COUCHDB_USER, password=COUCHDB_PASSWORD)
