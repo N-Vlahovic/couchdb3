@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 import unittest
 from urllib import parse
@@ -18,7 +17,7 @@ class TestUtils(unittest.TestCase):
             descending=True,
             skip=10,
             keys=["hello", "world"],
-        ).url
+        )
         self.assertEqual(url0, parse.unquote(url1))
 
     def test_rm_nones_from_dict(self):

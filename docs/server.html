@@ -48,7 +48,7 @@ el.replaceWith(d);
 <dl>
 <dt id="couchdb3.server.Server"><code class="flex name class">
 <span>class <span class="ident">Server</span></span>
-<span>(</span><span>url: str,<br>*,<br>port: int | None = None,<br>user: str | None = None,<br>password: str | None = None,<br>disable_ssl_verification: bool = False,<br>auth_method: str | None = None,<br>timeout: int | None = 300,<br>session: requests.sessions.Session | None = None)</span>
+<span>(</span><span>url: str,<br>*,<br>port: int | None = None,<br>user: str | None = None,<br>password: str | None = None,<br>disable_ssl_verification: bool = False,<br>auth_method: str | None = None,<br>timeout: int | None = 300,<br>session: httpx.Client | None = None)</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -64,13 +64,13 @@ el.replaceWith(d);
         self,
         url: str,
         *,
-        port: Optional[int] = None,
-        user: Optional[str] = None,
-        password: Optional[str] = None,
+        port: int | None = None,
+        user: str | None = None,
+        password: str | None = None,
         disable_ssl_verification: bool = False,
-        auth_method: Optional[str] = None,
-        timeout: Optional[int] = DEFAULT_TIMEOUT,
-        session: Optional[requests.Session] = None,
+        auth_method: str | None = None,
+        timeout: int | None = DEFAULT_TIMEOUT,
+        session: httpx.Client | None = None,
     ) -&gt; None:
         &#34;&#34;&#34;
 
@@ -88,16 +88,16 @@ el.replaceWith(d);
         password : str
             The CouchDB admin password. Can also be supplied via the url.
         disable_ssl_verification : bool
-            Controls whether to verify the server’s TLS certificate. Set to `True` when connecting to a server with
+            Controls whether to verify the server&#39;s TLS certificate. Set to `True` when connecting to a server with
             self-signed TLS certificates. Default `False`.
         auth_method : str
             Authentication method. Choices are `cookie` or `basic`. Default is `couchdb3.utils.DEFAULT_AUTH_METHOD`.
         timeout : int
             The default timeout for requests. Default c.f. `couchdb3.utils.DEFAULT_TIMEOUT`.
-        session: requests.Session
-            A specific session to use. Optional - if not provided, a new session will be initialized.
+        session: httpx.Client
+            A specific client to use. Optional - if not provided, a new client will be initialized.
         &#34;&#34;&#34;
-        super(Server, self).__init__(
+        super().__init__(
             url=url,
             port=port,
             user=user,
@@ -119,11 +119,11 @@ el.replaceWith(d);
         -------
         str
         &#34;&#34;&#34;
-        return f&#34;{super(Server, self).__repr__()}: {self.url}&#34;
+        return f&#34;{super().__repr__()}: {self.url}&#34;
 
     def active_tasks(
         self,
-    ) -&gt; List[Dict]:
+    ) -&gt; list[dict]:
         &#34;&#34;&#34;
         List of running tasks, including the task type, name, status and process ID. The result is a JSON array of the
         currently running tasks, with each task being described with a single object. Depending on operation type set
@@ -157,16 +157,16 @@ el.replaceWith(d);
         self,
         name: str,
         *,
-        user_id: Optional[str] = None,
-        derived_key: Optional[str] = None,
-        roles: Optional[List[str]] = None,
-        password: Optional[str] = None,
-        password_sha: Optional[str] = None,
-        password_scheme: Optional[str] = None,
-        salt: Optional[str] = None,
-        iterations: Optional[int] = None,
-        rev: Optional[str] = None,
-    ) -&gt; Tuple[bool, str, str]:
+        user_id: str | None = None,
+        derived_key: str | None = None,
+        roles: list[str] | None = None,
+        password: str | None = None,
+        password_sha: str | None = None,
+        password_scheme: str | None = None,
+        salt: str | None = None,
+        iterations: int | None = None,
+        rev: str | None = None,
+    ) -&gt; tuple[bool, str, str]:
         &#34;&#34;&#34;
         Create or update a user. In case of a `ConflictError`, a `HEAD` request to `/_users/&lt;user_id&gt;` will be sent to
         obtain the latest revision.
@@ -236,11 +236,11 @@ el.replaceWith(d);
         self,
         *,
         descending: bool = False,
-        endkey: Optional[str] = None,
-        limit: Optional[int] = None,
+        endkey: str | None = None,
+        limit: int | None = None,
         skip: int = 0,
-        startkey: Optional[str] = None,
-    ) -&gt; List[str]:
+        startkey: str | None = None,
+    ) -&gt; list[str]:
         &#34;&#34;&#34;
         Get all database names.
 
@@ -275,8 +275,8 @@ el.replaceWith(d);
     def create(
         self,
         name: str,
-        q: Optional[int] = None,
-        n: Optional[int] = None,
+        q: int | None = None,
+        n: int | None = None,
         partitioned: bool = False,
     ) -&gt; Database:
         &#34;&#34;&#34;
@@ -304,7 +304,7 @@ el.replaceWith(d);
         )
         return self.get(name=name)
 
-    def dbs_info(self, keys: List[str]) -&gt; List[Dict]:
+    def dbs_info(self, keys: list[str]) -&gt; list[dict]:
         &#34;&#34;&#34;
         Returns information of a list of the specified databases in the CouchDB instance.
 
@@ -340,20 +340,20 @@ el.replaceWith(d);
             url=self.url,
             user=self._user,
             password=self._password,
-            disable_ssl_verification=not self.session.verify,
+            disable_ssl_verification=self.disable_ssl_verification,
             auth_method=self.auth_method,
             session=self.session,
         )
         try:
             db._head()
-        except (NotFoundError, requests.exceptions.RequestException) as error:
+        except (NotFoundError, httpx.RequestError) as error:
             if check is True:
                 raise error
         except CouchDBError as error:
             raise error
         return db
 
-    def delete(self, resource: Optional[str] = None) -&gt; bool:
+    def delete(self, resource: str | None = None) -&gt; bool:
         &#34;&#34;&#34;
         Delete a database.
 
@@ -371,19 +371,19 @@ el.replaceWith(d);
 
     def replicate(
         self,
-        source: Union[Dict, str],
-        target: Union[Dict, str],
-        replication_id: Optional[str] = None,
-        cancel: Optional[bool] = None,
-        continuous: Optional[bool] = None,
-        create_target: Optional[bool] = None,
-        create_target_params: Optional[Dict] = None,
-        doc_ids: Optional[List[str]] = None,
-        filter_func: Optional[str] = None,
-        selector: Optional[Dict] = None,
-        source_proxy: Optional[str] = None,
-        target_proxy: Optional[str] = None,
-    ) -&gt; Dict:
+        source: dict | str,
+        target: dict | str,
+        replication_id: str | None = None,
+        cancel: bool | None = None,
+        continuous: bool | None = None,
+        create_target: bool | None = None,
+        create_target_params: dict | None = None,
+        doc_ids: list[str] | None = None,
+        filter_func: str | None = None,
+        selector: dict | None = None,
+        source_proxy: str | None = None,
+        target_proxy: str | None = None,
+    ) -&gt; dict:
         &#34;&#34;&#34;
         Request, configure, or stop, a replication operation. For more info, please refer to
         [the official documentation](https://docs.couchdb.org/en/main/api/server/common.html#replicate).
@@ -515,14 +515,14 @@ el.replaceWith(d);
 <dt><strong><code>password</code></strong> :&ensp;<code>str</code></dt>
 <dd>The CouchDB admin password. Can also be supplied via the url.</dd>
 <dt><strong><code>disable_ssl_verification</code></strong> :&ensp;<code>bool</code></dt>
-<dd>Controls whether to verify the server’s TLS certificate. Set to <code>True</code> when connecting to a server with
+<dd>Controls whether to verify the server's TLS certificate. Set to <code>True</code> when connecting to a server with
 self-signed TLS certificates. Default <code>False</code>.</dd>
 <dt><strong><code>auth_method</code></strong> :&ensp;<code>str</code></dt>
 <dd>Authentication method. Choices are <code>cookie</code> or <code>basic</code>. Default is <code><a title="couchdb3.utils.DEFAULT_AUTH_METHOD" href="utils.html#couchdb3.utils.DEFAULT_AUTH_METHOD">DEFAULT_AUTH_METHOD</a></code>.</dd>
 <dt><strong><code>timeout</code></strong> :&ensp;<code>int</code></dt>
 <dd>The default timeout for requests. Default c.f. <code><a title="couchdb3.utils.DEFAULT_TIMEOUT" href="utils.html#couchdb3.utils.DEFAULT_TIMEOUT">DEFAULT_TIMEOUT</a></code>.</dd>
-<dt><strong><code>session</code></strong> :&ensp;<code>requests.Session</code></dt>
-<dd>A specific session to use. Optional - if not provided, a new session will be initialized.</dd>
+<dt><strong><code>session</code></strong> :&ensp;<code>httpx.Client</code></dt>
+<dd>A specific client to use. Optional - if not provided, a new client will be initialized.</dd>
 </dl></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -531,7 +531,7 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
 <h3>Methods</h3>
 <dl>
 <dt id="couchdb3.server.Server.active_tasks"><code class="name flex">
-<span>def <span class="ident">active_tasks</span></span>(<span>self) ‑> List[Dict]</span>
+<span>def <span class="ident">active_tasks</span></span>(<span>self) ‑> list[dict]</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -540,7 +540,7 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
 </summary>
 <pre><code class="python">def active_tasks(
     self,
-) -&gt; List[Dict]:
+) -&gt; list[dict]:
     &#34;&#34;&#34;
     List of running tasks, including the task type, name, status and process ID. The result is a JSON array of the
     currently running tasks, with each task being described with a single object. Depending on operation type set
@@ -562,7 +562,7 @@ of response object fields might be different.</p>
 </dl></div>
 </dd>
 <dt id="couchdb3.server.Server.all_dbs"><code class="name flex">
-<span>def <span class="ident">all_dbs</span></span>(<span>self,<br>*,<br>descending: bool = False,<br>endkey: str | None = None,<br>limit: int | None = None,<br>skip: int = 0,<br>startkey: str | None = None) ‑> List[str]</span>
+<span>def <span class="ident">all_dbs</span></span>(<span>self,<br>*,<br>descending: bool = False,<br>endkey: str | None = None,<br>limit: int | None = None,<br>skip: int = 0,<br>startkey: str | None = None) ‑> list[str]</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -573,11 +573,11 @@ of response object fields might be different.</p>
     self,
     *,
     descending: bool = False,
-    endkey: Optional[str] = None,
-    limit: Optional[int] = None,
+    endkey: str | None = None,
+    limit: int | None = None,
     skip: int = 0,
-    startkey: Optional[str] = None,
-) -&gt; List[str]:
+    startkey: str | None = None,
+) -&gt; list[str]:
     &#34;&#34;&#34;
     Get all database names.
 
@@ -675,8 +675,8 @@ request.</p>
 <pre><code class="python">def create(
     self,
     name: str,
-    q: Optional[int] = None,
-    n: Optional[int] = None,
+    q: int | None = None,
+    n: int | None = None,
     partitioned: bool = False,
 ) -&gt; Database:
     &#34;&#34;&#34;
@@ -725,14 +725,14 @@ used: <code>3</code>, unless overridden in the <code>cluster config</code>).</dd
 </dl></div>
 </dd>
 <dt id="couchdb3.server.Server.dbs_info"><code class="name flex">
-<span>def <span class="ident">dbs_info</span></span>(<span>self, keys: List[str]) ‑> List[Dict]</span>
+<span>def <span class="ident">dbs_info</span></span>(<span>self, keys: list[str]) ‑> list[dict]</span>
 </code></dt>
 <dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def dbs_info(self, keys: List[str]) -&gt; List[Dict]:
+<pre><code class="python">def dbs_info(self, keys: list[str]) -&gt; list[dict]:
     &#34;&#34;&#34;
     Returns information of a list of the specified databases in the CouchDB instance.
 
@@ -764,7 +764,7 @@ used: <code>3</code>, unless overridden in the <code>cluster config</code>).</dd
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def delete(self, resource: Optional[str] = None) -&gt; bool:
+<pre><code class="python">def delete(self, resource: str | None = None) -&gt; bool:
     &#34;&#34;&#34;
     Delete a database.
 
@@ -818,13 +818,13 @@ used: <code>3</code>, unless overridden in the <code>cluster config</code>).</dd
         url=self.url,
         user=self._user,
         password=self._password,
-        disable_ssl_verification=not self.session.verify,
+        disable_ssl_verification=self.disable_ssl_verification,
         auth_method=self.auth_method,
         session=self.session,
     )
     try:
         db._head()
-    except (NotFoundError, requests.exceptions.RequestException) as error:
+    except (NotFoundError, httpx.RequestError) as error:
         if check is True:
             raise error
     except CouchDBError as error:
@@ -846,7 +846,7 @@ used: <code>3</code>, unless overridden in the <code>cluster config</code>).</dd
 </dl></div>
 </dd>
 <dt id="couchdb3.server.Server.replicate"><code class="name flex">
-<span>def <span class="ident">replicate</span></span>(<span>self,<br>source: Dict | str,<br>target: Dict | str,<br>replication_id: str | None = None,<br>cancel: bool | None = None,<br>continuous: bool | None = None,<br>create_target: bool | None = None,<br>create_target_params: Dict | None = None,<br>doc_ids: List[str] | None = None,<br>filter_func: str | None = None,<br>selector: Dict | None = None,<br>source_proxy: str | None = None,<br>target_proxy: str | None = None) ‑> Dict</span>
+<span>def <span class="ident">replicate</span></span>(<span>self,<br>source: dict | str,<br>target: dict | str,<br>replication_id: str | None = None,<br>cancel: bool | None = None,<br>continuous: bool | None = None,<br>create_target: bool | None = None,<br>create_target_params: dict | None = None,<br>doc_ids: list[str] | None = None,<br>filter_func: str | None = None,<br>selector: dict | None = None,<br>source_proxy: str | None = None,<br>target_proxy: str | None = None) ‑> dict</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -855,19 +855,19 @@ used: <code>3</code>, unless overridden in the <code>cluster config</code>).</dd
 </summary>
 <pre><code class="python">def replicate(
     self,
-    source: Union[Dict, str],
-    target: Union[Dict, str],
-    replication_id: Optional[str] = None,
-    cancel: Optional[bool] = None,
-    continuous: Optional[bool] = None,
-    create_target: Optional[bool] = None,
-    create_target_params: Optional[Dict] = None,
-    doc_ids: Optional[List[str]] = None,
-    filter_func: Optional[str] = None,
-    selector: Optional[Dict] = None,
-    source_proxy: Optional[str] = None,
-    target_proxy: Optional[str] = None,
-) -&gt; Dict:
+    source: dict | str,
+    target: dict | str,
+    replication_id: str | None = None,
+    cancel: bool | None = None,
+    continuous: bool | None = None,
+    create_target: bool | None = None,
+    create_target_params: dict | None = None,
+    doc_ids: list[str] | None = None,
+    filter_func: str | None = None,
+    selector: dict | None = None,
+    source_proxy: str | None = None,
+    target_proxy: str | None = None,
+) -&gt; dict:
     &#34;&#34;&#34;
     Request, configure, or stop, a replication operation. For more info, please refer to
     [the official documentation](https://docs.couchdb.org/en/main/api/server/common.html#replicate).
@@ -1023,7 +1023,7 @@ or <code>“socks5”</code>).</dd>
 </ul></div>
 </dd>
 <dt id="couchdb3.server.Server.save_user"><code class="name flex">
-<span>def <span class="ident">save_user</span></span>(<span>self,<br>name: str,<br>*,<br>user_id: str | None = None,<br>derived_key: str | None = None,<br>roles: List[str] | None = None,<br>password: str | None = None,<br>password_sha: str | None = None,<br>password_scheme: str | None = None,<br>salt: str | None = None,<br>iterations: int | None = None,<br>rev: str | None = None) ‑> Tuple[bool, str, str]</span>
+<span>def <span class="ident">save_user</span></span>(<span>self,<br>name: str,<br>*,<br>user_id: str | None = None,<br>derived_key: str | None = None,<br>roles: list[str] | None = None,<br>password: str | None = None,<br>password_sha: str | None = None,<br>password_scheme: str | None = None,<br>salt: str | None = None,<br>iterations: int | None = None,<br>rev: str | None = None) ‑> tuple[bool, str, str]</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -1034,16 +1034,16 @@ or <code>“socks5”</code>).</dd>
     self,
     name: str,
     *,
-    user_id: Optional[str] = None,
-    derived_key: Optional[str] = None,
-    roles: Optional[List[str]] = None,
-    password: Optional[str] = None,
-    password_sha: Optional[str] = None,
-    password_scheme: Optional[str] = None,
-    salt: Optional[str] = None,
-    iterations: Optional[int] = None,
-    rev: Optional[str] = None,
-) -&gt; Tuple[bool, str, str]:
+    user_id: str | None = None,
+    derived_key: str | None = None,
+    roles: list[str] | None = None,
+    password: str | None = None,
+    password_sha: str | None = None,
+    password_scheme: str | None = None,
+    salt: str | None = None,
+    iterations: int | None = None,
+    rev: str | None = None,
+) -&gt; tuple[bool, str, str]:
     &#34;&#34;&#34;
     Create or update a user. In case of a `ConflictError`, a `HEAD` request to `/_users/&lt;user_id&gt;` will be sent to
     obtain the latest revision.

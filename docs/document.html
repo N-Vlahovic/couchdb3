@@ -45,14 +45,14 @@ el.replaceWith(d);
 <h2 class="section-title" id="header-functions">Functions</h2>
 <dl>
 <dt id="couchdb3.document.extract_document_id_and_rev"><code class="name flex">
-<span>def <span class="ident">extract_document_id_and_rev</span></span>(<span>doc: Union[Dict, <a title="couchdb3.document.Document" href="#couchdb3.document.Document">Document</a>],<br>rev: bool = True) ‑> Dict</span>
+<span>def <span class="ident">extract_document_id_and_rev</span></span>(<span>doc: dict | <a title="couchdb3.document.Document" href="#couchdb3.document.Document">Document</a>,<br>rev: bool = True) ‑> dict</span>
 </code></dt>
 <dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def extract_document_id_and_rev(doc: Union[Dict, Document], rev: bool = True) -&gt; Dict:
+<pre><code class="python">def extract_document_id_and_rev(doc: dict | Document, rev: bool = True) -&gt; dict:
     &#34;&#34;&#34;
     Extract id and revision from an abstract document.
 
@@ -104,7 +104,7 @@ el.replaceWith(d);
     &#34;&#34;&#34;CouchDB Attachment Document - a wrapper around Python dictionaries.&#34;&#34;&#34;
 
     def __init__(self, *args, **kwargs) -&gt; None:
-        super(AttachmentDocument, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.content = self.get(&#34;content&#34;)
         self.content_encoding = self.get(&#34;content_encoding&#34;)
         self.content_length = self.get(&#34;content_length&#34;)
@@ -289,7 +289,7 @@ def digest(self) -&gt; str:
     &#34;&#34;&#34;CouchDB Document - a wrapper around Python dictionaries.&#34;&#34;&#34;
 
     @property
-    def id(self) -&gt; Optional[str]:
+    def id(self) -&gt; str | None:
         &#34;&#34;&#34;
         Returns
         -------
@@ -302,7 +302,7 @@ def digest(self) -&gt; str:
         self.update({&#34;_id&#34;: value})
 
     @property
-    def rev(self) -&gt; Optional[str]:
+    def rev(self) -&gt; str | None:
         &#34;&#34;&#34;
         Returns
         -------
@@ -322,14 +322,14 @@ def digest(self) -&gt; str:
 </ul>
 <h3>Instance variables</h3>
 <dl>
-<dt id="couchdb3.document.Document.id"><code class="name">prop <span class="ident">id</span> : Optional[str]</code></dt>
+<dt id="couchdb3.document.Document.id"><code class="name">prop <span class="ident">id</span> : str | None</code></dt>
 <dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
-def id(self) -&gt; Optional[str]:
+def id(self) -&gt; str | None:
     &#34;&#34;&#34;
     Returns
     -------
@@ -340,14 +340,14 @@ def id(self) -&gt; Optional[str]:
 <div class="desc"><h2 id="returns">Returns</h2>
 <p>str : The document's id.</p></div>
 </dd>
-<dt id="couchdb3.document.Document.rev"><code class="name">prop <span class="ident">rev</span> : Optional[str]</code></dt>
+<dt id="couchdb3.document.Document.rev"><code class="name">prop <span class="ident">rev</span> : str | None</code></dt>
 <dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
-def rev(self) -&gt; Optional[str]:
+def rev(self) -&gt; str | None:
     &#34;&#34;&#34;
     Returns
     -------
@@ -373,7 +373,7 @@ def rev(self) -&gt; Optional[str]:
     &#34;&#34;&#34;CouchDB Security Document - a wrapper around Python dictionaries.&#34;&#34;&#34;
 
     def __init__(self, *args, **kwargs) -&gt; None:
-        super(SecurityDocument, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.admins = SecurityDocumentElement(**self.get(&#34;admins&#34;, {}))
         self.members = SecurityDocumentElement(**self.get(&#34;members&#34;, {}))
 
@@ -469,7 +469,7 @@ def members(self) -&gt; SecurityDocumentElement:
         self.roles = sorted(set(self.roles).union({role}))
 
     @property
-    def names(self) -&gt; List[str]:
+    def names(self) -&gt; list[str]:
         &#34;&#34;&#34;
         Returns
         -------
@@ -482,7 +482,7 @@ def members(self) -&gt; SecurityDocumentElement:
         self.update({&#34;names&#34;: value})
 
     @property
-    def roles(self) -&gt; List[str]:
+    def roles(self) -&gt; list[str]:
         &#34;&#34;&#34;
         Returns
         -------
@@ -503,14 +503,14 @@ dictionaries.</p></div>
 </ul>
 <h3>Instance variables</h3>
 <dl>
-<dt id="couchdb3.document.SecurityDocumentElement.names"><code class="name">prop <span class="ident">names</span> : List[str]</code></dt>
+<dt id="couchdb3.document.SecurityDocumentElement.names"><code class="name">prop <span class="ident">names</span> : list[str]</code></dt>
 <dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
-def names(self) -&gt; List[str]:
+def names(self) -&gt; list[str]:
     &#34;&#34;&#34;
     Returns
     -------
@@ -521,14 +521,14 @@ def names(self) -&gt; List[str]:
 <div class="desc"><h2 id="returns">Returns</h2>
 <p>List[str] : The document's names.</p></div>
 </dd>
-<dt id="couchdb3.document.SecurityDocumentElement.roles"><code class="name">prop <span class="ident">roles</span> : List[str]</code></dt>
+<dt id="couchdb3.document.SecurityDocumentElement.roles"><code class="name">prop <span class="ident">roles</span> : list[str]</code></dt>
 <dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@property
-def roles(self) -&gt; List[str]:
+def roles(self) -&gt; list[str]:
     &#34;&#34;&#34;
     Returns
     -------

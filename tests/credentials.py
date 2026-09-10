@@ -1,13 +1,11 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 import os
 from pathlib import Path
-import requests
-from typing import Dict, Optional
+
+import httpx
 
 from couchdb3.exceptions import CouchDBError
-from couchdb3.utils import check_response, DEFAULT_TIMEOUT
-
+from couchdb3.utils import DEFAULT_TIMEOUT, check_response
 
 __all__ = [
     "ATTACHMENT_PATH_HTML",
@@ -16,10 +14,10 @@ __all__ = [
     "ATTACHMENT_PATH_PNG",
     "ATTACHMENT_PATH_TXT",
     "ATTACHMENT_PATH_ZIP",
-    "COUCHDB_USER",
-    "COUCHDB_PASSWORD",
     "COUCHDB0_URL",
     "COUCHDB1_URL",
+    "COUCHDB_PASSWORD",
+    "COUCHDB_USER",
     "DOCUMENT_VIEW",
     "check_alive",
 ]
@@ -30,15 +28,15 @@ DEFAULT_URL: str = "http://127.0.0.1:5984"
 
 def check_alive(url: str = DEFAULT_URL) -> bool:
     try:
-        check_response(requests.get(url, timeout=DEFAULT_TIMEOUT))
+        check_response(httpx.get(url, timeout=DEFAULT_TIMEOUT))
         return True
-    except (CouchDBError, requests.exceptions.ConnectionError):
+    except (CouchDBError, httpx.ConnectError):
         return False
 
 
 proj_path: str = Path(os.path.dirname(os.path.abspath(__file__))).parent.as_posix()
 env_file_path: str = f"{proj_path}/.env"
-env_file: Dict
+env_file: dict
 if os.path.isfile(env_file_path):
     with open(env_file_path, "r", encoding="utf-8") as _:
         env_file = {k: v for k, v in map(lambda _: _.strip().split("="), _.readlines())}
@@ -58,7 +56,7 @@ with open(f"{proj_path}/tests/views/document-view.js", "r", encoding="utf-8") as
     DOCUMENT_VIEW: str = _.read()
 
 
-def load_env_var(name: str) -> Optional[str]:
+def load_env_var(name: str) -> str | None:
     """
     Load an environment variable.
     Parameters
@@ -84,4 +82,4 @@ COUCHDB0_URL: str = (
         or input("Please provide a valid CouchDB URL:\n")
     )
 )
-COUCHDB1_URL: Optional[str] = load_env_var("COUCHDB1_URL") or None
+COUCHDB1_URL: str | None = load_env_var("COUCHDB1_URL") or None

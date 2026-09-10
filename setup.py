@@ -5,11 +5,11 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="CouchDB3",
-    version="3.0.4",
+    version="3.1.0",
     author="Nikolai Vlahovic",
     author_email="nikolai@nexup.com",
     description="A wrapper around the CouchDB API.",
-    install_requires=["requests"],
+    install_requires=["httpx>=0.27,<1.0"],
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/n-vlahovic/couchdb3",

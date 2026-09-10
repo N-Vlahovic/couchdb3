@@ -1,20 +1,16 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
 import atexit
-
 import unittest
 
 from couchdb3.database import Database
 from couchdb3.server import Server
-
 from tests.credentials import (
-    COUCHDB_USER,
-    COUCHDB_PASSWORD,
     COUCHDB0_URL,
+    COUCHDB_PASSWORD,
+    COUCHDB_USER,
     DOCUMENT_VIEW,
 )
-
 
 CLIENT: Server = Server(COUCHDB0_URL, user=COUCHDB_USER, password=COUCHDB_PASSWORD)
 DB_NAME: str = "tmp-test-partitioned-db"

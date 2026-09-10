@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 
-from typing import Optional, Union, Dict, Any, List
+from typing import Any
 
 from .base import DictBase
 from .document import Document
@@ -13,14 +12,14 @@ class ViewRow(DictBase):
     """
 
     def __init__(self, *args, **kwargs) -> None:
-        super(ViewRow, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.doc = self.get("doc", None)
         self.id = self.get("id", None)
         self.key = self.get("key", None)
         self.value = self.get("value", None)
 
     @property
-    def doc(self) -> Optional[Document]:
+    def doc(self) -> Document | None:
         """
         Returns
         -------
@@ -29,7 +28,7 @@ class ViewRow(DictBase):
         return self._doc
 
     @doc.setter
-    def doc(self, value: Union[Dict, Document]) -> None:
+    def doc(self, value: dict | Document) -> None:
         self._doc = Document(**value) if value else None
 
     @property
@@ -59,7 +58,7 @@ class ViewRow(DictBase):
         self._key = value
 
     @property
-    def value(self) -> Optional[Any]:
+    def value(self) -> Any | None:
         """
         Returns
         -------
@@ -78,7 +77,7 @@ class ViewResult(DictBase):
     """
 
     def __init__(self, *args, **kwargs) -> None:
-        super(ViewResult, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.offset = self.get("offset", 0)
         self.rows = self.get("rows", [])
         self.total_rows = self.get("total_rows", 0)
@@ -97,7 +96,7 @@ class ViewResult(DictBase):
         self._offset = value
 
     @property
-    def rows(self) -> List[ViewRow]:
+    def rows(self) -> list[ViewRow]:
         """
         Returns
         -------
@@ -106,7 +105,7 @@ class ViewResult(DictBase):
         return self._rows
 
     @rows.setter
-    def rows(self, value: List[ViewRow]) -> None:
+    def rows(self, value: list[ViewRow]) -> None:
         self._rows = [ViewRow(**_) for _ in value]
 
     @property

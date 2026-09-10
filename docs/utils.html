@@ -54,11 +54,11 @@ el.replaceWith(d);
 <dd>
 <div class="desc"><p>Reserved CouchDB users database name.</p></div>
 </dd>
-<dt id="couchdb3.utils.COUCH_DB_RESERVED_DB_NAMES"><code class="name">var <span class="ident">COUCH_DB_RESERVED_DB_NAMES</span> : Set[str]</code></dt>
+<dt id="couchdb3.utils.COUCH_DB_RESERVED_DB_NAMES"><code class="name">var <span class="ident">COUCH_DB_RESERVED_DB_NAMES</span> : set[str]</code></dt>
 <dd>
 <div class="desc"><p>Reserved CouchDB database names.</p></div>
 </dd>
-<dt id="couchdb3.utils.COUCH_DB_RESERVED_DOC_FIELDS"><code class="name">var <span class="ident">COUCH_DB_RESERVED_DOC_FIELDS</span> : Set[str]</code></dt>
+<dt id="couchdb3.utils.COUCH_DB_RESERVED_DOC_FIELDS"><code class="name">var <span class="ident">COUCH_DB_RESERVED_DOC_FIELDS</span> : set[str]</code></dt>
 <dd>
 <div class="desc"><p>Reserved CouchDB document fields.</p></div>
 </dd>
@@ -78,11 +78,11 @@ el.replaceWith(d);
 <dd>
 <div class="desc"><p>The pattern for valid user IDs.</p></div>
 </dd>
-<dt id="couchdb3.utils.VALID_AUTH_METHODS"><code class="name">var <span class="ident">VALID_AUTH_METHODS</span> : Set[str]</code></dt>
+<dt id="couchdb3.utils.VALID_AUTH_METHODS"><code class="name">var <span class="ident">VALID_AUTH_METHODS</span> : set[str]</code></dt>
 <dd>
 <div class="desc"><p>The valid auth method arguments. Possible values are <code>"basic"</code> or <code>"cookie"</code>.</p></div>
 </dd>
-<dt id="couchdb3.utils.VALID_SCHEMES"><code class="name">var <span class="ident">VALID_SCHEMES</span> : Set[str]</code></dt>
+<dt id="couchdb3.utils.VALID_SCHEMES"><code class="name">var <span class="ident">VALID_SCHEMES</span> : set[str]</code></dt>
 <dd>
 <div class="desc"><p>The valid TCP schemes. Possible values are <code>"http"</code> or <code>"https"</code> or <code>"socks5"</code>.</p></div>
 </dd>
@@ -137,7 +137,7 @@ el.replaceWith(d);
 </summary>
 <pre><code class="python">def build_query(
     **kwargs,
-) -&gt; Optional[str]:
+) -&gt; str | None:
     &#34;&#34;&#34;
 
     Parameters
@@ -161,7 +161,7 @@ el.replaceWith(d);
 <p>str : A string containing the keyword-args encoded as URL query-params.</p></div>
 </dd>
 <dt id="couchdb3.utils.build_url"><code class="name flex">
-<span>def <span class="ident">build_url</span></span>(<span>*, scheme: str, host: str, path: str = None, port: int = None, **kwargs) ‑> urllib3.util.url.Url</span>
+<span>def <span class="ident">build_url</span></span>(<span>*, scheme: str, host: str, path: str = None, port: int = None, **kwargs) ‑> str</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -175,7 +175,7 @@ el.replaceWith(d);
     path: str = None,
     port: int = None,
     **kwargs,
-) -&gt; Url:
+) -&gt; str:
     &#34;&#34;&#34;
     Build a URL using the provided scheme, host, path &amp; kwargs.
 
@@ -193,15 +193,16 @@ el.replaceWith(d);
         Arbitrary keyword-args to be passed as query-params in a URL.
     Returns
     -------
-    Url : An instance of `Url`.
+    str : The fully constructed URL string.
     &#34;&#34;&#34;
-    return Url(
-        scheme=scheme,
-        host=host,
-        port=port,
-        path=path,
-        query=build_query(**kwargs),
-    )</code></pre>
+    host_part = f&#34;{host}:{port}&#34; if port else host
+    base = f&#34;{scheme}://{host_part}&#34;
+    if path:
+        base += f&#34;/{path.lstrip(&#39;/&#39;)}&#34;
+    query = build_query(**kwargs)
+    if query:
+        base += f&#34;?{query}&#34;
+    return base</code></pre>
 </details>
 <div class="desc"><p>Build a URL using the provided scheme, host, path &amp; kwargs.</p>
 <h2 id="parameters">Parameters</h2>
@@ -218,24 +219,24 @@ el.replaceWith(d);
 <dd>Arbitrary keyword-args to be passed as query-params in a URL.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
-<p>Url : An instance of <code>Url</code>.</p></div>
+<p>str : The fully constructed URL string.</p></div>
 </dd>
 <dt id="couchdb3.utils.check_response"><code class="name flex">
-<span>def <span class="ident">check_response</span></span>(<span>response: requests.models.Response) ‑> None</span>
+<span>def <span class="ident">check_response</span></span>(<span>response: httpx.Response) ‑> None</span>
 </code></dt>
 <dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def check_response(response: requests.Response) -&gt; None:
+<pre><code class="python">def check_response(response: httpx.Response) -&gt; None:
     &#34;&#34;&#34;
     Check if a request yields a successful response.
 
     Parameters
     ----------
-    response : requests.Response
-        A `requests.Response` object.
+    response : httpx.Response
+        An `httpx.Response` object.
     Returns
     -------
     None
@@ -246,8 +247,8 @@ el.replaceWith(d);
     - couchdb3.error.CouchDBError
     - ConnectionError
     - TimeoutError
-    - requests.exceptions.ConnectionError
-    - requests.exceptions.HTTPError
+    - httpx.ConnectError
+    - httpx.HTTPStatusError
 
     &#34;&#34;&#34;
     try:
@@ -255,22 +256,22 @@ el.replaceWith(d);
     except (
         ConnectionError,
         TimeoutError,
-        requests.exceptions.ConnectionError,
-        requests.exceptions.HTTPError,
+        httpx.ConnectError,
+        httpx.HTTPStatusError,
     ) as err:
         if response.status_code in exceptions.STATUS_CODE_ERROR_MAPPING:
             _ = exceptions.STATUS_CODE_ERROR_MAPPING[response.status_code]
             if _:
                 raise _(response.text)
             else:
-                return None
+                return
         raise err</code></pre>
 </details>
 <div class="desc"><p>Check if a request yields a successful response.</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
-<dt><strong><code>response</code></strong> :&ensp;<code>requests.Response</code></dt>
-<dd>A <code>requests.Response</code> object.</dd>
+<dt><strong><code>response</code></strong> :&ensp;<code>httpx.Response</code></dt>
+<dd>An <code>httpx.Response</code> object.</dd>
 </dl>
 <h2 id="returns">Returns</h2>
 <dl>
@@ -286,19 +287,19 @@ el.replaceWith(d);
 <li>couchdb3.error.CouchDBError</li>
 <li>ConnectionError</li>
 <li>TimeoutError</li>
-<li>requests.exceptions.ConnectionError</li>
-<li>requests.exceptions.HTTPError</li>
+<li>httpx.ConnectError</li>
+<li>httpx.HTTPStatusError</li>
 </ul></div>
 </dd>
 <dt id="couchdb3.utils.extract_url_data"><code class="name flex">
-<span>def <span class="ident">extract_url_data</span></span>(<span>url: str) ‑> Dict</span>
+<span>def <span class="ident">extract_url_data</span></span>(<span>url: str) ‑> dict</span>
 </code></dt>
 <dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def extract_url_data(url: str) -&gt; Dict:
+<pre><code class="python">def extract_url_data(url: str) -&gt; dict:
     &#34;&#34;&#34;
     Extract scheme, credentials, host, port &amp; path from a URL.
 
@@ -320,16 +321,14 @@ el.replaceWith(d);
     &#34;&#34;&#34;
     if not any(url.startswith(_) for _ in VALID_SCHEMES):
         url = f&#34;http://{url}&#34;
-    parsed = parse_url(url)
+    parsed = urlparse(url)
     return {
         &#34;scheme&#34;: parsed.scheme,
-        &#34;user&#34;: parsed.auth.split(&#34;:&#34;)[0] if hasattr(parsed.auth, &#34;split&#34;) else None,
-        &#34;password&#34;: parsed.auth.split(&#34;:&#34;)[1]
-        if hasattr(parsed.auth, &#34;split&#34;)
-        else None,
-        &#34;host&#34;: parsed.host,
+        &#34;user&#34;: parsed.username or None,
+        &#34;password&#34;: parsed.password or None,
+        &#34;host&#34;: parsed.hostname,
         &#34;port&#34;: parsed.port,
-        &#34;path&#34;: parsed.path,
+        &#34;path&#34;: parsed.path or None,
     }</code></pre>
 </details>
 <div class="desc"><p>Extract scheme, credentials, host, port &amp; path from a URL.</p>
@@ -358,9 +357,9 @@ el.replaceWith(d);
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def partitioned_db_resource_parser(
-    resource: Optional[str] = None,
-    partition: Optional[str] = None,
-) -&gt; Optional[str]:
+    resource: str | None = None,
+    partition: str | None = None,
+) -&gt; str | None:
     &#34;&#34;&#34;
     Build resource path with optional partition ID.
 
@@ -536,7 +535,7 @@ el.replaceWith(d);
     -------
     bool : `True` if the provided proxy is CouchDB compliant.
     &#34;&#34;&#34;
-    return parse_url(proxy).scheme in VALID_SCHEMES</code></pre>
+    return urlparse(proxy).scheme in VALID_SCHEMES</code></pre>
 </details>
 <div class="desc"><p>Check a proxy scheme for CouchDB proxy-scheme-compliance</p>
 <h2 id="parameters">Parameters</h2>
