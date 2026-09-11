@@ -362,6 +362,32 @@ for doc in result["docs"]:
 plan = await db.explain({"type": {"$eq": "post"}}, limit=10)
 ```
 
+### Controlling concurrency
+
+`httpx.AsyncClient` pools connections internally. For application-level concurrency control
+use `asyncio.Semaphore`, and optionally tune the connection pool via `httpx.Limits`:
+
+```python
+import asyncio
+import httpx
+from couchdb3.aio import AsyncServer
+
+# Limit to 10 concurrent CouchDB operations
+sem = asyncio.Semaphore(10)
+
+async def fetch(db, docid):
+    async with sem:
+        return await db.get(docid)
+
+# Optionally tune the underlying connection pool
+client = AsyncServer(
+    "http://user:password@127.0.0.1:5984",
+    session=httpx.AsyncClient(
+        limits=httpx.Limits(max_connections=20, max_keepalive_connections=10)
+    ),
+)
+```
+
 ### Working with async partitions
 ```python
 from couchdb3.aio import AsyncServer, AsyncDatabase, AsyncPartition
