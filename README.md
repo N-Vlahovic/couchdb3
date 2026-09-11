@@ -1,6 +1,6 @@
 # CouchDB3
 
-*CouchDB3* is a wrapper around the CouchDB API. For more detailed information, please refer to
+*CouchDB3* is a sync and async Python wrapper around the CouchDB API. For more detailed information, please refer to
 [the documentation](https://n-vlahovic.github.io/couchdb3/).
 
 ## Disclaimer
