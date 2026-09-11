@@ -58,7 +58,22 @@ el.replaceWith(d);
 <pre><code class="language-bash">git clone https://github.com/n-Vlahovic/couchdb3
 python -m pip install -e couchdb3
 </code></pre>
-<h2 id="quickstart">Quickstart</h2>
+<h2 id="import-styles">Import styles</h2>
+<p>All public classes are available flat from <code><a title="couchdb3" href="#couchdb3">couchdb3</a></code> for backward compatibility.
+Explicit subpackage imports are also supported for clarity:</p>
+<pre><code class="language-python"># Flat (backward-compatible)
+from couchdb3 import Server, AsyncServer, Document
+
+# Explicit sync subpackage
+from couchdb3.sync import Server, Database, Partition
+
+# Explicit async subpackage
+from couchdb3.aio import AsyncServer, AsyncDatabase, AsyncPartition
+
+# Shared types always from couchdb3 directly
+from couchdb3 import Document, ViewResult, ViewRow, exceptions
+</code></pre>
+<h2 id="quickstart-sync">Quickstart — Sync</h2>
 <h3 id="connecting-to-a-database-server">Connecting to a database server</h3>
 <pre><code class="language-python">import couchdb3
 
@@ -70,15 +85,14 @@ client = couchdb3.Server(
 print(client.up())
 # True
 </code></pre>
-<p>user and password can also be passed into the Server constructor as keyword parameters, e.g.</p>
+<p>User and password can also be passed as keyword parameters:</p>
 <pre><code class="language-python">client = couchdb3.Server(
     &quot;127.0.0.1:5984&quot;,  # Scheme omitted - will assume http protocol
     user=&quot;user&quot;,
     password=&quot;password&quot;
 )
 </code></pre>
-<p>Both approaches are equivalent, i.e. in both cases the instance's <code>scheme,host,port,user,password</code> will be identical.</p>
-<p>Further, clients can be used with context managers:</p>
+<p>Both approaches are equivalent. Clients can also be used as context managers:</p>
 <pre><code class="language-python">with couchdb3.Server(&quot;http://user:password@127.0.0.1:5984&quot;) as client:
     # Do stuff
     ...
@@ -102,8 +116,8 @@ print(db.save(mydoc))
 <code>Database.create</code> does not.</p>
 <h3 id="updating-a-document">Updating a document</h3>
 <p>To update an existing document, retrieving the revision is paramount.
-In the example below, <code>dbdoc</code> contains the key <code>_rev</code> and the builtin <code>dict.update</code> function is used to update the
-document before saving it.</p>
+In the example below, <code>dbdoc</code> contains the key <code>_rev</code> and the builtin <code>dict.update</code> function is
+used to update the document before saving it.</p>
 <pre><code class="language-python">mydoc = {
     &quot;_id&quot;: &quot;mydoc-id&quot;,
     &quot;name&quot;: &quot;Hello World&quot;,
@@ -114,7 +128,7 @@ dbdoc.update(mydoc)
 print(db.save(dbdoc))
 # ('mydoc-id', True, '2-374aa8f0236b9120242ca64935e2e8f1')
 </code></pre>
-<p>Alternatively, one can use <code>Database.rev</code> to fetch the latest revision and overwrite the document</p>
+<p>Alternatively, one can use <code>Database.rev</code> to fetch the latest revision and overwrite the document:</p>
 <pre><code class="language-python">mydoc = {
     &quot;_id&quot;: &quot;mydoc-id&quot;,
     &quot;_rev&quot;: db.rev(&quot;mydoc-id&quot;),
@@ -125,7 +139,7 @@ print(db.save(mydoc))
 # ('mydoc-id', True, '3-d56b14b7ffb87960b51d03269990a30d')
 </code></pre>
 <h3 id="deleting-a-document">Deleting a document</h3>
-<p>To delete a document, the <code>docid</code> and <code>rev</code> are needed</p>
+<p>To delete a document, the <code>docid</code> and <code>rev</code> are needed:</p>
 <pre><code class="language-python">docid = &quot;mydoc-id&quot;
 print(db.delete(docid=docid, rev=db.rev(docid)))  # Fetch the revision on the go
 # True
@@ -182,28 +196,26 @@ for doc in result[&quot;docs&quot;]:
 plan = db.explain({&quot;type&quot;: {&quot;$eq&quot;: &quot;post&quot;}}, limit=10)
 </code></pre>
 <h3 id="working-with-partitions">Working with partitions</h3>
-<p>For a partitioned database, the <code><a title="couchdb3.database.Partition" href="database.html#couchdb3.database.Partition">Partition</a></code> class offers a wrapper around partitions (acting similarly
-to collections in Mongo). </p>
-<pre><code class="language-python">from couchdb3 import Server, Database, Partition
-
+<p>For a partitioned database, the <code><a title="couchdb3.sync.Partition" href="sync/index.html#couchdb3.sync.Partition">Partition</a></code> class offers a wrapper around
+partitions (acting similarly to collections in Mongo).</p>
+<pre><code class="language-python">from couchdb3.sync import Server, Database, Partition
 
 client: Server = Server(...)
 db: Database = client[&quot;some-db&quot;]
 partition: Partition = db.get_partition(&quot;partition_id&quot;)
 </code></pre>
-<p>Partition instances append the partition's ID the document IDs (<code>partition-id:doc-id</code>) for a simpler user interaction,
-e.g.</p>
+<p>Partition instances prepend the partition's ID to document IDs (<code>partition-id:doc-id</code>)
+for simpler user interaction:</p>
 <pre><code class="language-python">doc_id = &quot;test-id&quot;
-print(doc_id in partition)  # no need to append the partition's ID
+print(doc_id in partition)  # no need to prepend the partition's ID
 rev = partition.rev(doc_id)
 partition.save({
-    &quot;_id&quot;: doc_id,  # no need to append the partition's ID
+    &quot;_id&quot;: doc_id,  # no need to prepend the partition's ID
     &quot;_rev&quot;: rev,
     ...
 })
 </code></pre>
-<p>The partition ID will only be appended provided document IDs do not start with <code>partition-id</code>, e.g. the following will
-work and be equivalent to the previous example</p>
+<p>The partition ID will only be prepended if the document ID does not already start with it:</p>
 <pre><code class="language-python">doc_id = &quot;partition_id:test-id&quot;
 print(doc_id in partition)
 rev = partition.rev(doc_id)
@@ -213,17 +225,53 @@ partition.save({
     ...
 })
 </code></pre>
+<h2 id="quickstart-async">Quickstart — Async</h2>
+<h3 id="connecting-to-a-database-server_1">Connecting to a database server</h3>
+<pre><code class="language-python">import asyncio
+from couchdb3.aio import AsyncServer
+
+async def main():
+    async with AsyncServer(&quot;http://user:password@127.0.0.1:5984&quot;) as client:
+        print(await client.up())
+        # True
+
+asyncio.run(main())
+</code></pre>
+<h3 id="getting-or-creating-a-database_1">Getting or creating a database</h3>
+<pre><code class="language-python">async with AsyncServer(&quot;http://user:password@127.0.0.1:5984&quot;) as client:
+    dbname = &quot;mydb&quot;
+    all_dbs = await client.all_dbs()
+    db = await client.get(dbname) if dbname in all_dbs else await client.create(dbname)
+</code></pre>
+<h3 id="creating-and-fetching-documents">Creating and fetching documents</h3>
+<pre><code class="language-python">async with AsyncServer(&quot;http://user:password@127.0.0.1:5984&quot;) as client:
+    db = await client.get(&quot;mydb&quot;)
+
+    # Save a document
+    _id, ok, _rev = await db.save({&quot;_id&quot;: &quot;mydoc-id&quot;, &quot;name&quot;: &quot;Hello&quot;, &quot;type&quot;: &quot;World&quot;})
+
+    # Fetch a document
+    doc = await db.get(&quot;mydoc-id&quot;)
+    print(doc)
+
+    # Delete a document
+    await db.delete(docid=&quot;mydoc-id&quot;, rev=await db.rev(&quot;mydoc-id&quot;))
+</code></pre>
+<h3 id="async-context-manager-manual-lifecycle">Async context manager (manual lifecycle)</h3>
+<pre><code class="language-python">from couchdb3.aio import AsyncServer
+
+client = AsyncServer(&quot;http://user:password@127.0.0.1:5984&quot;)
+db = await client.get(&quot;mydb&quot;)
+doc = await db.get(&quot;mydoc-id&quot;)
+await client.aclose()  # must be called explicitly when not using async with
+</code></pre>
 </section>
 <section>
 <h2 class="section-title" id="header-submodules">Sub-modules</h2>
 <dl>
-<dt><code class="name"><a title="couchdb3.base" href="base.html">couchdb3.base</a></code></dt>
+<dt><code class="name"><a title="couchdb3.aio" href="aio/index.html">couchdb3.aio</a></code></dt>
 <dd>
-<div class="desc"></div>
-</dd>
-<dt><code class="name"><a title="couchdb3.database" href="database.html">couchdb3.database</a></code></dt>
-<dd>
-<div class="desc"></div>
+<div class="desc"><p>Asynchronous CouchDB client subpackage …</p></div>
 </dd>
 <dt><code class="name"><a title="couchdb3.document" href="document.html">couchdb3.document</a></code></dt>
 <dd>
@@ -233,9 +281,9 @@ partition.save({
 <dd>
 <div class="desc"></div>
 </dd>
-<dt><code class="name"><a title="couchdb3.server" href="server.html">couchdb3.server</a></code></dt>
+<dt><code class="name"><a title="couchdb3.sync" href="sync/index.html">couchdb3.sync</a></code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Synchronous CouchDB client subpackage …</p></div>
 </dd>
 <dt><code class="name"><a title="couchdb3.utils" href="utils.html">couchdb3.utils</a></code></dt>
 <dd>
@@ -261,7 +309,8 @@ partition.save({
 <li><a href="#disclaimer">Disclaimer</a></li>
 <li><a href="#requirements">Requirements</a></li>
 <li><a href="#installation">Installation</a></li>
-<li><a href="#quickstart">Quickstart</a><ul>
+<li><a href="#import-styles">Import styles</a></li>
+<li><a href="#quickstart-sync">Quickstart — Sync</a><ul>
 <li><a href="#connecting-to-a-database-server">Connecting to a database server</a></li>
 <li><a href="#getting-or-creating-a-database">Getting or creating a database</a></li>
 <li><a href="#creating-a-document">Creating a document</a></li>
@@ -273,6 +322,13 @@ partition.save({
 <li><a href="#working-with-partitions">Working with partitions</a></li>
 </ul>
 </li>
+<li><a href="#quickstart-async">Quickstart — Async</a><ul>
+<li><a href="#connecting-to-a-database-server_1">Connecting to a database server</a></li>
+<li><a href="#getting-or-creating-a-database_1">Getting or creating a database</a></li>
+<li><a href="#creating-and-fetching-documents">Creating and fetching documents</a></li>
+<li><a href="#async-context-manager-manual-lifecycle">Async context manager (manual lifecycle)</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -280,11 +336,10 @@ partition.save({
 <ul id="index">
 <li><h3><a href="#header-submodules">Sub-modules</a></h3>
 <ul>
-<li><code><a title="couchdb3.base" href="base.html">couchdb3.base</a></code></li>
-<li><code><a title="couchdb3.database" href="database.html">couchdb3.database</a></code></li>
+<li><code><a title="couchdb3.aio" href="aio/index.html">couchdb3.aio</a></code></li>
 <li><code><a title="couchdb3.document" href="document.html">couchdb3.document</a></code></li>
 <li><code><a title="couchdb3.exceptions" href="exceptions.html">couchdb3.exceptions</a></code></li>
-<li><code><a title="couchdb3.server" href="server.html">couchdb3.server</a></code></li>
+<li><code><a title="couchdb3.sync" href="sync/index.html">couchdb3.sync</a></code></li>
 <li><code><a title="couchdb3.utils" href="utils.html">couchdb3.utils</a></code></li>
 <li><code><a title="couchdb3.view" href="view.html">couchdb3.view</a></code></li>
 </ul>

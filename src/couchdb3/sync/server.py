@@ -5,14 +5,14 @@ import httpx
 
 from .base import Base
 from .database import Database
-from .exceptions import (
+from ..exceptions import (
     ConflictError,
     CouchDBError,
     NotFoundError,
     ProxySchemeComplianceError,
     UserIDComplianceError,
 )
-from .utils import (
+from ..utils import (
     DEFAULT_TIMEOUT,
     rm_nones_from_dict,
     user_name_to_id,
@@ -265,7 +265,7 @@ class Server(Base):
 
         Returns
         -------
-        couchdb3.database.Database
+        couchdb3.sync.Database
         """
         self._put(
             resource=name, query_kwargs={"q": q, "n": n, "partitioned": partitioned}
@@ -300,7 +300,7 @@ class Server(Base):
 
         Returns
         -------
-        couchdb3.database.Database
+        couchdb3.sync.Database
 
         """
         db = Database(

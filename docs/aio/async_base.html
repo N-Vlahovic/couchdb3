@@ -1,0 +1,847 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.6">
+<title>couchdb3.aio.async_base API documentation</title>
+<meta name="description" content="">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source > summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible;min-width:max-content}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin:1em 0}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+/* Collapse source docstrings */
+setTimeout(() => {
+[...document.querySelectorAll('.hljs.language-python > .hljs-string')]
+.filter(el => el.innerHTML.length > 200 && ['"""', "'''"].includes(el.innerHTML.substring(0, 3)))
+.forEach(el => {
+let d = document.createElement('details');
+d.classList.add('hljs-string');
+d.innerHTML = '<summary>"""</summary>' + el.innerHTML.substring(3);
+el.replaceWith(d);
+});
+}, 100);
+})</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>couchdb3.aio.async_base</code></h1>
+</header>
+<section id="section-intro">
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="couchdb3.aio.async_base.AsyncBase"><code class="flex name class">
+<span>class <span class="ident">AsyncBase</span></span>
+<span>(</span><span>url: str,<br>*,<br>port: int | None = None,<br>user: str | None = None,<br>password: str | None = None,<br>disable_ssl_verification: bool = False,<br>auth_method: str | None = None,<br>timeout: int | None = 300,<br>session: httpx.AsyncClient | None = None)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class AsyncBase:
+    &#34;&#34;&#34;
+    Abstract async base class. Mirrors `Base` but uses `httpx.AsyncClient`
+    and `async def` methods throughout.
+
+    Lifecycle must be managed via `async with` or explicit `await obj.aclose()`.
+    `__del__` is intentionally absent — `await` is not valid inside it.
+    &#34;&#34;&#34;
+
+    def __init__(
+        self,
+        url: str,
+        *,
+        port: int | None = None,
+        user: str | None = None,
+        password: str | None = None,
+        disable_ssl_verification: bool = False,
+        auth_method: str | None = None,
+        timeout: int | None = utils.DEFAULT_TIMEOUT,
+        session: httpx.AsyncClient | None = None,
+    ) -&gt; None:
+        &#34;&#34;&#34;
+
+        Parameters
+        ----------
+        url : str
+            The url of the CouchDB server formatted as `scheme://user:password@host:port`. For example:
+
+                &#34;http://user:password@127.0.0.1:5984&#34;
+                &#34;https://couchdb.example.com&#34;
+        port : int
+            The port of the CouchDB server. Can also be supplied via the url.
+        user : str
+            The CouchDB admin username. Can also be supplied via the url.
+        password : str
+            The CouchDB admin password. Can also be supplied via the url.
+        disable_ssl_verification : bool
+            Controls whether to verify the server&#39;s TLS certificate. Set to `True` when connecting
+            to a server with self-signed TLS certificates. Default `False`.
+        auth_method : str
+            Authentication method. Choices are `cookie` or `basic`.
+            Default is `couchdb3.utils.DEFAULT_AUTH_METHOD`.
+        timeout : int
+            The default timeout for requests. Default c.f. `couchdb3.utils.DEFAULT_TIMEOUT`.
+        session : httpx.AsyncClient
+            A specific async client to use. Optional — if not provided, a new client will be
+            initialized. When provided, the caller retains ownership and is responsible for closing
+            it; this instance will NOT close it on `aclose()`.
+        &#34;&#34;&#34;
+        auth_method = auth_method or utils.DEFAULT_AUTH_METHOD
+        if utils.validate_auth_method(auth_method=auth_method) is False:
+            raise exceptions.AuthenticationMethodError(
+                &#39;Invalid authentication method. Possible values are &#34;basic&#34; and &#34;cookie&#34;.&#39;
+            )
+        _ = utils.extract_url_data(url=url)
+        user = user or _[&#34;user&#34;]
+        password = password or _[&#34;password&#34;]
+        self.scheme = _[&#34;scheme&#34;]
+        self.host = _[&#34;host&#34;]
+        self.port = port or _[&#34;port&#34;]
+        self.root = None
+        self.disable_ssl_verification = disable_ssl_verification
+        # Track ownership so that child objects sharing a parent&#39;s session don&#39;t close it.
+        if session is not None:
+            self.session = session
+            self._owns_session = False
+        else:
+            self.session = httpx.AsyncClient(
+                verify=disable_ssl_verification is False,
+                headers={&#34;Accept&#34;: &#34;application/json&#34;, &#34;Content-type&#34;: &#34;application/json&#34;},
+            )
+            self._owns_session = True
+        self._user = user
+        self._password = password
+        self._auth = httpx.BasicAuth(user, password) if user and password else None
+        self.auth_method = auth_method
+        self.timeout = timeout
+        # Lock for cookie auth token renewal — prevents concurrent coroutines from
+        # each issuing a renewal POST when the token expires simultaneously.
+        self._auth_lock: asyncio.Lock = asyncio.Lock()
+
+    async def __aenter__(self):
+        &#34;&#34;&#34;
+        Enter method for use with `async with` statements.
+
+        Returns
+        -------
+        AsyncBase: The given instance.
+        &#34;&#34;&#34;
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb) -&gt; None:
+        &#34;&#34;&#34;
+        Exit method for use with `async with` statements. Closes the client
+        if this instance owns it.
+
+        Returns
+        -------
+        None
+        &#34;&#34;&#34;
+        await self.aclose()
+
+    def __repr__(self) -&gt; str:
+        &#34;&#34;&#34;
+        Basic repr.
+
+        Returns
+        -------
+        str: The instance&#39;s representation.
+        &#34;&#34;&#34;
+        return self.__class__.__name__
+
+    @property
+    def basic(self) -&gt; str:
+        return utils.basic_auth(user=self._user, password=self._password)
+
+    @property
+    def url(self) -&gt; str:
+        &#34;&#34;&#34;
+
+        Returns
+        -------
+        str: The instance&#39;s url parsed using its scheme, root and port.
+        &#34;&#34;&#34;
+        url = f&#34;{self.scheme}://{self.host}&#34;
+        if self.port:
+            url += f&#34;:{self.port}&#34;
+        if self.root:
+            url += f&#34;/{self.root}&#34;
+        return url
+
+    async def aclose(self) -&gt; None:
+        &#34;&#34;&#34;
+        Close the underlying async client, but only if this instance owns it.
+
+        Returns
+        -------
+        None
+        &#34;&#34;&#34;
+        if self._owns_session:
+            await self.session.aclose()
+
+    def _is_auth_token_expired(self) -&gt; bool:
+        &#34;&#34;&#34;
+        Check if the authentication token is expired. Synchronous — reads a
+        timestamp only, no I/O.
+
+        Returns
+        -------
+        bool : `True` if the auth token is expired or absent.
+        &#34;&#34;&#34;
+        try:
+            return (
+                next(
+                    _.expires
+                    for _ in self.session.cookies.jar
+                    if _.name == &#34;AuthSession&#34;
+                )
+                &lt;= datetime.now(UTC).timestamp()
+            )
+        except StopIteration:
+            return True
+
+    async def _renew_auth_token(self) -&gt; None:
+        &#34;&#34;&#34;
+        Send a `POST` request to the `_session` endpoint to obtain a fresh cookie token.
+
+        Protected by a double-checked `asyncio.Lock` so that concurrent coroutines
+        that simultaneously detect an expired token only issue a single renewal POST.
+
+        Returns
+        -------
+        None
+        &#34;&#34;&#34;
+        async with self._auth_lock:
+            # Re-check inside the lock: another coroutine may have already renewed
+            # the token while this one was waiting to acquire the lock.
+            if self._is_auth_token_expired():
+                await self._post(
+                    resource=&#34;_session&#34;,
+                    body={&#34;name&#34;: self._user, &#34;password&#34;: self._password},
+                    auth_method=&#34;basic&#34;,
+                    root=&#34;&#34;,
+                )
+
+    async def _request(
+        self,
+        *,
+        method: str,
+        resource: str | None = None,
+        body: dict | list | None = None,
+        query_kwargs: dict | None = None,
+        auth_method: str | None = None,
+        root: str | None = None,
+        timeout: int | None = None,
+        **req_kwargs,
+    ) -&gt; httpx.Response:
+        &#34;&#34;&#34;
+        Abstract async request dispatcher.
+
+        Parameters
+        ----------
+        method : str
+            The HTTP method.
+        resource : str
+            The resource to fetch (relative to the host). Default `None`.
+        body : dict | list
+            The request body. Default `None`.
+        query_kwargs : dict
+            Query parameters to encode into the URL. Default `None`.
+        auth_method : str
+            Authentication method override. Choices are `cookie` or `basic`. Default `None`.
+        root : str
+            A root path relative to the server URL, e.g. `&#34;dbname&#34;`. Default `None`.
+        timeout : int
+            Request-level timeout override. Default `None`.
+        req_kwargs
+            Further `httpx.AsyncClient.request` keyword parameters.
+
+        Returns
+        -------
+        httpx.Response
+        &#34;&#34;&#34;
+        auth_method = auth_method or self.auth_method
+        root = root if isinstance(root, str) else self.root
+        path = &#34;&#34;
+        if root:
+            path += root
+        if body and isinstance(body, dict):
+            for k in utils.COUCH_DB_RESERVED_DOC_FIELDS:
+                if k in body and body.get(k) is None:
+                    del body[k]
+        if resource:
+            path += f&#34;/{resource}&#34;
+        if auth_method == &#34;basic&#34;:
+            req_kwargs.update({&#34;auth&#34;: self._auth})
+        elif auth_method == &#34;cookie&#34;:
+            if self._is_auth_token_expired():
+                await self._renew_auth_token()
+        response = await self.session.request(
+            method=method,
+            url=utils.build_url(
+                scheme=self.scheme,
+                host=self.host,
+                path=path,
+                port=self.port,
+                **(query_kwargs or {}),
+            ),
+            json=body,
+            timeout=timeout or self.timeout,
+            **req_kwargs,
+        )
+        utils.check_response(response=response)
+        return response
+
+    async def _delete(
+        self,
+        resource: str | None = None,
+        *,
+        timeout: int = utils.DEFAULT_TIMEOUT,
+        query_kwargs: dict | None = None,
+        auth_method: str | None = None,
+        root: str | None = None,
+        **req_kwargs,
+    ) -&gt; httpx.Response:
+        &#34;&#34;&#34;
+        Async DELETE request.
+
+        Parameters
+        ----------
+        resource : str
+            The resource to fetch (relative to the host). Default `None`.
+        timeout : int
+            The request&#39;s timeout. Default c.f. `couchdb3.utils.DEFAULT_TIMEOUT`.
+        query_kwargs : dict
+            Query parameters. Default `None`.
+        auth_method : str
+            Authentication method override. Default `None`.
+        root : str
+            Root path override. Default `None`.
+        req_kwargs
+            Further `httpx.AsyncClient.request` keyword parameters.
+
+        Returns
+        -------
+        httpx.Response
+        &#34;&#34;&#34;
+        return await self._request(
+            method=&#34;DELETE&#34;,
+            resource=resource,
+            timeout=timeout,
+            query_kwargs=query_kwargs,
+            auth_method=auth_method,
+            root=root,
+            **req_kwargs,
+        )
+
+    async def _get(
+        self,
+        resource: str | None = None,
+        *,
+        timeout: int = utils.DEFAULT_TIMEOUT,
+        query_kwargs: dict | None = None,
+        auth_method: str | None = None,
+        root: str | None = None,
+        **req_kwargs,
+    ) -&gt; httpx.Response:
+        &#34;&#34;&#34;
+        Async GET request.
+
+        Parameters
+        ----------
+        resource : str
+            The resource to fetch (relative to the host). Default `None`.
+        timeout : int
+            The request&#39;s timeout. Default c.f. `couchdb3.utils.DEFAULT_TIMEOUT`.
+        query_kwargs : dict
+            Query parameters. Default `None`.
+        auth_method : str
+            Authentication method override. Default `None`.
+        root : str
+            Root path override. Default `None`.
+        req_kwargs
+            Further `httpx.AsyncClient.request` keyword parameters.
+
+        Returns
+        -------
+        httpx.Response
+        &#34;&#34;&#34;
+        return await self._request(
+            method=&#34;GET&#34;,
+            resource=resource,
+            timeout=timeout,
+            query_kwargs=query_kwargs,
+            auth_method=auth_method,
+            root=root,
+            **req_kwargs,
+        )
+
+    async def _head(
+        self,
+        resource: str | None = None,
+        *,
+        timeout: int | None = None,
+        query_kwargs: dict | None = None,
+        auth_method: str | None = None,
+        root: str | None = None,
+        **req_kwargs,
+    ) -&gt; httpx.Response:
+        &#34;&#34;&#34;
+        Async HEAD request.
+
+        Parameters
+        ----------
+        resource : str
+            The resource to fetch (relative to the host). Default `None`.
+        timeout : int
+            The request&#39;s timeout. Default `None`.
+        query_kwargs : dict
+            Query parameters. Default `None`.
+        auth_method : str
+            Authentication method override. Default `None`.
+        root : str
+            Root path override. Default `None`.
+        req_kwargs
+            Further `httpx.AsyncClient.request` keyword parameters.
+
+        Returns
+        -------
+        httpx.Response
+        &#34;&#34;&#34;
+        return await self._request(
+            method=&#34;HEAD&#34;,
+            resource=resource,
+            timeout=timeout,
+            query_kwargs=query_kwargs,
+            auth_method=auth_method,
+            root=root,
+            **req_kwargs,
+        )
+
+    async def _post(
+        self,
+        resource: str | None = None,
+        *,
+        body: dict | list | None = None,
+        timeout: int | None = None,
+        query_kwargs: dict | None = None,
+        auth_method: str | None = None,
+        root: str | None = None,
+        **req_kwargs,
+    ) -&gt; httpx.Response:
+        &#34;&#34;&#34;
+        Async POST request.
+
+        Parameters
+        ----------
+        resource : str
+            The resource to fetch (relative to the host). Default `None`.
+        body : dict | list
+            The request body. Default `None`.
+        timeout : int
+            The request&#39;s timeout. Default `None`.
+        query_kwargs : dict
+            Query parameters. Default `None`.
+        auth_method : str
+            Authentication method override. Default `None`.
+        root : str
+            Root path override. Default `None`.
+        req_kwargs
+            Further `httpx.AsyncClient.request` keyword parameters.
+
+        Returns
+        -------
+        httpx.Response
+        &#34;&#34;&#34;
+        return await self._request(
+            method=&#34;POST&#34;,
+            resource=resource,
+            body=body,
+            timeout=timeout,
+            query_kwargs=query_kwargs,
+            auth_method=auth_method,
+            root=root,
+            **req_kwargs,
+        )
+
+    async def _put(
+        self,
+        resource: str | None = None,
+        *,
+        body: dict | list | None = None,
+        timeout: int | None = None,
+        query_kwargs: dict | None = None,
+        auth_method: str | None = None,
+        root: str | None = None,
+        **req_kwargs,
+    ) -&gt; httpx.Response:
+        &#34;&#34;&#34;
+        Async PUT request.
+
+        Parameters
+        ----------
+        resource : str
+            The resource to fetch (relative to the host). Default `None`.
+        body : dict | list
+            The request body. Default `None`.
+        timeout : int
+            The request&#39;s timeout. Default `None`.
+        query_kwargs : dict
+            Query parameters. Default `None`.
+        auth_method : str
+            Authentication method override. Default `None`.
+        root : str
+            Root path override. Default `None`.
+        req_kwargs
+            Further `httpx.AsyncClient.request` keyword parameters.
+
+        Returns
+        -------
+        httpx.Response
+        &#34;&#34;&#34;
+        return await self._request(
+            method=&#34;PUT&#34;,
+            resource=resource,
+            body=body,
+            timeout=timeout,
+            query_kwargs=query_kwargs,
+            auth_method=auth_method,
+            root=root,
+            **req_kwargs,
+        )
+
+    async def check(self, resource: str | None = None) -&gt; bool:
+        &#34;&#34;&#34;
+        Check the server or database by sending a `HEAD` request to `/self.root`.
+
+        Parameters
+        ----------
+        resource : str
+            The resource to fetch (relative to the host). Default `None`.
+
+        Returns
+        -------
+        bool: `True` if the server is up or the database exists.
+        &#34;&#34;&#34;
+        try:
+            utils.check_response(await self._head(resource=resource))
+            return True
+        except (exceptions.CouchDBError, httpx.RequestError):
+            return False
+
+    async def info(self, partition: str | None = None) -&gt; dict:
+        &#34;&#34;&#34;
+        Return a server&#39;s or database&#39;s info by sending a `GET` request to `/self.root`.
+
+        Parameters
+        ----------
+        partition : str
+            A specific partition of the database. Only valid for partitioned databases.
+            Default is `None`.
+
+        Returns
+        -------
+        dict: A dictionary containing the server&#39;s or database&#39;s info.
+        &#34;&#34;&#34;
+        return (
+            await self._get(resource=f&#34;_partition/{partition}&#34; if partition else None)
+        ).json()
+
+    async def rev(self, resource: str) -&gt; str | None:
+        &#34;&#34;&#34;
+        Safely retrieves a resource&#39;s revision via a lightweight `HEAD` request,
+        reading the `&#34;ETag&#34;` response header.
+
+        Returns `None` if the resource is not found, rather than raising
+        `couchdb3.exceptions.NotFoundError`.
+
+        Parameters
+        ----------
+        resource : str
+            The resource to fetch (relative to the host).
+
+        Returns
+        -------
+        str | None : The resource&#39;s current revision.
+        &#34;&#34;&#34;
+        rev = None
+        try:
+            rev = (await self._head(resource=resource)).headers.get(&#34;ETag&#34;).strip(&#39;&#34;&#39;)
+        except exceptions.NotFoundError:
+            pass
+        return rev</code></pre>
+</details>
+<div class="desc"><p>Abstract async base class. Mirrors <code>Base</code> but uses <code>httpx.AsyncClient</code>
+and <code>async def</code> methods throughout.</p>
+<p>Lifecycle must be managed via <code>async with</code> or explicit <code>await obj.aclose()</code>.
+<code>__del__</code> is intentionally absent — <code>await</code> is not valid inside it.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>url</code></strong> :&ensp;<code>str</code></dt>
+<dd>The url of the CouchDB server formatted as <code>scheme://user:password@host:port</code>. For example:<pre><code>"http://user:password@127.0.0.1:5984"
+"https://couchdb.example.com"
+</code></pre>
+</dd>
+<dt><strong><code>port</code></strong> :&ensp;<code>int</code></dt>
+<dd>The port of the CouchDB server. Can also be supplied via the url.</dd>
+<dt><strong><code>user</code></strong> :&ensp;<code>str</code></dt>
+<dd>The CouchDB admin username. Can also be supplied via the url.</dd>
+<dt><strong><code>password</code></strong> :&ensp;<code>str</code></dt>
+<dd>The CouchDB admin password. Can also be supplied via the url.</dd>
+<dt><strong><code>disable_ssl_verification</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Controls whether to verify the server's TLS certificate. Set to <code>True</code> when connecting
+to a server with self-signed TLS certificates. Default <code>False</code>.</dd>
+<dt><strong><code>auth_method</code></strong> :&ensp;<code>str</code></dt>
+<dd>Authentication method. Choices are <code>cookie</code> or <code>basic</code>.
+Default is <code><a title="couchdb3.utils.DEFAULT_AUTH_METHOD" href="../utils.html#couchdb3.utils.DEFAULT_AUTH_METHOD">DEFAULT_AUTH_METHOD</a></code>.</dd>
+<dt><strong><code>timeout</code></strong> :&ensp;<code>int</code></dt>
+<dd>The default timeout for requests. Default c.f. <code><a title="couchdb3.utils.DEFAULT_TIMEOUT" href="../utils.html#couchdb3.utils.DEFAULT_TIMEOUT">DEFAULT_TIMEOUT</a></code>.</dd>
+<dt><strong><code>session</code></strong> :&ensp;<code>httpx.AsyncClient</code></dt>
+<dd>A specific async client to use. Optional — if not provided, a new client will be
+initialized. When provided, the caller retains ownership and is responsible for closing
+it; this instance will NOT close it on <code>aclose()</code>.</dd>
+</dl></div>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="couchdb3.aio.async_database.AsyncDatabase" href="async_database.html#couchdb3.aio.async_database.AsyncDatabase">AsyncDatabase</a></li>
+<li><a title="couchdb3.aio.async_server.AsyncServer" href="async_server.html#couchdb3.aio.async_server.AsyncServer">AsyncServer</a></li>
+</ul>
+<h3>Instance variables</h3>
+<dl>
+<dt id="couchdb3.aio.async_base.AsyncBase.basic"><code class="name">prop <span class="ident">basic</span> : str</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def basic(self) -&gt; str:
+    return utils.basic_auth(user=self._user, password=self._password)</code></pre>
+</details>
+<div class="desc"></div>
+</dd>
+<dt id="couchdb3.aio.async_base.AsyncBase.url"><code class="name">prop <span class="ident">url</span> : str</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def url(self) -&gt; str:
+    &#34;&#34;&#34;
+
+    Returns
+    -------
+    str: The instance&#39;s url parsed using its scheme, root and port.
+    &#34;&#34;&#34;
+    url = f&#34;{self.scheme}://{self.host}&#34;
+    if self.port:
+        url += f&#34;:{self.port}&#34;
+    if self.root:
+        url += f&#34;/{self.root}&#34;
+    return url</code></pre>
+</details>
+<div class="desc"><h2 id="returns">Returns</h2>
+<p>str: The instance's url parsed using its scheme, root and port.</p></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="couchdb3.aio.async_base.AsyncBase.aclose"><code class="name flex">
+<span>async def <span class="ident">aclose</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def aclose(self) -&gt; None:
+    &#34;&#34;&#34;
+    Close the underlying async client, but only if this instance owns it.
+
+    Returns
+    -------
+    None
+    &#34;&#34;&#34;
+    if self._owns_session:
+        await self.session.aclose()</code></pre>
+</details>
+<div class="desc"><p>Close the underlying async client, but only if this instance owns it.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>None</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+</dd>
+<dt id="couchdb3.aio.async_base.AsyncBase.check"><code class="name flex">
+<span>async def <span class="ident">check</span></span>(<span>self, resource: str | None = None) ‑> bool</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def check(self, resource: str | None = None) -&gt; bool:
+    &#34;&#34;&#34;
+    Check the server or database by sending a `HEAD` request to `/self.root`.
+
+    Parameters
+    ----------
+    resource : str
+        The resource to fetch (relative to the host). Default `None`.
+
+    Returns
+    -------
+    bool: `True` if the server is up or the database exists.
+    &#34;&#34;&#34;
+    try:
+        utils.check_response(await self._head(resource=resource))
+        return True
+    except (exceptions.CouchDBError, httpx.RequestError):
+        return False</code></pre>
+</details>
+<div class="desc"><p>Check the server or database by sending a <code>HEAD</code> request to <code>/self.root</code>.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>resource</code></strong> :&ensp;<code>str</code></dt>
+<dd>The resource to fetch (relative to the host). Default <code>None</code>.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>bool: <code>True</code> if the server is up or the database exists.</p></div>
+</dd>
+<dt id="couchdb3.aio.async_base.AsyncBase.info"><code class="name flex">
+<span>async def <span class="ident">info</span></span>(<span>self, partition: str | None = None) ‑> dict</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def info(self, partition: str | None = None) -&gt; dict:
+    &#34;&#34;&#34;
+    Return a server&#39;s or database&#39;s info by sending a `GET` request to `/self.root`.
+
+    Parameters
+    ----------
+    partition : str
+        A specific partition of the database. Only valid for partitioned databases.
+        Default is `None`.
+
+    Returns
+    -------
+    dict: A dictionary containing the server&#39;s or database&#39;s info.
+    &#34;&#34;&#34;
+    return (
+        await self._get(resource=f&#34;_partition/{partition}&#34; if partition else None)
+    ).json()</code></pre>
+</details>
+<div class="desc"><p>Return a server's or database's info by sending a <code>GET</code> request to <code>/self.root</code>.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>partition</code></strong> :&ensp;<code>str</code></dt>
+<dd>A specific partition of the database. Only valid for partitioned databases.
+Default is <code>None</code>.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>dict: A dictionary containing the server's or database's info.</p></div>
+</dd>
+<dt id="couchdb3.aio.async_base.AsyncBase.rev"><code class="name flex">
+<span>async def <span class="ident">rev</span></span>(<span>self, resource: str) ‑> str | None</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def rev(self, resource: str) -&gt; str | None:
+    &#34;&#34;&#34;
+    Safely retrieves a resource&#39;s revision via a lightweight `HEAD` request,
+    reading the `&#34;ETag&#34;` response header.
+
+    Returns `None` if the resource is not found, rather than raising
+    `couchdb3.exceptions.NotFoundError`.
+
+    Parameters
+    ----------
+    resource : str
+        The resource to fetch (relative to the host).
+
+    Returns
+    -------
+    str | None : The resource&#39;s current revision.
+    &#34;&#34;&#34;
+    rev = None
+    try:
+        rev = (await self._head(resource=resource)).headers.get(&#34;ETag&#34;).strip(&#39;&#34;&#39;)
+    except exceptions.NotFoundError:
+        pass
+    return rev</code></pre>
+</details>
+<div class="desc"><p>Safely retrieves a resource's revision via a lightweight <code>HEAD</code> request,
+reading the <code>"ETag"</code> response header.</p>
+<p>Returns <code>None</code> if the resource is not found, rather than raising
+<code><a title="couchdb3.exceptions.NotFoundError" href="../exceptions.html#couchdb3.exceptions.NotFoundError">NotFoundError</a></code>.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>resource</code></strong> :&ensp;<code>str</code></dt>
+<dd>The resource to fetch (relative to the host).</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>str | None : The resource's current revision.</p></div>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="couchdb3.aio" href="index.html">couchdb3.aio</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="couchdb3.aio.async_base.AsyncBase" href="#couchdb3.aio.async_base.AsyncBase">AsyncBase</a></code></h4>
+<ul class="two-column">
+<li><code><a title="couchdb3.aio.async_base.AsyncBase.aclose" href="#couchdb3.aio.async_base.AsyncBase.aclose">aclose</a></code></li>
+<li><code><a title="couchdb3.aio.async_base.AsyncBase.basic" href="#couchdb3.aio.async_base.AsyncBase.basic">basic</a></code></li>
+<li><code><a title="couchdb3.aio.async_base.AsyncBase.check" href="#couchdb3.aio.async_base.AsyncBase.check">check</a></code></li>
+<li><code><a title="couchdb3.aio.async_base.AsyncBase.info" href="#couchdb3.aio.async_base.AsyncBase.info">info</a></code></li>
+<li><code><a title="couchdb3.aio.async_base.AsyncBase.rev" href="#couchdb3.aio.async_base.AsyncBase.rev">rev</a></code></li>
+<li><code><a title="couchdb3.aio.async_base.AsyncBase.url" href="#couchdb3.aio.async_base.AsyncBase.url">url</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.6</a>.</p>
+</footer>
+</body>
+</html>

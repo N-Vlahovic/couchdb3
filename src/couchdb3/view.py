@@ -2,8 +2,7 @@
 
 from typing import Any
 
-from .base import DictBase
-from .document import Document
+from .document import DictBase, Document
 
 
 class ViewRow(DictBase):

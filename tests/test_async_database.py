@@ -1,0 +1,301 @@
+#!/usr/bin/env python3
+
+import atexit
+import random
+import string
+import unittest
+
+from couchdb3.aio import AsyncDatabase, AsyncPartition, AsyncServer
+from couchdb3.document import AttachmentDocument, Document
+from couchdb3.sync import Server
+from couchdb3.utils import MimeTypeEnum, user_name_to_id
+from couchdb3.view import ViewResult, ViewRow
+from tests.credentials import (
+    ATTACHMENT_PATH_HTML,
+    ATTACHMENT_PATH_JSON,
+    ATTACHMENT_PATH_PDF,
+    ATTACHMENT_PATH_PNG,
+    ATTACHMENT_PATH_TXT,
+    COUCHDB0_URL,
+    COUCHDB_PASSWORD,
+    COUCHDB_USER,
+    DOCUMENT_VIEW,
+)
+
+DB_NAME: str = "test-async-" + "".join(random.choices(string.ascii_lowercase, k=5))
+DB_NAME_PARTITIONED: str = f"{DB_NAME}-partitioned"
+
+DDOC_ID: str = "document-design"
+P_ID: str = "p0"
+VIEW_ID: str = "document-view"
+
+# Sync client for atexit cleanup only
+_SYNC_CLIENT: Server = Server(
+    url=COUCHDB0_URL, user=COUCHDB_USER, password=COUCHDB_PASSWORD
+)
+
+
+class TestAsyncDatabase(unittest.IsolatedAsyncioTestCase):
+    async def asyncSetUp(self):
+        self.server = AsyncServer(
+            url=COUCHDB0_URL, user=COUCHDB_USER, password=COUCHDB_PASSWORD
+        )
+        all_dbs = await self.server.all_dbs()
+        if DB_NAME in all_dbs:
+            self.db = await self.server.get(DB_NAME)
+        else:
+            self.db = await self.server.create(DB_NAME)
+        if DB_NAME_PARTITIONED in all_dbs:
+            self.db_partitioned = await self.server.get(DB_NAME_PARTITIONED)
+        else:
+            self.db_partitioned = await self.server.create(
+                DB_NAME_PARTITIONED, partitioned=True
+            )
+
+    async def asyncTearDown(self):
+        await self.server.aclose()
+
+    async def test_all_docs(self):
+        docs = [
+            {"_id": f"test-async-all-docs-{i}", "name": f"Document {i}"}
+            for i in range(5)
+        ]
+        await self.db.bulk_docs(docs=docs)
+        result = await self.db.all_docs(keys=[d["_id"] for d in docs])
+        self.assertIsInstance(result, ViewResult)
+        self.assertEqual(len(result.rows), 5)
+        result = await self.db.all_docs(
+            keys=[d["_id"] for d in docs], include_docs=True
+        )
+        for row in result.rows:
+            self.assertIsInstance(row, ViewRow)
+            self.assertIsInstance(row.doc, Document)
+
+    async def test_bulk_docs(self):
+        docs = [
+            {"_id": f"test-async-bulk-{i}", "name": f"Document {i}"}
+            for i in range(5)
+        ]
+        results = await self.db.bulk_docs(docs=docs)
+        self.assertIsInstance(results, list)
+        for doc, res in zip(docs, results):
+            self.assertEqual(doc["_id"], res["id"])
+            self.assertIsInstance(res["rev"], str)
+            self.assertTrue(res["ok"])
+
+    async def test_bulk_get(self):
+        docs = [
+            {"_id": f"test-async-bulk-get-{i}", "name": f"Document {i}"}
+            for i in range(5)
+        ]
+        await self.db.bulk_docs(docs=docs)
+        results = await self.db.bulk_get(
+            docs=[{"id": d["_id"]} for d in docs]
+        )
+        self.assertIsInstance(results, list)
+        for res in results:
+            self.assertIn("id", res)
+            self.assertIn("docs", res)
+
+    async def test_compact(self):
+        result = await self.db.compact()
+        self.assertTrue(result)
+
+    async def test_create(self):
+        docid = "test-async-create"
+        _id, ok, _rev = await self.db.create({"_id": docid, "type": "test"})
+        self.assertEqual(_id, docid)
+        self.assertTrue(ok)
+        self.assertIsInstance(_rev, str)
+
+    async def test_delete(self):
+        docid = "test-async-delete"
+        await self.db.save({"_id": docid})
+        rev = await self.db.rev(docid)
+        self.assertTrue(await self.db.delete(docid=docid, rev=rev))
+
+    async def test_delete_attachment(self):
+        docid = "test-async-delete-attachment"
+        await self.db.save({"_id": docid})
+        content_type = MimeTypeEnum.mime_type_json.value
+        attname = "test-att.json"
+        rev = await self.db.rev(docid)
+        await self.db.put_attachment(
+            docid=docid,
+            attname=attname,
+            content=b'{"hello": "world"}',
+            content_type=content_type,
+            rev=rev,
+        )
+        rev = await self.db.rev(docid)
+        self.assertTrue(
+            await self.db.delete_attachment(
+                docid=docid, attname=attname, rev=rev
+            )
+        )
+
+    async def test_find(self):
+        await self.db.save_index(
+            index={"fields": ["type"]}, name="async-type-idx"
+        )
+        docs = [
+            {"_id": f"test-async-find-{i}", "type": "async-find-test"}
+            for i in range(3)
+        ]
+        await self.db.bulk_docs(docs=docs)
+        result = await self.db.find(
+            {"type": {"$eq": "async-find-test"}}, fields=["_id", "type"]
+        )
+        self.assertIn("docs", result)
+        self.assertIsInstance(result["docs"], list)
+
+    async def test_get(self):
+        docid = "test-async-get"
+        await self.db.save({"_id": docid, "name": "hello"})
+        doc = await self.db.get(docid)
+        self.assertIsInstance(doc, Document)
+        self.assertEqual(doc.id, docid)
+        missing = await self.db.get("nonexistent-doc-async")
+        self.assertIsNone(missing)
+
+    async def test_get_attachment(self):
+        docid = "test-async-get-attachment"
+        attname = "hello.txt"
+        content = b"hello async world"
+        await self.db.save({"_id": docid})
+        rev = await self.db.rev(docid)
+        await self.db.put_attachment(
+            docid=docid,
+            attname=attname,
+            content=content,
+            content_type="text/plain",
+            rev=rev,
+        )
+        att = await self.db.get_attachment(docid=docid, attname=attname)
+        self.assertIsInstance(att, AttachmentDocument)
+        self.assertEqual(att.content, content)
+
+    async def test_indexes(self):
+        result = await self.db.indexes()
+        self.assertIsInstance(result, dict)
+        self.assertIn("indexes", result)
+
+    async def test_put_attachment_from_path(self):
+        docid = "test-async-put-attachment-path"
+        await self.db.save({"_id": docid})
+        for path in [
+            ATTACHMENT_PATH_TXT,
+            ATTACHMENT_PATH_JSON,
+            ATTACHMENT_PATH_PNG,
+            ATTACHMENT_PATH_HTML,
+            ATTACHMENT_PATH_PDF,
+        ]:
+            rev = await self.db.rev(docid)
+            attname = path.split("/")[-1]
+            _id, ok, _rev = await self.db.put_attachment(
+                docid=docid, attname=attname, path=path, rev=rev
+            )
+            self.assertEqual(_id, docid)
+            self.assertTrue(ok)
+
+    async def test_put_design(self):
+        db = await self.server.get(DB_NAME)
+        rev = await db.rev(f"_design/{DDOC_ID}")
+        _id, ok, _rev = await db.put_design(
+            DDOC_ID,
+            rev=rev,
+            views={VIEW_ID: {"map": DOCUMENT_VIEW}},
+        )
+        self.assertIsInstance(_id, str)
+        self.assertTrue(ok)
+        self.assertIsInstance(_rev, str)
+
+    async def test_save(self):
+        doc = {"_id": "test-async-save", "name": "hello async"}
+        _id, ok, _rev = await self.db.save(doc)
+        self.assertEqual(_id, doc["_id"])
+        self.assertTrue(ok)
+        self.assertIsInstance(_rev, str)
+        # Update
+        doc["_rev"] = _rev
+        doc["name"] = "updated async"
+        _id2, ok2, _rev2 = await self.db.save(doc)
+        self.assertEqual(_id2, _id)
+        self.assertTrue(ok2)
+        self.assertNotEqual(_rev2, _rev)
+
+    async def test_save_index(self):
+        result, _id, name = await self.db.save_index(
+            index={"fields": ["name"]},
+            name="async-name-idx",
+            index_type="json",
+        )
+        self.assertIn(result, ["created", "exists"])
+        self.assertIsInstance(_id, str)
+        self.assertIsInstance(name, str)
+
+    async def test_security(self):
+        from couchdb3.document import SecurityDocument
+        sec = await self.db.security()
+        self.assertIsInstance(sec, SecurityDocument)
+
+    async def test_view(self):
+        docid = "test-async-view-doc"
+        db = await self.server.get(DB_NAME)
+        if not await db.rev(f"_design/{DDOC_ID}"):
+            await db.put_design(
+                DDOC_ID, views={VIEW_ID: {"map": DOCUMENT_VIEW}}
+            )
+        if not await db.rev(docid):
+            await db.save({"_id": docid, "type": "document"})
+        result = await db.view(DDOC_ID, VIEW_ID)
+        self.assertIsInstance(result, ViewResult)
+
+
+class TestAsyncPartition(unittest.IsolatedAsyncioTestCase):
+    async def asyncSetUp(self):
+        self.server = AsyncServer(
+            url=COUCHDB0_URL, user=COUCHDB_USER, password=COUCHDB_PASSWORD
+        )
+        all_dbs = await self.server.all_dbs()
+        if DB_NAME_PARTITIONED not in all_dbs:
+            await self.server.create(DB_NAME_PARTITIONED, partitioned=True)
+        self.db = await self.server.get(DB_NAME_PARTITIONED)
+        self.partition = await self.db.get_partition(P_ID)
+
+    async def asyncTearDown(self):
+        await self.server.aclose()
+
+    async def test_partition_info(self):
+        info = await self.partition.info()
+        self.assertIsInstance(info, dict)
+
+    async def test_partition_save_get(self):
+        docid = "test-async-partition-doc"
+        await self.partition.save({"_id": docid, "type": "partition-test"})
+        doc = await self.partition.get(docid)
+        self.assertIsInstance(doc, Document)
+        self.assertIn(P_ID, doc.id)
+
+    async def test_partition_all_docs(self):
+        result = await self.partition.all_docs()
+        self.assertIsInstance(result, ViewResult)
+
+    async def test_partition_find(self):
+        result = await self.partition.find({"type": {"$eq": "partition-test"}})
+        self.assertIn("docs", result)
+
+    async def test_partition_type(self):
+        self.assertIsInstance(self.partition, AsyncPartition)
+
+
+@atexit.register
+def rm_test_dbs() -> None:
+    """Remove temporary async database test DBs using the sync client."""
+    for dbname in [DB_NAME, DB_NAME_PARTITIONED]:
+        if dbname in _SYNC_CLIENT:
+            _SYNC_CLIENT.delete(dbname)
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -1,15 +1,15 @@
 __doc__ = """# CouchDB3
 
-*CouchDB3* is a wrapper around the CouchDB API. For more detailed information, please refer to 
+*CouchDB3* is a wrapper around the CouchDB API. For more detailed information, please refer to
 [the documentation](https://n-vlahovic.github.io/couchdb3/).
 
 ## Disclaimer
 
-Big parts of the documentation (and thus docstrings) have been copied from CouchDB's API's great 
+Big parts of the documentation (and thus docstrings) have been copied from CouchDB's API's great
 [official documentation](https://docs.couchdb.org/en/main/api/index.html).
 
 
-## Requirements  
+## Requirements
 
 - Python version `>= 3.11`
 - CouchDB version `3.x`
@@ -31,7 +31,26 @@ git clone https://github.com/n-Vlahovic/couchdb3
 python -m pip install -e couchdb3
 ```
 
-## Quickstart
+## Import styles
+
+All public classes are available flat from `couchdb3` for backward compatibility.
+Explicit subpackage imports are also supported for clarity:
+
+```python
+# Flat (backward-compatible)
+from couchdb3 import Server, AsyncServer, Document
+
+# Explicit sync subpackage
+from couchdb3.sync import Server, Database, Partition
+
+# Explicit async subpackage
+from couchdb3.aio import AsyncServer, AsyncDatabase, AsyncPartition
+
+# Shared types always from couchdb3 directly
+from couchdb3 import Document, ViewResult, ViewRow, exceptions
+```
+
+## Quickstart — Sync
 
 ### Connecting to a database server
 
@@ -47,7 +66,7 @@ print(client.up())
 # True
 ```
 
-user and password can also be passed into the Server constructor as keyword parameters, e.g.
+User and password can also be passed as keyword parameters:
 
 ```python
 client = couchdb3.Server(
@@ -57,9 +76,8 @@ client = couchdb3.Server(
 )
 ```
 
-Both approaches are equivalent, i.e. in both cases the instance's `scheme,host,port,user,password` will be identical.
+Both approaches are equivalent. Clients can also be used as context managers:
 
-Further, clients can be used with context managers:
 ```python
 with couchdb3.Server("http://user:password@127.0.0.1:5984") as client:
     # Do stuff
@@ -84,13 +102,13 @@ mydoc = {
 print(db.save(mydoc))
 # ('mydoc-id', True, '1-24fa3b3fd2691da9649dd6abe3cafc7e')
 ```
-Note: `Database.save` requires the document to have an id (i.e. a key `_id`), 
+Note: `Database.save` requires the document to have an id (i.e. a key `_id`),
 `Database.create` does not.
 
 ### Updating a document
 To update an existing document, retrieving the revision is paramount.
-In the example below, `dbdoc` contains the key `_rev` and the builtin `dict.update` function is used to update the 
-document before saving it.
+In the example below, `dbdoc` contains the key `_rev` and the builtin `dict.update` function is
+used to update the document before saving it.
 ```python
 mydoc = {
     "_id": "mydoc-id",
@@ -102,7 +120,7 @@ dbdoc.update(mydoc)
 print(db.save(dbdoc))
 # ('mydoc-id', True, '2-374aa8f0236b9120242ca64935e2e8f1')
 ```
-Alternatively, one can use `Database.rev` to fetch the latest revision and overwrite the document
+Alternatively, one can use `Database.rev` to fetch the latest revision and overwrite the document:
 ```python
 mydoc = {
     "_id": "mydoc-id",
@@ -115,7 +133,7 @@ print(db.save(mydoc))
 ```
 
 ### Deleting a document
-To delete a document, the `docid` and `rev` are needed
+To delete a document, the `docid` and `rev` are needed:
 ```python
 docid = "mydoc-id"
 print(db.delete(docid=docid, rev=db.rev(docid)))  # Fetch the revision on the go
@@ -180,33 +198,31 @@ plan = db.explain({"type": {"$eq": "post"}}, limit=10)
 ```
 
 ### Working with partitions
-For a partitioned database, the `couchdb3.database.Partition` class offers a wrapper around partitions (acting similarly 
-to collections in Mongo). 
+For a partitioned database, the `couchdb3.sync.Partition` class offers a wrapper around
+partitions (acting similarly to collections in Mongo).
 
 ```python
-from couchdb3 import Server, Database, Partition
-
+from couchdb3.sync import Server, Database, Partition
 
 client: Server = Server(...)
 db: Database = client["some-db"]
 partition: Partition = db.get_partition("partition_id")
 ```
 
-Partition instances append the partition's ID the document IDs (`partition-id:doc-id`) for a simpler user interaction, 
-e.g.
+Partition instances prepend the partition's ID to document IDs (`partition-id:doc-id`)
+for simpler user interaction:
 ```python
 doc_id = "test-id"
-print(doc_id in partition)  # no need to append the partition's ID
+print(doc_id in partition)  # no need to prepend the partition's ID
 rev = partition.rev(doc_id)
 partition.save({
-    "_id": doc_id,  # no need to append the partition's ID
+    "_id": doc_id,  # no need to prepend the partition's ID
     "_rev": rev,
     ...
 })
 ```
 
-The partition ID will only be appended provided document IDs do not start with `partition-id`, e.g. the following will 
-work and be equivalent to the previous example
+The partition ID will only be prepended if the document ID does not already start with it:
 ```python
 doc_id = "partition_id:test-id"
 print(doc_id in partition)
@@ -217,12 +233,64 @@ partition.save({
     ...
 })
 ```
+
+## Quickstart — Async
+
+### Connecting to a database server
+```python
+import asyncio
+from couchdb3.aio import AsyncServer
+
+async def main():
+    async with AsyncServer("http://user:password@127.0.0.1:5984") as client:
+        print(await client.up())
+        # True
+
+asyncio.run(main())
+```
+
+### Getting or creating a database
+```python
+async with AsyncServer("http://user:password@127.0.0.1:5984") as client:
+    dbname = "mydb"
+    all_dbs = await client.all_dbs()
+    db = await client.get(dbname) if dbname in all_dbs else await client.create(dbname)
+```
+
+### Creating and fetching documents
+```python
+async with AsyncServer("http://user:password@127.0.0.1:5984") as client:
+    db = await client.get("mydb")
+
+    # Save a document
+    _id, ok, _rev = await db.save({"_id": "mydoc-id", "name": "Hello", "type": "World"})
+
+    # Fetch a document
+    doc = await db.get("mydoc-id")
+    print(doc)
+
+    # Delete a document
+    await db.delete(docid="mydoc-id", rev=await db.rev("mydoc-id"))
+```
+
+### Async context manager (manual lifecycle)
+```python
+from couchdb3.aio import AsyncServer
+
+client = AsyncServer("http://user:password@127.0.0.1:5984")
+db = await client.get("mydb")
+doc = await db.get("mydoc-id")
+await client.aclose()  # must be called explicitly when not using async with
+```
 """
 from . import exceptions as exceptions
 from . import utils as utils
-from .database import Database as Database
-from .database import Partition as Partition
+from .aio import AsyncDatabase as AsyncDatabase
+from .aio import AsyncPartition as AsyncPartition
+from .aio import AsyncServer as AsyncServer
 from .document import Document as Document
-from .server import Server as Server
+from .sync import Database as Database
+from .sync import Partition as Partition
+from .sync import Server as Server
 from .view import ViewResult as ViewResult
 from .view import ViewRow as ViewRow
