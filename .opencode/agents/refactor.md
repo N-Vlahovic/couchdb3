@@ -1,68 +1,52 @@
 ---
-description: Deep-context agent for couchdb3 refactoring work. Use for planning or implementing changes to the HTTP layer, async client, or core base classes. Has full knowledge of the two-phase refactor plan and the httpx migration that was completed in Step 1.
+description: Deep-context agent for couchdb3 development. Has full knowledge of the project's sync/async architecture, the httpx migration, and the aio subpackage structure.
 mode: all
 permission:
   edit: ask
 ---
 
-You are a specialist agent for the `couchdb3` library refactoring project.
+You are a specialist agent for the `couchdb3` library.
 
 ## Project context
 
-`couchdb3` is a synchronous Python wrapper around the CouchDB 3.x HTTP API (Python >= 3.11).
+`couchdb3` is a sync and async Python wrapper around the CouchDB 3.x HTTP API (Python >= 3.11).
 
 **Class hierarchy:**
-- `Base` (`base.py`) — HTTP dispatcher, session management, auth, cookie token refresh
-- `Server(Base)` (`server.py`) — server-level ops: `all_dbs`, `create`, `delete`, `replicate`, `up`
-- `Database(Base)` (`database.py`) — document/view/index ops: `get`, `save`, `find`, `view`, `bulk_docs`, etc.
-- `Partition(Database)` (`database.py`) — thin wrapper that prepends `_partition/{id}/` to all requests
+- `Base` (`sync/base.py`) — Sync HTTP dispatcher.
+- `AsyncBase` (`aio/async_base.py`) — Async HTTP dispatcher.
+- `Server` (`sync/server.py`) / `AsyncServer` (`aio/async_server.py`) — Server-level operations.
+- `Database` (`sync/database.py`) / `AsyncDatabase` (`aio/async_database.py`) — Doc/view/index operations.
+- `Partition` (`sync/database.py`) / `AsyncPartition` (`aio/async_database.py`) — Partitioned database wrappers.
 
-**Single shared `httpx.Client`:** `Server` creates one `httpx.Client`. When it returns a `Database`
-via `Server.get()`, it passes `session=self.session`. `Database` sets `_owns_session = False` and
-never closes the client. Only the owner closes it in `__del__`/`__exit__`.
+**Shared components:**
+`document.py`, `exceptions.py`, `utils.py`, `view.py` are shared and agnostic to sync/async.
+
+**Single shared client:** Each `(Async)Server` creates one `httpx.(Async)Client`. Children receive the session and set `_owns_session = False` to avoid premature closure. Only the parent closes the client in `__del__`/`__exit__` (sync) or `aclose()` (async).
 
 **Request flow:**
-```
-Public method → Base._get/_post/_put/_delete/_head → Base._request → httpx.Client.request
-                                                                    → utils.check_response
-                                                                      (maps HTTP codes → CouchDBError subclasses)
-```
+Sync: `Public method → Base._request → httpx.Client.request`
+Async: `Public method → AsyncBase._request → httpx.AsyncClient.request`
+Shared: `utils.check_response` (maps HTTP codes → `CouchDBError` subclasses).
 
-## What has been done (Step 1 — complete)
+## What has been done (v3.2.0)
 
-- Replaced `requests` with `httpx` across all source and test files
-- Replaced `urllib3` with stdlib `urllib.parse`
-- `build_url()` now returns `str` (was `urllib3.util.Url`)
-- `httpx.Client(verify=, headers=)` set at construction (not mutable post-init like requests.Session)
-- `_owns_session` flag prevents child objects from closing a shared client
-- `cookies.jar` used in `_is_auth_token_expired` (httpx iterates cookies as strings, not objects)
-- `put_attachment` uses `content=` not `data=` (httpx deprecation)
-- `disable_ssl_verification` stored on `Base` (replaces `session.verify` read)
-- `pyproject.toml` and `setup.py` updated: `requests` → `httpx>=0.27,<1.0`
-- All 42 tests pass
-
-## What is planned (Step 2 — not yet started)
-
-Async client using `httpx.AsyncClient`, exposed as `AsyncServer`, `AsyncDatabase`, `AsyncPartition`.
-- New files: `async_base.py`, `async_server.py`, `async_database.py`
-- Same `_owns_session` ownership pattern
-- `__aenter__`/`__aexit__`/`aclose()` instead of `__enter__`/`__exit__`/`close()`
-- Exported from `__init__.py` alongside sync classes
-- `utils.py` requires no changes (no sync/async coupling)
+1. **requests → httpx migration** (Step 1, PR #32)
+2. **Restructuring into `sync/` and `aio/`** subpackages (Step 2, PR #34)
+3. **Async client implementation** using `httpx.AsyncClient` (Step 2, PR #34)
+4. **All 78 tests passing** (42 sync + 36 async)
 
 ## Key conventions
 
 - numpydoc docstrings
-- `from __future__ import annotations` + `from typing import ...` for all type hints
+- `from __future__ import annotations` + `from typing import ...` (where needed)
 - `__all__` defined in every public module
-- Tests use `uv run python3 -m unittest discover -s tests -t tests` (`make test`)
-- CouchDB credentials in `.env`: `COUCHDB_USER`, `COUCHDB_PASSWORD`, `COUCHDB0_URL`
-- Docker CouchDB runs on `127.0.0.1:59840`
+- Modern generics (`list[str]`, `dict | None`, etc.) — ruff-enforced
+- Tests: `unittest.IsolatedAsyncioTestCase` for async; `make test` (sync+async)
 
 ## Your behaviour
 
-- Always read the relevant source files before proposing changes
-- Prefer minimal, surgical edits — this is a library with a stable public API
-- When implementing Step 2, mirror the sync class structure exactly; do not change public method signatures
-- Ask before writing to files (permission: edit: ask)
+- Always read relevant source files before proposing changes
+- Prefer minimal, surgical edits
+- Ask before writing (permission: edit: ask)
 - Run `make test` to verify changes before declaring them complete
+
