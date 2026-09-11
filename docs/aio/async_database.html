@@ -1,0 +1,3618 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.6">
+<title>couchdb3.aio.async_database API documentation</title>
+<meta name="description" content="">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source > summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible;min-width:max-content}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin:1em 0}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+/* Collapse source docstrings */
+setTimeout(() => {
+[...document.querySelectorAll('.hljs.language-python > .hljs-string')]
+.filter(el => el.innerHTML.length > 200 && ['"""', "'''"].includes(el.innerHTML.substring(0, 3)))
+.forEach(el => {
+let d = document.createElement('details');
+d.classList.add('hljs-string');
+d.innerHTML = '<summary>"""</summary>' + el.innerHTML.substring(3);
+el.replaceWith(d);
+});
+}, 100);
+})</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>couchdb3.aio.async_database</code></h1>
+</header>
+<section id="section-intro">
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="couchdb3.aio.async_database.AsyncDatabase"><code class="flex name class">
+<span>class <span class="ident">AsyncDatabase</span></span>
+<span>(</span><span>name: str,<br>*,<br>url: str | None = None,<br>port: int | None = None,<br>user: str | None = None,<br>password: str | None = None,<br>disable_ssl_verification: bool = False,<br>auth_method: str | None = None,<br>timeout: int | None = 300,<br>session: httpx.AsyncClient | None = None)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class AsyncDatabase(AsyncBase):
+    &#34;&#34;&#34;
+    Async CouchDB database client. Mirrors `Database` with `async def` methods throughout.
+
+    Note: `__getitem__` is not supported on async classes — Python does not allow
+    `__getitem__` to be a coroutine. Use `await db.get(docid)` instead.
+    &#34;&#34;&#34;
+
+    def __init__(
+        self,
+        name: str,
+        *,
+        url: str | None = None,
+        port: int | None = None,
+        user: str | None = None,
+        password: str | None = None,
+        disable_ssl_verification: bool = False,
+        auth_method: str | None = None,
+        timeout: int | None = DEFAULT_TIMEOUT,
+        session: httpx.AsyncClient | None = None,
+    ) -&gt; None:
+        &#34;&#34;&#34;
+
+        Parameters
+        ----------
+        name : str
+            The name of the database.
+        url : str
+            The url of the CouchDB server formatted as `scheme://user:password@host:port`. For example:
+
+                &#34;http://user:password@127.0.0.1:5984&#34;
+                &#34;https://couchdb.example.com&#34;
+        port : int
+            The port of the CouchDB server. Can also be supplied via the url.
+        user : str
+            The CouchDB admin username. Can also be supplied via the url.
+        password : str
+            The CouchDB admin password. Can also be supplied via the url.
+        disable_ssl_verification : bool
+            Controls whether to verify the server&#39;s TLS certificate. Set to `True` when connecting
+            to a server with self-signed TLS certificates. Default `False`.
+        auth_method : str
+            Authentication method. Choices are `cookie` or `basic`.
+            Default is `couchdb3.utils.DEFAULT_AUTH_METHOD`.
+        timeout : int
+            The default timeout for requests. Default c.f. `couchdb3.utils.DEFAULT_TIMEOUT`.
+        session : httpx.AsyncClient
+            A specific async client to use. Optional — if not provided, a new client will be
+            initialized.
+        &#34;&#34;&#34;
+        super().__init__(
+            url=url,
+            session=session,
+            port=port,
+            user=user,
+            password=password,
+            disable_ssl_verification=disable_ssl_verification,
+            auth_method=auth_method,
+            timeout=timeout,
+        )
+        if not validate_db_name(name=name):
+            raise NameComplianceError(
+                &#34;Database name does not comply with the CouchDB requirements. &#34;
+                &#34;See https://docs.couchdb.org/en/latest/api/database/common.html#put--db.&#34;
+            )
+        self.name = name
+        self.root = name
+
+    def __repr__(self) -&gt; str:
+        &#34;&#34;&#34;
+        Basic repr.
+
+        Returns
+        -------
+        str : The instance&#39;s representation.
+        &#34;&#34;&#34;
+        return f&#34;{super().__repr__()}: {self.name}&#34;
+
+    async def all_docs(
+        self,
+        partition: str | None = None,
+        keys: Iterable[str] | None = None,
+        **kwargs,
+    ) -&gt; ViewResult:
+        &#34;&#34;&#34;
+        Executes the built-in _all_docs view, returning all documents in the database
+        (or partition).
+
+        Parameters
+        ----------
+        partition : str
+            Filter using the partition&#39;s name (only valid for partitioned databases).
+            Default is `None`.
+        keys : Iterable[str]
+            Return only documents where the key matches one of the keys specified.
+            Default is `None`.
+        kwargs
+            Further `AsyncDatabase.view` parameters.
+
+        Returns
+        -------
+        ViewResult
+        &#34;&#34;&#34;
+        return await self.view(
+            f&#34;_partition/{partition}/_all_docs&#34; if partition else &#34;_all_docs&#34;,
+            keys=keys,
+            **kwargs,
+        )
+
+    async def bulk_docs(
+        self,
+        docs: list[dict | Document],
+        new_edits: bool = True,
+    ) -&gt; list[dict]:
+        &#34;&#34;&#34;
+        Create or update multiple documents in a single request.
+
+        Parameters
+        ----------
+        docs : list[dict | Document]
+            List of document objects.
+        new_edits : bool
+            If `False`, prevents the database from assigning new revision IDs. Default `True`.
+
+        Returns
+        -------
+        list[dict] : Each item contains `id`, `ok`, and `rev`.
+        &#34;&#34;&#34;
+        return (
+            await self._post(
+                resource=&#34;_bulk_docs&#34;, body={&#34;docs&#34;: docs, &#34;new_edits&#34;: new_edits}
+            )
+        ).json()
+
+    async def bulk_get(
+        self,
+        docs: list[dict | Document],
+        revs: bool = False,
+    ) -&gt; list[dict]:
+        &#34;&#34;&#34;
+        Query several documents in bulk.
+
+        Parameters
+        ----------
+        docs : list[dict | Document]
+            List of document objects, with `id`, and optionally `rev` and `atts_since`.
+        revs : bool
+            Give the revisions history. Default `False`.
+
+        Returns
+        -------
+        list[dict]
+        &#34;&#34;&#34;
+        return (
+            (
+                await self._post(
+                    resource=&#34;_bulk_get&#34;,
+                    body={&#34;docs&#34;: [extract_document_id_and_rev(_) for _ in docs]},
+                    query_kwargs={&#34;revs&#34;: revs},
+                )
+            )
+            .json()
+            .get(&#34;results&#34;, [])
+        )
+
+    async def compact(self, ddoc: str | None = None) -&gt; bool:
+        &#34;&#34;&#34;
+        Request compaction of the database.
+
+        Parameters
+        ----------
+        ddoc : str
+            A design document name. If provided, compacts the view indexes for that ddoc.
+
+        Returns
+        -------
+        bool: `True` upon compaction request successfully sent.
+        &#34;&#34;&#34;
+        resource = &#34;_compact&#34;
+        if ddoc:
+            resource += f&#34;/{ddoc}&#34;
+        return (await self._post(resource=resource)).json().get(&#34;ok&#34;)
+
+    async def copy(
+        self,
+        docid: str,
+        destid: str,
+        rev: str | None = None,
+        destrev: str | None = None,
+    ) -&gt; tuple[str, bool, str]:
+        &#34;&#34;&#34;
+        Copy an existing document to a new or existing document.
+
+        Parameters
+        ----------
+        docid : str
+            The ID of the document to copy.
+        destid : str
+            The target document&#39;s ID.
+        rev : str
+            A specific revision of the document to copy.
+        destrev : str
+            If the target document already exists, its current revision.
+
+        Returns
+        -------
+        tuple[str, bool, str] : (id, ok, rev)
+        &#34;&#34;&#34;
+        destination = destid
+        if destrev:
+            destination += f&#34;?rev={destrev}&#34;
+        data = (
+            await self._request(
+                method=&#34;COPY&#34;,
+                resource=docid,
+                headers={&#34;Destination&#34;: destination},
+                query_kwargs={&#34;rev&#34;: rev},
+            )
+        ).json()
+        return data[&#34;id&#34;], data[&#34;ok&#34;], data[&#34;rev&#34;]
+
+    async def create(
+        self,
+        doc: dict | Document,
+        *,
+        batch: bool | None = None,
+    ) -&gt; tuple[str, bool, str]:
+        &#34;&#34;&#34;
+        Create a new document without specifying an ID.
+
+        Parameters
+        ----------
+        doc : dict | Document
+            A dictionary or Document instance.
+        batch : bool
+            Stores document in batch mode. Default `None`.
+
+        Returns
+        -------
+        tuple[str, bool, str] : (id, ok, rev)
+        &#34;&#34;&#34;
+        data = (
+            await self._post(
+                body=doc, query_kwargs={&#34;batch&#34;: &#34;ok&#34; if batch is True else None}
+            )
+        ).json()
+        return data[&#34;id&#34;], data[&#34;ok&#34;], data[&#34;rev&#34;]
+
+    async def delete(
+        self, docid: str, rev: str, *, batch: bool | None = None
+    ) -&gt; bool:
+        &#34;&#34;&#34;
+        Delete a document.
+
+        Parameters
+        ----------
+        docid : str
+            The document&#39;s id.
+        rev : str
+            The document&#39;s current revision.
+        batch : bool
+            Stores document in batch mode. Default `None`.
+
+        Returns
+        -------
+        bool : `True` upon successful deletion.
+        &#34;&#34;&#34;
+        await self._delete(
+            resource=docid,
+            query_kwargs={&#34;rev&#34;: rev, &#34;batch&#34;: &#34;ok&#34; if batch is True else None},
+        )
+        return True
+
+    async def delete_attachment(
+        self, docid: str, attname: str, rev: str, *, batch: bool = False
+    ) -&gt; bool:
+        &#34;&#34;&#34;
+        Delete an attachment.
+
+        Parameters
+        ----------
+        docid : str
+            The document&#39;s id.
+        attname : str
+            The attachment&#39;s name.
+        rev : str
+            The document&#39;s current revision.
+        batch : bool
+            Stores in batch mode. Default `False`.
+
+        Returns
+        -------
+        bool : `True` upon successful deletion.
+        &#34;&#34;&#34;
+        await self._delete(
+            resource=f&#34;{docid}/{attname}&#34;,
+            query_kwargs={&#34;rev&#34;: rev, &#34;batch&#34;: &#34;ok&#34; if batch is True else None},
+        )
+        return True
+
+    async def explain(
+        self,
+        selector: dict,
+        limit: int = 25,
+        skip: int = 0,
+        sort: list[dict] | None = None,
+        fields: list[str] | None = None,
+        use_index: str | list[str] | None = None,
+        conflicts: bool = False,
+        r: int = 1,
+        bookmark: str | None = None,
+        update: bool = True,
+        stable: bool | None = None,
+        execution_stats: bool = False,
+    ) -&gt; dict:
+        &#34;&#34;&#34;
+        Shows which index is being used by the query. Parameters are the same as
+        `AsyncDatabase.find`.
+
+        Parameters
+        ----------
+        selector : dict
+            JSON object describing criteria used to select documents.
+        limit : int
+            Maximum number of results returned. Default is `25`.
+        skip : int
+            Skip the first `n` results. Default is `0`.
+        sort : list[dict]
+            JSON array following CouchDB&#39;s sort syntax. Default is `None`.
+        fields : list[str]
+            Fields to return. Default is `None` (entire object).
+        use_index : str | list[str]
+            Instruct a query to use a specific index. Default is `None`.
+        conflicts : bool
+            Include conflicted documents. Default is `False`.
+        r : int
+            Read quorum. Default is `1`.
+        bookmark : str
+            Paging bookmark. Default is `None`.
+        update : bool
+            Whether to update the index prior to returning the result. Default is `True`.
+        stable : bool
+            Whether to use a stable set of shards. Default is `None`.
+        execution_stats : bool
+            Include execution statistics. Default is `False`.
+
+        Returns
+        -------
+        dict
+        &#34;&#34;&#34;
+        return (
+            await self._post(
+                resource=&#34;_explain&#34;,
+                body=rm_nones_from_dict(
+                    {
+                        &#34;selector&#34;: selector,
+                        &#34;limit&#34;: limit,
+                        &#34;skip&#34;: skip,
+                        &#34;sort&#34;: sort,
+                        &#34;fields&#34;: fields,
+                        &#34;use_index&#34;: use_index,
+                        &#34;conflicts&#34;: conflicts,
+                        &#34;r&#34;: r,
+                        &#34;bookmark&#34;: bookmark,
+                        &#34;update&#34;: update,
+                        &#34;stable&#34;: stable,
+                        &#34;execution_stats&#34;: execution_stats,
+                    }
+                ),
+            )
+        ).json()
+
+    async def find(
+        self,
+        selector: dict,
+        limit: int = 25,
+        skip: int = 0,
+        sort: list[dict] | None = None,
+        fields: list[str] | None = None,
+        use_index: str | list[str] | None = None,
+        conflicts: bool = False,
+        r: int = 1,
+        bookmark: str | None = None,
+        update: bool = True,
+        stable: bool | None = None,
+        execution_stats: bool = False,
+        partition: str | None = None,
+    ) -&gt; dict:
+        &#34;&#34;&#34;
+        Find documents using a declarative JSON querying syntax.
+
+        Parameters
+        ----------
+        selector : dict
+            JSON object describing criteria used to select documents.
+        limit : int
+            Maximum number of results returned. Default is `25`.
+        skip : int
+            Skip the first `n` results. Default is `0`.
+        sort : list[dict]
+            JSON array following CouchDB&#39;s sort syntax. Default is `None`.
+        fields : list[str]
+            Fields to return. Default is `None` (entire object).
+        use_index : str | list[str]
+            Instruct a query to use a specific index. Default is `None`.
+        conflicts : bool
+            Include conflicted documents. Default is `False`.
+        r : int
+            Read quorum. Default is `1`.
+        bookmark : str
+            Paging bookmark. Default is `None`.
+        update : bool
+            Whether to update the index prior to returning the result. Default is `True`.
+        stable : bool
+            Whether to use a stable set of shards. Default is `None`.
+        execution_stats : bool
+            Include execution statistics. Default is `False`.
+        partition : str
+            An optional partition ID. Only valid for partitioned databases. Default `None`.
+
+        Returns
+        -------
+        dict : Keys are `bookmark`, `docs`, `warning`.
+        &#34;&#34;&#34;
+        return (
+            await self._post(
+                resource=partitioned_db_resource_parser(
+                    resource=&#34;_find&#34;,
+                    partition=partition,
+                ),
+                body=rm_nones_from_dict(
+                    {
+                        &#34;selector&#34;: selector,
+                        &#34;limit&#34;: limit,
+                        &#34;skip&#34;: skip,
+                        &#34;sort&#34;: sort,
+                        &#34;fields&#34;: fields,
+                        &#34;use_index&#34;: use_index,
+                        &#34;conflicts&#34;: conflicts,
+                        &#34;r&#34;: r,
+                        &#34;bookmark&#34;: bookmark,
+                        &#34;update&#34;: update,
+                        &#34;stable&#34;: stable,
+                        &#34;execution_stats&#34;: execution_stats,
+                    }
+                ),
+            )
+        ).json()
+
+    async def indexes(self) -&gt; dict:
+        &#34;&#34;&#34;
+        Get a list of all indexes in the database.
+
+        Returns
+        -------
+        dict : Keys are `total_rows` and `indexes`.
+        &#34;&#34;&#34;
+        return (await self._get(resource=&#34;_index&#34;)).json()
+
+    async def get(
+        self,
+        docid: str,
+        *,
+        attachments: bool | None = None,
+        att_encoding_info: bool | None = None,
+        atts_since: Iterable[str] | None = None,
+        conflicts: bool | None = None,
+        deleted_conflicts: bool | None = None,
+        latest: bool | None = None,
+        local_seq: bool | None = None,
+        meta: bool | None = None,
+        open_revs: Iterable[str] | None = None,
+        rev: str | None = None,
+        revs: bool | None = None,
+        revs_info: bool | None = None,
+        check: bool | None = None,
+        default_value: Any | None = None,
+    ) -&gt; Document | Any:
+        &#34;&#34;&#34;
+        Get a document by id.
+
+        Parameters
+        ----------
+        docid : str
+            The document&#39;s id.
+        attachments : bool
+            Includes attachment bodies in response. Default `None`.
+        att_encoding_info : bool
+            Includes encoding information in attachment stubs. Default `None`.
+        atts_since : Iterable[str]
+            Includes attachments only since specified revisions. Default `None`.
+        conflicts : bool
+            Includes conflict information. Default `None`.
+        deleted_conflicts : bool
+            Includes deleted conflicted revisions. Default `None`.
+        latest : bool
+            Forces retrieving the latest leaf revision. Default `None`.
+        local_seq : bool
+            Includes last update sequence for the document. Default `None`.
+        meta : bool
+            Equivalent to specifying all conflicts, deleted_conflicts and revs_info.
+            Default `None`.
+        open_revs : Iterable[str]
+            Retrieves documents of specified leaf revisions. Default `None`.
+        rev : str
+            Retrieves document of specified revision. Default `None`.
+        revs : bool
+            Includes list of all known document revisions. Default `None`.
+        revs_info : bool
+            Includes detailed information for all known document revisions. Default `None`.
+        check : bool
+            If `True`, raise an exception if the document is not found. Default `None`.
+        default_value : Any
+            Value to return if `check=False` and document is not found. Default `None`.
+
+        Returns
+        -------
+        Document | Any
+        &#34;&#34;&#34;
+        try:
+            return Document(
+                **(
+                    await self._get(
+                        resource=docid,
+                        query_kwargs={
+                            &#34;attachments&#34;: attachments,
+                            &#34;att_encoding_info&#34;: att_encoding_info,
+                            &#34;atts_since&#34;: atts_since,
+                            &#34;conflicts&#34;: conflicts,
+                            &#34;deleted_conflicts&#34;: deleted_conflicts,
+                            &#34;latest&#34;: latest,
+                            &#34;local_seq&#34;: local_seq,
+                            &#34;meta&#34;: meta,
+                            &#34;open_revs&#34;: open_revs,
+                            &#34;rev&#34;: rev,
+                            &#34;revs&#34;: revs,
+                            &#34;revs_info&#34;: revs_info,
+                        },
+                    )
+                ).json()
+            )
+        except (CouchDBError, httpx.RequestError) as error:
+            if check:
+                raise error
+            return default_value
+
+    async def get_attachment(
+        self,
+        docid: str,
+        attname: str,
+        rev: str | None = None,
+    ) -&gt; AttachmentDocument:
+        &#34;&#34;&#34;
+        Get a document&#39;s attachment.
+
+        Parameters
+        ----------
+        docid : str
+            The document&#39;s id.
+        attname : str
+            The attachment&#39;s name.
+        rev : str
+            A specific revision. Default `None`.
+
+        Returns
+        -------
+        AttachmentDocument
+        &#34;&#34;&#34;
+        response = await self._get(f&#34;{docid}/{attname}&#34;, query_kwargs={&#34;rev&#34;: rev})
+        content_md5 = response.headers.get(&#34;content-md5&#34;)
+        digest_value = f&#34;md5-{content_md5}&#34; if content_md5 else None
+        return AttachmentDocument(
+            content=response.content,
+            content_encoding=response.headers.get(&#34;content-encoding&#34;),
+            content_length=response.headers.get(&#34;content-length&#34;),
+            content_type=response.headers.get(&#34;content-type&#34;),
+            digest=digest_value,
+        )
+
+    async def get_design(self, ddoc: str, **kwargs) -&gt; Document:
+        &#34;&#34;&#34;
+        Get a design document.
+
+        Parameters
+        ----------
+        ddoc : str
+            The design document&#39;s name.
+        kwargs
+            Further `AsyncDatabase.get` parameters.
+
+        Returns
+        -------
+        Document
+        &#34;&#34;&#34;
+        return await self.get(docid=f&#34;_design/{ddoc}&#34;, **kwargs)
+
+    async def purge(self, data: dict) -&gt; dict:
+        &#34;&#34;&#34;
+        Permanently purge the given `(id, rev)` pairs.
+
+        Parameters
+        ----------
+        data : dict
+            A dictionary with document IDs as keys and list of revisions as values.
+
+        Returns
+        -------
+        dict
+        &#34;&#34;&#34;
+        return (await self._post(resource=&#34;_purge&#34;, body=data)).json()
+
+    async def put_attachment(
+        self,
+        docid: str,
+        attname: str,
+        path: str | None = None,
+        *,
+        content: bytes | None = None,
+        content_type: str | None = None,
+        rev: str | None = None,
+    ) -&gt; tuple[str, bool, str]:
+        &#34;&#34;&#34;
+        Upload content as an attachment to the specified document.
+
+        Parameters
+        ----------
+        docid : str
+            The document&#39;s id.
+        attname : str
+            The attachment&#39;s name.
+        path : str
+            Path to a local file to upload. Mutually exclusive with `content`.
+        content : bytes
+            Raw bytes to upload. Mutually exclusive with `path`.
+        content_type : str
+            The attachment&#39;s MIME type. Required when `content` is provided.
+        rev : str
+            The document&#39;s current revision. Required for existing documents.
+
+        Returns
+        -------
+        tuple[str, bool, str] : (id, ok, rev)
+        &#34;&#34;&#34;
+        if (not content and not path) or (content and path):
+            raise ValueError(
+                &#39;Precisely one of the arguments &#34;content&#34; and &#34;path&#34; must be provided.&#39;
+            )
+        if content and not content_type:
+            raise ValueError(
+                &#39;Argument &#34;content_type&#34; cannot be empty when &#34;content&#34; is provided.&#39;
+            )
+        resource = f&#34;{docid}/{attname}&#34;
+        query_kwargs = {&#34;rev&#34;: rev}
+        content_type = content_type if content_type else mimetypes.guess_type(path)[0]
+        if path:
+            with open(path, &#34;rb&#34;) as file:
+                content = file.read()
+        response = await self._put(
+            resource=resource,
+            query_kwargs=query_kwargs,
+            content=content,
+            headers={&#34;content-type&#34;: content_type},
+        )
+        data = response.json()
+        return data[&#34;id&#34;], data[&#34;ok&#34;], data[&#34;rev&#34;]
+
+    async def put_design(
+        self,
+        ddoc: str,
+        *,
+        rev: str | None = None,
+        language: str | None = None,
+        options: dict | None = None,
+        filters: dict | None = None,
+        updates: dict | None = None,
+        validate_doc_update: str | None = None,
+        views: dict | None = None,
+        autoupdate: bool | None = None,
+        partitioned: bool | None = None,
+        **kwargs,
+    ) -&gt; tuple[str, bool, str]:
+        &#34;&#34;&#34;
+        Create or update a named design document.
+
+        Parameters
+        ----------
+        ddoc : str
+            The design document&#39;s name.
+        rev : str
+            The design document&#39;s revision in case of an update.
+        language : str
+            Query Server to process design document functions.
+        options : dict
+            View&#39;s default options.
+        filters : dict
+            Filter functions definition.
+        updates : dict
+            Update functions definition.
+        validate_doc_update : str
+            Validate document update function source.
+        views : dict
+            View functions definition.
+        autoupdate : bool
+            Indicates whether to automatically build indexes.
+        partitioned : bool
+            Set to `True` for a partitioned design.
+        kwargs
+            Further `AsyncDatabase.save` parameters.
+
+        Returns
+        -------
+        tuple[str, bool, str] : (id, ok, rev)
+        &#34;&#34;&#34;
+        if partitioned:
+            options = (options or {}).update({&#34;partitioned&#34;: partitioned})
+        return await self.save(
+            doc=rm_nones_from_dict(
+                {
+                    &#34;_id&#34;: f&#34;_design/{ddoc}&#34;,
+                    &#34;_rev&#34;: rev,
+                    &#34;language&#34;: language,
+                    &#34;options&#34;: options,
+                    &#34;filters&#34;: filters,
+                    &#34;updates&#34;: updates,
+                    &#34;validate_doc_update&#34;: validate_doc_update,
+                    &#34;views&#34;: views,
+                    &#34;autoupdate&#34;: autoupdate,
+                }
+            ),
+            **kwargs,
+        )
+
+    async def save(
+        self,
+        doc: dict | Document,
+        batch: bool | None = None,
+        new_edits: bool | None = None,
+        path: str | None = None,
+    ) -&gt; tuple[str, bool, str]:
+        &#34;&#34;&#34;
+        Create a new named document, or a new revision of an existing document.
+
+        Parameters
+        ----------
+        doc : dict | Document
+            A dictionary or Document instance with a valid `_id`, and `_rev` if updating.
+        batch : bool
+            Store document in batch mode. Default `None`.
+        new_edits : bool
+            Prevents insertion of a conflicting document. Default `None`.
+        path : str
+            Database path, e.g. `_design`. Default `None`.
+
+        Returns
+        -------
+        tuple[str, bool, str] : (id, ok, rev)
+        &#34;&#34;&#34;
+        batch = &#34;ok&#34; if batch else None
+        data = (
+            await self._put(
+                resource=f&#34;{path}/{doc.get(&#39;_id&#39;)}&#34; if path else doc.get(&#34;_id&#34;),
+                body=doc,
+                query_kwargs={
+                    &#34;batch&#34;: &#34;ok&#34; if batch else None,
+                    &#34;new_edits&#34;: new_edits,
+                    &#34;rev&#34;: doc.get(&#34;_rev&#34;),
+                },
+            )
+        ).json()
+        return data[&#34;id&#34;], data[&#34;ok&#34;], data[&#34;rev&#34;]
+
+    async def save_index(
+        self,
+        index: dict,
+        ddoc: str | None = None,
+        name: str | None = None,
+        index_type: str | None = &#34;json&#34;,
+        partitioned: bool | None = None,
+    ) -&gt; tuple[str, str, str]:
+        &#34;&#34;&#34;
+        Create a new index on a database.
+
+        Parameters
+        ----------
+        index : dict
+            Dictionary describing the index to create.
+        ddoc : str
+            Name of the design document. Default `None` (auto-generated).
+        name : str
+            Name of the index. Default `None` (auto-generated).
+        index_type : str
+            `json` or `text`. Default `json`.
+        partitioned : bool
+            Whether the index is partitioned or global. Default `None`.
+
+        Returns
+        -------
+        tuple[str, str, str] : (result, id, name)
+        &#34;&#34;&#34;
+        data = (
+            await self._post(
+                resource=&#34;_index&#34;,
+                body=rm_nones_from_dict(
+                    {
+                        &#34;index&#34;: index,
+                        &#34;ddoc&#34;: ddoc,
+                        &#34;name&#34;: name,
+                        &#34;type&#34;: index_type,
+                        &#34;partitioned&#34;: partitioned,
+                    }
+                ),
+            )
+        ).json()
+        return data[&#34;result&#34;], data[&#34;id&#34;], data[&#34;name&#34;]
+
+    async def security(self) -&gt; SecurityDocument:
+        &#34;&#34;&#34;
+        Returns the current security object from the specified database.
+
+        Returns
+        -------
+        SecurityDocument
+        &#34;&#34;&#34;
+        data = (await self._get(resource=&#34;_security&#34;)).json()
+        return SecurityDocument(**data)
+
+    async def update_security(
+        self,
+        admins: dict | SecurityDocumentElement | None = None,
+        members: dict | SecurityDocumentElement | None = None,
+    ) -&gt; bool:
+        &#34;&#34;&#34;
+        Update database security.
+
+        Parameters
+        ----------
+        admins : dict | SecurityDocumentElement
+            Object with `names` and `roles` fields.
+        members : dict | SecurityDocumentElement
+            Object with `names` and `roles` fields.
+
+        Returns
+        -------
+        bool : Operation status.
+        &#34;&#34;&#34;
+        return (
+            await self._put(
+                resource=&#34;_security&#34;, body={&#34;admins&#34;: admins, &#34;members&#34;: members}
+            )
+        ).json()[&#34;ok&#34;]
+
+    async def view(
+        self,
+        ddoc: str,
+        view: str | None = None,
+        *,
+        partition: str | None = None,
+        conflicts: bool | None = None,
+        descending: bool | None = None,
+        endkey: Any | None = None,
+        endkey_docid: str | None = None,
+        group: bool | None = None,
+        group_level: int | None = None,
+        include_docs: bool | None = None,
+        attachments: bool | None = None,
+        att_encoding_info: bool | None = None,
+        inclusive_end: bool | None = None,
+        key: str | None = None,
+        keys: Iterable[str] | None = None,
+        limit: int | None = None,
+        reduce: bool | None = None,
+        skip: int | None = None,
+        sort: bool | None = None,
+        stable: bool | None = None,
+        startkey: Any | None = None,
+        startkey_docid: str | None = None,
+        update: str | None = None,
+        update_seq: bool | None = None,
+    ) -&gt; ViewResult:
+        &#34;&#34;&#34;
+        Executes the specified view function from the specified design document.
+
+        Parameters
+        ----------
+        ddoc : str
+            The corresponding design document&#39;s id.
+        view : str
+            The view&#39;s id.
+        partition : str
+            An optional partition ID. Only valid for partitioned databases. Default `None`.
+        conflicts : bool
+            Include conflicts information in response. Default `None`.
+        descending : bool
+            Return documents in descending order. Default `None`.
+        endkey : Any
+            Stop returning records at this key. Default `None`.
+        endkey_docid : str
+            Stop returning records at this document ID. Default `None`.
+        group : bool
+            Group results using the reduce function. Default `None`.
+        group_level : int
+            Specify the group level. Default `None`.
+        include_docs : bool
+            Include the associated document with each row. Default `None`.
+        attachments : bool
+            Include Base64-encoded attachment content. Default `None`.
+        att_encoding_info : bool
+            Include encoding information in attachment stubs. Default `None`.
+        inclusive_end : bool
+            Whether the end key should be included in the result. Default `None`.
+        key : str
+            Return only documents matching this key. Default `None`.
+        keys : Iterable[str]
+            Return only documents matching these keys. Default `None`.
+        limit : int
+            Maximum number of documents to return. Default `None`.
+        reduce : bool
+            Use the reduction function. Default `None`.
+        skip : int
+            Skip this number of records. Default `None`.
+        sort : bool
+            Sort returned rows. Default `None`.
+        stable : bool
+            Use a stable set of shards. Default `None`.
+        startkey : Any
+            Return records starting with this key. Default `None`.
+        startkey_docid : str
+            Return records starting with this document ID. Default `None`.
+        update : str
+            Whether to update the view prior to responding (`true`, `false`, `lazy`).
+            Default `None`.
+        update_seq : bool
+            Include the `update_seq` value in the response. Default `None`.
+
+        Returns
+        -------
+        ViewResult
+        &#34;&#34;&#34;
+        path = partitioned_db_resource_parser(
+            resource=&#34;_design&#34;,
+            partition=partition,
+        )
+        return ViewResult(
+            **(
+                await self._get(
+                    resource=f&#34;{path}/{ddoc}/_view/{view}&#34; if (ddoc and view) else ddoc,
+                    query_kwargs={
+                        &#34;conflicts&#34;: conflicts,
+                        &#34;descending&#34;: descending,
+                        &#34;endkey&#34;: endkey,
+                        &#34;endkey_docid&#34;: endkey_docid,
+                        &#34;group&#34;: group,
+                        &#34;group_level&#34;: group_level,
+                        &#34;include_docs&#34;: include_docs,
+                        &#34;attachments&#34;: attachments,
+                        &#34;att_encoding_info&#34;: att_encoding_info,
+                        &#34;inclusive_end&#34;: inclusive_end,
+                        &#34;key&#34;: key,
+                        &#34;keys&#34;: keys,
+                        &#34;limit&#34;: limit,
+                        &#34;reduce&#34;: reduce,
+                        &#34;skip&#34;: skip,
+                        &#34;sorted&#34;: sort,
+                        &#34;stable&#34;: stable,
+                        &#34;startkey&#34;: startkey,
+                        &#34;startkey_docid&#34;: startkey_docid,
+                        &#34;update&#34;: update,
+                        &#34;update_seq&#34;: update_seq,
+                    },
+                )
+            ).json()
+        )
+
+    async def get_partition(self, partition_id: str) -&gt; AsyncPartition:
+        &#34;&#34;&#34;
+        Get a given partition.
+
+        Parameters
+        ----------
+        partition_id : str
+            The partition&#39;s ID.
+
+        Returns
+        -------
+        AsyncPartition
+        &#34;&#34;&#34;
+        return AsyncPartition(
+            partition_id=partition_id,
+            name=self.name,
+            url=self.url,
+            port=self.port,
+            user=self._user,
+            password=self._password,
+            disable_ssl_verification=self.disable_ssl_verification,
+            auth_method=self.auth_method,
+            session=self.session,  # shared — child sets _owns_session=False
+        )</code></pre>
+</details>
+<div class="desc"><p>Async CouchDB database client. Mirrors <code>Database</code> with <code>async def</code> methods throughout.</p>
+<p>Note: <code>__getitem__</code> is not supported on async classes — Python does not allow
+<code>__getitem__</code> to be a coroutine. Use <code>await db.get(docid)</code> instead.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>The name of the database.</dd>
+<dt><strong><code>url</code></strong> :&ensp;<code>str</code></dt>
+<dd>The url of the CouchDB server formatted as <code>scheme://user:password@host:port</code>. For example:<pre><code>"http://user:password@127.0.0.1:5984"
+"https://couchdb.example.com"
+</code></pre>
+</dd>
+<dt><strong><code>port</code></strong> :&ensp;<code>int</code></dt>
+<dd>The port of the CouchDB server. Can also be supplied via the url.</dd>
+<dt><strong><code>user</code></strong> :&ensp;<code>str</code></dt>
+<dd>The CouchDB admin username. Can also be supplied via the url.</dd>
+<dt><strong><code>password</code></strong> :&ensp;<code>str</code></dt>
+<dd>The CouchDB admin password. Can also be supplied via the url.</dd>
+<dt><strong><code>disable_ssl_verification</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Controls whether to verify the server's TLS certificate. Set to <code>True</code> when connecting
+to a server with self-signed TLS certificates. Default <code>False</code>.</dd>
+<dt><strong><code>auth_method</code></strong> :&ensp;<code>str</code></dt>
+<dd>Authentication method. Choices are <code>cookie</code> or <code>basic</code>.
+Default is <code><a title="couchdb3.utils.DEFAULT_AUTH_METHOD" href="../utils.html#couchdb3.utils.DEFAULT_AUTH_METHOD">DEFAULT_AUTH_METHOD</a></code>.</dd>
+<dt><strong><code>timeout</code></strong> :&ensp;<code>int</code></dt>
+<dd>The default timeout for requests. Default c.f. <code><a title="couchdb3.utils.DEFAULT_TIMEOUT" href="../utils.html#couchdb3.utils.DEFAULT_TIMEOUT">DEFAULT_TIMEOUT</a></code>.</dd>
+<dt><strong><code>session</code></strong> :&ensp;<code>httpx.AsyncClient</code></dt>
+<dd>A specific async client to use. Optional — if not provided, a new client will be
+initialized.</dd>
+</dl></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="couchdb3.aio.async_base.AsyncBase" href="async_base.html#couchdb3.aio.async_base.AsyncBase">AsyncBase</a></li>
+</ul>
+<h3>Subclasses</h3>
+<ul class="hlist">
+<li><a title="couchdb3.aio.async_database.AsyncPartition" href="#couchdb3.aio.async_database.AsyncPartition">AsyncPartition</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="couchdb3.aio.async_database.AsyncDatabase.all_docs"><code class="name flex">
+<span>async def <span class="ident">all_docs</span></span>(<span>self, partition: str | None = None, keys: Iterable[str] | None = None, **kwargs) ‑> <a title="couchdb3.view.ViewResult" href="../view.html#couchdb3.view.ViewResult">ViewResult</a></span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def all_docs(
+    self,
+    partition: str | None = None,
+    keys: Iterable[str] | None = None,
+    **kwargs,
+) -&gt; ViewResult:
+    &#34;&#34;&#34;
+    Executes the built-in _all_docs view, returning all documents in the database
+    (or partition).
+
+    Parameters
+    ----------
+    partition : str
+        Filter using the partition&#39;s name (only valid for partitioned databases).
+        Default is `None`.
+    keys : Iterable[str]
+        Return only documents where the key matches one of the keys specified.
+        Default is `None`.
+    kwargs
+        Further `AsyncDatabase.view` parameters.
+
+    Returns
+    -------
+    ViewResult
+    &#34;&#34;&#34;
+    return await self.view(
+        f&#34;_partition/{partition}/_all_docs&#34; if partition else &#34;_all_docs&#34;,
+        keys=keys,
+        **kwargs,
+    )</code></pre>
+</details>
+<div class="desc"><p>Executes the built-in _all_docs view, returning all documents in the database
+(or partition).</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>partition</code></strong> :&ensp;<code>str</code></dt>
+<dd>Filter using the partition's name (only valid for partitioned databases).
+Default is <code>None</code>.</dd>
+<dt><strong><code>keys</code></strong> :&ensp;<code>Iterable[str]</code></dt>
+<dd>Return only documents where the key matches one of the keys specified.
+Default is <code>None</code>.</dd>
+<dt><strong><code>kwargs</code></strong></dt>
+<dd>Further <code><a title="couchdb3.aio.async_database.AsyncDatabase.view" href="#couchdb3.aio.async_database.AsyncDatabase.view">AsyncDatabase.view()</a></code> parameters.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>ViewResult</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+</dd>
+<dt id="couchdb3.aio.async_database.AsyncDatabase.bulk_docs"><code class="name flex">
+<span>async def <span class="ident">bulk_docs</span></span>(<span>self, docs: list[dict | Document], new_edits: bool = True) ‑> list[dict]</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def bulk_docs(
+    self,
+    docs: list[dict | Document],
+    new_edits: bool = True,
+) -&gt; list[dict]:
+    &#34;&#34;&#34;
+    Create or update multiple documents in a single request.
+
+    Parameters
+    ----------
+    docs : list[dict | Document]
+        List of document objects.
+    new_edits : bool
+        If `False`, prevents the database from assigning new revision IDs. Default `True`.
+
+    Returns
+    -------
+    list[dict] : Each item contains `id`, `ok`, and `rev`.
+    &#34;&#34;&#34;
+    return (
+        await self._post(
+            resource=&#34;_bulk_docs&#34;, body={&#34;docs&#34;: docs, &#34;new_edits&#34;: new_edits}
+        )
+    ).json()</code></pre>
+</details>
+<div class="desc"><p>Create or update multiple documents in a single request.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>docs</code></strong> :&ensp;<code>list[dict | Document]</code></dt>
+<dd>List of document objects.</dd>
+<dt><strong><code>new_edits</code></strong> :&ensp;<code>bool</code></dt>
+<dd>If <code>False</code>, prevents the database from assigning new revision IDs. Default <code>True</code>.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>list[dict] : Each item contains <code>id</code>, <code>ok</code>, and <code>rev</code>.</p></div>
+</dd>
+<dt id="couchdb3.aio.async_database.AsyncDatabase.bulk_get"><code class="name flex">
+<span>async def <span class="ident">bulk_get</span></span>(<span>self, docs: list[dict | Document], revs: bool = False) ‑> list[dict]</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def bulk_get(
+    self,
+    docs: list[dict | Document],
+    revs: bool = False,
+) -&gt; list[dict]:
+    &#34;&#34;&#34;
+    Query several documents in bulk.
+
+    Parameters
+    ----------
+    docs : list[dict | Document]
+        List of document objects, with `id`, and optionally `rev` and `atts_since`.
+    revs : bool
+        Give the revisions history. Default `False`.
+
+    Returns
+    -------
+    list[dict]
+    &#34;&#34;&#34;
+    return (
+        (
+            await self._post(
+                resource=&#34;_bulk_get&#34;,
+                body={&#34;docs&#34;: [extract_document_id_and_rev(_) for _ in docs]},
+                query_kwargs={&#34;revs&#34;: revs},
+            )
+        )
+        .json()
+        .get(&#34;results&#34;, [])
+    )</code></pre>
+</details>
+<div class="desc"><p>Query several documents in bulk.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>docs</code></strong> :&ensp;<code>list[dict | Document]</code></dt>
+<dd>List of document objects, with <code>id</code>, and optionally <code>rev</code> and <code>atts_since</code>.</dd>
+<dt><strong><code>revs</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Give the revisions history. Default <code>False</code>.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>list[dict]</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+</dd>
+<dt id="couchdb3.aio.async_database.AsyncDatabase.compact"><code class="name flex">
+<span>async def <span class="ident">compact</span></span>(<span>self, ddoc: str | None = None) ‑> bool</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def compact(self, ddoc: str | None = None) -&gt; bool:
+    &#34;&#34;&#34;
+    Request compaction of the database.
+
+    Parameters
+    ----------
+    ddoc : str
+        A design document name. If provided, compacts the view indexes for that ddoc.
+
+    Returns
+    -------
+    bool: `True` upon compaction request successfully sent.
+    &#34;&#34;&#34;
+    resource = &#34;_compact&#34;
+    if ddoc:
+        resource += f&#34;/{ddoc}&#34;
+    return (await self._post(resource=resource)).json().get(&#34;ok&#34;)</code></pre>
+</details>
+<div class="desc"><p>Request compaction of the database.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>ddoc</code></strong> :&ensp;<code>str</code></dt>
+<dd>A design document name. If provided, compacts the view indexes for that ddoc.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>bool: <code>True</code> upon compaction request successfully sent.</p></div>
+</dd>
+<dt id="couchdb3.aio.async_database.AsyncDatabase.copy"><code class="name flex">
+<span>async def <span class="ident">copy</span></span>(<span>self, docid: str, destid: str, rev: str | None = None, destrev: str | None = None) ‑> tuple[str, bool, str]</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def copy(
+    self,
+    docid: str,
+    destid: str,
+    rev: str | None = None,
+    destrev: str | None = None,
+) -&gt; tuple[str, bool, str]:
+    &#34;&#34;&#34;
+    Copy an existing document to a new or existing document.
+
+    Parameters
+    ----------
+    docid : str
+        The ID of the document to copy.
+    destid : str
+        The target document&#39;s ID.
+    rev : str
+        A specific revision of the document to copy.
+    destrev : str
+        If the target document already exists, its current revision.
+
+    Returns
+    -------
+    tuple[str, bool, str] : (id, ok, rev)
+    &#34;&#34;&#34;
+    destination = destid
+    if destrev:
+        destination += f&#34;?rev={destrev}&#34;
+    data = (
+        await self._request(
+            method=&#34;COPY&#34;,
+            resource=docid,
+            headers={&#34;Destination&#34;: destination},
+            query_kwargs={&#34;rev&#34;: rev},
+        )
+    ).json()
+    return data[&#34;id&#34;], data[&#34;ok&#34;], data[&#34;rev&#34;]</code></pre>
+</details>
+<div class="desc"><p>Copy an existing document to a new or existing document.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>docid</code></strong> :&ensp;<code>str</code></dt>
+<dd>The ID of the document to copy.</dd>
+<dt><strong><code>destid</code></strong> :&ensp;<code>str</code></dt>
+<dd>The target document's ID.</dd>
+<dt><strong><code>rev</code></strong> :&ensp;<code>str</code></dt>
+<dd>A specific revision of the document to copy.</dd>
+<dt><strong><code>destrev</code></strong> :&ensp;<code>str</code></dt>
+<dd>If the target document already exists, its current revision.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>tuple[str, bool, str] : (id, ok, rev)</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+</dd>
+<dt id="couchdb3.aio.async_database.AsyncDatabase.create"><code class="name flex">
+<span>async def <span class="ident">create</span></span>(<span>self, doc: dict | Document, *, batch: bool | None = None) ‑> tuple[str, bool, str]</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def create(
+    self,
+    doc: dict | Document,
+    *,
+    batch: bool | None = None,
+) -&gt; tuple[str, bool, str]:
+    &#34;&#34;&#34;
+    Create a new document without specifying an ID.
+
+    Parameters
+    ----------
+    doc : dict | Document
+        A dictionary or Document instance.
+    batch : bool
+        Stores document in batch mode. Default `None`.
+
+    Returns
+    -------
+    tuple[str, bool, str] : (id, ok, rev)
+    &#34;&#34;&#34;
+    data = (
+        await self._post(
+            body=doc, query_kwargs={&#34;batch&#34;: &#34;ok&#34; if batch is True else None}
+        )
+    ).json()
+    return data[&#34;id&#34;], data[&#34;ok&#34;], data[&#34;rev&#34;]</code></pre>
+</details>
+<div class="desc"><p>Create a new document without specifying an ID.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>doc</code></strong> :&ensp;<code>dict | Document</code></dt>
+<dd>A dictionary or Document instance.</dd>
+<dt><strong><code>batch</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Stores document in batch mode. Default <code>None</code>.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>tuple[str, bool, str] : (id, ok, rev)</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+</dd>
+<dt id="couchdb3.aio.async_database.AsyncDatabase.delete"><code class="name flex">
+<span>async def <span class="ident">delete</span></span>(<span>self, docid: str, rev: str, *, batch: bool | None = None) ‑> bool</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def delete(
+    self, docid: str, rev: str, *, batch: bool | None = None
+) -&gt; bool:
+    &#34;&#34;&#34;
+    Delete a document.
+
+    Parameters
+    ----------
+    docid : str
+        The document&#39;s id.
+    rev : str
+        The document&#39;s current revision.
+    batch : bool
+        Stores document in batch mode. Default `None`.
+
+    Returns
+    -------
+    bool : `True` upon successful deletion.
+    &#34;&#34;&#34;
+    await self._delete(
+        resource=docid,
+        query_kwargs={&#34;rev&#34;: rev, &#34;batch&#34;: &#34;ok&#34; if batch is True else None},
+    )
+    return True</code></pre>
+</details>
+<div class="desc"><p>Delete a document.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>docid</code></strong> :&ensp;<code>str</code></dt>
+<dd>The document's id.</dd>
+<dt><strong><code>rev</code></strong> :&ensp;<code>str</code></dt>
+<dd>The document's current revision.</dd>
+<dt><strong><code>batch</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Stores document in batch mode. Default <code>None</code>.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>bool : <code>True</code> upon successful deletion.</p></div>
+</dd>
+<dt id="couchdb3.aio.async_database.AsyncDatabase.delete_attachment"><code class="name flex">
+<span>async def <span class="ident">delete_attachment</span></span>(<span>self, docid: str, attname: str, rev: str, *, batch: bool = False) ‑> bool</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def delete_attachment(
+    self, docid: str, attname: str, rev: str, *, batch: bool = False
+) -&gt; bool:
+    &#34;&#34;&#34;
+    Delete an attachment.
+
+    Parameters
+    ----------
+    docid : str
+        The document&#39;s id.
+    attname : str
+        The attachment&#39;s name.
+    rev : str
+        The document&#39;s current revision.
+    batch : bool
+        Stores in batch mode. Default `False`.
+
+    Returns
+    -------
+    bool : `True` upon successful deletion.
+    &#34;&#34;&#34;
+    await self._delete(
+        resource=f&#34;{docid}/{attname}&#34;,
+        query_kwargs={&#34;rev&#34;: rev, &#34;batch&#34;: &#34;ok&#34; if batch is True else None},
+    )
+    return True</code></pre>
+</details>
+<div class="desc"><p>Delete an attachment.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>docid</code></strong> :&ensp;<code>str</code></dt>
+<dd>The document's id.</dd>
+<dt><strong><code>attname</code></strong> :&ensp;<code>str</code></dt>
+<dd>The attachment's name.</dd>
+<dt><strong><code>rev</code></strong> :&ensp;<code>str</code></dt>
+<dd>The document's current revision.</dd>
+<dt><strong><code>batch</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Stores in batch mode. Default <code>False</code>.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>bool : <code>True</code> upon successful deletion.</p></div>
+</dd>
+<dt id="couchdb3.aio.async_database.AsyncDatabase.explain"><code class="name flex">
+<span>async def <span class="ident">explain</span></span>(<span>self,<br>selector: dict,<br>limit: int = 25,<br>skip: int = 0,<br>sort: list[dict] | None = None,<br>fields: list[str] | None = None,<br>use_index: str | list[str] | None = None,<br>conflicts: bool = False,<br>r: int = 1,<br>bookmark: str | None = None,<br>update: bool = True,<br>stable: bool | None = None,<br>execution_stats: bool = False) ‑> dict</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def explain(
+    self,
+    selector: dict,
+    limit: int = 25,
+    skip: int = 0,
+    sort: list[dict] | None = None,
+    fields: list[str] | None = None,
+    use_index: str | list[str] | None = None,
+    conflicts: bool = False,
+    r: int = 1,
+    bookmark: str | None = None,
+    update: bool = True,
+    stable: bool | None = None,
+    execution_stats: bool = False,
+) -&gt; dict:
+    &#34;&#34;&#34;
+    Shows which index is being used by the query. Parameters are the same as
+    `AsyncDatabase.find`.
+
+    Parameters
+    ----------
+    selector : dict
+        JSON object describing criteria used to select documents.
+    limit : int
+        Maximum number of results returned. Default is `25`.
+    skip : int
+        Skip the first `n` results. Default is `0`.
+    sort : list[dict]
+        JSON array following CouchDB&#39;s sort syntax. Default is `None`.
+    fields : list[str]
+        Fields to return. Default is `None` (entire object).
+    use_index : str | list[str]
+        Instruct a query to use a specific index. Default is `None`.
+    conflicts : bool
+        Include conflicted documents. Default is `False`.
+    r : int
+        Read quorum. Default is `1`.
+    bookmark : str
+        Paging bookmark. Default is `None`.
+    update : bool
+        Whether to update the index prior to returning the result. Default is `True`.
+    stable : bool
+        Whether to use a stable set of shards. Default is `None`.
+    execution_stats : bool
+        Include execution statistics. Default is `False`.
+
+    Returns
+    -------
+    dict
+    &#34;&#34;&#34;
+    return (
+        await self._post(
+            resource=&#34;_explain&#34;,
+            body=rm_nones_from_dict(
+                {
+                    &#34;selector&#34;: selector,
+                    &#34;limit&#34;: limit,
+                    &#34;skip&#34;: skip,
+                    &#34;sort&#34;: sort,
+                    &#34;fields&#34;: fields,
+                    &#34;use_index&#34;: use_index,
+                    &#34;conflicts&#34;: conflicts,
+                    &#34;r&#34;: r,
+                    &#34;bookmark&#34;: bookmark,
+                    &#34;update&#34;: update,
+                    &#34;stable&#34;: stable,
+                    &#34;execution_stats&#34;: execution_stats,
+                }
+            ),
+        )
+    ).json()</code></pre>
+</details>
+<div class="desc"><p>Shows which index is being used by the query. Parameters are the same as
+<code><a title="couchdb3.aio.async_database.AsyncDatabase.find" href="#couchdb3.aio.async_database.AsyncDatabase.find">AsyncDatabase.find()</a></code>.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>selector</code></strong> :&ensp;<code>dict</code></dt>
+<dd>JSON object describing criteria used to select documents.</dd>
+<dt><strong><code>limit</code></strong> :&ensp;<code>int</code></dt>
+<dd>Maximum number of results returned. Default is <code>25</code>.</dd>
+<dt><strong><code>skip</code></strong> :&ensp;<code>int</code></dt>
+<dd>Skip the first <code>n</code> results. Default is <code>0</code>.</dd>
+<dt><strong><code>sort</code></strong> :&ensp;<code>list[dict]</code></dt>
+<dd>JSON array following CouchDB's sort syntax. Default is <code>None</code>.</dd>
+<dt><strong><code>fields</code></strong> :&ensp;<code>list[str]</code></dt>
+<dd>Fields to return. Default is <code>None</code> (entire object).</dd>
+<dt><strong><code>use_index</code></strong> :&ensp;<code>str | list[str]</code></dt>
+<dd>Instruct a query to use a specific index. Default is <code>None</code>.</dd>
+<dt><strong><code>conflicts</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Include conflicted documents. Default is <code>False</code>.</dd>
+<dt><strong><code>r</code></strong> :&ensp;<code>int</code></dt>
+<dd>Read quorum. Default is <code>1</code>.</dd>
+<dt><strong><code>bookmark</code></strong> :&ensp;<code>str</code></dt>
+<dd>Paging bookmark. Default is <code>None</code>.</dd>
+<dt><strong><code>update</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Whether to update the index prior to returning the result. Default is <code>True</code>.</dd>
+<dt><strong><code>stable</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Whether to use a stable set of shards. Default is <code>None</code>.</dd>
+<dt><strong><code>execution_stats</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Include execution statistics. Default is <code>False</code>.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dict</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+</dd>
+<dt id="couchdb3.aio.async_database.AsyncDatabase.find"><code class="name flex">
+<span>async def <span class="ident">find</span></span>(<span>self,<br>selector: dict,<br>limit: int = 25,<br>skip: int = 0,<br>sort: list[dict] | None = None,<br>fields: list[str] | None = None,<br>use_index: str | list[str] | None = None,<br>conflicts: bool = False,<br>r: int = 1,<br>bookmark: str | None = None,<br>update: bool = True,<br>stable: bool | None = None,<br>execution_stats: bool = False,<br>partition: str | None = None) ‑> dict</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def find(
+    self,
+    selector: dict,
+    limit: int = 25,
+    skip: int = 0,
+    sort: list[dict] | None = None,
+    fields: list[str] | None = None,
+    use_index: str | list[str] | None = None,
+    conflicts: bool = False,
+    r: int = 1,
+    bookmark: str | None = None,
+    update: bool = True,
+    stable: bool | None = None,
+    execution_stats: bool = False,
+    partition: str | None = None,
+) -&gt; dict:
+    &#34;&#34;&#34;
+    Find documents using a declarative JSON querying syntax.
+
+    Parameters
+    ----------
+    selector : dict
+        JSON object describing criteria used to select documents.
+    limit : int
+        Maximum number of results returned. Default is `25`.
+    skip : int
+        Skip the first `n` results. Default is `0`.
+    sort : list[dict]
+        JSON array following CouchDB&#39;s sort syntax. Default is `None`.
+    fields : list[str]
+        Fields to return. Default is `None` (entire object).
+    use_index : str | list[str]
+        Instruct a query to use a specific index. Default is `None`.
+    conflicts : bool
+        Include conflicted documents. Default is `False`.
+    r : int
+        Read quorum. Default is `1`.
+    bookmark : str
+        Paging bookmark. Default is `None`.
+    update : bool
+        Whether to update the index prior to returning the result. Default is `True`.
+    stable : bool
+        Whether to use a stable set of shards. Default is `None`.
+    execution_stats : bool
+        Include execution statistics. Default is `False`.
+    partition : str
+        An optional partition ID. Only valid for partitioned databases. Default `None`.
+
+    Returns
+    -------
+    dict : Keys are `bookmark`, `docs`, `warning`.
+    &#34;&#34;&#34;
+    return (
+        await self._post(
+            resource=partitioned_db_resource_parser(
+                resource=&#34;_find&#34;,
+                partition=partition,
+            ),
+            body=rm_nones_from_dict(
+                {
+                    &#34;selector&#34;: selector,
+                    &#34;limit&#34;: limit,
+                    &#34;skip&#34;: skip,
+                    &#34;sort&#34;: sort,
+                    &#34;fields&#34;: fields,
+                    &#34;use_index&#34;: use_index,
+                    &#34;conflicts&#34;: conflicts,
+                    &#34;r&#34;: r,
+                    &#34;bookmark&#34;: bookmark,
+                    &#34;update&#34;: update,
+                    &#34;stable&#34;: stable,
+                    &#34;execution_stats&#34;: execution_stats,
+                }
+            ),
+        )
+    ).json()</code></pre>
+</details>
+<div class="desc"><p>Find documents using a declarative JSON querying syntax.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>selector</code></strong> :&ensp;<code>dict</code></dt>
+<dd>JSON object describing criteria used to select documents.</dd>
+<dt><strong><code>limit</code></strong> :&ensp;<code>int</code></dt>
+<dd>Maximum number of results returned. Default is <code>25</code>.</dd>
+<dt><strong><code>skip</code></strong> :&ensp;<code>int</code></dt>
+<dd>Skip the first <code>n</code> results. Default is <code>0</code>.</dd>
+<dt><strong><code>sort</code></strong> :&ensp;<code>list[dict]</code></dt>
+<dd>JSON array following CouchDB's sort syntax. Default is <code>None</code>.</dd>
+<dt><strong><code>fields</code></strong> :&ensp;<code>list[str]</code></dt>
+<dd>Fields to return. Default is <code>None</code> (entire object).</dd>
+<dt><strong><code>use_index</code></strong> :&ensp;<code>str | list[str]</code></dt>
+<dd>Instruct a query to use a specific index. Default is <code>None</code>.</dd>
+<dt><strong><code>conflicts</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Include conflicted documents. Default is <code>False</code>.</dd>
+<dt><strong><code>r</code></strong> :&ensp;<code>int</code></dt>
+<dd>Read quorum. Default is <code>1</code>.</dd>
+<dt><strong><code>bookmark</code></strong> :&ensp;<code>str</code></dt>
+<dd>Paging bookmark. Default is <code>None</code>.</dd>
+<dt><strong><code>update</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Whether to update the index prior to returning the result. Default is <code>True</code>.</dd>
+<dt><strong><code>stable</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Whether to use a stable set of shards. Default is <code>None</code>.</dd>
+<dt><strong><code>execution_stats</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Include execution statistics. Default is <code>False</code>.</dd>
+<dt><strong><code>partition</code></strong> :&ensp;<code>str</code></dt>
+<dd>An optional partition ID. Only valid for partitioned databases. Default <code>None</code>.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>dict : Keys are <code>bookmark</code>, <code>docs</code>, <code>warning</code>.</p></div>
+</dd>
+<dt id="couchdb3.aio.async_database.AsyncDatabase.get"><code class="name flex">
+<span>async def <span class="ident">get</span></span>(<span>self,<br>docid: str,<br>*,<br>attachments: bool | None = None,<br>att_encoding_info: bool | None = None,<br>atts_since: Iterable[str] | None = None,<br>conflicts: bool | None = None,<br>deleted_conflicts: bool | None = None,<br>latest: bool | None = None,<br>local_seq: bool | None = None,<br>meta: bool | None = None,<br>open_revs: Iterable[str] | None = None,<br>rev: str | None = None,<br>revs: bool | None = None,<br>revs_info: bool | None = None,<br>check: bool | None = None,<br>default_value: Any | None = None) ‑> <a title="couchdb3.document.Document" href="../document.html#couchdb3.document.Document">Document</a> | Any</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def get(
+    self,
+    docid: str,
+    *,
+    attachments: bool | None = None,
+    att_encoding_info: bool | None = None,
+    atts_since: Iterable[str] | None = None,
+    conflicts: bool | None = None,
+    deleted_conflicts: bool | None = None,
+    latest: bool | None = None,
+    local_seq: bool | None = None,
+    meta: bool | None = None,
+    open_revs: Iterable[str] | None = None,
+    rev: str | None = None,
+    revs: bool | None = None,
+    revs_info: bool | None = None,
+    check: bool | None = None,
+    default_value: Any | None = None,
+) -&gt; Document | Any:
+    &#34;&#34;&#34;
+    Get a document by id.
+
+    Parameters
+    ----------
+    docid : str
+        The document&#39;s id.
+    attachments : bool
+        Includes attachment bodies in response. Default `None`.
+    att_encoding_info : bool
+        Includes encoding information in attachment stubs. Default `None`.
+    atts_since : Iterable[str]
+        Includes attachments only since specified revisions. Default `None`.
+    conflicts : bool
+        Includes conflict information. Default `None`.
+    deleted_conflicts : bool
+        Includes deleted conflicted revisions. Default `None`.
+    latest : bool
+        Forces retrieving the latest leaf revision. Default `None`.
+    local_seq : bool
+        Includes last update sequence for the document. Default `None`.
+    meta : bool
+        Equivalent to specifying all conflicts, deleted_conflicts and revs_info.
+        Default `None`.
+    open_revs : Iterable[str]
+        Retrieves documents of specified leaf revisions. Default `None`.
+    rev : str
+        Retrieves document of specified revision. Default `None`.
+    revs : bool
+        Includes list of all known document revisions. Default `None`.
+    revs_info : bool
+        Includes detailed information for all known document revisions. Default `None`.
+    check : bool
+        If `True`, raise an exception if the document is not found. Default `None`.
+    default_value : Any
+        Value to return if `check=False` and document is not found. Default `None`.
+
+    Returns
+    -------
+    Document | Any
+    &#34;&#34;&#34;
+    try:
+        return Document(
+            **(
+                await self._get(
+                    resource=docid,
+                    query_kwargs={
+                        &#34;attachments&#34;: attachments,
+                        &#34;att_encoding_info&#34;: att_encoding_info,
+                        &#34;atts_since&#34;: atts_since,
+                        &#34;conflicts&#34;: conflicts,
+                        &#34;deleted_conflicts&#34;: deleted_conflicts,
+                        &#34;latest&#34;: latest,
+                        &#34;local_seq&#34;: local_seq,
+                        &#34;meta&#34;: meta,
+                        &#34;open_revs&#34;: open_revs,
+                        &#34;rev&#34;: rev,
+                        &#34;revs&#34;: revs,
+                        &#34;revs_info&#34;: revs_info,
+                    },
+                )
+            ).json()
+        )
+    except (CouchDBError, httpx.RequestError) as error:
+        if check:
+            raise error
+        return default_value</code></pre>
+</details>
+<div class="desc"><p>Get a document by id.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>docid</code></strong> :&ensp;<code>str</code></dt>
+<dd>The document's id.</dd>
+<dt><strong><code>attachments</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Includes attachment bodies in response. Default <code>None</code>.</dd>
+<dt><strong><code>att_encoding_info</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Includes encoding information in attachment stubs. Default <code>None</code>.</dd>
+<dt><strong><code>atts_since</code></strong> :&ensp;<code>Iterable[str]</code></dt>
+<dd>Includes attachments only since specified revisions. Default <code>None</code>.</dd>
+<dt><strong><code>conflicts</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Includes conflict information. Default <code>None</code>.</dd>
+<dt><strong><code>deleted_conflicts</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Includes deleted conflicted revisions. Default <code>None</code>.</dd>
+<dt><strong><code>latest</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Forces retrieving the latest leaf revision. Default <code>None</code>.</dd>
+<dt><strong><code>local_seq</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Includes last update sequence for the document. Default <code>None</code>.</dd>
+<dt><strong><code>meta</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Equivalent to specifying all conflicts, deleted_conflicts and revs_info.
+Default <code>None</code>.</dd>
+<dt><strong><code>open_revs</code></strong> :&ensp;<code>Iterable[str]</code></dt>
+<dd>Retrieves documents of specified leaf revisions. Default <code>None</code>.</dd>
+<dt><strong><code>rev</code></strong> :&ensp;<code>str</code></dt>
+<dd>Retrieves document of specified revision. Default <code>None</code>.</dd>
+<dt><strong><code>revs</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Includes list of all known document revisions. Default <code>None</code>.</dd>
+<dt><strong><code>revs_info</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Includes detailed information for all known document revisions. Default <code>None</code>.</dd>
+<dt><strong><code>check</code></strong> :&ensp;<code>bool</code></dt>
+<dd>If <code>True</code>, raise an exception if the document is not found. Default <code>None</code>.</dd>
+<dt><strong><code>default_value</code></strong> :&ensp;<code>Any</code></dt>
+<dd>Value to return if <code>check=False</code> and document is not found. Default <code>None</code>.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Document | Any</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+</dd>
+<dt id="couchdb3.aio.async_database.AsyncDatabase.get_attachment"><code class="name flex">
+<span>async def <span class="ident">get_attachment</span></span>(<span>self, docid: str, attname: str, rev: str | None = None) ‑> <a title="couchdb3.document.AttachmentDocument" href="../document.html#couchdb3.document.AttachmentDocument">AttachmentDocument</a></span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def get_attachment(
+    self,
+    docid: str,
+    attname: str,
+    rev: str | None = None,
+) -&gt; AttachmentDocument:
+    &#34;&#34;&#34;
+    Get a document&#39;s attachment.
+
+    Parameters
+    ----------
+    docid : str
+        The document&#39;s id.
+    attname : str
+        The attachment&#39;s name.
+    rev : str
+        A specific revision. Default `None`.
+
+    Returns
+    -------
+    AttachmentDocument
+    &#34;&#34;&#34;
+    response = await self._get(f&#34;{docid}/{attname}&#34;, query_kwargs={&#34;rev&#34;: rev})
+    content_md5 = response.headers.get(&#34;content-md5&#34;)
+    digest_value = f&#34;md5-{content_md5}&#34; if content_md5 else None
+    return AttachmentDocument(
+        content=response.content,
+        content_encoding=response.headers.get(&#34;content-encoding&#34;),
+        content_length=response.headers.get(&#34;content-length&#34;),
+        content_type=response.headers.get(&#34;content-type&#34;),
+        digest=digest_value,
+    )</code></pre>
+</details>
+<div class="desc"><p>Get a document's attachment.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>docid</code></strong> :&ensp;<code>str</code></dt>
+<dd>The document's id.</dd>
+<dt><strong><code>attname</code></strong> :&ensp;<code>str</code></dt>
+<dd>The attachment's name.</dd>
+<dt><strong><code>rev</code></strong> :&ensp;<code>str</code></dt>
+<dd>A specific revision. Default <code>None</code>.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>AttachmentDocument</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+</dd>
+<dt id="couchdb3.aio.async_database.AsyncDatabase.get_design"><code class="name flex">
+<span>async def <span class="ident">get_design</span></span>(<span>self, ddoc: str, **kwargs) ‑> <a title="couchdb3.document.Document" href="../document.html#couchdb3.document.Document">Document</a></span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def get_design(self, ddoc: str, **kwargs) -&gt; Document:
+    &#34;&#34;&#34;
+    Get a design document.
+
+    Parameters
+    ----------
+    ddoc : str
+        The design document&#39;s name.
+    kwargs
+        Further `AsyncDatabase.get` parameters.
+
+    Returns
+    -------
+    Document
+    &#34;&#34;&#34;
+    return await self.get(docid=f&#34;_design/{ddoc}&#34;, **kwargs)</code></pre>
+</details>
+<div class="desc"><p>Get a design document.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>ddoc</code></strong> :&ensp;<code>str</code></dt>
+<dd>The design document's name.</dd>
+<dt><strong><code>kwargs</code></strong></dt>
+<dd>Further <code><a title="couchdb3.aio.async_database.AsyncDatabase.get" href="#couchdb3.aio.async_database.AsyncDatabase.get">AsyncDatabase.get()</a></code> parameters.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Document</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+</dd>
+<dt id="couchdb3.aio.async_database.AsyncDatabase.get_partition"><code class="name flex">
+<span>async def <span class="ident">get_partition</span></span>(<span>self, partition_id: str) ‑> <a title="couchdb3.aio.async_database.AsyncPartition" href="#couchdb3.aio.async_database.AsyncPartition">AsyncPartition</a></span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def get_partition(self, partition_id: str) -&gt; AsyncPartition:
+    &#34;&#34;&#34;
+    Get a given partition.
+
+    Parameters
+    ----------
+    partition_id : str
+        The partition&#39;s ID.
+
+    Returns
+    -------
+    AsyncPartition
+    &#34;&#34;&#34;
+    return AsyncPartition(
+        partition_id=partition_id,
+        name=self.name,
+        url=self.url,
+        port=self.port,
+        user=self._user,
+        password=self._password,
+        disable_ssl_verification=self.disable_ssl_verification,
+        auth_method=self.auth_method,
+        session=self.session,  # shared — child sets _owns_session=False
+    )</code></pre>
+</details>
+<div class="desc"><p>Get a given partition.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>partition_id</code></strong> :&ensp;<code>str</code></dt>
+<dd>The partition's ID.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code><a title="couchdb3.aio.async_database.AsyncPartition" href="#couchdb3.aio.async_database.AsyncPartition">AsyncPartition</a></code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+</dd>
+<dt id="couchdb3.aio.async_database.AsyncDatabase.indexes"><code class="name flex">
+<span>async def <span class="ident">indexes</span></span>(<span>self) ‑> dict</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def indexes(self) -&gt; dict:
+    &#34;&#34;&#34;
+    Get a list of all indexes in the database.
+
+    Returns
+    -------
+    dict : Keys are `total_rows` and `indexes`.
+    &#34;&#34;&#34;
+    return (await self._get(resource=&#34;_index&#34;)).json()</code></pre>
+</details>
+<div class="desc"><p>Get a list of all indexes in the database.</p>
+<h2 id="returns">Returns</h2>
+<p>dict : Keys are <code>total_rows</code> and <code>indexes</code>.</p></div>
+</dd>
+<dt id="couchdb3.aio.async_database.AsyncDatabase.purge"><code class="name flex">
+<span>async def <span class="ident">purge</span></span>(<span>self, data: dict) ‑> dict</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def purge(self, data: dict) -&gt; dict:
+    &#34;&#34;&#34;
+    Permanently purge the given `(id, rev)` pairs.
+
+    Parameters
+    ----------
+    data : dict
+        A dictionary with document IDs as keys and list of revisions as values.
+
+    Returns
+    -------
+    dict
+    &#34;&#34;&#34;
+    return (await self._post(resource=&#34;_purge&#34;, body=data)).json()</code></pre>
+</details>
+<div class="desc"><p>Permanently purge the given <code>(id, rev)</code> pairs.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>data</code></strong> :&ensp;<code>dict</code></dt>
+<dd>A dictionary with document IDs as keys and list of revisions as values.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dict</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+</dd>
+<dt id="couchdb3.aio.async_database.AsyncDatabase.put_attachment"><code class="name flex">
+<span>async def <span class="ident">put_attachment</span></span>(<span>self,<br>docid: str,<br>attname: str,<br>path: str | None = None,<br>*,<br>content: bytes | None = None,<br>content_type: str | None = None,<br>rev: str | None = None) ‑> tuple[str, bool, str]</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def put_attachment(
+    self,
+    docid: str,
+    attname: str,
+    path: str | None = None,
+    *,
+    content: bytes | None = None,
+    content_type: str | None = None,
+    rev: str | None = None,
+) -&gt; tuple[str, bool, str]:
+    &#34;&#34;&#34;
+    Upload content as an attachment to the specified document.
+
+    Parameters
+    ----------
+    docid : str
+        The document&#39;s id.
+    attname : str
+        The attachment&#39;s name.
+    path : str
+        Path to a local file to upload. Mutually exclusive with `content`.
+    content : bytes
+        Raw bytes to upload. Mutually exclusive with `path`.
+    content_type : str
+        The attachment&#39;s MIME type. Required when `content` is provided.
+    rev : str
+        The document&#39;s current revision. Required for existing documents.
+
+    Returns
+    -------
+    tuple[str, bool, str] : (id, ok, rev)
+    &#34;&#34;&#34;
+    if (not content and not path) or (content and path):
+        raise ValueError(
+            &#39;Precisely one of the arguments &#34;content&#34; and &#34;path&#34; must be provided.&#39;
+        )
+    if content and not content_type:
+        raise ValueError(
+            &#39;Argument &#34;content_type&#34; cannot be empty when &#34;content&#34; is provided.&#39;
+        )
+    resource = f&#34;{docid}/{attname}&#34;
+    query_kwargs = {&#34;rev&#34;: rev}
+    content_type = content_type if content_type else mimetypes.guess_type(path)[0]
+    if path:
+        with open(path, &#34;rb&#34;) as file:
+            content = file.read()
+    response = await self._put(
+        resource=resource,
+        query_kwargs=query_kwargs,
+        content=content,
+        headers={&#34;content-type&#34;: content_type},
+    )
+    data = response.json()
+    return data[&#34;id&#34;], data[&#34;ok&#34;], data[&#34;rev&#34;]</code></pre>
+</details>
+<div class="desc"><p>Upload content as an attachment to the specified document.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>docid</code></strong> :&ensp;<code>str</code></dt>
+<dd>The document's id.</dd>
+<dt><strong><code>attname</code></strong> :&ensp;<code>str</code></dt>
+<dd>The attachment's name.</dd>
+<dt><strong><code>path</code></strong> :&ensp;<code>str</code></dt>
+<dd>Path to a local file to upload. Mutually exclusive with <code>content</code>.</dd>
+<dt><strong><code>content</code></strong> :&ensp;<code>bytes</code></dt>
+<dd>Raw bytes to upload. Mutually exclusive with <code>path</code>.</dd>
+<dt><strong><code>content_type</code></strong> :&ensp;<code>str</code></dt>
+<dd>The attachment's MIME type. Required when <code>content</code> is provided.</dd>
+<dt><strong><code>rev</code></strong> :&ensp;<code>str</code></dt>
+<dd>The document's current revision. Required for existing documents.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>tuple[str, bool, str] : (id, ok, rev)</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+</dd>
+<dt id="couchdb3.aio.async_database.AsyncDatabase.put_design"><code class="name flex">
+<span>async def <span class="ident">put_design</span></span>(<span>self,<br>ddoc: str,<br>*,<br>rev: str | None = None,<br>language: str | None = None,<br>options: dict | None = None,<br>filters: dict | None = None,<br>updates: dict | None = None,<br>validate_doc_update: str | None = None,<br>views: dict | None = None,<br>autoupdate: bool | None = None,<br>partitioned: bool | None = None,<br>**kwargs) ‑> tuple[str, bool, str]</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def put_design(
+    self,
+    ddoc: str,
+    *,
+    rev: str | None = None,
+    language: str | None = None,
+    options: dict | None = None,
+    filters: dict | None = None,
+    updates: dict | None = None,
+    validate_doc_update: str | None = None,
+    views: dict | None = None,
+    autoupdate: bool | None = None,
+    partitioned: bool | None = None,
+    **kwargs,
+) -&gt; tuple[str, bool, str]:
+    &#34;&#34;&#34;
+    Create or update a named design document.
+
+    Parameters
+    ----------
+    ddoc : str
+        The design document&#39;s name.
+    rev : str
+        The design document&#39;s revision in case of an update.
+    language : str
+        Query Server to process design document functions.
+    options : dict
+        View&#39;s default options.
+    filters : dict
+        Filter functions definition.
+    updates : dict
+        Update functions definition.
+    validate_doc_update : str
+        Validate document update function source.
+    views : dict
+        View functions definition.
+    autoupdate : bool
+        Indicates whether to automatically build indexes.
+    partitioned : bool
+        Set to `True` for a partitioned design.
+    kwargs
+        Further `AsyncDatabase.save` parameters.
+
+    Returns
+    -------
+    tuple[str, bool, str] : (id, ok, rev)
+    &#34;&#34;&#34;
+    if partitioned:
+        options = (options or {}).update({&#34;partitioned&#34;: partitioned})
+    return await self.save(
+        doc=rm_nones_from_dict(
+            {
+                &#34;_id&#34;: f&#34;_design/{ddoc}&#34;,
+                &#34;_rev&#34;: rev,
+                &#34;language&#34;: language,
+                &#34;options&#34;: options,
+                &#34;filters&#34;: filters,
+                &#34;updates&#34;: updates,
+                &#34;validate_doc_update&#34;: validate_doc_update,
+                &#34;views&#34;: views,
+                &#34;autoupdate&#34;: autoupdate,
+            }
+        ),
+        **kwargs,
+    )</code></pre>
+</details>
+<div class="desc"><p>Create or update a named design document.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>ddoc</code></strong> :&ensp;<code>str</code></dt>
+<dd>The design document's name.</dd>
+<dt><strong><code>rev</code></strong> :&ensp;<code>str</code></dt>
+<dd>The design document's revision in case of an update.</dd>
+<dt><strong><code>language</code></strong> :&ensp;<code>str</code></dt>
+<dd>Query Server to process design document functions.</dd>
+<dt><strong><code>options</code></strong> :&ensp;<code>dict</code></dt>
+<dd>View's default options.</dd>
+<dt><strong><code>filters</code></strong> :&ensp;<code>dict</code></dt>
+<dd>Filter functions definition.</dd>
+<dt><strong><code>updates</code></strong> :&ensp;<code>dict</code></dt>
+<dd>Update functions definition.</dd>
+<dt><strong><code>validate_doc_update</code></strong> :&ensp;<code>str</code></dt>
+<dd>Validate document update function source.</dd>
+<dt><strong><code>views</code></strong> :&ensp;<code>dict</code></dt>
+<dd>View functions definition.</dd>
+<dt><strong><code>autoupdate</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Indicates whether to automatically build indexes.</dd>
+<dt><strong><code>partitioned</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Set to <code>True</code> for a partitioned design.</dd>
+<dt><strong><code>kwargs</code></strong></dt>
+<dd>Further <code><a title="couchdb3.aio.async_database.AsyncDatabase.save" href="#couchdb3.aio.async_database.AsyncDatabase.save">AsyncDatabase.save()</a></code> parameters.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>tuple[str, bool, str] : (id, ok, rev)</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+</dd>
+<dt id="couchdb3.aio.async_database.AsyncDatabase.save"><code class="name flex">
+<span>async def <span class="ident">save</span></span>(<span>self,<br>doc: dict | Document,<br>batch: bool | None = None,<br>new_edits: bool | None = None,<br>path: str | None = None) ‑> tuple[str, bool, str]</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def save(
+    self,
+    doc: dict | Document,
+    batch: bool | None = None,
+    new_edits: bool | None = None,
+    path: str | None = None,
+) -&gt; tuple[str, bool, str]:
+    &#34;&#34;&#34;
+    Create a new named document, or a new revision of an existing document.
+
+    Parameters
+    ----------
+    doc : dict | Document
+        A dictionary or Document instance with a valid `_id`, and `_rev` if updating.
+    batch : bool
+        Store document in batch mode. Default `None`.
+    new_edits : bool
+        Prevents insertion of a conflicting document. Default `None`.
+    path : str
+        Database path, e.g. `_design`. Default `None`.
+
+    Returns
+    -------
+    tuple[str, bool, str] : (id, ok, rev)
+    &#34;&#34;&#34;
+    batch = &#34;ok&#34; if batch else None
+    data = (
+        await self._put(
+            resource=f&#34;{path}/{doc.get(&#39;_id&#39;)}&#34; if path else doc.get(&#34;_id&#34;),
+            body=doc,
+            query_kwargs={
+                &#34;batch&#34;: &#34;ok&#34; if batch else None,
+                &#34;new_edits&#34;: new_edits,
+                &#34;rev&#34;: doc.get(&#34;_rev&#34;),
+            },
+        )
+    ).json()
+    return data[&#34;id&#34;], data[&#34;ok&#34;], data[&#34;rev&#34;]</code></pre>
+</details>
+<div class="desc"><p>Create a new named document, or a new revision of an existing document.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>doc</code></strong> :&ensp;<code>dict | Document</code></dt>
+<dd>A dictionary or Document instance with a valid <code>_id</code>, and <code>_rev</code> if updating.</dd>
+<dt><strong><code>batch</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Store document in batch mode. Default <code>None</code>.</dd>
+<dt><strong><code>new_edits</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Prevents insertion of a conflicting document. Default <code>None</code>.</dd>
+<dt><strong><code>path</code></strong> :&ensp;<code>str</code></dt>
+<dd>Database path, e.g. <code>_design</code>. Default <code>None</code>.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>tuple[str, bool, str] : (id, ok, rev)</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+</dd>
+<dt id="couchdb3.aio.async_database.AsyncDatabase.save_index"><code class="name flex">
+<span>async def <span class="ident">save_index</span></span>(<span>self,<br>index: dict,<br>ddoc: str | None = None,<br>name: str | None = None,<br>index_type: str | None = 'json',<br>partitioned: bool | None = None) ‑> tuple[str, str, str]</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def save_index(
+    self,
+    index: dict,
+    ddoc: str | None = None,
+    name: str | None = None,
+    index_type: str | None = &#34;json&#34;,
+    partitioned: bool | None = None,
+) -&gt; tuple[str, str, str]:
+    &#34;&#34;&#34;
+    Create a new index on a database.
+
+    Parameters
+    ----------
+    index : dict
+        Dictionary describing the index to create.
+    ddoc : str
+        Name of the design document. Default `None` (auto-generated).
+    name : str
+        Name of the index. Default `None` (auto-generated).
+    index_type : str
+        `json` or `text`. Default `json`.
+    partitioned : bool
+        Whether the index is partitioned or global. Default `None`.
+
+    Returns
+    -------
+    tuple[str, str, str] : (result, id, name)
+    &#34;&#34;&#34;
+    data = (
+        await self._post(
+            resource=&#34;_index&#34;,
+            body=rm_nones_from_dict(
+                {
+                    &#34;index&#34;: index,
+                    &#34;ddoc&#34;: ddoc,
+                    &#34;name&#34;: name,
+                    &#34;type&#34;: index_type,
+                    &#34;partitioned&#34;: partitioned,
+                }
+            ),
+        )
+    ).json()
+    return data[&#34;result&#34;], data[&#34;id&#34;], data[&#34;name&#34;]</code></pre>
+</details>
+<div class="desc"><p>Create a new index on a database.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>index</code></strong> :&ensp;<code>dict</code></dt>
+<dd>Dictionary describing the index to create.</dd>
+<dt><strong><code>ddoc</code></strong> :&ensp;<code>str</code></dt>
+<dd>Name of the design document. Default <code>None</code> (auto-generated).</dd>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>Name of the index. Default <code>None</code> (auto-generated).</dd>
+<dt><strong><code>index_type</code></strong> :&ensp;<code>str</code></dt>
+<dd><code>json</code> or <code>text</code>. Default <code>json</code>.</dd>
+<dt><strong><code>partitioned</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Whether the index is partitioned or global. Default <code>None</code>.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>tuple[str, str, str] : (result, id, name)</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+</dd>
+<dt id="couchdb3.aio.async_database.AsyncDatabase.security"><code class="name flex">
+<span>async def <span class="ident">security</span></span>(<span>self) ‑> <a title="couchdb3.document.SecurityDocument" href="../document.html#couchdb3.document.SecurityDocument">SecurityDocument</a></span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def security(self) -&gt; SecurityDocument:
+    &#34;&#34;&#34;
+    Returns the current security object from the specified database.
+
+    Returns
+    -------
+    SecurityDocument
+    &#34;&#34;&#34;
+    data = (await self._get(resource=&#34;_security&#34;)).json()
+    return SecurityDocument(**data)</code></pre>
+</details>
+<div class="desc"><p>Returns the current security object from the specified database.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>SecurityDocument</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+</dd>
+<dt id="couchdb3.aio.async_database.AsyncDatabase.update_security"><code class="name flex">
+<span>async def <span class="ident">update_security</span></span>(<span>self,<br>admins: dict | SecurityDocumentElement | None = None,<br>members: dict | SecurityDocumentElement | None = None) ‑> bool</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def update_security(
+    self,
+    admins: dict | SecurityDocumentElement | None = None,
+    members: dict | SecurityDocumentElement | None = None,
+) -&gt; bool:
+    &#34;&#34;&#34;
+    Update database security.
+
+    Parameters
+    ----------
+    admins : dict | SecurityDocumentElement
+        Object with `names` and `roles` fields.
+    members : dict | SecurityDocumentElement
+        Object with `names` and `roles` fields.
+
+    Returns
+    -------
+    bool : Operation status.
+    &#34;&#34;&#34;
+    return (
+        await self._put(
+            resource=&#34;_security&#34;, body={&#34;admins&#34;: admins, &#34;members&#34;: members}
+        )
+    ).json()[&#34;ok&#34;]</code></pre>
+</details>
+<div class="desc"><p>Update database security.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>admins</code></strong> :&ensp;<code>dict | SecurityDocumentElement</code></dt>
+<dd>Object with <code>names</code> and <code>roles</code> fields.</dd>
+<dt><strong><code>members</code></strong> :&ensp;<code>dict | SecurityDocumentElement</code></dt>
+<dd>Object with <code>names</code> and <code>roles</code> fields.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>bool : Operation status.</p></div>
+</dd>
+<dt id="couchdb3.aio.async_database.AsyncDatabase.view"><code class="name flex">
+<span>async def <span class="ident">view</span></span>(<span>self,<br>ddoc: str,<br>view: str | None = None,<br>*,<br>partition: str | None = None,<br>conflicts: bool | None = None,<br>descending: bool | None = None,<br>endkey: Any | None = None,<br>endkey_docid: str | None = None,<br>group: bool | None = None,<br>group_level: int | None = None,<br>include_docs: bool | None = None,<br>attachments: bool | None = None,<br>att_encoding_info: bool | None = None,<br>inclusive_end: bool | None = None,<br>key: str | None = None,<br>keys: Iterable[str] | None = None,<br>limit: int | None = None,<br>reduce: bool | None = None,<br>skip: int | None = None,<br>sort: bool | None = None,<br>stable: bool | None = None,<br>startkey: Any | None = None,<br>startkey_docid: str | None = None,<br>update: str | None = None,<br>update_seq: bool | None = None) ‑> <a title="couchdb3.view.ViewResult" href="../view.html#couchdb3.view.ViewResult">ViewResult</a></span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def view(
+    self,
+    ddoc: str,
+    view: str | None = None,
+    *,
+    partition: str | None = None,
+    conflicts: bool | None = None,
+    descending: bool | None = None,
+    endkey: Any | None = None,
+    endkey_docid: str | None = None,
+    group: bool | None = None,
+    group_level: int | None = None,
+    include_docs: bool | None = None,
+    attachments: bool | None = None,
+    att_encoding_info: bool | None = None,
+    inclusive_end: bool | None = None,
+    key: str | None = None,
+    keys: Iterable[str] | None = None,
+    limit: int | None = None,
+    reduce: bool | None = None,
+    skip: int | None = None,
+    sort: bool | None = None,
+    stable: bool | None = None,
+    startkey: Any | None = None,
+    startkey_docid: str | None = None,
+    update: str | None = None,
+    update_seq: bool | None = None,
+) -&gt; ViewResult:
+    &#34;&#34;&#34;
+    Executes the specified view function from the specified design document.
+
+    Parameters
+    ----------
+    ddoc : str
+        The corresponding design document&#39;s id.
+    view : str
+        The view&#39;s id.
+    partition : str
+        An optional partition ID. Only valid for partitioned databases. Default `None`.
+    conflicts : bool
+        Include conflicts information in response. Default `None`.
+    descending : bool
+        Return documents in descending order. Default `None`.
+    endkey : Any
+        Stop returning records at this key. Default `None`.
+    endkey_docid : str
+        Stop returning records at this document ID. Default `None`.
+    group : bool
+        Group results using the reduce function. Default `None`.
+    group_level : int
+        Specify the group level. Default `None`.
+    include_docs : bool
+        Include the associated document with each row. Default `None`.
+    attachments : bool
+        Include Base64-encoded attachment content. Default `None`.
+    att_encoding_info : bool
+        Include encoding information in attachment stubs. Default `None`.
+    inclusive_end : bool
+        Whether the end key should be included in the result. Default `None`.
+    key : str
+        Return only documents matching this key. Default `None`.
+    keys : Iterable[str]
+        Return only documents matching these keys. Default `None`.
+    limit : int
+        Maximum number of documents to return. Default `None`.
+    reduce : bool
+        Use the reduction function. Default `None`.
+    skip : int
+        Skip this number of records. Default `None`.
+    sort : bool
+        Sort returned rows. Default `None`.
+    stable : bool
+        Use a stable set of shards. Default `None`.
+    startkey : Any
+        Return records starting with this key. Default `None`.
+    startkey_docid : str
+        Return records starting with this document ID. Default `None`.
+    update : str
+        Whether to update the view prior to responding (`true`, `false`, `lazy`).
+        Default `None`.
+    update_seq : bool
+        Include the `update_seq` value in the response. Default `None`.
+
+    Returns
+    -------
+    ViewResult
+    &#34;&#34;&#34;
+    path = partitioned_db_resource_parser(
+        resource=&#34;_design&#34;,
+        partition=partition,
+    )
+    return ViewResult(
+        **(
+            await self._get(
+                resource=f&#34;{path}/{ddoc}/_view/{view}&#34; if (ddoc and view) else ddoc,
+                query_kwargs={
+                    &#34;conflicts&#34;: conflicts,
+                    &#34;descending&#34;: descending,
+                    &#34;endkey&#34;: endkey,
+                    &#34;endkey_docid&#34;: endkey_docid,
+                    &#34;group&#34;: group,
+                    &#34;group_level&#34;: group_level,
+                    &#34;include_docs&#34;: include_docs,
+                    &#34;attachments&#34;: attachments,
+                    &#34;att_encoding_info&#34;: att_encoding_info,
+                    &#34;inclusive_end&#34;: inclusive_end,
+                    &#34;key&#34;: key,
+                    &#34;keys&#34;: keys,
+                    &#34;limit&#34;: limit,
+                    &#34;reduce&#34;: reduce,
+                    &#34;skip&#34;: skip,
+                    &#34;sorted&#34;: sort,
+                    &#34;stable&#34;: stable,
+                    &#34;startkey&#34;: startkey,
+                    &#34;startkey_docid&#34;: startkey_docid,
+                    &#34;update&#34;: update,
+                    &#34;update_seq&#34;: update_seq,
+                },
+            )
+        ).json()
+    )</code></pre>
+</details>
+<div class="desc"><p>Executes the specified view function from the specified design document.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>ddoc</code></strong> :&ensp;<code>str</code></dt>
+<dd>The corresponding design document's id.</dd>
+<dt><strong><code>view</code></strong> :&ensp;<code>str</code></dt>
+<dd>The view's id.</dd>
+<dt><strong><code>partition</code></strong> :&ensp;<code>str</code></dt>
+<dd>An optional partition ID. Only valid for partitioned databases. Default <code>None</code>.</dd>
+<dt><strong><code>conflicts</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Include conflicts information in response. Default <code>None</code>.</dd>
+<dt><strong><code>descending</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Return documents in descending order. Default <code>None</code>.</dd>
+<dt><strong><code>endkey</code></strong> :&ensp;<code>Any</code></dt>
+<dd>Stop returning records at this key. Default <code>None</code>.</dd>
+<dt><strong><code>endkey_docid</code></strong> :&ensp;<code>str</code></dt>
+<dd>Stop returning records at this document ID. Default <code>None</code>.</dd>
+<dt><strong><code>group</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Group results using the reduce function. Default <code>None</code>.</dd>
+<dt><strong><code>group_level</code></strong> :&ensp;<code>int</code></dt>
+<dd>Specify the group level. Default <code>None</code>.</dd>
+<dt><strong><code>include_docs</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Include the associated document with each row. Default <code>None</code>.</dd>
+<dt><strong><code>attachments</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Include Base64-encoded attachment content. Default <code>None</code>.</dd>
+<dt><strong><code>att_encoding_info</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Include encoding information in attachment stubs. Default <code>None</code>.</dd>
+<dt><strong><code>inclusive_end</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Whether the end key should be included in the result. Default <code>None</code>.</dd>
+<dt><strong><code>key</code></strong> :&ensp;<code>str</code></dt>
+<dd>Return only documents matching this key. Default <code>None</code>.</dd>
+<dt><strong><code>keys</code></strong> :&ensp;<code>Iterable[str]</code></dt>
+<dd>Return only documents matching these keys. Default <code>None</code>.</dd>
+<dt><strong><code>limit</code></strong> :&ensp;<code>int</code></dt>
+<dd>Maximum number of documents to return. Default <code>None</code>.</dd>
+<dt><strong><code>reduce</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Use the reduction function. Default <code>None</code>.</dd>
+<dt><strong><code>skip</code></strong> :&ensp;<code>int</code></dt>
+<dd>Skip this number of records. Default <code>None</code>.</dd>
+<dt><strong><code>sort</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Sort returned rows. Default <code>None</code>.</dd>
+<dt><strong><code>stable</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Use a stable set of shards. Default <code>None</code>.</dd>
+<dt><strong><code>startkey</code></strong> :&ensp;<code>Any</code></dt>
+<dd>Return records starting with this key. Default <code>None</code>.</dd>
+<dt><strong><code>startkey_docid</code></strong> :&ensp;<code>str</code></dt>
+<dd>Return records starting with this document ID. Default <code>None</code>.</dd>
+<dt><strong><code>update</code></strong> :&ensp;<code>str</code></dt>
+<dd>Whether to update the view prior to responding (<code>true</code>, <code>false</code>, <code>lazy</code>).
+Default <code>None</code>.</dd>
+<dt><strong><code>update_seq</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Include the <code>update_seq</code> value in the response. Default <code>None</code>.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>ViewResult</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="couchdb3.aio.async_base.AsyncBase" href="async_base.html#couchdb3.aio.async_base.AsyncBase">AsyncBase</a></b></code>:
+<ul class="hlist">
+<li><code><a title="couchdb3.aio.async_base.AsyncBase.aclose" href="async_base.html#couchdb3.aio.async_base.AsyncBase.aclose">aclose</a></code></li>
+<li><code><a title="couchdb3.aio.async_base.AsyncBase.check" href="async_base.html#couchdb3.aio.async_base.AsyncBase.check">check</a></code></li>
+<li><code><a title="couchdb3.aio.async_base.AsyncBase.info" href="async_base.html#couchdb3.aio.async_base.AsyncBase.info">info</a></code></li>
+<li><code><a title="couchdb3.aio.async_base.AsyncBase.rev" href="async_base.html#couchdb3.aio.async_base.AsyncBase.rev">rev</a></code></li>
+<li><code><a title="couchdb3.aio.async_base.AsyncBase.url" href="async_base.html#couchdb3.aio.async_base.AsyncBase.url">url</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+<dt id="couchdb3.aio.async_database.AsyncPartition"><code class="flex name class">
+<span>class <span class="ident">AsyncPartition</span></span>
+<span>(</span><span>partition_id: str,<br>name: str,<br>*,<br>url: str | None = None,<br>port: int | None = None,<br>user: str | None = None,<br>password: str | None = None,<br>disable_ssl_verification: bool = False,<br>auth_method: str | None = None,<br>timeout: int | None = None,<br>session: httpx.AsyncClient | None = None)</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class AsyncPartition(AsyncDatabase):
+    &#34;&#34;&#34;
+    Async CouchDB partition client. Mirrors `Partition` with `async def` methods throughout.
+    &#34;&#34;&#34;
+
+    def __init__(
+        self,
+        partition_id: str,
+        name: str,
+        *,
+        url: str | None = None,
+        port: int | None = None,
+        user: str | None = None,
+        password: str | None = None,
+        disable_ssl_verification: bool = False,
+        auth_method: str | None = None,
+        timeout: int | None = None,
+        session: httpx.AsyncClient | None = None,
+    ) -&gt; None:
+        &#34;&#34;&#34;
+
+        Parameters
+        ----------
+        partition_id : str
+            The partition&#39;s ID.
+        name : str
+            The name of the database.
+        url : str
+            The url of the CouchDB server.
+        port : int
+            The port of the CouchDB server.
+        user : str
+            The CouchDB admin username.
+        password : str
+            The CouchDB admin password.
+        disable_ssl_verification : bool
+            Controls whether to verify the server&#39;s TLS certificate. Default `False`.
+        auth_method : str
+            Authentication method. Default is `couchdb3.utils.DEFAULT_AUTH_METHOD`.
+        timeout : int
+            The default timeout for requests. Default `None`.
+        session : httpx.AsyncClient
+            A specific async client to use. Optional.
+        &#34;&#34;&#34;
+        super().__init__(
+            name=name,
+            url=url,
+            session=session,
+            port=port,
+            user=user,
+            password=password,
+            disable_ssl_verification=disable_ssl_verification,
+            auth_method=auth_method,
+            timeout=timeout,
+        )
+        self.partition_id = partition_id
+
+    def __repr__(self) -&gt; str:
+        return f&#34;{super().__repr__()}/{self.partition_id}&#34;
+
+    async def all_docs(
+        self, keys: Iterable[str] | None = None, **kwargs
+    ) -&gt; ViewResult:
+        &#34;&#34;&#34;
+        Executes the built-in _all_docs view, returning all documents in the partition.
+
+        Parameters
+        ----------
+        keys : Iterable[str]
+            Return only documents matching these keys. Default `None`.
+        kwargs
+            Further `AsyncDatabase.view` parameters.
+
+        Returns
+        -------
+        ViewResult
+        &#34;&#34;&#34;
+        return await super().all_docs(
+            partition=self.partition_id, keys=keys, **kwargs
+        )
+
+    async def info(self) -&gt; dict:
+        &#34;&#34;&#34;
+        Return the partition&#39;s info.
+
+        Returns
+        -------
+        dict
+        &#34;&#34;&#34;
+        return await super().info(partition=self.partition_id)
+
+    async def find(
+        self,
+        selector: dict,
+        limit: int = 25,
+        skip: int = 0,
+        sort: list[dict] | None = None,
+        fields: list[str] | None = None,
+        use_index: str | list[str] | None = None,
+        conflicts: bool = False,
+        r: int = 1,
+        bookmark: str | None = None,
+        update: bool = True,
+        stable: bool | None = None,
+        execution_stats: bool = False,
+    ) -&gt; dict:
+        &#34;&#34;&#34;
+        See `AsyncDatabase.find`.
+        &#34;&#34;&#34;
+        return await super().find(
+            selector=selector,
+            limit=limit,
+            skip=skip,
+            sort=sort,
+            fields=fields,
+            use_index=use_index,
+            conflicts=conflicts,
+            r=r,
+            bookmark=bookmark,
+            update=update,
+            stable=stable,
+            execution_stats=execution_stats,
+            partition=self.partition_id,
+        )
+
+    async def view(
+        self,
+        ddoc: str,
+        view: str | None = None,
+        *,
+        conflicts: bool | None = None,
+        descending: bool | None = None,
+        endkey: Any | None = None,
+        endkey_docid: str | None = None,
+        group: bool | None = None,
+        group_level: int | None = None,
+        include_docs: bool | None = None,
+        attachments: bool | None = None,
+        att_encoding_info: bool | None = None,
+        inclusive_end: bool | None = None,
+        key: str | None = None,
+        keys: Iterable[str] | None = None,
+        limit: int | None = None,
+        reduce: bool | None = None,
+        skip: int | None = None,
+        sort: bool | None = None,
+        stable: bool | None = None,
+        startkey: Any | None = None,
+        startkey_docid: str | None = None,
+        update: str | None = None,
+        update_seq: bool | None = None,
+    ) -&gt; ViewResult:
+        &#34;&#34;&#34;
+        See `AsyncDatabase.view`.
+        &#34;&#34;&#34;
+        return await super().view(
+            ddoc=ddoc,
+            view=view,
+            partition=self.partition_id,
+            conflicts=conflicts,
+            descending=descending,
+            endkey=endkey,
+            endkey_docid=endkey_docid,
+            group=group,
+            group_level=group_level,
+            include_docs=include_docs,
+            attachments=attachments,
+            att_encoding_info=att_encoding_info,
+            inclusive_end=inclusive_end,
+            key=key,
+            keys=keys,
+            limit=limit,
+            reduce=reduce,
+            skip=skip,
+            sort=sort,
+            stable=stable,
+            startkey=startkey,
+            startkey_docid=startkey_docid,
+            update=update,
+            update_seq=update_seq,
+        )
+
+    async def bulk_docs(
+        self, docs: list[dict | Document], new_edits: bool = True
+    ) -&gt; list[dict]:
+        &#34;&#34;&#34;See `AsyncDatabase.bulk_docs`. Prepends partition ID to document IDs.&#34;&#34;&#34;
+        return await super().bulk_docs(
+            docs=[self.add_partition_to_doc(doc) for doc in docs],
+            new_edits=new_edits,
+        )
+
+    async def bulk_get(
+        self, docs: list[dict | Document], revs: bool = False
+    ) -&gt; list[dict]:
+        &#34;&#34;&#34;See `AsyncDatabase.bulk_get`. Prepends partition ID to document IDs.&#34;&#34;&#34;
+        return await super().bulk_get(
+            docs=[self.add_partition_to_doc(doc) for doc in docs],
+            revs=revs,
+        )
+
+    async def copy(
+        self,
+        docid: str,
+        destid: str,
+        rev: str | None = None,
+        destrev: str | None = None,
+    ) -&gt; tuple[str, bool, str]:
+        &#34;&#34;&#34;See `AsyncDatabase.copy`. Prepends partition ID to document IDs.&#34;&#34;&#34;
+        return await super().copy(
+            docid=self.add_partition_to_str(docid),
+            destid=self.add_partition_to_str(destid),
+            rev=rev,
+            destrev=destrev,
+        )
+
+    async def create(
+        self, doc: dict | Document, *, batch: bool | None = None
+    ) -&gt; tuple[str, bool, str]:
+        &#34;&#34;&#34;See `AsyncDatabase.create`. Prepends partition ID to document ID.&#34;&#34;&#34;
+        return await super().create(
+            doc=self.add_partition_to_doc(doc),
+            batch=batch,
+        )
+
+    async def delete(
+        self, docid: str, rev: str, *, batch: bool | None = None
+    ) -&gt; bool:
+        &#34;&#34;&#34;See `AsyncDatabase.delete`. Prepends partition ID to document ID.&#34;&#34;&#34;
+        return await super().delete(
+            docid=self.add_partition_to_str(docid),
+            rev=rev,
+            batch=batch,
+        )
+
+    async def delete_attachment(
+        self, docid: str, attname: str, rev: str, *, batch: bool = False
+    ) -&gt; bool:
+        &#34;&#34;&#34;See `AsyncDatabase.delete_attachment`. Prepends partition ID to document ID.&#34;&#34;&#34;
+        return await super().delete_attachment(
+            docid=self.add_partition_to_str(docid),
+            attname=attname,
+            rev=rev,
+            batch=batch,
+        )
+
+    async def get(
+        self,
+        docid: str,
+        *,
+        attachments: bool | None = None,
+        att_encoding_info: bool | None = None,
+        atts_since: Iterable[str] | None = None,
+        conflicts: bool | None = None,
+        deleted_conflicts: bool | None = None,
+        latest: bool | None = None,
+        local_seq: bool | None = None,
+        meta: bool | None = None,
+        open_revs: Iterable[str] | None = None,
+        rev: str | None = None,
+        revs: bool | None = None,
+        revs_info: bool | None = None,
+        check: bool | None = False,
+        default_value: Any | None = None,
+    ) -&gt; Document | Any:
+        &#34;&#34;&#34;See `AsyncDatabase.get`. Prepends partition ID to document ID.&#34;&#34;&#34;
+        return await super().get(
+            docid=self.add_partition_to_str(docid),
+            attachments=attachments,
+            att_encoding_info=att_encoding_info,
+            atts_since=atts_since,
+            conflicts=conflicts,
+            deleted_conflicts=deleted_conflicts,
+            latest=latest,
+            local_seq=local_seq,
+            meta=meta,
+            open_revs=open_revs,
+            rev=rev,
+            revs=revs,
+            revs_info=revs_info,
+            check=check,
+            default_value=default_value,
+        )
+
+    async def get_attachment(
+        self, docid: str, attname: str, rev: str | None = None
+    ) -&gt; AttachmentDocument:
+        &#34;&#34;&#34;See `AsyncDatabase.get_attachment`. Prepends partition ID to document ID.&#34;&#34;&#34;
+        return await super().get_attachment(
+            docid=self.add_partition_to_str(docid),
+            attname=attname,
+            rev=rev,
+        )
+
+    async def put_attachment(
+        self,
+        docid: str,
+        attname: str,
+        path: str | None = None,
+        *,
+        content: bytes | None = None,
+        content_type: str | None = None,
+        rev: str | None = None,
+    ) -&gt; tuple[str, bool, str]:
+        &#34;&#34;&#34;See `AsyncDatabase.put_attachment`. Prepends partition ID to document ID.&#34;&#34;&#34;
+        return await super().put_attachment(
+            docid=self.add_partition_to_str(docid),
+            attname=attname,
+            content_type=content_type,
+            path=path,
+            content=content,
+            rev=rev,
+        )
+
+    async def rev(self, resource: str) -&gt; str | None:
+        &#34;&#34;&#34;See `AsyncDatabase.rev`. Prepends partition ID to the resource.&#34;&#34;&#34;
+        return await super().rev(self.add_partition_to_str(resource))
+
+    async def save(
+        self,
+        doc: dict | Document,
+        batch: bool | None = None,
+        new_edits: bool | None = None,
+        path: str | None = None,
+    ) -&gt; tuple[str, bool, str]:
+        &#34;&#34;&#34;See `AsyncDatabase.save`. Prepends partition ID to document ID.&#34;&#34;&#34;
+        return await super().save(
+            doc=self.add_partition_to_doc(doc),
+            batch=batch,
+            new_edits=new_edits,
+            path=path,
+        )
+
+    def add_partition_to_str(self, string: str) -&gt; str:
+        &#34;&#34;&#34;Append the instance&#39;s partition ID to a string if not already present.&#34;&#34;&#34;
+        if string.startswith(self.partition_id):
+            return string
+        return f&#34;{self.partition_id}:{string}&#34;
+
+    def add_partition_to_doc(self, doc: Document | dict) -&gt; Document | dict:
+        &#34;&#34;&#34;Append the instance&#39;s partition ID to the document&#39;s `_id`.&#34;&#34;&#34;
+        docid = doc.get(&#34;_id&#34;)
+        if docid is None:
+            return doc
+        doc[&#34;_id&#34;] = self.add_partition_to_str(docid)
+        return doc</code></pre>
+</details>
+<div class="desc"><p>Async CouchDB partition client. Mirrors <code>Partition</code> with <code>async def</code> methods throughout.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>partition_id</code></strong> :&ensp;<code>str</code></dt>
+<dd>The partition's ID.</dd>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>The name of the database.</dd>
+<dt><strong><code>url</code></strong> :&ensp;<code>str</code></dt>
+<dd>The url of the CouchDB server.</dd>
+<dt><strong><code>port</code></strong> :&ensp;<code>int</code></dt>
+<dd>The port of the CouchDB server.</dd>
+<dt><strong><code>user</code></strong> :&ensp;<code>str</code></dt>
+<dd>The CouchDB admin username.</dd>
+<dt><strong><code>password</code></strong> :&ensp;<code>str</code></dt>
+<dd>The CouchDB admin password.</dd>
+<dt><strong><code>disable_ssl_verification</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Controls whether to verify the server's TLS certificate. Default <code>False</code>.</dd>
+<dt><strong><code>auth_method</code></strong> :&ensp;<code>str</code></dt>
+<dd>Authentication method. Default is <code><a title="couchdb3.utils.DEFAULT_AUTH_METHOD" href="../utils.html#couchdb3.utils.DEFAULT_AUTH_METHOD">DEFAULT_AUTH_METHOD</a></code>.</dd>
+<dt><strong><code>timeout</code></strong> :&ensp;<code>int</code></dt>
+<dd>The default timeout for requests. Default <code>None</code>.</dd>
+<dt><strong><code>session</code></strong> :&ensp;<code>httpx.AsyncClient</code></dt>
+<dd>A specific async client to use. Optional.</dd>
+</dl></div>
+<h3>Ancestors</h3>
+<ul class="hlist">
+<li><a title="couchdb3.aio.async_database.AsyncDatabase" href="#couchdb3.aio.async_database.AsyncDatabase">AsyncDatabase</a></li>
+<li><a title="couchdb3.aio.async_base.AsyncBase" href="async_base.html#couchdb3.aio.async_base.AsyncBase">AsyncBase</a></li>
+</ul>
+<h3>Methods</h3>
+<dl>
+<dt id="couchdb3.aio.async_database.AsyncPartition.add_partition_to_doc"><code class="name flex">
+<span>def <span class="ident">add_partition_to_doc</span></span>(<span>self, doc: Document | dict) ‑> <a title="couchdb3.document.Document" href="../document.html#couchdb3.document.Document">Document</a> | dict</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add_partition_to_doc(self, doc: Document | dict) -&gt; Document | dict:
+    &#34;&#34;&#34;Append the instance&#39;s partition ID to the document&#39;s `_id`.&#34;&#34;&#34;
+    docid = doc.get(&#34;_id&#34;)
+    if docid is None:
+        return doc
+    doc[&#34;_id&#34;] = self.add_partition_to_str(docid)
+    return doc</code></pre>
+</details>
+<div class="desc"><p>Append the instance's partition ID to the document's <code>_id</code>.</p></div>
+</dd>
+<dt id="couchdb3.aio.async_database.AsyncPartition.add_partition_to_str"><code class="name flex">
+<span>def <span class="ident">add_partition_to_str</span></span>(<span>self, string: str) ‑> str</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add_partition_to_str(self, string: str) -&gt; str:
+    &#34;&#34;&#34;Append the instance&#39;s partition ID to a string if not already present.&#34;&#34;&#34;
+    if string.startswith(self.partition_id):
+        return string
+    return f&#34;{self.partition_id}:{string}&#34;</code></pre>
+</details>
+<div class="desc"><p>Append the instance's partition ID to a string if not already present.</p></div>
+</dd>
+<dt id="couchdb3.aio.async_database.AsyncPartition.all_docs"><code class="name flex">
+<span>async def <span class="ident">all_docs</span></span>(<span>self, keys: Iterable[str] | None = None, **kwargs) ‑> <a title="couchdb3.view.ViewResult" href="../view.html#couchdb3.view.ViewResult">ViewResult</a></span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def all_docs(
+    self, keys: Iterable[str] | None = None, **kwargs
+) -&gt; ViewResult:
+    &#34;&#34;&#34;
+    Executes the built-in _all_docs view, returning all documents in the partition.
+
+    Parameters
+    ----------
+    keys : Iterable[str]
+        Return only documents matching these keys. Default `None`.
+    kwargs
+        Further `AsyncDatabase.view` parameters.
+
+    Returns
+    -------
+    ViewResult
+    &#34;&#34;&#34;
+    return await super().all_docs(
+        partition=self.partition_id, keys=keys, **kwargs
+    )</code></pre>
+</details>
+<div class="desc"><p>Executes the built-in _all_docs view, returning all documents in the partition.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>keys</code></strong> :&ensp;<code>Iterable[str]</code></dt>
+<dd>Return only documents matching these keys. Default <code>None</code>.</dd>
+<dt><strong><code>kwargs</code></strong></dt>
+<dd>Further <code><a title="couchdb3.aio.async_database.AsyncDatabase.view" href="#couchdb3.aio.async_database.AsyncDatabase.view">AsyncDatabase.view()</a></code> parameters.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>ViewResult</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+</dd>
+<dt id="couchdb3.aio.async_database.AsyncPartition.bulk_docs"><code class="name flex">
+<span>async def <span class="ident">bulk_docs</span></span>(<span>self, docs: list[dict | Document], new_edits: bool = True) ‑> list[dict]</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def bulk_docs(
+    self, docs: list[dict | Document], new_edits: bool = True
+) -&gt; list[dict]:
+    &#34;&#34;&#34;See `AsyncDatabase.bulk_docs`. Prepends partition ID to document IDs.&#34;&#34;&#34;
+    return await super().bulk_docs(
+        docs=[self.add_partition_to_doc(doc) for doc in docs],
+        new_edits=new_edits,
+    )</code></pre>
+</details>
+<div class="desc"><p>See <code><a title="couchdb3.aio.async_database.AsyncDatabase.bulk_docs" href="#couchdb3.aio.async_database.AsyncDatabase.bulk_docs">AsyncDatabase.bulk_docs()</a></code>. Prepends partition ID to document IDs.</p></div>
+</dd>
+<dt id="couchdb3.aio.async_database.AsyncPartition.bulk_get"><code class="name flex">
+<span>async def <span class="ident">bulk_get</span></span>(<span>self, docs: list[dict | Document], revs: bool = False) ‑> list[dict]</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def bulk_get(
+    self, docs: list[dict | Document], revs: bool = False
+) -&gt; list[dict]:
+    &#34;&#34;&#34;See `AsyncDatabase.bulk_get`. Prepends partition ID to document IDs.&#34;&#34;&#34;
+    return await super().bulk_get(
+        docs=[self.add_partition_to_doc(doc) for doc in docs],
+        revs=revs,
+    )</code></pre>
+</details>
+<div class="desc"><p>See <code><a title="couchdb3.aio.async_database.AsyncDatabase.bulk_get" href="#couchdb3.aio.async_database.AsyncDatabase.bulk_get">AsyncDatabase.bulk_get()</a></code>. Prepends partition ID to document IDs.</p></div>
+</dd>
+<dt id="couchdb3.aio.async_database.AsyncPartition.copy"><code class="name flex">
+<span>async def <span class="ident">copy</span></span>(<span>self, docid: str, destid: str, rev: str | None = None, destrev: str | None = None) ‑> tuple[str, bool, str]</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def copy(
+    self,
+    docid: str,
+    destid: str,
+    rev: str | None = None,
+    destrev: str | None = None,
+) -&gt; tuple[str, bool, str]:
+    &#34;&#34;&#34;See `AsyncDatabase.copy`. Prepends partition ID to document IDs.&#34;&#34;&#34;
+    return await super().copy(
+        docid=self.add_partition_to_str(docid),
+        destid=self.add_partition_to_str(destid),
+        rev=rev,
+        destrev=destrev,
+    )</code></pre>
+</details>
+<div class="desc"><p>See <code><a title="couchdb3.aio.async_database.AsyncDatabase.copy" href="#couchdb3.aio.async_database.AsyncDatabase.copy">AsyncDatabase.copy()</a></code>. Prepends partition ID to document IDs.</p></div>
+</dd>
+<dt id="couchdb3.aio.async_database.AsyncPartition.create"><code class="name flex">
+<span>async def <span class="ident">create</span></span>(<span>self, doc: dict | Document, *, batch: bool | None = None) ‑> tuple[str, bool, str]</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def create(
+    self, doc: dict | Document, *, batch: bool | None = None
+) -&gt; tuple[str, bool, str]:
+    &#34;&#34;&#34;See `AsyncDatabase.create`. Prepends partition ID to document ID.&#34;&#34;&#34;
+    return await super().create(
+        doc=self.add_partition_to_doc(doc),
+        batch=batch,
+    )</code></pre>
+</details>
+<div class="desc"><p>See <code><a title="couchdb3.aio.async_database.AsyncDatabase.create" href="#couchdb3.aio.async_database.AsyncDatabase.create">AsyncDatabase.create()</a></code>. Prepends partition ID to document ID.</p></div>
+</dd>
+<dt id="couchdb3.aio.async_database.AsyncPartition.delete"><code class="name flex">
+<span>async def <span class="ident">delete</span></span>(<span>self, docid: str, rev: str, *, batch: bool | None = None) ‑> bool</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def delete(
+    self, docid: str, rev: str, *, batch: bool | None = None
+) -&gt; bool:
+    &#34;&#34;&#34;See `AsyncDatabase.delete`. Prepends partition ID to document ID.&#34;&#34;&#34;
+    return await super().delete(
+        docid=self.add_partition_to_str(docid),
+        rev=rev,
+        batch=batch,
+    )</code></pre>
+</details>
+<div class="desc"><p>See <code><a title="couchdb3.aio.async_database.AsyncDatabase.delete" href="#couchdb3.aio.async_database.AsyncDatabase.delete">AsyncDatabase.delete()</a></code>. Prepends partition ID to document ID.</p></div>
+</dd>
+<dt id="couchdb3.aio.async_database.AsyncPartition.delete_attachment"><code class="name flex">
+<span>async def <span class="ident">delete_attachment</span></span>(<span>self, docid: str, attname: str, rev: str, *, batch: bool = False) ‑> bool</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def delete_attachment(
+    self, docid: str, attname: str, rev: str, *, batch: bool = False
+) -&gt; bool:
+    &#34;&#34;&#34;See `AsyncDatabase.delete_attachment`. Prepends partition ID to document ID.&#34;&#34;&#34;
+    return await super().delete_attachment(
+        docid=self.add_partition_to_str(docid),
+        attname=attname,
+        rev=rev,
+        batch=batch,
+    )</code></pre>
+</details>
+<div class="desc"><p>See <code><a title="couchdb3.aio.async_database.AsyncDatabase.delete_attachment" href="#couchdb3.aio.async_database.AsyncDatabase.delete_attachment">AsyncDatabase.delete_attachment()</a></code>. Prepends partition ID to document ID.</p></div>
+</dd>
+<dt id="couchdb3.aio.async_database.AsyncPartition.find"><code class="name flex">
+<span>async def <span class="ident">find</span></span>(<span>self,<br>selector: dict,<br>limit: int = 25,<br>skip: int = 0,<br>sort: list[dict] | None = None,<br>fields: list[str] | None = None,<br>use_index: str | list[str] | None = None,<br>conflicts: bool = False,<br>r: int = 1,<br>bookmark: str | None = None,<br>update: bool = True,<br>stable: bool | None = None,<br>execution_stats: bool = False) ‑> dict</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def find(
+    self,
+    selector: dict,
+    limit: int = 25,
+    skip: int = 0,
+    sort: list[dict] | None = None,
+    fields: list[str] | None = None,
+    use_index: str | list[str] | None = None,
+    conflicts: bool = False,
+    r: int = 1,
+    bookmark: str | None = None,
+    update: bool = True,
+    stable: bool | None = None,
+    execution_stats: bool = False,
+) -&gt; dict:
+    &#34;&#34;&#34;
+    See `AsyncDatabase.find`.
+    &#34;&#34;&#34;
+    return await super().find(
+        selector=selector,
+        limit=limit,
+        skip=skip,
+        sort=sort,
+        fields=fields,
+        use_index=use_index,
+        conflicts=conflicts,
+        r=r,
+        bookmark=bookmark,
+        update=update,
+        stable=stable,
+        execution_stats=execution_stats,
+        partition=self.partition_id,
+    )</code></pre>
+</details>
+<div class="desc"><p>See <code><a title="couchdb3.aio.async_database.AsyncDatabase.find" href="#couchdb3.aio.async_database.AsyncDatabase.find">AsyncDatabase.find()</a></code>.</p></div>
+</dd>
+<dt id="couchdb3.aio.async_database.AsyncPartition.get"><code class="name flex">
+<span>async def <span class="ident">get</span></span>(<span>self,<br>docid: str,<br>*,<br>attachments: bool | None = None,<br>att_encoding_info: bool | None = None,<br>atts_since: Iterable[str] | None = None,<br>conflicts: bool | None = None,<br>deleted_conflicts: bool | None = None,<br>latest: bool | None = None,<br>local_seq: bool | None = None,<br>meta: bool | None = None,<br>open_revs: Iterable[str] | None = None,<br>rev: str | None = None,<br>revs: bool | None = None,<br>revs_info: bool | None = None,<br>check: bool | None = False,<br>default_value: Any | None = None) ‑> <a title="couchdb3.document.Document" href="../document.html#couchdb3.document.Document">Document</a> | Any</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def get(
+    self,
+    docid: str,
+    *,
+    attachments: bool | None = None,
+    att_encoding_info: bool | None = None,
+    atts_since: Iterable[str] | None = None,
+    conflicts: bool | None = None,
+    deleted_conflicts: bool | None = None,
+    latest: bool | None = None,
+    local_seq: bool | None = None,
+    meta: bool | None = None,
+    open_revs: Iterable[str] | None = None,
+    rev: str | None = None,
+    revs: bool | None = None,
+    revs_info: bool | None = None,
+    check: bool | None = False,
+    default_value: Any | None = None,
+) -&gt; Document | Any:
+    &#34;&#34;&#34;See `AsyncDatabase.get`. Prepends partition ID to document ID.&#34;&#34;&#34;
+    return await super().get(
+        docid=self.add_partition_to_str(docid),
+        attachments=attachments,
+        att_encoding_info=att_encoding_info,
+        atts_since=atts_since,
+        conflicts=conflicts,
+        deleted_conflicts=deleted_conflicts,
+        latest=latest,
+        local_seq=local_seq,
+        meta=meta,
+        open_revs=open_revs,
+        rev=rev,
+        revs=revs,
+        revs_info=revs_info,
+        check=check,
+        default_value=default_value,
+    )</code></pre>
+</details>
+<div class="desc"><p>See <code><a title="couchdb3.aio.async_database.AsyncDatabase.get" href="#couchdb3.aio.async_database.AsyncDatabase.get">AsyncDatabase.get()</a></code>. Prepends partition ID to document ID.</p></div>
+</dd>
+<dt id="couchdb3.aio.async_database.AsyncPartition.get_attachment"><code class="name flex">
+<span>async def <span class="ident">get_attachment</span></span>(<span>self, docid: str, attname: str, rev: str | None = None) ‑> <a title="couchdb3.document.AttachmentDocument" href="../document.html#couchdb3.document.AttachmentDocument">AttachmentDocument</a></span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def get_attachment(
+    self, docid: str, attname: str, rev: str | None = None
+) -&gt; AttachmentDocument:
+    &#34;&#34;&#34;See `AsyncDatabase.get_attachment`. Prepends partition ID to document ID.&#34;&#34;&#34;
+    return await super().get_attachment(
+        docid=self.add_partition_to_str(docid),
+        attname=attname,
+        rev=rev,
+    )</code></pre>
+</details>
+<div class="desc"><p>See <code><a title="couchdb3.aio.async_database.AsyncDatabase.get_attachment" href="#couchdb3.aio.async_database.AsyncDatabase.get_attachment">AsyncDatabase.get_attachment()</a></code>. Prepends partition ID to document ID.</p></div>
+</dd>
+<dt id="couchdb3.aio.async_database.AsyncPartition.info"><code class="name flex">
+<span>async def <span class="ident">info</span></span>(<span>self) ‑> dict</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def info(self) -&gt; dict:
+    &#34;&#34;&#34;
+    Return the partition&#39;s info.
+
+    Returns
+    -------
+    dict
+    &#34;&#34;&#34;
+    return await super().info(partition=self.partition_id)</code></pre>
+</details>
+<div class="desc"><p>Return the partition's info.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dict</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+</dd>
+<dt id="couchdb3.aio.async_database.AsyncPartition.put_attachment"><code class="name flex">
+<span>async def <span class="ident">put_attachment</span></span>(<span>self,<br>docid: str,<br>attname: str,<br>path: str | None = None,<br>*,<br>content: bytes | None = None,<br>content_type: str | None = None,<br>rev: str | None = None) ‑> tuple[str, bool, str]</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def put_attachment(
+    self,
+    docid: str,
+    attname: str,
+    path: str | None = None,
+    *,
+    content: bytes | None = None,
+    content_type: str | None = None,
+    rev: str | None = None,
+) -&gt; tuple[str, bool, str]:
+    &#34;&#34;&#34;See `AsyncDatabase.put_attachment`. Prepends partition ID to document ID.&#34;&#34;&#34;
+    return await super().put_attachment(
+        docid=self.add_partition_to_str(docid),
+        attname=attname,
+        content_type=content_type,
+        path=path,
+        content=content,
+        rev=rev,
+    )</code></pre>
+</details>
+<div class="desc"><p>See <code><a title="couchdb3.aio.async_database.AsyncDatabase.put_attachment" href="#couchdb3.aio.async_database.AsyncDatabase.put_attachment">AsyncDatabase.put_attachment()</a></code>. Prepends partition ID to document ID.</p></div>
+</dd>
+<dt id="couchdb3.aio.async_database.AsyncPartition.rev"><code class="name flex">
+<span>async def <span class="ident">rev</span></span>(<span>self, resource: str) ‑> str | None</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def rev(self, resource: str) -&gt; str | None:
+    &#34;&#34;&#34;See `AsyncDatabase.rev`. Prepends partition ID to the resource.&#34;&#34;&#34;
+    return await super().rev(self.add_partition_to_str(resource))</code></pre>
+</details>
+<div class="desc"><p>See <code><a title="couchdb3.aio.async_database.AsyncDatabase.rev" href="async_base.html#couchdb3.aio.async_base.AsyncBase.rev">AsyncBase.rev()</a></code>. Prepends partition ID to the resource.</p></div>
+</dd>
+<dt id="couchdb3.aio.async_database.AsyncPartition.save"><code class="name flex">
+<span>async def <span class="ident">save</span></span>(<span>self,<br>doc: dict | Document,<br>batch: bool | None = None,<br>new_edits: bool | None = None,<br>path: str | None = None) ‑> tuple[str, bool, str]</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def save(
+    self,
+    doc: dict | Document,
+    batch: bool | None = None,
+    new_edits: bool | None = None,
+    path: str | None = None,
+) -&gt; tuple[str, bool, str]:
+    &#34;&#34;&#34;See `AsyncDatabase.save`. Prepends partition ID to document ID.&#34;&#34;&#34;
+    return await super().save(
+        doc=self.add_partition_to_doc(doc),
+        batch=batch,
+        new_edits=new_edits,
+        path=path,
+    )</code></pre>
+</details>
+<div class="desc"><p>See <code><a title="couchdb3.aio.async_database.AsyncDatabase.save" href="#couchdb3.aio.async_database.AsyncDatabase.save">AsyncDatabase.save()</a></code>. Prepends partition ID to document ID.</p></div>
+</dd>
+<dt id="couchdb3.aio.async_database.AsyncPartition.view"><code class="name flex">
+<span>async def <span class="ident">view</span></span>(<span>self,<br>ddoc: str,<br>view: str | None = None,<br>*,<br>conflicts: bool | None = None,<br>descending: bool | None = None,<br>endkey: Any | None = None,<br>endkey_docid: str | None = None,<br>group: bool | None = None,<br>group_level: int | None = None,<br>include_docs: bool | None = None,<br>attachments: bool | None = None,<br>att_encoding_info: bool | None = None,<br>inclusive_end: bool | None = None,<br>key: str | None = None,<br>keys: Iterable[str] | None = None,<br>limit: int | None = None,<br>reduce: bool | None = None,<br>skip: int | None = None,<br>sort: bool | None = None,<br>stable: bool | None = None,<br>startkey: Any | None = None,<br>startkey_docid: str | None = None,<br>update: str | None = None,<br>update_seq: bool | None = None) ‑> <a title="couchdb3.view.ViewResult" href="../view.html#couchdb3.view.ViewResult">ViewResult</a></span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def view(
+    self,
+    ddoc: str,
+    view: str | None = None,
+    *,
+    conflicts: bool | None = None,
+    descending: bool | None = None,
+    endkey: Any | None = None,
+    endkey_docid: str | None = None,
+    group: bool | None = None,
+    group_level: int | None = None,
+    include_docs: bool | None = None,
+    attachments: bool | None = None,
+    att_encoding_info: bool | None = None,
+    inclusive_end: bool | None = None,
+    key: str | None = None,
+    keys: Iterable[str] | None = None,
+    limit: int | None = None,
+    reduce: bool | None = None,
+    skip: int | None = None,
+    sort: bool | None = None,
+    stable: bool | None = None,
+    startkey: Any | None = None,
+    startkey_docid: str | None = None,
+    update: str | None = None,
+    update_seq: bool | None = None,
+) -&gt; ViewResult:
+    &#34;&#34;&#34;
+    See `AsyncDatabase.view`.
+    &#34;&#34;&#34;
+    return await super().view(
+        ddoc=ddoc,
+        view=view,
+        partition=self.partition_id,
+        conflicts=conflicts,
+        descending=descending,
+        endkey=endkey,
+        endkey_docid=endkey_docid,
+        group=group,
+        group_level=group_level,
+        include_docs=include_docs,
+        attachments=attachments,
+        att_encoding_info=att_encoding_info,
+        inclusive_end=inclusive_end,
+        key=key,
+        keys=keys,
+        limit=limit,
+        reduce=reduce,
+        skip=skip,
+        sort=sort,
+        stable=stable,
+        startkey=startkey,
+        startkey_docid=startkey_docid,
+        update=update,
+        update_seq=update_seq,
+    )</code></pre>
+</details>
+<div class="desc"><p>See <code><a title="couchdb3.aio.async_database.AsyncDatabase.view" href="#couchdb3.aio.async_database.AsyncDatabase.view">AsyncDatabase.view()</a></code>.</p></div>
+</dd>
+</dl>
+<h3>Inherited members</h3>
+<ul class="hlist">
+<li><code><b><a title="couchdb3.aio.async_database.AsyncDatabase" href="#couchdb3.aio.async_database.AsyncDatabase">AsyncDatabase</a></b></code>:
+<ul class="hlist">
+<li><code><a title="couchdb3.aio.async_database.AsyncDatabase.aclose" href="async_base.html#couchdb3.aio.async_base.AsyncBase.aclose">aclose</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncDatabase.check" href="async_base.html#couchdb3.aio.async_base.AsyncBase.check">check</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncDatabase.compact" href="#couchdb3.aio.async_database.AsyncDatabase.compact">compact</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncDatabase.explain" href="#couchdb3.aio.async_database.AsyncDatabase.explain">explain</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncDatabase.get_design" href="#couchdb3.aio.async_database.AsyncDatabase.get_design">get_design</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncDatabase.get_partition" href="#couchdb3.aio.async_database.AsyncDatabase.get_partition">get_partition</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncDatabase.indexes" href="#couchdb3.aio.async_database.AsyncDatabase.indexes">indexes</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncDatabase.purge" href="#couchdb3.aio.async_database.AsyncDatabase.purge">purge</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncDatabase.put_design" href="#couchdb3.aio.async_database.AsyncDatabase.put_design">put_design</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncDatabase.save_index" href="#couchdb3.aio.async_database.AsyncDatabase.save_index">save_index</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncDatabase.security" href="#couchdb3.aio.async_database.AsyncDatabase.security">security</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncDatabase.update_security" href="#couchdb3.aio.async_database.AsyncDatabase.update_security">update_security</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncDatabase.url" href="async_base.html#couchdb3.aio.async_base.AsyncBase.url">url</a></code></li>
+</ul>
+</li>
+</ul>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="couchdb3.aio" href="index.html">couchdb3.aio</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="couchdb3.aio.async_database.AsyncDatabase" href="#couchdb3.aio.async_database.AsyncDatabase">AsyncDatabase</a></code></h4>
+<ul class="two-column">
+<li><code><a title="couchdb3.aio.async_database.AsyncDatabase.all_docs" href="#couchdb3.aio.async_database.AsyncDatabase.all_docs">all_docs</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncDatabase.bulk_docs" href="#couchdb3.aio.async_database.AsyncDatabase.bulk_docs">bulk_docs</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncDatabase.bulk_get" href="#couchdb3.aio.async_database.AsyncDatabase.bulk_get">bulk_get</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncDatabase.compact" href="#couchdb3.aio.async_database.AsyncDatabase.compact">compact</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncDatabase.copy" href="#couchdb3.aio.async_database.AsyncDatabase.copy">copy</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncDatabase.create" href="#couchdb3.aio.async_database.AsyncDatabase.create">create</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncDatabase.delete" href="#couchdb3.aio.async_database.AsyncDatabase.delete">delete</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncDatabase.delete_attachment" href="#couchdb3.aio.async_database.AsyncDatabase.delete_attachment">delete_attachment</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncDatabase.explain" href="#couchdb3.aio.async_database.AsyncDatabase.explain">explain</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncDatabase.find" href="#couchdb3.aio.async_database.AsyncDatabase.find">find</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncDatabase.get" href="#couchdb3.aio.async_database.AsyncDatabase.get">get</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncDatabase.get_attachment" href="#couchdb3.aio.async_database.AsyncDatabase.get_attachment">get_attachment</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncDatabase.get_design" href="#couchdb3.aio.async_database.AsyncDatabase.get_design">get_design</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncDatabase.get_partition" href="#couchdb3.aio.async_database.AsyncDatabase.get_partition">get_partition</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncDatabase.indexes" href="#couchdb3.aio.async_database.AsyncDatabase.indexes">indexes</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncDatabase.purge" href="#couchdb3.aio.async_database.AsyncDatabase.purge">purge</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncDatabase.put_attachment" href="#couchdb3.aio.async_database.AsyncDatabase.put_attachment">put_attachment</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncDatabase.put_design" href="#couchdb3.aio.async_database.AsyncDatabase.put_design">put_design</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncDatabase.save" href="#couchdb3.aio.async_database.AsyncDatabase.save">save</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncDatabase.save_index" href="#couchdb3.aio.async_database.AsyncDatabase.save_index">save_index</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncDatabase.security" href="#couchdb3.aio.async_database.AsyncDatabase.security">security</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncDatabase.update_security" href="#couchdb3.aio.async_database.AsyncDatabase.update_security">update_security</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncDatabase.view" href="#couchdb3.aio.async_database.AsyncDatabase.view">view</a></code></li>
+</ul>
+</li>
+<li>
+<h4><code><a title="couchdb3.aio.async_database.AsyncPartition" href="#couchdb3.aio.async_database.AsyncPartition">AsyncPartition</a></code></h4>
+<ul class="">
+<li><code><a title="couchdb3.aio.async_database.AsyncPartition.add_partition_to_doc" href="#couchdb3.aio.async_database.AsyncPartition.add_partition_to_doc">add_partition_to_doc</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncPartition.add_partition_to_str" href="#couchdb3.aio.async_database.AsyncPartition.add_partition_to_str">add_partition_to_str</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncPartition.all_docs" href="#couchdb3.aio.async_database.AsyncPartition.all_docs">all_docs</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncPartition.bulk_docs" href="#couchdb3.aio.async_database.AsyncPartition.bulk_docs">bulk_docs</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncPartition.bulk_get" href="#couchdb3.aio.async_database.AsyncPartition.bulk_get">bulk_get</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncPartition.copy" href="#couchdb3.aio.async_database.AsyncPartition.copy">copy</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncPartition.create" href="#couchdb3.aio.async_database.AsyncPartition.create">create</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncPartition.delete" href="#couchdb3.aio.async_database.AsyncPartition.delete">delete</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncPartition.delete_attachment" href="#couchdb3.aio.async_database.AsyncPartition.delete_attachment">delete_attachment</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncPartition.find" href="#couchdb3.aio.async_database.AsyncPartition.find">find</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncPartition.get" href="#couchdb3.aio.async_database.AsyncPartition.get">get</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncPartition.get_attachment" href="#couchdb3.aio.async_database.AsyncPartition.get_attachment">get_attachment</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncPartition.info" href="#couchdb3.aio.async_database.AsyncPartition.info">info</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncPartition.put_attachment" href="#couchdb3.aio.async_database.AsyncPartition.put_attachment">put_attachment</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncPartition.rev" href="#couchdb3.aio.async_database.AsyncPartition.rev">rev</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncPartition.save" href="#couchdb3.aio.async_database.AsyncPartition.save">save</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncPartition.view" href="#couchdb3.aio.async_database.AsyncPartition.view">view</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.6</a>.</p>
+</footer>
+</body>
+</html>

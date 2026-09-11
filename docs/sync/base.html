@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
 <meta name="generator" content="pdoc3 0.11.6">
-<title>couchdb3.base API documentation</title>
+<title>couchdb3.sync.base API documentation</title>
 <meta name="description" content="">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
@@ -33,7 +33,7 @@ el.replaceWith(d);
 <main>
 <article id="content">
 <header>
-<h1 class="title">Module <code>couchdb3.base</code></h1>
+<h1 class="title">Module <code>couchdb3.sync.base</code></h1>
 </header>
 <section id="section-intro">
 </section>
@@ -46,7 +46,7 @@ el.replaceWith(d);
 <section>
 <h2 class="section-title" id="header-classes">Classes</h2>
 <dl>
-<dt id="couchdb3.base.Base"><code class="flex name class">
+<dt id="couchdb3.sync.base.Base"><code class="flex name class">
 <span>class <span class="ident">Base</span></span>
 <span>(</span><span>url: str,<br>*,<br>port: int | None = None,<br>user: str | None = None,<br>password: str | None = None,<br>disable_ssl_verification: bool = False,<br>auth_method: str | None = None,<br>timeout: int | None = 300,<br>session: httpx.Client | None = None)</span>
 </code></dt>
@@ -621,20 +621,20 @@ el.replaceWith(d);
 <dd>Controls whether to verify the server's TLS certificate. Set to <code>True</code> when connecting to a server with
 self-signed TLS certificates. Default <code>False</code>.</dd>
 <dt><strong><code>auth_method</code></strong> :&ensp;<code>str</code></dt>
-<dd>Authentication method. Choices are <code>cookie</code> or <code>basic</code>. Default is <code><a title="couchdb3.utils.DEFAULT_AUTH_METHOD" href="utils.html#couchdb3.utils.DEFAULT_AUTH_METHOD">DEFAULT_AUTH_METHOD</a></code>.</dd>
+<dd>Authentication method. Choices are <code>cookie</code> or <code>basic</code>. Default is <code><a title="couchdb3.utils.DEFAULT_AUTH_METHOD" href="../utils.html#couchdb3.utils.DEFAULT_AUTH_METHOD">DEFAULT_AUTH_METHOD</a></code>.</dd>
 <dt><strong><code>timeout</code></strong> :&ensp;<code>int</code></dt>
-<dd>The default timeout for requests. Default c.f. <code><a title="couchdb3.utils.DEFAULT_TIMEOUT" href="utils.html#couchdb3.utils.DEFAULT_TIMEOUT">DEFAULT_TIMEOUT</a></code>.</dd>
+<dd>The default timeout for requests. Default c.f. <code><a title="couchdb3.utils.DEFAULT_TIMEOUT" href="../utils.html#couchdb3.utils.DEFAULT_TIMEOUT">DEFAULT_TIMEOUT</a></code>.</dd>
 <dt><strong><code>session</code></strong> :&ensp;<code>httpx.Client</code></dt>
 <dd>A specific client to use. Optional - if not provided, a new client will be initialized.</dd>
 </dl></div>
 <h3>Subclasses</h3>
 <ul class="hlist">
-<li><a title="couchdb3.database.Database" href="database.html#couchdb3.database.Database">Database</a></li>
-<li><a title="couchdb3.server.Server" href="server.html#couchdb3.server.Server">Server</a></li>
+<li><a title="couchdb3.sync.database.Database" href="database.html#couchdb3.sync.database.Database">Database</a></li>
+<li><a title="couchdb3.sync.server.Server" href="server.html#couchdb3.sync.server.Server">Server</a></li>
 </ul>
 <h3>Instance variables</h3>
 <dl>
-<dt id="couchdb3.base.Base.basic"><code class="name">prop <span class="ident">basic</span> : str</code></dt>
+<dt id="couchdb3.sync.base.Base.basic"><code class="name">prop <span class="ident">basic</span> : str</code></dt>
 <dd>
 <details class="source">
 <summary>
@@ -646,7 +646,7 @@ def basic(self) -&gt; str:
 </details>
 <div class="desc"></div>
 </dd>
-<dt id="couchdb3.base.Base.url"><code class="name">prop <span class="ident">url</span> : str</code></dt>
+<dt id="couchdb3.sync.base.Base.url"><code class="name">prop <span class="ident">url</span> : str</code></dt>
 <dd>
 <details class="source">
 <summary>
@@ -673,7 +673,7 @@ def url(self) -&gt; str:
 </dl>
 <h3>Methods</h3>
 <dl>
-<dt id="couchdb3.base.Base.check"><code class="name flex">
+<dt id="couchdb3.sync.base.Base.check"><code class="name flex">
 <span>def <span class="ident">check</span></span>(<span>self, resource: str | None = None) ‑> bool</span>
 </code></dt>
 <dd>
@@ -709,7 +709,7 @@ def url(self) -&gt; str:
 <h2 id="returns">Returns</h2>
 <p>bool: <code>True</code> if the server is up or the database exists.</p></div>
 </dd>
-<dt id="couchdb3.base.Base.info"><code class="name flex">
+<dt id="couchdb3.sync.base.Base.info"><code class="name flex">
 <span>def <span class="ident">info</span></span>(<span>self, partition: str | None = None) ‑> dict</span>
 </code></dt>
 <dd>
@@ -743,7 +743,7 @@ def url(self) -&gt; str:
 <h2 id="returns">Returns</h2>
 <p>Dict: A dictionary containing the server's or database's info.</p></div>
 </dd>
-<dt id="couchdb3.base.Base.rev"><code class="name flex">
+<dt id="couchdb3.sync.base.Base.rev"><code class="name flex">
 <span>def <span class="ident">rev</span></span>(<span>self, resource: str) ‑> str | None</span>
 </code></dt>
 <dd>
@@ -778,7 +778,7 @@ def url(self) -&gt; str:
 <div class="desc"><p>Safely retrieves a resource's revision by sending a lightweight <code>HEAD</code>request and reading the response's
 <code>"ETag"</code> header.</p>
 <p>If the provided resource cannot be found, <code>None</code> will be returned (instead of raising a
-<code><a title="couchdb3.exceptions.NotFoundError" href="exceptions.html#couchdb3.exceptions.NotFoundError">NotFoundError</a></code> error).</p>
+<code><a title="couchdb3.exceptions.NotFoundError" href="../exceptions.html#couchdb3.exceptions.NotFoundError">NotFoundError</a></code> error).</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
 <dt><strong><code>resource</code></strong> :&ensp;<code>str</code></dt>
@@ -789,7 +789,7 @@ def url(self) -&gt; str:
 </dd>
 </dl>
 </dd>
-<dt id="couchdb3.base.DictBase"><code class="flex name class">
+<dt id="couchdb3.sync.base.DictBase"><code class="flex name class">
 <span>class <span class="ident">DictBase</span></span>
 <span>(</span><span>*args, **kwargs)</span>
 </code></dt>
@@ -800,25 +800,25 @@ def url(self) -&gt; str:
 </summary>
 <pre><code class="python">class DictBase(dict):
     &#34;&#34;&#34;
-    Abstract dictionary class.
+    Abstract dictionary class. Base for all document-like dict wrappers.
     &#34;&#34;&#34;
 
     def __repr__(self) -&gt; str:
         return f&#34;{self.__class__.__name__}: {super().__repr__()}&#34;</code></pre>
 </details>
-<div class="desc"><p>Abstract dictionary class.</p></div>
+<div class="desc"><p>Abstract dictionary class. Base for all document-like dict wrappers.</p></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li>builtins.dict</li>
 </ul>
 <h3>Subclasses</h3>
 <ul class="hlist">
-<li><a title="couchdb3.document.AttachmentDocument" href="document.html#couchdb3.document.AttachmentDocument">AttachmentDocument</a></li>
-<li><a title="couchdb3.document.Document" href="document.html#couchdb3.document.Document">Document</a></li>
-<li><a title="couchdb3.document.SecurityDocument" href="document.html#couchdb3.document.SecurityDocument">SecurityDocument</a></li>
-<li><a title="couchdb3.document.SecurityDocumentElement" href="document.html#couchdb3.document.SecurityDocumentElement">SecurityDocumentElement</a></li>
-<li><a title="couchdb3.view.ViewResult" href="view.html#couchdb3.view.ViewResult">ViewResult</a></li>
-<li><a title="couchdb3.view.ViewRow" href="view.html#couchdb3.view.ViewRow">ViewRow</a></li>
+<li><a title="couchdb3.document.AttachmentDocument" href="../document.html#couchdb3.document.AttachmentDocument">AttachmentDocument</a></li>
+<li><a title="couchdb3.document.Document" href="../document.html#couchdb3.document.Document">Document</a></li>
+<li><a title="couchdb3.document.SecurityDocument" href="../document.html#couchdb3.document.SecurityDocument">SecurityDocument</a></li>
+<li><a title="couchdb3.document.SecurityDocumentElement" href="../document.html#couchdb3.document.SecurityDocumentElement">SecurityDocumentElement</a></li>
+<li><a title="couchdb3.view.ViewResult" href="../view.html#couchdb3.view.ViewResult">ViewResult</a></li>
+<li><a title="couchdb3.view.ViewRow" href="../view.html#couchdb3.view.ViewRow">ViewRow</a></li>
 </ul>
 </dd>
 </dl>
@@ -831,23 +831,23 @@ def url(self) -&gt; str:
 <ul id="index">
 <li><h3>Super-module</h3>
 <ul>
-<li><code><a title="couchdb3" href="index.html">couchdb3</a></code></li>
+<li><code><a title="couchdb3.sync" href="index.html">couchdb3.sync</a></code></li>
 </ul>
 </li>
 <li><h3><a href="#header-classes">Classes</a></h3>
 <ul>
 <li>
-<h4><code><a title="couchdb3.base.Base" href="#couchdb3.base.Base">Base</a></code></h4>
+<h4><code><a title="couchdb3.sync.base.Base" href="#couchdb3.sync.base.Base">Base</a></code></h4>
 <ul class="">
-<li><code><a title="couchdb3.base.Base.basic" href="#couchdb3.base.Base.basic">basic</a></code></li>
-<li><code><a title="couchdb3.base.Base.check" href="#couchdb3.base.Base.check">check</a></code></li>
-<li><code><a title="couchdb3.base.Base.info" href="#couchdb3.base.Base.info">info</a></code></li>
-<li><code><a title="couchdb3.base.Base.rev" href="#couchdb3.base.Base.rev">rev</a></code></li>
-<li><code><a title="couchdb3.base.Base.url" href="#couchdb3.base.Base.url">url</a></code></li>
+<li><code><a title="couchdb3.sync.base.Base.basic" href="#couchdb3.sync.base.Base.basic">basic</a></code></li>
+<li><code><a title="couchdb3.sync.base.Base.check" href="#couchdb3.sync.base.Base.check">check</a></code></li>
+<li><code><a title="couchdb3.sync.base.Base.info" href="#couchdb3.sync.base.Base.info">info</a></code></li>
+<li><code><a title="couchdb3.sync.base.Base.rev" href="#couchdb3.sync.base.Base.rev">rev</a></code></li>
+<li><code><a title="couchdb3.sync.base.Base.url" href="#couchdb3.sync.base.Base.url">url</a></code></li>
 </ul>
 </li>
 <li>
-<h4><code><a title="couchdb3.base.DictBase" href="#couchdb3.base.DictBase">DictBase</a></code></h4>
+<h4><code><a title="couchdb3.sync.base.DictBase" href="#couchdb3.sync.base.DictBase">DictBase</a></code></h4>
 </li>
 </ul>
 </li>

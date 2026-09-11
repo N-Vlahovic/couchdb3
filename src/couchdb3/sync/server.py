@@ -265,7 +265,7 @@ class Server(Base):
 
         Returns
         -------
-        couchdb3.database.Database
+        couchdb3.sync.Database
         """
         self._put(
             resource=name, query_kwargs={"q": q, "n": n, "partitioned": partitioned}
@@ -300,7 +300,7 @@ class Server(Base):
 
         Returns
         -------
-        couchdb3.database.Database
+        couchdb3.sync.Database
 
         """
         db = Database(
