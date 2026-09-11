@@ -220,6 +220,9 @@ partition.save({
 """
 from . import exceptions as exceptions
 from . import utils as utils
+from .async_database import AsyncDatabase as AsyncDatabase
+from .async_database import AsyncPartition as AsyncPartition
+from .async_server import AsyncServer as AsyncServer
 from .database import Database as Database
 from .database import Partition as Partition
 from .document import Document as Document
