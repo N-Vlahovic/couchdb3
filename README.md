@@ -3,6 +3,34 @@
 *CouchDB3* is a sync and async Python wrapper around the CouchDB API. For more detailed information, please refer to
 [the documentation](https://n-vlahovic.github.io/couchdb3/).
 
+## Contents
+
+- [Disclaimer](#disclaimer)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Import styles](#import-styles)
+- [Quickstart](#quickstart)
+  - [Connecting to a database server](#connecting-to-a-database-server)
+  - [Getting or creating a database](#getting-or-creating-a-database)
+  - [Creating a document](#creating-a-document)
+  - [Updating a document](#updating-a-document)
+  - [Deleting a document](#deleting-a-document)
+  - [Fetching documents](#fetching-documents)
+  - [Views](#views)
+  - [Mango queries](#mango-queries)
+  - [Working with partitions](#working-with-partitions)
+- [Async client](#async-client)
+  - [Connecting to a database server](#connecting-to-a-database-server-1)
+  - [Getting or creating a database](#getting-or-creating-a-database-1)
+  - [Creating a document](#creating-a-document-1)
+  - [Updating a document](#updating-a-document-1)
+  - [Deleting a document](#deleting-a-document-1)
+  - [Fetching documents](#fetching-documents-1)
+  - [Views](#views-1)
+  - [Mango queries](#mango-queries-1)
+  - [Controlling concurrency](#controlling-concurrency)
+  - [Working with async partitions](#working-with-async-partitions)
+
 ## Disclaimer
 
 Big parts of the documentation (and thus docstrings) have been copied from CouchDB's API's great
