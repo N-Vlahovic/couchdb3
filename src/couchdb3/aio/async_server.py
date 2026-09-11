@@ -4,14 +4,14 @@ import httpx
 
 from .async_base import AsyncBase
 from .async_database import AsyncDatabase
-from .exceptions import (
+from ..exceptions import (
     ConflictError,
     CouchDBError,
     NotFoundError,
     ProxySchemeComplianceError,
     UserIDComplianceError,
 )
-from .utils import (
+from ..utils import (
     DEFAULT_TIMEOUT,
     rm_nones_from_dict,
     user_name_to_id,

@@ -4,7 +4,8 @@ from datetime import UTC, datetime
 
 import httpx
 
-from . import exceptions, utils
+from .. import exceptions, utils
+from ..document import DictBase as DictBase
 
 __all__ = ["Base", "DictBase"]
 
@@ -558,10 +559,4 @@ class Base:
         return rev
 
 
-class DictBase(dict):
-    """
-    Abstract dictionary class.
-    """
 
-    def __repr__(self) -> str:
-        return f"{self.__class__.__name__}: {super().__repr__()}"

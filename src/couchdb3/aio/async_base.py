@@ -5,7 +5,7 @@ from datetime import UTC, datetime
 
 import httpx
 
-from . import exceptions, utils
+from .. import exceptions, utils
 
 __all__ = ["AsyncBase"]
 

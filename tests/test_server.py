@@ -2,8 +2,7 @@
 import atexit
 import unittest
 
-from couchdb3.database import Database
-from couchdb3.server import Server
+from couchdb3.sync import Database, Server
 from couchdb3.utils import COUCH_DB_RESERVED_DB_NAMES
 from tests.credentials import COUCHDB0_URL, COUCHDB_PASSWORD, COUCHDB_USER
 

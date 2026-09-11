@@ -7,9 +7,8 @@ import random
 import string
 import unittest
 
-from couchdb3.database import Database, Partition
 from couchdb3.document import AttachmentDocument, Document
-from couchdb3.server import Server
+from couchdb3.sync import Database, Partition, Server
 from couchdb3.utils import MimeTypeEnum, user_name_to_id
 from couchdb3.view import ViewResult, ViewRow
 from tests.credentials import (

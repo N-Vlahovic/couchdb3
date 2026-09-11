@@ -8,21 +8,21 @@ from typing import Any
 import httpx
 
 from .base import Base
-from .document import (
+from ..document import (
     AttachmentDocument,
     Document,
     SecurityDocument,
     SecurityDocumentElement,
     extract_document_id_and_rev,
 )
-from .exceptions import CouchDBError, NameComplianceError
-from .utils import (
+from ..exceptions import CouchDBError, NameComplianceError
+from ..utils import (
     DEFAULT_TIMEOUT,
     partitioned_db_resource_parser,
     rm_nones_from_dict,
     validate_db_name,
 )
-from .view import ViewResult
+from ..view import ViewResult
 
 __all__ = [
     "Database",

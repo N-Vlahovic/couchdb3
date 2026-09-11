@@ -2,15 +2,23 @@
 
 from __future__ import annotations
 
-from .base import DictBase
-
 __all__ = [
+    "DictBase",
     "AttachmentDocument",
     "Document",
     "SecurityDocument",
     "SecurityDocumentElement",
     "extract_document_id_and_rev",
 ]
+
+
+class DictBase(dict):
+    """
+    Abstract dictionary class. Base for all document-like dict wrappers.
+    """
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}: {super().__repr__()}"
 
 
 def extract_document_id_and_rev(doc: dict | Document, rev: bool = True) -> dict:

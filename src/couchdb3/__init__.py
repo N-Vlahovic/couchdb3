@@ -220,12 +220,12 @@ partition.save({
 """
 from . import exceptions as exceptions
 from . import utils as utils
-from .async_database import AsyncDatabase as AsyncDatabase
-from .async_database import AsyncPartition as AsyncPartition
-from .async_server import AsyncServer as AsyncServer
-from .database import Database as Database
-from .database import Partition as Partition
+from .aio import AsyncDatabase as AsyncDatabase
+from .aio import AsyncPartition as AsyncPartition
+from .aio import AsyncServer as AsyncServer
 from .document import Document as Document
-from .server import Server as Server
+from .sync import Database as Database
+from .sync import Partition as Partition
+from .sync import Server as Server
 from .view import ViewResult as ViewResult
 from .view import ViewRow as ViewRow

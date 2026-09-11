@@ -4,9 +4,8 @@ import asyncio
 import atexit
 import unittest
 
-from couchdb3.async_database import AsyncDatabase
-from couchdb3.async_server import AsyncServer
-from couchdb3.server import Server
+from couchdb3.aio import AsyncDatabase, AsyncServer
+from couchdb3.sync import Server
 from couchdb3.utils import COUCH_DB_RESERVED_DB_NAMES
 from tests.credentials import COUCHDB0_URL, COUCHDB_PASSWORD, COUCHDB_USER
 
