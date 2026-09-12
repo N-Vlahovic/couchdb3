@@ -73,8 +73,10 @@ uv run python3 -m unittest tests.test_server
 If a prior run crashed before cleanup, delete it manually:
 ```python
 from couchdb3 import Server
-s = Server("http://...:...") # credentials
-if "test-db" in s: s.delete("test-db")
+
+s = Server("http://...:...")  # credentials
+if "test-db" in s:
+    s.delete("test-db")
 ```
 
 ---

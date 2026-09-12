@@ -86,7 +86,7 @@ VALID_SCHEMES: set[str] = {"http", "https", "socks5"}
 
 def _handler(x: Any) -> str:
     if isinstance(x, (Generator, map, list, set, tuple)):
-        return "[%s]" % ",".join(f'"{_handler(_)}"' for _ in x)
+        return "[{}]".format(",".join(f'"{_handler(_)}"' for _ in x))
     elif isinstance(x, dict):
         return str({key: _handler(val) for key, val in x.items()})
     elif isinstance(x, bool):
@@ -125,17 +125,15 @@ def build_query(
     -------
     str : A string containing the keyword-args encoded as URL query-params.
     """
-    return parse.urlencode(
-        {key: _handler(val) for key, val in kwargs.items() if val is not None}
-    )
+    return parse.urlencode({key: _handler(val) for key, val in kwargs.items() if val is not None})
 
 
 def build_url(
     *,
     scheme: str,
     host: str,
-    path: str = None,
-    port: int = None,
+    path: str | None = None,
+    port: int | None = None,
     **kwargs,
 ) -> str:
     """
@@ -292,14 +290,14 @@ def check_response(response: httpx.Response) -> None:
         TimeoutError,
         httpx.ConnectError,
         httpx.HTTPStatusError,
-    ) as err:
+    ):
         if response.status_code in exceptions.STATUS_CODE_ERROR_MAPPING:
             _ = exceptions.STATUS_CODE_ERROR_MAPPING[response.status_code]
             if _:
                 raise _(response.text)
             else:
                 return
-        raise err
+        raise
 
 
 def extract_url_data(url: str) -> dict:

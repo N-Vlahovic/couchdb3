@@ -3,8 +3,6 @@
 
 import httpx
 
-from .base import Base
-from .database import Database
 from ..exceptions import (
     ConflictError,
     CouchDBError,
@@ -19,6 +17,8 @@ from ..utils import (
     validate_proxy,
     validate_user_id,
 )
+from .base import Base
+from .database import Database
 
 __all__ = ["Server"]
 
@@ -267,9 +267,7 @@ class Server(Base):
         -------
         couchdb3.sync.Database
         """
-        self._put(
-            resource=name, query_kwargs={"q": q, "n": n, "partitioned": partitioned}
-        )
+        self._put(resource=name, query_kwargs={"q": q, "n": n, "partitioned": partitioned})
         return self.get(name=name)
 
     def dbs_info(self, keys: list[str]) -> list[dict]:
@@ -314,11 +312,11 @@ class Server(Base):
         )
         try:
             db._head()
-        except (NotFoundError, httpx.RequestError) as error:
+        except (NotFoundError, httpx.RequestError):
             if check is True:
-                raise error
-        except CouchDBError as error:
-            raise error
+                raise
+        except CouchDBError:
+            raise
         return db
 
     def delete(self, resource: str | None = None) -> bool:
@@ -463,7 +461,7 @@ class Server(Base):
         try:
             response = self._get(resource="_up")
             return "status" in response.json() and response.json()["status"] == "ok"
-        except Exception as error:
+        except Exception:
             if raise_exception:
-                raise error
+                raise
             return False

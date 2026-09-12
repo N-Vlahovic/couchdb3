@@ -2,8 +2,6 @@
 
 import httpx
 
-from .async_base import AsyncBase
-from .async_database import AsyncDatabase
 from ..exceptions import (
     ConflictError,
     CouchDBError,
@@ -18,6 +16,8 @@ from ..utils import (
     validate_proxy,
     validate_user_id,
 )
+from .async_base import AsyncBase
+from .async_database import AsyncDatabase
 
 __all__ = ["AsyncServer"]
 
@@ -265,9 +265,7 @@ class AsyncServer(AsyncBase):
         -------
         AsyncDatabase
         """
-        await self._put(
-            resource=name, query_kwargs={"q": q, "n": n, "partitioned": partitioned}
-        )
+        await self._put(resource=name, query_kwargs={"q": q, "n": n, "partitioned": partitioned})
         return await self.get(name=name)
 
     async def dbs_info(self, keys: list[str]) -> list[dict]:
@@ -311,11 +309,11 @@ class AsyncServer(AsyncBase):
         )
         try:
             await db._head()
-        except (NotFoundError, httpx.RequestError) as error:
+        except (NotFoundError, httpx.RequestError):
             if check is True:
-                raise error
-        except CouchDBError as error:
-            raise error
+                raise
+        except CouchDBError:
+            raise
         return db
 
     async def delete(self, resource: str | None = None) -> bool:
@@ -430,7 +428,7 @@ class AsyncServer(AsyncBase):
         try:
             response = await self._get(resource="_up")
             return "status" in response.json() and response.json()["status"] == "ok"
-        except Exception as error:
+        except Exception:
             if raise_exception:
-                raise error
+                raise
             return False
