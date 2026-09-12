@@ -61,9 +61,12 @@ Backwards compatibility might be a future topic but as of now `v3` is the only o
 ### Python Packages
 The package itself only requires `httpx` (c.f. `setup.py` and `pyproject.toml`).
 
-Dev/build tools (`build`, `pdoc3`, `setuptools`, `twine`) are declared under
-`[project.optional-dependencies] dev` in `pyproject.toml` and are installed by certain `make`
-commands automatically (e.g. `make build` uses `build`, `make html` uses `pdoc3`).
+Dev/build tools (`build`, `pdoc3`, `ruff`, `setuptools`, `twine`) are declared under
+`[project.optional-dependencies] dev` in `pyproject.toml`. Install them all in one step:
+
+```bash
+uv pip install -e ".[dev]"
+```
 
 
 ## Testing
