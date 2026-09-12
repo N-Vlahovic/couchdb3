@@ -16,22 +16,33 @@ Firstly, a rough explanation of the file structure is provided below.
 
 To get started, clone the project into a directory of your choice - say `~/couchdb3`.
 
-Next, you'll need an (virtual) environment: I like to use `venv` but `pipenv` or other alternatives work just as well.
+### Setting up with uv (recommended)
 
-### A Few Notes on venv
-Creating a new virtual environment can be done with the command
+The project uses [uv](https://docs.astral.sh/uv/) for environment and dependency management.
+To get started:
+
 ```bash
-python3 -m venv /path/to/venv
+# Install uv if you don't have it
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Clone and enter the project
+git clone https://github.com/n-Vlahovic/couchdb3
+cd couchdb3
+
+# Create the environment, install the package and all dev dependencies
+uv sync
+uv pip install -e ".[dev]"
 ```
-which creates the env at the designated location (relative to your current path).
-Activating the env can be done via the command
-```bash
-source /path/to/venv/bin/activate
-```
-and deactivating simply with
-```bash
-deactivate
-```
+
+From there, prefix commands with `uv run` to run them inside the managed environment, e.g.
+`uv run python3`, `uv run ruff check .`, etc. — or use `make test`, `make build` etc. which
+handle this automatically.
+
+### Other environments
+
+`venv`, `pipenv`, `conda` and similar tools work fine too. The only requirement is that
+`httpx>=0.27,<1.0` is available at runtime, and the dev extras (`build`, `pdoc3`, `ruff`,
+`setuptools`, `twine`) are available when running the corresponding `make` targets.
 
 ## Requirements
 
