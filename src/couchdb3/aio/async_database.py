@@ -50,6 +50,7 @@ class AsyncDatabase(AsyncBase):
         auth_method: str | None = None,
         timeout: int | None = DEFAULT_TIMEOUT,
         session: httpx.AsyncClient | None = None,
+        _server: Any = None,
     ) -> None:
         """
 
@@ -79,6 +80,11 @@ class AsyncDatabase(AsyncBase):
         session : httpx.AsyncClient
             A specific async client to use. Optional — if not provided, a new client will be
             initialized.
+        _server : AsyncServer
+            The owning `AsyncServer` instance. Set internally by `AsyncServer.get()` to keep
+            the server alive for the lifetime of this database object. Not part of the public
+            constructor API — pass `None` (default) when constructing an `AsyncDatabase`
+            directly.
         """
         super().__init__(
             url=url,
@@ -97,6 +103,21 @@ class AsyncDatabase(AsyncBase):
             )
         self.name = name
         self.root = name
+        self._server = _server
+
+    @property
+    def server(self):
+        """
+        The `AsyncServer` instance this database was obtained from, or `None` if the database
+        was constructed directly (i.e. not via `AsyncServer.get()`).
+
+        Read-only. Setting this attribute raises `AttributeError`.
+
+        Returns
+        -------
+        AsyncServer | None
+        """
+        return self._server
 
     def __repr__(self) -> str:
         """
@@ -1152,6 +1173,7 @@ class AsyncDatabase(AsyncBase):
             disable_ssl_verification=self.disable_ssl_verification,
             auth_method=self.auth_method,
             session=self.session,  # shared — child sets _owns_session=False
+            _database=self,
         )
 
 
@@ -1173,6 +1195,7 @@ class AsyncPartition(AsyncDatabase):
         auth_method: str | None = None,
         timeout: int | None = None,
         session: httpx.AsyncClient | None = None,
+        _database: Any = None,
     ) -> None:
         """
 
@@ -1198,6 +1221,11 @@ class AsyncPartition(AsyncDatabase):
             The default timeout for requests. Default `None`.
         session : httpx.AsyncClient
             A specific async client to use. Optional.
+        _database : AsyncDatabase
+            The owning `AsyncDatabase` instance. Set internally by
+            `AsyncDatabase.get_partition()` to keep the database alive for the lifetime of
+            this partition object. Not part of the public constructor API — pass `None`
+            (default) when constructing an `AsyncPartition` directly.
         """
         super().__init__(
             name=name,
@@ -1211,6 +1239,21 @@ class AsyncPartition(AsyncDatabase):
             timeout=timeout,
         )
         self.partition_id = partition_id
+        self._database = _database
+
+    @property
+    def database(self):
+        """
+        The `AsyncDatabase` instance this partition was obtained from, or `None` if the
+        partition was constructed directly (i.e. not via `AsyncDatabase.get_partition()`).
+
+        Read-only. Setting this attribute raises `AttributeError`.
+
+        Returns
+        -------
+        AsyncDatabase | None
+        """
+        return self._database
 
     def __repr__(self) -> str:
         return f"{super().__repr__()}/{self.partition_id}"

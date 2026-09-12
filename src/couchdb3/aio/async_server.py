@@ -306,6 +306,7 @@ class AsyncServer(AsyncBase):
             disable_ssl_verification=self.disable_ssl_verification,
             auth_method=self.auth_method,
             session=self.session,  # shared — child sets _owns_session=False
+            _server=self,
         )
         try:
             await db._head()

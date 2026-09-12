@@ -341,6 +341,7 @@ el.replaceWith(d);
             disable_ssl_verification=self.disable_ssl_verification,
             auth_method=self.auth_method,
             session=self.session,
+            _server=self,
         )
         try:
             db._head()
@@ -1169,6 +1170,7 @@ used: <code>3</code>, unless overridden in the <code>cluster config</code>).</dd
         disable_ssl_verification=self.disable_ssl_verification,
         auth_method=self.auth_method,
         session=self.session,
+        _server=self,
     )
     try:
         db._head()

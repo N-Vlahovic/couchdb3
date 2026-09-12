@@ -47,6 +47,7 @@ class Database(Base):
         auth_method: str | None = None,
         timeout: int | None = DEFAULT_TIMEOUT,
         session: httpx.Client | None = None,
+        _server: Any = None,
     ) -> None:
         """
 
@@ -74,6 +75,10 @@ class Database(Base):
             The default timeout for requests. Default c.f. `couchdb3.utils.DEFAULT_TIMEOUT`.
         session: httpx.Client
             A specific client to use. Optional - if not provided, a new client will be initialized.
+        _server : Server
+            The owning `Server` instance. Set internally by `Server.get()` to keep the server
+            alive for the lifetime of this database object. Not part of the public constructor
+            API — pass `None` (default) when constructing a `Database` directly.
         """
         super().__init__(
             url=url,
@@ -92,6 +97,21 @@ class Database(Base):
             )
         self.name = name
         self.root = name
+        self._server = _server
+
+    @property
+    def server(self):
+        """
+        The `Server` instance this database was obtained from, or `None` if the database
+        was constructed directly (i.e. not via `Server.get()`).
+
+        Read-only. Setting this attribute raises `AttributeError`.
+
+        Returns
+        -------
+        Server | None
+        """
+        return self._server
 
     def __getitem__(self, item) -> Document:
         return self.get(docid=item, check=True)
@@ -1293,6 +1313,7 @@ class Database(Base):
             disable_ssl_verification=self.disable_ssl_verification,
             auth_method=self.auth_method,
             session=self.session,
+            _database=self,
         )
 
 
@@ -1314,11 +1335,14 @@ class Partition(Database):
         auth_method: str | None = None,
         timeout: int | None = None,
         session: httpx.Client | None = None,
+        _database: Any = None,
     ) -> None:
         """
 
         Parameters
         ----------
+        partition_id : str
+            The partition's ID.
         name : str
             The name of the database.
         url : str
@@ -1341,6 +1365,11 @@ class Partition(Database):
             The default timeout for requests. Default c.f. `couchdb3.utils.DEFAULT_TIMEOUT`.
         session: httpx.Client
             A specific client to use. Optional - if not provided, a new client will be initialized.
+        _database : Database
+            The owning `Database` instance. Set internally by `Database.get_partition()` to
+            keep the database alive for the lifetime of this partition object. Not part of the
+            public constructor API — pass `None` (default) when constructing a `Partition`
+            directly.
         """
         super().__init__(
             name=name,
@@ -1354,7 +1383,21 @@ class Partition(Database):
             timeout=timeout,
         )
         self.partition_id = partition_id
-        # self.root = f"{name}/_partition/{partition_id}"
+        self._database = _database
+
+    @property
+    def database(self):
+        """
+        The `Database` instance this partition was obtained from, or `None` if the partition
+        was constructed directly (i.e. not via `Database.get_partition()`).
+
+        Read-only. Setting this attribute raises `AttributeError`.
+
+        Returns
+        -------
+        Database | None
+        """
+        return self._database
 
     def __repr__(self) -> str:
         return f"{super().__repr__()}/{self.partition_id}"
