@@ -31,3 +31,5 @@
 - `POST /{db}/_view_cleanup` — view index cleanup
 - `__contains__` on `AsyncServer` (sync `Server` supports `if db in server`; async does not)
 - `GET /{db}/_changes` with `feed=continuous|eventsource` — streaming feeds (deferred)
+  - **sync:** implement `Database.changes_stream()` as a generator using `httpx.Client.stream()`, yielding parsed JSON objects line-by-line from the NDJSON response; caller controls iteration and closure via a `with` block or explicit `.close()`
+  - **async:** implement `AsyncDatabase.changes_stream()` as an async generator using `httpx.AsyncClient.stream()`, yielding the same parsed objects; caller drives with `async for` and the underlying connection is released on `aclose()` or generator exhaustion
