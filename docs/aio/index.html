@@ -95,6 +95,7 @@ re-exported here — import them from <code><a title="couchdb3" href="../index.h
         auth_method: str | None = None,
         timeout: int | None = DEFAULT_TIMEOUT,
         session: httpx.AsyncClient | None = None,
+        _server: Any = None,
     ) -&gt; None:
         &#34;&#34;&#34;
 
@@ -124,6 +125,11 @@ re-exported here — import them from <code><a title="couchdb3" href="../index.h
         session : httpx.AsyncClient
             A specific async client to use. Optional — if not provided, a new client will be
             initialized.
+        _server : AsyncServer
+            The owning `AsyncServer` instance. Set internally by `AsyncServer.get()` to keep
+            the server alive for the lifetime of this database object. Not part of the public
+            constructor API — pass `None` (default) when constructing an `AsyncDatabase`
+            directly.
         &#34;&#34;&#34;
         super().__init__(
             url=url,
@@ -142,6 +148,21 @@ re-exported here — import them from <code><a title="couchdb3" href="../index.h
             )
         self.name = name
         self.root = name
+        self._server = _server
+
+    @property
+    def server(self):
+        &#34;&#34;&#34;
+        The `AsyncServer` instance this database was obtained from, or `None` if the database
+        was constructed directly (i.e. not via `AsyncServer.get()`).
+
+        Read-only. Setting this attribute raises `AttributeError`.
+
+        Returns
+        -------
+        AsyncServer | None
+        &#34;&#34;&#34;
+        return self._server
 
     def __repr__(self) -&gt; str:
         &#34;&#34;&#34;
@@ -1197,6 +1218,7 @@ re-exported here — import them from <code><a title="couchdb3" href="../index.h
             disable_ssl_verification=self.disable_ssl_verification,
             auth_method=self.auth_method,
             session=self.session,  # shared — child sets _owns_session=False
+            _database=self,
         )</code></pre>
 </details>
 <div class="desc"><p>Async CouchDB database client. Mirrors <code>Database</code> with <code>async def</code> methods throughout.</p>
@@ -1228,6 +1250,11 @@ Default is <code><a title="couchdb3.utils.DEFAULT_AUTH_METHOD" href="../utils.ht
 <dt><strong><code>session</code></strong> :&ensp;<code>httpx.AsyncClient</code></dt>
 <dd>A specific async client to use. Optional — if not provided, a new client will be
 initialized.</dd>
+<dt><strong><code>_server</code></strong> :&ensp;<code><a title="couchdb3.aio.AsyncServer" href="#couchdb3.aio.AsyncServer">AsyncServer</a></code></dt>
+<dd>The owning <code><a title="couchdb3.aio.AsyncServer" href="#couchdb3.aio.AsyncServer">AsyncServer</a></code> instance. Set internally by <code><a title="couchdb3.aio.AsyncServer.get" href="#couchdb3.aio.AsyncServer.get">AsyncServer.get()</a></code> to keep
+the server alive for the lifetime of this database object. Not part of the public
+constructor API — pass <code>None</code> (default) when constructing an <code><a title="couchdb3.aio.AsyncDatabase" href="#couchdb3.aio.AsyncDatabase">AsyncDatabase</a></code>
+directly.</dd>
 </dl></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -1237,6 +1264,38 @@ initialized.</dd>
 <ul class="hlist">
 <li><a title="couchdb3.aio.async_database.AsyncPartition" href="async_database.html#couchdb3.aio.async_database.AsyncPartition">AsyncPartition</a></li>
 </ul>
+<h3>Instance variables</h3>
+<dl>
+<dt id="couchdb3.aio.AsyncDatabase.server"><code class="name">prop <span class="ident">server</span></code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def server(self):
+    &#34;&#34;&#34;
+    The `AsyncServer` instance this database was obtained from, or `None` if the database
+    was constructed directly (i.e. not via `AsyncServer.get()`).
+
+    Read-only. Setting this attribute raises `AttributeError`.
+
+    Returns
+    -------
+    AsyncServer | None
+    &#34;&#34;&#34;
+    return self._server</code></pre>
+</details>
+<div class="desc"><p>The <code><a title="couchdb3.aio.AsyncServer" href="#couchdb3.aio.AsyncServer">AsyncServer</a></code> instance this database was obtained from, or <code>None</code> if the database
+was constructed directly (i.e. not via <code><a title="couchdb3.aio.AsyncServer.get" href="#couchdb3.aio.AsyncServer.get">AsyncServer.get()</a></code>).</p>
+<p>Read-only. Setting this attribute raises <code>AttributeError</code>.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>AsyncServer | None</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+</dd>
+</dl>
 <h3>Methods</h3>
 <dl>
 <dt id="couchdb3.aio.AsyncDatabase.all_docs"><code class="name flex">
@@ -2342,6 +2401,7 @@ Default <code>None</code>.</dd>
         disable_ssl_verification=self.disable_ssl_verification,
         auth_method=self.auth_method,
         session=self.session,  # shared — child sets _owns_session=False
+        _database=self,
     )</code></pre>
 </details>
 <div class="desc"><p>Get a given partition.</p>
@@ -3037,6 +3097,7 @@ Default <code>None</code>.</dd>
         auth_method: str | None = None,
         timeout: int | None = None,
         session: httpx.AsyncClient | None = None,
+        _database: Any = None,
     ) -&gt; None:
         &#34;&#34;&#34;
 
@@ -3062,6 +3123,11 @@ Default <code>None</code>.</dd>
             The default timeout for requests. Default `None`.
         session : httpx.AsyncClient
             A specific async client to use. Optional.
+        _database : AsyncDatabase
+            The owning `AsyncDatabase` instance. Set internally by
+            `AsyncDatabase.get_partition()` to keep the database alive for the lifetime of
+            this partition object. Not part of the public constructor API — pass `None`
+            (default) when constructing an `AsyncPartition` directly.
         &#34;&#34;&#34;
         super().__init__(
             name=name,
@@ -3075,6 +3141,21 @@ Default <code>None</code>.</dd>
             timeout=timeout,
         )
         self.partition_id = partition_id
+        self._database = _database
+
+    @property
+    def database(self):
+        &#34;&#34;&#34;
+        The `AsyncDatabase` instance this partition was obtained from, or `None` if the
+        partition was constructed directly (i.e. not via `AsyncDatabase.get_partition()`).
+
+        Read-only. Setting this attribute raises `AttributeError`.
+
+        Returns
+        -------
+        AsyncDatabase | None
+        &#34;&#34;&#34;
+        return self._database
 
     def __repr__(self) -&gt; str:
         return f&#34;{super().__repr__()}/{self.partition_id}&#34;
@@ -3378,12 +3459,49 @@ Default <code>None</code>.</dd>
 <dd>The default timeout for requests. Default <code>None</code>.</dd>
 <dt><strong><code>session</code></strong> :&ensp;<code>httpx.AsyncClient</code></dt>
 <dd>A specific async client to use. Optional.</dd>
+<dt><strong><code>_database</code></strong> :&ensp;<code><a title="couchdb3.aio.AsyncDatabase" href="#couchdb3.aio.AsyncDatabase">AsyncDatabase</a></code></dt>
+<dd>The owning <code><a title="couchdb3.aio.AsyncDatabase" href="#couchdb3.aio.AsyncDatabase">AsyncDatabase</a></code> instance. Set internally by
+<code><a title="couchdb3.aio.AsyncDatabase.get_partition" href="#couchdb3.aio.AsyncDatabase.get_partition">AsyncDatabase.get_partition()</a></code> to keep the database alive for the lifetime of
+this partition object. Not part of the public constructor API — pass <code>None</code>
+(default) when constructing an <code><a title="couchdb3.aio.AsyncPartition" href="#couchdb3.aio.AsyncPartition">AsyncPartition</a></code> directly.</dd>
 </dl></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="couchdb3.aio.async_database.AsyncDatabase" href="async_database.html#couchdb3.aio.async_database.AsyncDatabase">AsyncDatabase</a></li>
 <li><a title="couchdb3.aio.async_base.AsyncBase" href="async_base.html#couchdb3.aio.async_base.AsyncBase">AsyncBase</a></li>
 </ul>
+<h3>Instance variables</h3>
+<dl>
+<dt id="couchdb3.aio.AsyncPartition.database"><code class="name">prop <span class="ident">database</span></code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def database(self):
+    &#34;&#34;&#34;
+    The `AsyncDatabase` instance this partition was obtained from, or `None` if the
+    partition was constructed directly (i.e. not via `AsyncDatabase.get_partition()`).
+
+    Read-only. Setting this attribute raises `AttributeError`.
+
+    Returns
+    -------
+    AsyncDatabase | None
+    &#34;&#34;&#34;
+    return self._database</code></pre>
+</details>
+<div class="desc"><p>The <code><a title="couchdb3.aio.AsyncDatabase" href="#couchdb3.aio.AsyncDatabase">AsyncDatabase</a></code> instance this partition was obtained from, or <code>None</code> if the
+partition was constructed directly (i.e. not via <code><a title="couchdb3.aio.AsyncDatabase.get_partition" href="#couchdb3.aio.AsyncDatabase.get_partition">AsyncDatabase.get_partition()</a></code>).</p>
+<p>Read-only. Setting this attribute raises <code>AttributeError</code>.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>AsyncDatabase | None</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+</dd>
+</dl>
 <h3>Methods</h3>
 <dl>
 <dt id="couchdb3.aio.AsyncPartition.add_partition_to_doc"><code class="name flex">
@@ -3866,6 +3984,7 @@ Default <code>None</code>.</dd>
 <li><code><a title="couchdb3.aio.async_database.AsyncDatabase.put_design" href="async_database.html#couchdb3.aio.async_database.AsyncDatabase.put_design">put_design</a></code></li>
 <li><code><a title="couchdb3.aio.async_database.AsyncDatabase.save_index" href="async_database.html#couchdb3.aio.async_database.AsyncDatabase.save_index">save_index</a></code></li>
 <li><code><a title="couchdb3.aio.async_database.AsyncDatabase.security" href="async_database.html#couchdb3.aio.async_database.AsyncDatabase.security">security</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncDatabase.server" href="async_database.html#couchdb3.aio.async_database.AsyncDatabase.server">server</a></code></li>
 <li><code><a title="couchdb3.aio.async_database.AsyncDatabase.update_security" href="async_database.html#couchdb3.aio.async_database.AsyncDatabase.update_security">update_security</a></code></li>
 <li><code><a title="couchdb3.aio.async_database.AsyncDatabase.url" href="async_base.html#couchdb3.aio.async_base.AsyncBase.url">url</a></code></li>
 </ul>
@@ -4165,6 +4284,7 @@ Default <code>None</code>.</dd>
             disable_ssl_verification=self.disable_ssl_verification,
             auth_method=self.auth_method,
             session=self.session,  # shared — child sets _owns_session=False
+            _server=self,
         )
         try:
             await db._head()
@@ -4983,6 +5103,7 @@ Defaults to <code>["_users", "_replicator"]</code>.</dd>
         disable_ssl_verification=self.disable_ssl_verification,
         auth_method=self.auth_method,
         session=self.session,  # shared — child sets _owns_session=False
+        _server=self,
     )
     try:
         await db._head()
@@ -5725,6 +5846,7 @@ remote node's port (<code>add_node</code>).</dd>
 <li><code><a title="couchdb3.aio.AsyncDatabase.save" href="#couchdb3.aio.AsyncDatabase.save">save</a></code></li>
 <li><code><a title="couchdb3.aio.AsyncDatabase.save_index" href="#couchdb3.aio.AsyncDatabase.save_index">save_index</a></code></li>
 <li><code><a title="couchdb3.aio.AsyncDatabase.security" href="#couchdb3.aio.AsyncDatabase.security">security</a></code></li>
+<li><code><a title="couchdb3.aio.AsyncDatabase.server" href="#couchdb3.aio.AsyncDatabase.server">server</a></code></li>
 <li><code><a title="couchdb3.aio.AsyncDatabase.update_security" href="#couchdb3.aio.AsyncDatabase.update_security">update_security</a></code></li>
 <li><code><a title="couchdb3.aio.AsyncDatabase.view" href="#couchdb3.aio.AsyncDatabase.view">view</a></code></li>
 </ul>
@@ -5739,6 +5861,7 @@ remote node's port (<code>add_node</code>).</dd>
 <li><code><a title="couchdb3.aio.AsyncPartition.bulk_get" href="#couchdb3.aio.AsyncPartition.bulk_get">bulk_get</a></code></li>
 <li><code><a title="couchdb3.aio.AsyncPartition.copy" href="#couchdb3.aio.AsyncPartition.copy">copy</a></code></li>
 <li><code><a title="couchdb3.aio.AsyncPartition.create" href="#couchdb3.aio.AsyncPartition.create">create</a></code></li>
+<li><code><a title="couchdb3.aio.AsyncPartition.database" href="#couchdb3.aio.AsyncPartition.database">database</a></code></li>
 <li><code><a title="couchdb3.aio.AsyncPartition.delete" href="#couchdb3.aio.AsyncPartition.delete">delete</a></code></li>
 <li><code><a title="couchdb3.aio.AsyncPartition.delete_attachment" href="#couchdb3.aio.AsyncPartition.delete_attachment">delete_attachment</a></code></li>
 <li><code><a title="couchdb3.aio.AsyncPartition.find" href="#couchdb3.aio.AsyncPartition.find">find</a></code></li>

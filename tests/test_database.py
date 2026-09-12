@@ -447,6 +447,54 @@ class TestDatabase(unittest.TestCase):
             DB.changes(doc_ids=["a"], selector={"type": "x"})
 
 
+class TestDatabaseServerRef(unittest.TestCase):
+    """Tests for the db.server and partition.database back-references (Option C lifetime fix)."""
+
+    def test_db_server_is_set(self):
+        # A Database obtained via Server.get() / Server.__getitem__ carries a ref to the Server
+        db = CLIENT.get(DB_NAME)
+        self.assertIs(db.server, CLIENT)
+
+    def test_db_server_is_none_when_standalone(self):
+        # A Database constructed directly has no server ref
+        db = Database(name=DB_NAME, url=COUCHDB0_URL, user=COUCHDB_USER, password=COUCHDB_PASSWORD)
+        self.assertIsNone(db.server)
+
+    def test_db_server_is_readonly(self):
+        db = CLIENT.get(DB_NAME)
+        with self.assertRaises(AttributeError):
+            db.server = None
+
+    def test_partition_database_is_set(self):
+        partition = DB_PARTITIONED.get_partition(P_ID)
+        self.assertIs(partition.database, DB_PARTITIONED)
+
+    def test_partition_database_is_none_when_standalone(self):
+        from couchdb3.sync import Partition
+
+        p = Partition(
+            partition_id=P_ID,
+            name=DB_NAME_PARTITIONED,
+            url=COUCHDB0_URL,
+            user=COUCHDB_USER,
+            password=COUCHDB_PASSWORD,
+        )
+        self.assertIsNone(p.database)
+
+    def test_partition_database_is_readonly(self):
+        partition = DB_PARTITIONED.get_partition(P_ID)
+        with self.assertRaises(AttributeError):
+            partition.database = None
+
+    def test_one_liner_does_not_raise(self):
+        # The original bug: temporary Server GC'd before chained method executes.
+        # db.server holds a strong ref, keeping the Server (and its httpx.Client) alive.
+        result = Server(COUCHDB0_URL, user=COUCHDB_USER, password=COUCHDB_PASSWORD)[
+            DB_NAME
+        ].changes(limit=1)
+        self.assertIn("results", result)
+
+
 @atexit.register
 def rm_test_db() -> None:
     """

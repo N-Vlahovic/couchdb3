@@ -309,6 +309,7 @@ class Server(Base):
             disable_ssl_verification=self.disable_ssl_verification,
             auth_method=self.auth_method,
             session=self.session,
+            _server=self,
         )
         try:
             db._head()

@@ -331,6 +331,73 @@ class TestAsyncDatabaseChanges(unittest.IsolatedAsyncioTestCase):
             await self.db.changes(doc_ids=["a"], selector={"type": "x"})
 
 
+class TestAsyncDatabaseServerRef(unittest.IsolatedAsyncioTestCase):
+    """Tests for the db.server and partition.database back-references (Option C lifetime fix)."""
+
+    async def asyncSetUp(self):
+        self.server = AsyncServer(url=COUCHDB0_URL, user=COUCHDB_USER, password=COUCHDB_PASSWORD)
+        all_dbs = await self.server.all_dbs()
+        if DB_NAME in all_dbs:
+            self.db = await self.server.get(DB_NAME)
+        else:
+            self.db = await self.server.create(DB_NAME)
+        if DB_NAME_PARTITIONED in all_dbs:
+            self.db_partitioned = await self.server.get(DB_NAME_PARTITIONED)
+        else:
+            self.db_partitioned = await self.server.create(DB_NAME_PARTITIONED, partitioned=True)
+
+    async def asyncTearDown(self):
+        await self.server.aclose()
+
+    async def test_db_server_is_set(self):
+        self.assertIs(self.db.server, self.server)
+
+    async def test_db_server_is_none_when_standalone(self):
+        from couchdb3.aio import AsyncDatabase
+
+        db = AsyncDatabase(
+            name=DB_NAME, url=COUCHDB0_URL, user=COUCHDB_USER, password=COUCHDB_PASSWORD
+        )
+        self.assertIsNone(db.server)
+        await db.aclose()
+
+    async def test_db_server_is_readonly(self):
+        with self.assertRaises(AttributeError):
+            self.db.server = None
+
+    async def test_partition_database_is_set(self):
+        partition = await self.db_partitioned.get_partition(P_ID)
+        self.assertIs(partition.database, self.db_partitioned)
+
+    async def test_partition_database_is_none_when_standalone(self):
+        from couchdb3.aio import AsyncPartition
+
+        p = AsyncPartition(
+            partition_id=P_ID,
+            name=DB_NAME_PARTITIONED,
+            url=COUCHDB0_URL,
+            user=COUCHDB_USER,
+            password=COUCHDB_PASSWORD,
+        )
+        self.assertIsNone(p.database)
+        await p.aclose()
+
+    async def test_partition_database_is_readonly(self):
+        partition = await self.db_partitioned.get_partition(P_ID)
+        with self.assertRaises(AttributeError):
+            partition.database = None
+
+    async def test_one_liner_does_not_raise(self):
+        # The original bug: temporary AsyncServer GC'd before chained await executes.
+        # db.server holds a strong ref, keeping the AsyncServer (and its httpx.AsyncClient) alive.
+        async with AsyncServer(
+            url=COUCHDB0_URL, user=COUCHDB_USER, password=COUCHDB_PASSWORD
+        ) as server:
+            db = await server.get(DB_NAME)
+            result = await db.changes(limit=1)
+            self.assertIn("results", result)
+
+
 @atexit.register
 def rm_test_dbs() -> None:
     """Remove temporary async database test DBs using the sync client."""

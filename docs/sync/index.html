@@ -92,6 +92,7 @@ re-exported here — import them from <code><a title="couchdb3" href="../index.h
         auth_method: str | None = None,
         timeout: int | None = DEFAULT_TIMEOUT,
         session: httpx.Client | None = None,
+        _server: Any = None,
     ) -&gt; None:
         &#34;&#34;&#34;
 
@@ -119,6 +120,10 @@ re-exported here — import them from <code><a title="couchdb3" href="../index.h
             The default timeout for requests. Default c.f. `couchdb3.utils.DEFAULT_TIMEOUT`.
         session: httpx.Client
             A specific client to use. Optional - if not provided, a new client will be initialized.
+        _server : Server
+            The owning `Server` instance. Set internally by `Server.get()` to keep the server
+            alive for the lifetime of this database object. Not part of the public constructor
+            API — pass `None` (default) when constructing a `Database` directly.
         &#34;&#34;&#34;
         super().__init__(
             url=url,
@@ -137,6 +142,21 @@ re-exported here — import them from <code><a title="couchdb3" href="../index.h
             )
         self.name = name
         self.root = name
+        self._server = _server
+
+    @property
+    def server(self):
+        &#34;&#34;&#34;
+        The `Server` instance this database was obtained from, or `None` if the database
+        was constructed directly (i.e. not via `Server.get()`).
+
+        Read-only. Setting this attribute raises `AttributeError`.
+
+        Returns
+        -------
+        Server | None
+        &#34;&#34;&#34;
+        return self._server
 
     def __getitem__(self, item) -&gt; Document:
         return self.get(docid=item, check=True)
@@ -1338,6 +1358,7 @@ re-exported here — import them from <code><a title="couchdb3" href="../index.h
             disable_ssl_verification=self.disable_ssl_verification,
             auth_method=self.auth_method,
             session=self.session,
+            _database=self,
         )</code></pre>
 </details>
 <div class="desc"><p>Abstract Couchdb database</p>
@@ -1365,6 +1386,10 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
 <dd>The default timeout for requests. Default c.f. <code><a title="couchdb3.utils.DEFAULT_TIMEOUT" href="../utils.html#couchdb3.utils.DEFAULT_TIMEOUT">DEFAULT_TIMEOUT</a></code>.</dd>
 <dt><strong><code>session</code></strong> :&ensp;<code>httpx.Client</code></dt>
 <dd>A specific client to use. Optional - if not provided, a new client will be initialized.</dd>
+<dt><strong><code>_server</code></strong> :&ensp;<code><a title="couchdb3.sync.Server" href="#couchdb3.sync.Server">Server</a></code></dt>
+<dd>The owning <code><a title="couchdb3.sync.Server" href="#couchdb3.sync.Server">Server</a></code> instance. Set internally by <code><a title="couchdb3.sync.Server.get" href="#couchdb3.sync.Server.get">Server.get()</a></code> to keep the server
+alive for the lifetime of this database object. Not part of the public constructor
+API — pass <code>None</code> (default) when constructing a <code><a title="couchdb3.sync.Database" href="#couchdb3.sync.Database">Database</a></code> directly.</dd>
 </dl></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -1374,6 +1399,38 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
 <ul class="hlist">
 <li><a title="couchdb3.sync.database.Partition" href="database.html#couchdb3.sync.database.Partition">Partition</a></li>
 </ul>
+<h3>Instance variables</h3>
+<dl>
+<dt id="couchdb3.sync.Database.server"><code class="name">prop <span class="ident">server</span></code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def server(self):
+    &#34;&#34;&#34;
+    The `Server` instance this database was obtained from, or `None` if the database
+    was constructed directly (i.e. not via `Server.get()`).
+
+    Read-only. Setting this attribute raises `AttributeError`.
+
+    Returns
+    -------
+    Server | None
+    &#34;&#34;&#34;
+    return self._server</code></pre>
+</details>
+<div class="desc"><p>The <code><a title="couchdb3.sync.Server" href="#couchdb3.sync.Server">Server</a></code> instance this database was obtained from, or <code>None</code> if the database
+was constructed directly (i.e. not via <code><a title="couchdb3.sync.Server.get" href="#couchdb3.sync.Server.get">Server.get()</a></code>).</p>
+<p>Read-only. Setting this attribute raises <code>AttributeError</code>.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Server | None</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+</dd>
+</dl>
 <h3>Methods</h3>
 <dl>
 <dt id="couchdb3.sync.Database.all_docs"><code class="name flex">
@@ -2612,6 +2669,7 @@ revisions. Default <code>None</code>.</dd>
         disable_ssl_verification=self.disable_ssl_verification,
         auth_method=self.auth_method,
         session=self.session,
+        _database=self,
     )</code></pre>
 </details>
 <div class="desc"><p>Get a given partition.</p>
@@ -3442,11 +3500,14 @@ ViewResult: {
         auth_method: str | None = None,
         timeout: int | None = None,
         session: httpx.Client | None = None,
+        _database: Any = None,
     ) -&gt; None:
         &#34;&#34;&#34;
 
         Parameters
         ----------
+        partition_id : str
+            The partition&#39;s ID.
         name : str
             The name of the database.
         url : str
@@ -3469,6 +3530,11 @@ ViewResult: {
             The default timeout for requests. Default c.f. `couchdb3.utils.DEFAULT_TIMEOUT`.
         session: httpx.Client
             A specific client to use. Optional - if not provided, a new client will be initialized.
+        _database : Database
+            The owning `Database` instance. Set internally by `Database.get_partition()` to
+            keep the database alive for the lifetime of this partition object. Not part of the
+            public constructor API — pass `None` (default) when constructing a `Partition`
+            directly.
         &#34;&#34;&#34;
         super().__init__(
             name=name,
@@ -3482,7 +3548,21 @@ ViewResult: {
             timeout=timeout,
         )
         self.partition_id = partition_id
-        # self.root = f&#34;{name}/_partition/{partition_id}&#34;
+        self._database = _database
+
+    @property
+    def database(self):
+        &#34;&#34;&#34;
+        The `Database` instance this partition was obtained from, or `None` if the partition
+        was constructed directly (i.e. not via `Database.get_partition()`).
+
+        Read-only. Setting this attribute raises `AttributeError`.
+
+        Returns
+        -------
+        Database | None
+        &#34;&#34;&#34;
+        return self._database
 
     def __repr__(self) -&gt; str:
         return f&#34;{super().__repr__()}/{self.partition_id}&#34;
@@ -3918,6 +3998,8 @@ ViewResult: {
 <div class="desc"><p>Abstract Couchdb partition</p>
 <h2 id="parameters">Parameters</h2>
 <dl>
+<dt><strong><code>partition_id</code></strong> :&ensp;<code>str</code></dt>
+<dd>The partition's ID.</dd>
 <dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
 <dd>The name of the database.</dd>
 <dt><strong><code>url</code></strong> :&ensp;<code>str</code></dt>
@@ -3940,12 +4022,49 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
 <dd>The default timeout for requests. Default c.f. <code><a title="couchdb3.utils.DEFAULT_TIMEOUT" href="../utils.html#couchdb3.utils.DEFAULT_TIMEOUT">DEFAULT_TIMEOUT</a></code>.</dd>
 <dt><strong><code>session</code></strong> :&ensp;<code>httpx.Client</code></dt>
 <dd>A specific client to use. Optional - if not provided, a new client will be initialized.</dd>
+<dt><strong><code>_database</code></strong> :&ensp;<code><a title="couchdb3.sync.Database" href="#couchdb3.sync.Database">Database</a></code></dt>
+<dd>The owning <code><a title="couchdb3.sync.Database" href="#couchdb3.sync.Database">Database</a></code> instance. Set internally by <code><a title="couchdb3.sync.Database.get_partition" href="#couchdb3.sync.Database.get_partition">Database.get_partition()</a></code> to
+keep the database alive for the lifetime of this partition object. Not part of the
+public constructor API — pass <code>None</code> (default) when constructing a <code><a title="couchdb3.sync.Partition" href="#couchdb3.sync.Partition">Partition</a></code>
+directly.</dd>
 </dl></div>
 <h3>Ancestors</h3>
 <ul class="hlist">
 <li><a title="couchdb3.sync.database.Database" href="database.html#couchdb3.sync.database.Database">Database</a></li>
 <li><a title="couchdb3.sync.base.Base" href="base.html#couchdb3.sync.base.Base">Base</a></li>
 </ul>
+<h3>Instance variables</h3>
+<dl>
+<dt id="couchdb3.sync.Partition.database"><code class="name">prop <span class="ident">database</span></code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def database(self):
+    &#34;&#34;&#34;
+    The `Database` instance this partition was obtained from, or `None` if the partition
+    was constructed directly (i.e. not via `Database.get_partition()`).
+
+    Read-only. Setting this attribute raises `AttributeError`.
+
+    Returns
+    -------
+    Database | None
+    &#34;&#34;&#34;
+    return self._database</code></pre>
+</details>
+<div class="desc"><p>The <code><a title="couchdb3.sync.Database" href="#couchdb3.sync.Database">Database</a></code> instance this partition was obtained from, or <code>None</code> if the partition
+was constructed directly (i.e. not via <code><a title="couchdb3.sync.Database.get_partition" href="#couchdb3.sync.Database.get_partition">Database.get_partition()</a></code>).</p>
+<p>Read-only. Setting this attribute raises <code>AttributeError</code>.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>Database | None</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+</dd>
+</dl>
 <h3>Methods</h3>
 <dl>
 <dt id="couchdb3.sync.Partition.add_partition_to_doc"><code class="name flex">
@@ -4657,6 +4776,7 @@ view reflects. Default is <code>False</code>.</dd>
 <li><code><a title="couchdb3.sync.database.Database.put_design" href="database.html#couchdb3.sync.database.Database.put_design">put_design</a></code></li>
 <li><code><a title="couchdb3.sync.database.Database.save_index" href="database.html#couchdb3.sync.database.Database.save_index">save_index</a></code></li>
 <li><code><a title="couchdb3.sync.database.Database.security" href="database.html#couchdb3.sync.database.Database.security">security</a></code></li>
+<li><code><a title="couchdb3.sync.database.Database.server" href="database.html#couchdb3.sync.database.Database.server">server</a></code></li>
 <li><code><a title="couchdb3.sync.database.Database.update_security" href="database.html#couchdb3.sync.database.Database.update_security">update_security</a></code></li>
 <li><code><a title="couchdb3.sync.database.Database.url" href="base.html#couchdb3.sync.base.Base.url">url</a></code></li>
 </ul>
@@ -4958,6 +5078,7 @@ view reflects. Default is <code>False</code>.</dd>
             disable_ssl_verification=self.disable_ssl_verification,
             auth_method=self.auth_method,
             session=self.session,
+            _server=self,
         )
         try:
             db._head()
@@ -5786,6 +5907,7 @@ used: <code>3</code>, unless overridden in the <code>cluster config</code>).</dd
         disable_ssl_verification=self.disable_ssl_verification,
         auth_method=self.auth_method,
         session=self.session,
+        _server=self,
     )
     try:
         db._head()
@@ -6590,6 +6712,7 @@ remote node's port (<code>add_node</code>).</dd>
 <li><code><a title="couchdb3.sync.Database.save" href="#couchdb3.sync.Database.save">save</a></code></li>
 <li><code><a title="couchdb3.sync.Database.save_index" href="#couchdb3.sync.Database.save_index">save_index</a></code></li>
 <li><code><a title="couchdb3.sync.Database.security" href="#couchdb3.sync.Database.security">security</a></code></li>
+<li><code><a title="couchdb3.sync.Database.server" href="#couchdb3.sync.Database.server">server</a></code></li>
 <li><code><a title="couchdb3.sync.Database.update_security" href="#couchdb3.sync.Database.update_security">update_security</a></code></li>
 <li><code><a title="couchdb3.sync.Database.view" href="#couchdb3.sync.Database.view">view</a></code></li>
 </ul>
@@ -6604,6 +6727,7 @@ remote node's port (<code>add_node</code>).</dd>
 <li><code><a title="couchdb3.sync.Partition.bulk_get" href="#couchdb3.sync.Partition.bulk_get">bulk_get</a></code></li>
 <li><code><a title="couchdb3.sync.Partition.copy" href="#couchdb3.sync.Partition.copy">copy</a></code></li>
 <li><code><a title="couchdb3.sync.Partition.create" href="#couchdb3.sync.Partition.create">create</a></code></li>
+<li><code><a title="couchdb3.sync.Partition.database" href="#couchdb3.sync.Partition.database">database</a></code></li>
 <li><code><a title="couchdb3.sync.Partition.delete" href="#couchdb3.sync.Partition.delete">delete</a></code></li>
 <li><code><a title="couchdb3.sync.Partition.delete_attachment" href="#couchdb3.sync.Partition.delete_attachment">delete_attachment</a></code></li>
 <li><code><a title="couchdb3.sync.Partition.find" href="#couchdb3.sync.Partition.find">find</a></code></li>
