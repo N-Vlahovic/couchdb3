@@ -5,10 +5,10 @@ import random
 import string
 import unittest
 
-from couchdb3.aio import AsyncDatabase, AsyncPartition, AsyncServer
+from couchdb3.aio import AsyncPartition, AsyncServer
 from couchdb3.document import AttachmentDocument, Document
 from couchdb3.sync import Server
-from couchdb3.utils import MimeTypeEnum, user_name_to_id
+from couchdb3.utils import MimeTypeEnum
 from couchdb3.view import ViewResult, ViewRow
 from tests.credentials import (
     ATTACHMENT_PATH_HTML,
@@ -30,16 +30,12 @@ P_ID: str = "p0"
 VIEW_ID: str = "document-view"
 
 # Sync client for atexit cleanup only
-_SYNC_CLIENT: Server = Server(
-    url=COUCHDB0_URL, user=COUCHDB_USER, password=COUCHDB_PASSWORD
-)
+_SYNC_CLIENT: Server = Server(url=COUCHDB0_URL, user=COUCHDB_USER, password=COUCHDB_PASSWORD)
 
 
 class TestAsyncDatabase(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self):
-        self.server = AsyncServer(
-            url=COUCHDB0_URL, user=COUCHDB_USER, password=COUCHDB_PASSWORD
-        )
+        self.server = AsyncServer(url=COUCHDB0_URL, user=COUCHDB_USER, password=COUCHDB_PASSWORD)
         all_dbs = await self.server.all_dbs()
         if DB_NAME in all_dbs:
             self.db = await self.server.get(DB_NAME)
@@ -48,34 +44,24 @@ class TestAsyncDatabase(unittest.IsolatedAsyncioTestCase):
         if DB_NAME_PARTITIONED in all_dbs:
             self.db_partitioned = await self.server.get(DB_NAME_PARTITIONED)
         else:
-            self.db_partitioned = await self.server.create(
-                DB_NAME_PARTITIONED, partitioned=True
-            )
+            self.db_partitioned = await self.server.create(DB_NAME_PARTITIONED, partitioned=True)
 
     async def asyncTearDown(self):
         await self.server.aclose()
 
     async def test_all_docs(self):
-        docs = [
-            {"_id": f"test-async-all-docs-{i}", "name": f"Document {i}"}
-            for i in range(5)
-        ]
+        docs = [{"_id": f"test-async-all-docs-{i}", "name": f"Document {i}"} for i in range(5)]
         await self.db.bulk_docs(docs=docs)
         result = await self.db.all_docs(keys=[d["_id"] for d in docs])
         self.assertIsInstance(result, ViewResult)
         self.assertEqual(len(result.rows), 5)
-        result = await self.db.all_docs(
-            keys=[d["_id"] for d in docs], include_docs=True
-        )
+        result = await self.db.all_docs(keys=[d["_id"] for d in docs], include_docs=True)
         for row in result.rows:
             self.assertIsInstance(row, ViewRow)
             self.assertIsInstance(row.doc, Document)
 
     async def test_bulk_docs(self):
-        docs = [
-            {"_id": f"test-async-bulk-{i}", "name": f"Document {i}"}
-            for i in range(5)
-        ]
+        docs = [{"_id": f"test-async-bulk-{i}", "name": f"Document {i}"} for i in range(5)]
         results = await self.db.bulk_docs(docs=docs)
         self.assertIsInstance(results, list)
         for doc, res in zip(docs, results):
@@ -84,14 +70,9 @@ class TestAsyncDatabase(unittest.IsolatedAsyncioTestCase):
             self.assertTrue(res["ok"])
 
     async def test_bulk_get(self):
-        docs = [
-            {"_id": f"test-async-bulk-get-{i}", "name": f"Document {i}"}
-            for i in range(5)
-        ]
+        docs = [{"_id": f"test-async-bulk-get-{i}", "name": f"Document {i}"} for i in range(5)]
         await self.db.bulk_docs(docs=docs)
-        results = await self.db.bulk_get(
-            docs=[{"id": d["_id"]} for d in docs]
-        )
+        results = await self.db.bulk_get(docs=[{"id": d["_id"]} for d in docs])
         self.assertIsInstance(results, list)
         for res in results:
             self.assertIn("id", res)
@@ -128,24 +109,13 @@ class TestAsyncDatabase(unittest.IsolatedAsyncioTestCase):
             rev=rev,
         )
         rev = await self.db.rev(docid)
-        self.assertTrue(
-            await self.db.delete_attachment(
-                docid=docid, attname=attname, rev=rev
-            )
-        )
+        self.assertTrue(await self.db.delete_attachment(docid=docid, attname=attname, rev=rev))
 
     async def test_find(self):
-        await self.db.save_index(
-            index={"fields": ["type"]}, name="async-type-idx"
-        )
-        docs = [
-            {"_id": f"test-async-find-{i}", "type": "async-find-test"}
-            for i in range(3)
-        ]
+        await self.db.save_index(index={"fields": ["type"]}, name="async-type-idx")
+        docs = [{"_id": f"test-async-find-{i}", "type": "async-find-test"} for i in range(3)]
         await self.db.bulk_docs(docs=docs)
-        result = await self.db.find(
-            {"type": {"$eq": "async-find-test"}}, fields=["_id", "type"]
-        )
+        result = await self.db.find({"type": {"$eq": "async-find-test"}}, fields=["_id", "type"])
         self.assertIn("docs", result)
         self.assertIsInstance(result["docs"], list)
 
@@ -236,6 +206,7 @@ class TestAsyncDatabase(unittest.IsolatedAsyncioTestCase):
 
     async def test_security(self):
         from couchdb3.document import SecurityDocument
+
         sec = await self.db.security()
         self.assertIsInstance(sec, SecurityDocument)
 
@@ -243,9 +214,7 @@ class TestAsyncDatabase(unittest.IsolatedAsyncioTestCase):
         docid = "test-async-view-doc"
         db = await self.server.get(DB_NAME)
         if not await db.rev(f"_design/{DDOC_ID}"):
-            await db.put_design(
-                DDOC_ID, views={VIEW_ID: {"map": DOCUMENT_VIEW}}
-            )
+            await db.put_design(DDOC_ID, views={VIEW_ID: {"map": DOCUMENT_VIEW}})
         if not await db.rev(docid):
             await db.save({"_id": docid, "type": "document"})
         result = await db.view(DDOC_ID, VIEW_ID)
@@ -254,9 +223,7 @@ class TestAsyncDatabase(unittest.IsolatedAsyncioTestCase):
 
 class TestAsyncPartition(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self):
-        self.server = AsyncServer(
-            url=COUCHDB0_URL, user=COUCHDB_USER, password=COUCHDB_PASSWORD
-        )
+        self.server = AsyncServer(url=COUCHDB0_URL, user=COUCHDB_USER, password=COUCHDB_PASSWORD)
         all_dbs = await self.server.all_dbs()
         if DB_NAME_PARTITIONED not in all_dbs:
             await self.server.create(DB_NAME_PARTITIONED, partitioned=True)

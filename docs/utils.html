@@ -148,9 +148,7 @@ el.replaceWith(d);
     -------
     str : A string containing the keyword-args encoded as URL query-params.
     &#34;&#34;&#34;
-    return parse.urlencode(
-        {key: _handler(val) for key, val in kwargs.items() if val is not None}
-    )</code></pre>
+    return parse.urlencode({key: _handler(val) for key, val in kwargs.items() if val is not None})</code></pre>
 </details>
 <div class="desc"><h2 id="parameters">Parameters</h2>
 <dl>
@@ -161,7 +159,7 @@ el.replaceWith(d);
 <p>str : A string containing the keyword-args encoded as URL query-params.</p></div>
 </dd>
 <dt id="couchdb3.utils.build_url"><code class="name flex">
-<span>def <span class="ident">build_url</span></span>(<span>*, scheme: str, host: str, path: str = None, port: int = None, **kwargs) ‑> str</span>
+<span>def <span class="ident">build_url</span></span>(<span>*, scheme: str, host: str, path: str | None = None, port: int | None = None, **kwargs) ‑> str</span>
 </code></dt>
 <dd>
 <details class="source">
@@ -172,8 +170,8 @@ el.replaceWith(d);
     *,
     scheme: str,
     host: str,
-    path: str = None,
-    port: int = None,
+    path: str | None = None,
+    port: int | None = None,
     **kwargs,
 ) -&gt; str:
     &#34;&#34;&#34;
@@ -258,14 +256,14 @@ el.replaceWith(d);
         TimeoutError,
         httpx.ConnectError,
         httpx.HTTPStatusError,
-    ) as err:
+    ):
         if response.status_code in exceptions.STATUS_CODE_ERROR_MAPPING:
             _ = exceptions.STATUS_CODE_ERROR_MAPPING[response.status_code]
             if _:
                 raise _(response.text)
             else:
                 return
-        raise err</code></pre>
+        raise</code></pre>
 </details>
 <div class="desc"><p>Check if a request yields a successful response.</p>
 <h2 id="parameters">Parameters</h2>

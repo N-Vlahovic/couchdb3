@@ -25,9 +25,7 @@ from tests.credentials import (
 )
 
 
-def get_or_create_db(
-    db_name: str, client: Server, partitioned: bool = False
-) -> Database:
+def get_or_create_db(db_name: str, client: Server, partitioned: bool = False) -> Database:
     return (
         client.get(db_name)
         if db_name in client
@@ -59,7 +57,7 @@ class TestDatabase(unittest.TestCase):
         result = DB.all_docs(keys=[_["_id"] for _ in docs][:5])
         self.assertIsInstance(result, ViewResult)
         self.assertListEqual([_["_id"] for _ in docs][:5], [_.id for _ in result.rows])
-        result = DB.all_docs(keys=map(lambda _: _["_id"], docs), include_docs=True)
+        result = DB.all_docs(keys=(_["_id"] for _ in docs), include_docs=True)
         for _ in result.rows:
             self.assertIsInstance(_, ViewRow)
             self.assertTrue(_.doc)
@@ -196,8 +194,8 @@ class TestDatabase(unittest.TestCase):
         DB.create(doc)
         dbdoc = DB[docid]
         self.assertIsInstance(dbdoc, Document)
-        for key in doc:
-            self.assertEqual(doc[key], dbdoc[key])
+        for key, value in doc.items():
+            self.assertEqual(value, dbdoc[key])
 
     def test_delete_attachment(self):
         docid = "test-doc-delete-attachment"
@@ -215,9 +213,7 @@ class TestDatabase(unittest.TestCase):
                 content_type=content_type,
                 rev=DB.rev(docid),
             )
-            self.assertTrue(
-                DB.delete_attachment(docid=docid, attname=attname, rev=result[2])
-            )
+            self.assertTrue(DB.delete_attachment(docid=docid, attname=attname, rev=result[2]))
 
     def test_attachment_via_path(self):
         docid = self.test_attachment_via_path.__name__.replace("_", "-")
@@ -230,9 +226,7 @@ class TestDatabase(unittest.TestCase):
             ("test.zip", ATTACHMENT_PATH_ZIP),
             ("test.pdf", ATTACHMENT_PATH_PDF),
         ]:
-            DB.put_attachment(
-                docid=docid, attname=attname, path=path, rev=DB.rev(docid)
-            )
+            DB.put_attachment(docid=docid, attname=attname, path=path, rev=DB.rev(docid))
             response = DB.get_attachment(docid=docid, attname=attname)
             self.assertIsInstance(response, AttachmentDocument)
             self.assertIsInstance(response.content, bytes)
@@ -308,9 +302,7 @@ class TestDatabase(unittest.TestCase):
             ("test.txt", ATTACHMENT_PATH_TXT),
             ("test.zip", ATTACHMENT_PATH_ZIP),
         ]:
-            results = DB.put_attachment(
-                docid=docid, attname=attname, path=path, rev=DB.rev(docid)
-            )
+            results = DB.put_attachment(docid=docid, attname=attname, path=path, rev=DB.rev(docid))
             self.assertEqual(results[0], docid)
             self.assertEqual(results[1], True)
             self.assertEqual(results[2], DB.rev(docid))

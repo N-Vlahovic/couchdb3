@@ -187,9 +187,7 @@ re-exported here — import them from <code><a title="couchdb3" href="../index.h
             **kwargs,
         )
 
-    def bulk_docs(
-        self, docs: list[dict | Document], new_edits: bool = True
-    ) -&gt; list[dict]:
+    def bulk_docs(self, docs: list[dict | Document], new_edits: bool = True) -&gt; list[dict]:
         &#34;&#34;&#34;
         The bulk document API allows you to create and update multiple documents at the same time within a single
         request. The basic operation is similar to creating or updating a single document, except that you batch the
@@ -218,9 +216,7 @@ re-exported here — import them from <code><a title="couchdb3" href="../index.h
           - `ok` operation status
           - `rev` the document&#39;s revision
         &#34;&#34;&#34;
-        return self._post(
-            resource=&#34;_bulk_docs&#34;, body={&#34;docs&#34;: docs, &#34;new_edits&#34;: new_edits}
-        ).json()
+        return self._post(resource=&#34;_bulk_docs&#34;, body={&#34;docs&#34;: docs, &#34;new_edits&#34;: new_edits}).json()
 
     def bulk_get(
         self,
@@ -326,9 +322,7 @@ re-exported here — import them from <code><a title="couchdb3" href="../index.h
         ).json()
         return data[&#34;id&#34;], data[&#34;ok&#34;], data[&#34;rev&#34;]
 
-    def create(
-        self, doc: dict | Document, *, batch: bool | None = None
-    ) -&gt; tuple[str, bool, str]:
+    def create(self, doc: dict | Document, *, batch: bool | None = None) -&gt; tuple[str, bool, str]:
         &#34;&#34;&#34;
         Create a new document.
 
@@ -343,9 +337,7 @@ re-exported here — import them from <code><a title="couchdb3" href="../index.h
         -------
         Tuple[str, bool, str] : A tuple consisting of the id, success message &amp; revision.
         &#34;&#34;&#34;
-        data = self._post(
-            body=doc, query_kwargs={&#34;batch&#34;: &#34;ok&#34; if batch is True else None}
-        ).json()
+        data = self._post(body=doc, query_kwargs={&#34;batch&#34;: &#34;ok&#34; if batch is True else None}).json()
         return data[&#34;id&#34;], data[&#34;ok&#34;], data[&#34;rev&#34;]
 
     def delete(self, docid: str, rev: str, *, batch: bool | None = None) -&gt; bool:
@@ -371,9 +363,7 @@ re-exported here — import them from <code><a title="couchdb3" href="../index.h
         )
         return True
 
-    def delete_attachment(
-        self, docid: str, attname: str, rev: str, *, batch: bool = False
-    ) -&gt; bool:
+    def delete_attachment(self, docid: str, attname: str, rev: str, *, batch: bool = False) -&gt; bool:
         &#34;&#34;&#34;
         Delete an attachment.
 
@@ -693,9 +683,9 @@ re-exported here — import them from <code><a title="couchdb3" href="../index.h
                     },
                 ).json()
             )
-        except (CouchDBError, httpx.RequestError) as error:
+        except (CouchDBError, httpx.RequestError):
             if check:
-                raise error
+                raise
             return default_value
 
     def get_attachment(
@@ -809,9 +799,7 @@ re-exported here — import them from <code><a title="couchdb3" href="../index.h
                 &#39;Precisely one of the arguments &#34;attdata&#34; and  &#34;attloc&#34; must be provided.&#39;
             )
         if content and not content_type:
-            raise ValueError(
-                &#39;Argument &#34;content_type&#34; cannot be empty when &#34;content&#34; is provided.&#39;
-            )
+            raise ValueError(&#39;Argument &#34;content_type&#34; cannot be empty when &#34;content&#34; is provided.&#39;)
         resource = f&#34;{docid}/{attname}&#34;
         query_kwargs = {&#34;rev&#34;: rev}
         content_type = content_type if content_type else mimetypes.guess_type(path)[0]
@@ -885,7 +873,7 @@ re-exported here — import them from <code><a title="couchdb3" href="../index.h
         ... })
         &#34;&#34;&#34;
         if partitioned:
-            options = (options or dict()).update({&#34;partitioned&#34;: partitioned})
+            options = (options or {}).update({&#34;partitioned&#34;: partitioned})
         return self.save(
             doc=rm_nones_from_dict(
                 {
@@ -936,7 +924,7 @@ re-exported here — import them from <code><a title="couchdb3" href="../index.h
         &#34;&#34;&#34;
         batch = &#34;ok&#34; if batch else None
         data = self._put(
-            resource=&#34;%s/%s&#34; % (path, doc.get(&#34;_id&#34;)) if path else doc.get(&#34;_id&#34;),
+            resource=&#34;{}/{}&#34;.format(path, doc.get(&#34;_id&#34;)) if path else doc.get(&#34;_id&#34;),
             body=doc,
             query_kwargs={
                 &#34;batch&#34;: &#34;ok&#34; if batch else None,
@@ -1039,9 +1027,9 @@ re-exported here — import them from <code><a title="couchdb3" href="../index.h
         -------
         bool :  Operation status.
         &#34;&#34;&#34;
-        return self._put(
-            resource=&#34;_security&#34;, body={&#34;admins&#34;: admins, &#34;members&#34;: members}
-        ).json()[&#34;ok&#34;]
+        return self._put(resource=&#34;_security&#34;, body={&#34;admins&#34;: admins, &#34;members&#34;: members}).json()[
+            &#34;ok&#34;
+        ]
 
     def view(
         self,
@@ -1331,9 +1319,7 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def bulk_docs(
-    self, docs: list[dict | Document], new_edits: bool = True
-) -&gt; list[dict]:
+<pre><code class="python">def bulk_docs(self, docs: list[dict | Document], new_edits: bool = True) -&gt; list[dict]:
     &#34;&#34;&#34;
     The bulk document API allows you to create and update multiple documents at the same time within a single
     request. The basic operation is similar to creating or updating a single document, except that you batch the
@@ -1362,9 +1348,7 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
       - `ok` operation status
       - `rev` the document&#39;s revision
     &#34;&#34;&#34;
-    return self._post(
-        resource=&#34;_bulk_docs&#34;, body={&#34;docs&#34;: docs, &#34;new_edits&#34;: new_edits}
-    ).json()</code></pre>
+    return self._post(resource=&#34;_bulk_docs&#34;, body={&#34;docs&#34;: docs, &#34;new_edits&#34;: new_edits}).json()</code></pre>
 </details>
 <div class="desc"><p>The bulk document API allows you to create and update multiple documents at the same time within a single
 request. The basic operation is similar to creating or updating a single document, except that you batch the
@@ -1578,9 +1562,7 @@ database. For more info, please refer to
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def create(
-    self, doc: dict | Document, *, batch: bool | None = None
-) -&gt; tuple[str, bool, str]:
+<pre><code class="python">def create(self, doc: dict | Document, *, batch: bool | None = None) -&gt; tuple[str, bool, str]:
     &#34;&#34;&#34;
     Create a new document.
 
@@ -1595,9 +1577,7 @@ database. For more info, please refer to
     -------
     Tuple[str, bool, str] : A tuple consisting of the id, success message &amp; revision.
     &#34;&#34;&#34;
-    data = self._post(
-        body=doc, query_kwargs={&#34;batch&#34;: &#34;ok&#34; if batch is True else None}
-    ).json()
+    data = self._post(body=doc, query_kwargs={&#34;batch&#34;: &#34;ok&#34; if batch is True else None}).json()
     return data[&#34;id&#34;], data[&#34;ok&#34;], data[&#34;rev&#34;]</code></pre>
 </details>
 <div class="desc"><p>Create a new document.</p>
@@ -1663,9 +1643,7 @@ database. For more info, please refer to
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def delete_attachment(
-    self, docid: str, attname: str, rev: str, *, batch: bool = False
-) -&gt; bool:
+<pre><code class="python">def delete_attachment(self, docid: str, attname: str, rev: str, *, batch: bool = False) -&gt; bool:
     &#34;&#34;&#34;
     Delete an attachment.
 
@@ -2120,9 +2098,9 @@ the query response. Default is <code>False</code>.</dd>
                 },
             ).json()
         )
-    except (CouchDBError, httpx.RequestError) as error:
+    except (CouchDBError, httpx.RequestError):
         if check:
-            raise error
+            raise
         return default_value</code></pre>
 </details>
 <div class="desc"><p>Get a document by id.</p>
@@ -2421,9 +2399,7 @@ marked as <code>_deleted=true</code> as opposed to being completely purged. For 
             &#39;Precisely one of the arguments &#34;attdata&#34; and  &#34;attloc&#34; must be provided.&#39;
         )
     if content and not content_type:
-        raise ValueError(
-            &#39;Argument &#34;content_type&#34; cannot be empty when &#34;content&#34; is provided.&#39;
-        )
+        raise ValueError(&#39;Argument &#34;content_type&#34; cannot be empty when &#34;content&#34; is provided.&#39;)
     resource = f&#34;{docid}/{attname}&#34;
     query_kwargs = {&#34;rev&#34;: rev}
     content_type = content_type if content_type else mimetypes.guess_type(path)[0]
@@ -2532,7 +2508,7 @@ Must be provided when passing the <code>content</code> argument.</dd>
     ... })
     &#34;&#34;&#34;
     if partitioned:
-        options = (options or dict()).update({&#34;partitioned&#34;: partitioned})
+        options = (options or {}).update({&#34;partitioned&#34;: partitioned})
     return self.save(
         doc=rm_nones_from_dict(
             {
@@ -2630,7 +2606,7 @@ design document functions.</dd>
     &#34;&#34;&#34;
     batch = &#34;ok&#34; if batch else None
     data = self._put(
-        resource=&#34;%s/%s&#34; % (path, doc.get(&#34;_id&#34;)) if path else doc.get(&#34;_id&#34;),
+        resource=&#34;{}/{}&#34;.format(path, doc.get(&#34;_id&#34;)) if path else doc.get(&#34;_id&#34;),
         body=doc,
         query_kwargs={
             &#34;batch&#34;: &#34;ok&#34; if batch else None,
@@ -2816,9 +2792,9 @@ database, an error occurs.</dd>
     -------
     bool :  Operation status.
     &#34;&#34;&#34;
-    return self._put(
-        resource=&#34;_security&#34;, body={&#34;admins&#34;: admins, &#34;members&#34;: members}
-    ).json()[&#34;ok&#34;]</code></pre>
+    return self._put(resource=&#34;_security&#34;, body={&#34;admins&#34;: admins, &#34;members&#34;: members}).json()[
+        &#34;ok&#34;
+    ]</code></pre>
 </details>
 <div class="desc"><p>Update database security.</p>
 <h2 id="parameters">Parameters</h2>
@@ -3169,7 +3145,7 @@ ViewResult: {
     def __repr__(self) -&gt; str:
         return f&#34;{super().__repr__()}/{self.partition_id}&#34;
 
-    def all_docs(self, keys: Iterable[str] = None, **kwargs) -&gt; ViewResult:
+    def all_docs(self, keys: Iterable[str] | None = None, **kwargs) -&gt; ViewResult:
         &#34;&#34;&#34;
         Executes the built-in _all_docs view, returning all the documents in the partition.
 
@@ -3184,9 +3160,7 @@ ViewResult: {
         -------
         ViewResult
         &#34;&#34;&#34;
-        return super().all_docs(
-            partition=self.partition_id, keys=keys, **kwargs
-        )
+        return super().all_docs(partition=self.partition_id, keys=keys, **kwargs)
 
     # noinspection PyMethodOverriding
     def info(
@@ -3361,9 +3335,7 @@ ViewResult: {
             update_seq=update_seq,
         )
 
-    def bulk_docs(
-        self, docs: list[dict | Document], new_edits: bool = True
-    ) -&gt; list[dict]:
+    def bulk_docs(self, docs: list[dict | Document], new_edits: bool = True) -&gt; list[dict]:
         &#34;&#34;&#34;
         See `Database.bulk_docs`.
 
@@ -3673,14 +3645,14 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
 <div class="desc"><p>Append the instance's partition ID to a string.</p></div>
 </dd>
 <dt id="couchdb3.sync.Partition.all_docs"><code class="name flex">
-<span>def <span class="ident">all_docs</span></span>(<span>self, keys: Iterable[str] = None, **kwargs) ‑> <a title="couchdb3.view.ViewResult" href="../view.html#couchdb3.view.ViewResult">ViewResult</a></span>
+<span>def <span class="ident">all_docs</span></span>(<span>self, keys: Iterable[str] | None = None, **kwargs) ‑> <a title="couchdb3.view.ViewResult" href="../view.html#couchdb3.view.ViewResult">ViewResult</a></span>
 </code></dt>
 <dd>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def all_docs(self, keys: Iterable[str] = None, **kwargs) -&gt; ViewResult:
+<pre><code class="python">def all_docs(self, keys: Iterable[str] | None = None, **kwargs) -&gt; ViewResult:
     &#34;&#34;&#34;
     Executes the built-in _all_docs view, returning all the documents in the partition.
 
@@ -3695,9 +3667,7 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
     -------
     ViewResult
     &#34;&#34;&#34;
-    return super().all_docs(
-        partition=self.partition_id, keys=keys, **kwargs
-    )</code></pre>
+    return super().all_docs(partition=self.partition_id, keys=keys, **kwargs)</code></pre>
 </details>
 <div class="desc"><p>Executes the built-in _all_docs view, returning all the documents in the partition.</p>
 <h2 id="parameters">Parameters</h2>
@@ -3721,9 +3691,7 @@ self-signed TLS certificates. Default <code>False</code>.</dd>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def bulk_docs(
-    self, docs: list[dict | Document], new_edits: bool = True
-) -&gt; list[dict]:
+<pre><code class="python">def bulk_docs(self, docs: list[dict | Document], new_edits: bool = True) -&gt; list[dict]:
     &#34;&#34;&#34;
     See `Database.bulk_docs`.
 
@@ -4605,9 +4573,7 @@ view reflects. Default is <code>False</code>.</dd>
         -------
         couchdb3.sync.Database
         &#34;&#34;&#34;
-        self._put(
-            resource=name, query_kwargs={&#34;q&#34;: q, &#34;n&#34;: n, &#34;partitioned&#34;: partitioned}
-        )
+        self._put(resource=name, query_kwargs={&#34;q&#34;: q, &#34;n&#34;: n, &#34;partitioned&#34;: partitioned})
         return self.get(name=name)
 
     def dbs_info(self, keys: list[str]) -&gt; list[dict]:
@@ -4652,11 +4618,11 @@ view reflects. Default is <code>False</code>.</dd>
         )
         try:
             db._head()
-        except (NotFoundError, httpx.RequestError) as error:
+        except (NotFoundError, httpx.RequestError):
             if check is True:
-                raise error
-        except CouchDBError as error:
-            raise error
+                raise
+        except CouchDBError:
+            raise
         return db
 
     def delete(self, resource: str | None = None) -&gt; bool:
@@ -4801,9 +4767,9 @@ view reflects. Default is <code>False</code>.</dd>
         try:
             response = self._get(resource=&#34;_up&#34;)
             return &#34;status&#34; in response.json() and response.json()[&#34;status&#34;] == &#34;ok&#34;
-        except Exception as error:
+        except Exception:
             if raise_exception:
-                raise error
+                raise
             return False</code></pre>
 </details>
 <div class="desc"><p>Abstract Couchdb client</p>
@@ -5005,9 +4971,7 @@ request.</p>
     -------
     couchdb3.sync.Database
     &#34;&#34;&#34;
-    self._put(
-        resource=name, query_kwargs={&#34;q&#34;: q, &#34;n&#34;: n, &#34;partitioned&#34;: partitioned}
-    )
+    self._put(resource=name, query_kwargs={&#34;q&#34;: q, &#34;n&#34;: n, &#34;partitioned&#34;: partitioned})
     return self.get(name=name)</code></pre>
 </details>
 <div class="desc"><p>Create a database.</p>
@@ -5130,11 +5094,11 @@ used: <code>3</code>, unless overridden in the <code>cluster config</code>).</dd
     )
     try:
         db._head()
-    except (NotFoundError, httpx.RequestError) as error:
+    except (NotFoundError, httpx.RequestError):
         if check is True:
-            raise error
-    except CouchDBError as error:
-        raise error
+            raise
+    except CouchDBError:
+        raise
     return db</code></pre>
 </details>
 <div class="desc"><p>Get a database by name.</p>
@@ -5478,9 +5442,9 @@ stored.</dd>
     try:
         response = self._get(resource=&#34;_up&#34;)
         return &#34;status&#34; in response.json() and response.json()[&#34;status&#34;] == &#34;ok&#34;
-    except Exception as error:
+    except Exception:
         if raise_exception:
-            raise error
+            raise
         return False</code></pre>
 </details>
 <div class="desc"><p>Check if the server is up.</p>

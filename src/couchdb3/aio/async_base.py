@@ -163,11 +163,7 @@ class AsyncBase:
         """
         try:
             return (
-                next(
-                    _.expires
-                    for _ in self.session.cookies.jar
-                    if _.name == "AuthSession"
-                )
+                next(_.expires for _ in self.session.cookies.jar if _.name == "AuthSession")
                 <= datetime.now(UTC).timestamp()
             )
         except StopIteration:
@@ -516,9 +512,7 @@ class AsyncBase:
         -------
         dict: A dictionary containing the server's or database's info.
         """
-        return (
-            await self._get(resource=f"_partition/{partition}" if partition else None)
-        ).json()
+        return (await self._get(resource=f"_partition/{partition}" if partition else None)).json()
 
     async def rev(self, resource: str) -> str | None:
         """

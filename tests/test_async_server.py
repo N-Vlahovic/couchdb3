@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 
-import asyncio
 import atexit
 import unittest
 
@@ -12,16 +11,12 @@ from tests.credentials import COUCHDB0_URL, COUCHDB_PASSWORD, COUCHDB_USER
 TEST_DB_NAME: str = "test-async-db"
 
 # Sync client for atexit cleanup only
-_SYNC_CLIENT: Server = Server(
-    url=COUCHDB0_URL, user=COUCHDB_USER, password=COUCHDB_PASSWORD
-)
+_SYNC_CLIENT: Server = Server(url=COUCHDB0_URL, user=COUCHDB_USER, password=COUCHDB_PASSWORD)
 
 
 class TestAsyncClient(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self):
-        self.client = AsyncServer(
-            url=COUCHDB0_URL, user=COUCHDB_USER, password=COUCHDB_PASSWORD
-        )
+        self.client = AsyncServer(url=COUCHDB0_URL, user=COUCHDB_USER, password=COUCHDB_PASSWORD)
 
     async def asyncTearDown(self):
         await self.client.aclose()
@@ -45,9 +40,7 @@ class TestAsyncClient(unittest.IsolatedAsyncioTestCase):
 
     async def test_check_user(self):
         self.assertTrue(
-            await self.client.check_user(
-                username=COUCHDB_USER, password=COUCHDB_PASSWORD
-            )
+            await self.client.check_user(username=COUCHDB_USER, password=COUCHDB_PASSWORD)
         )
 
     async def test_create(self):
@@ -96,9 +89,7 @@ class TestAsyncClient(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(result.get("ok"))
 
     async def test_rev(self):
-        self.assertIsInstance(
-            await self.client.rev("_users/_design/_auth"), str
-        )
+        self.assertIsInstance(await self.client.rev("_users/_design/_auth"), str)
         self.assertIsNone(await self.client.rev("_users/test"))
 
     async def test_save_user(self):

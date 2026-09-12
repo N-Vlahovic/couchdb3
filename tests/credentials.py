@@ -39,7 +39,7 @@ env_file_path: str = f"{proj_path}/.env"
 env_file: dict
 if os.path.isfile(env_file_path):
     with open(env_file_path, "r", encoding="utf-8") as _:
-        env_file = {k: v for k, v in map(lambda _: _.strip().split("="), _.readlines())}
+        env_file = {k: v for k, v in (_.strip().split("=") for _ in _)}
 else:
     env_file = {}
 

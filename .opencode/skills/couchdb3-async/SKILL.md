@@ -127,6 +127,7 @@ Use `unittest.IsolatedAsyncioTestCase`:
 import unittest
 from couchdb3 import AsyncServer
 
+
 class TestAsyncServer(unittest.IsolatedAsyncioTestCase):
     async def test_up(self):
         async with AsyncServer("http://user:pass@127.0.0.1:59840") as client:

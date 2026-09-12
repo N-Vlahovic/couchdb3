@@ -124,9 +124,7 @@ el.replaceWith(d);
             self._owns_session = True
         self._user = user
         self._password = password
-        self._auth = (
-            httpx.BasicAuth(user, password) if user and password else None
-        )
+        self._auth = httpx.BasicAuth(user, password) if user and password else None
         self.auth_method = auth_method
         self.timeout = timeout
 
@@ -519,11 +517,7 @@ el.replaceWith(d);
             # httpx.Client.cookies.jar yields http.cookiejar.Cookie objects which
             # carry the .name and .expires attributes we need.
             return (
-                next(
-                    _.expires
-                    for _ in self.session.cookies.jar
-                    if _.name == &#34;AuthSession&#34;
-                )
+                next(_.expires for _ in self.session.cookies.jar if _.name == &#34;AuthSession&#34;)
                 &lt;= datetime.now(UTC).timestamp()
             )
         except StopIteration:
@@ -575,9 +569,7 @@ el.replaceWith(d);
         -------
         Dict: A dictionary containing the server&#39;s or database&#39;s info.
         &#34;&#34;&#34;
-        return self._get(
-            resource=f&#34;_partition/{partition}&#34; if partition else None
-        ).json()
+        return self._get(resource=f&#34;_partition/{partition}&#34; if partition else None).json()
 
     def rev(self, resource: str) -&gt; str | None:
         &#34;&#34;&#34;
@@ -730,9 +722,7 @@ def url(self) -&gt; str:
     -------
     Dict: A dictionary containing the server&#39;s or database&#39;s info.
     &#34;&#34;&#34;
-    return self._get(
-        resource=f&#34;_partition/{partition}&#34; if partition else None
-    ).json()</code></pre>
+    return self._get(resource=f&#34;_partition/{partition}&#34; if partition else None).json()</code></pre>
 </details>
 <div class="desc"><p>Return a server's or database's info by sending a <code>GET</code> request to <code>/self.root</code>.</p>
 <h2 id="parameters">Parameters</h2>

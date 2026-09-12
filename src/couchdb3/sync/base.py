@@ -79,9 +79,7 @@ class Base:
             self._owns_session = True
         self._user = user
         self._password = password
-        self._auth = (
-            httpx.BasicAuth(user, password) if user and password else None
-        )
+        self._auth = httpx.BasicAuth(user, password) if user and password else None
         self.auth_method = auth_method
         self.timeout = timeout
 
@@ -474,11 +472,7 @@ class Base:
             # httpx.Client.cookies.jar yields http.cookiejar.Cookie objects which
             # carry the .name and .expires attributes we need.
             return (
-                next(
-                    _.expires
-                    for _ in self.session.cookies.jar
-                    if _.name == "AuthSession"
-                )
+                next(_.expires for _ in self.session.cookies.jar if _.name == "AuthSession")
                 <= datetime.now(UTC).timestamp()
             )
         except StopIteration:
@@ -530,9 +524,7 @@ class Base:
         -------
         Dict: A dictionary containing the server's or database's info.
         """
-        return self._get(
-            resource=f"_partition/{partition}" if partition else None
-        ).json()
+        return self._get(resource=f"_partition/{partition}" if partition else None).json()
 
     def rev(self, resource: str) -> str | None:
         """
@@ -557,6 +549,3 @@ class Base:
         except exceptions.NotFoundError:
             pass
         return rev
-
-
-

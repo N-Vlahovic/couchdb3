@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 __all__ = [
-    "DictBase",
     "AttachmentDocument",
+    "DictBase",
     "Document",
     "SecurityDocument",
     "SecurityDocumentElement",

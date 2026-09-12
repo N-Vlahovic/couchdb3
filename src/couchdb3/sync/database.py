@@ -7,7 +7,6 @@ from typing import Any
 
 import httpx
 
-from .base import Base
 from ..document import (
     AttachmentDocument,
     Document,
@@ -23,6 +22,7 @@ from ..utils import (
     validate_db_name,
 )
 from ..view import ViewResult
+from .base import Base
 
 __all__ = [
     "Database",
@@ -142,9 +142,7 @@ class Database(Base):
             **kwargs,
         )
 
-    def bulk_docs(
-        self, docs: list[dict | Document], new_edits: bool = True
-    ) -> list[dict]:
+    def bulk_docs(self, docs: list[dict | Document], new_edits: bool = True) -> list[dict]:
         """
         The bulk document API allows you to create and update multiple documents at the same time within a single
         request. The basic operation is similar to creating or updating a single document, except that you batch the
@@ -173,9 +171,7 @@ class Database(Base):
           - `ok` operation status
           - `rev` the document's revision
         """
-        return self._post(
-            resource="_bulk_docs", body={"docs": docs, "new_edits": new_edits}
-        ).json()
+        return self._post(resource="_bulk_docs", body={"docs": docs, "new_edits": new_edits}).json()
 
     def bulk_get(
         self,
@@ -281,9 +277,7 @@ class Database(Base):
         ).json()
         return data["id"], data["ok"], data["rev"]
 
-    def create(
-        self, doc: dict | Document, *, batch: bool | None = None
-    ) -> tuple[str, bool, str]:
+    def create(self, doc: dict | Document, *, batch: bool | None = None) -> tuple[str, bool, str]:
         """
         Create a new document.
 
@@ -298,9 +292,7 @@ class Database(Base):
         -------
         Tuple[str, bool, str] : A tuple consisting of the id, success message & revision.
         """
-        data = self._post(
-            body=doc, query_kwargs={"batch": "ok" if batch is True else None}
-        ).json()
+        data = self._post(body=doc, query_kwargs={"batch": "ok" if batch is True else None}).json()
         return data["id"], data["ok"], data["rev"]
 
     def delete(self, docid: str, rev: str, *, batch: bool | None = None) -> bool:
@@ -326,9 +318,7 @@ class Database(Base):
         )
         return True
 
-    def delete_attachment(
-        self, docid: str, attname: str, rev: str, *, batch: bool = False
-    ) -> bool:
+    def delete_attachment(self, docid: str, attname: str, rev: str, *, batch: bool = False) -> bool:
         """
         Delete an attachment.
 
@@ -648,9 +638,9 @@ class Database(Base):
                     },
                 ).json()
             )
-        except (CouchDBError, httpx.RequestError) as error:
+        except (CouchDBError, httpx.RequestError):
             if check:
-                raise error
+                raise
             return default_value
 
     def get_attachment(
@@ -764,9 +754,7 @@ class Database(Base):
                 'Precisely one of the arguments "attdata" and  "attloc" must be provided.'
             )
         if content and not content_type:
-            raise ValueError(
-                'Argument "content_type" cannot be empty when "content" is provided.'
-            )
+            raise ValueError('Argument "content_type" cannot be empty when "content" is provided.')
         resource = f"{docid}/{attname}"
         query_kwargs = {"rev": rev}
         content_type = content_type if content_type else mimetypes.guess_type(path)[0]
@@ -840,7 +828,7 @@ class Database(Base):
         ... })
         """
         if partitioned:
-            options = (options or dict()).update({"partitioned": partitioned})
+            options = (options or {}).update({"partitioned": partitioned})
         return self.save(
             doc=rm_nones_from_dict(
                 {
@@ -891,7 +879,7 @@ class Database(Base):
         """
         batch = "ok" if batch else None
         data = self._put(
-            resource="%s/%s" % (path, doc.get("_id")) if path else doc.get("_id"),
+            resource="{}/{}".format(path, doc.get("_id")) if path else doc.get("_id"),
             body=doc,
             query_kwargs={
                 "batch": "ok" if batch else None,
@@ -994,9 +982,9 @@ class Database(Base):
         -------
         bool :  Operation status.
         """
-        return self._put(
-            resource="_security", body={"admins": admins, "members": members}
-        ).json()["ok"]
+        return self._put(resource="_security", body={"admins": admins, "members": members}).json()[
+            "ok"
+        ]
 
     def view(
         self,
@@ -1239,7 +1227,7 @@ class Partition(Database):
     def __repr__(self) -> str:
         return f"{super().__repr__()}/{self.partition_id}"
 
-    def all_docs(self, keys: Iterable[str] = None, **kwargs) -> ViewResult:
+    def all_docs(self, keys: Iterable[str] | None = None, **kwargs) -> ViewResult:
         """
         Executes the built-in _all_docs view, returning all the documents in the partition.
 
@@ -1254,9 +1242,7 @@ class Partition(Database):
         -------
         ViewResult
         """
-        return super().all_docs(
-            partition=self.partition_id, keys=keys, **kwargs
-        )
+        return super().all_docs(partition=self.partition_id, keys=keys, **kwargs)
 
     # noinspection PyMethodOverriding
     def info(
@@ -1431,9 +1417,7 @@ class Partition(Database):
             update_seq=update_seq,
         )
 
-    def bulk_docs(
-        self, docs: list[dict | Document], new_edits: bool = True
-    ) -> list[dict]:
+    def bulk_docs(self, docs: list[dict | Document], new_edits: bool = True) -> list[dict]:
         """
         See `Database.bulk_docs`.
 

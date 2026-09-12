@@ -29,9 +29,7 @@ class TestClient(unittest.TestCase):
             self.assertIsInstance(_, str)
 
     def test_check_user(self):
-        self.assertTrue(
-            CLIENT.check_user(username=COUCHDB_USER, password=COUCHDB_PASSWORD)
-        )
+        self.assertTrue(CLIENT.check_user(username=COUCHDB_USER, password=COUCHDB_PASSWORD))
 
     def test_create(self):
         db = CLIENT.create(name=TEST_DB_NAME, partitioned=True)
@@ -80,9 +78,7 @@ class TestClient(unittest.TestCase):
 
     def test_save_user(self):
         user_id = "org.couchdb.user:john"
-        ok, _id, _rev = CLIENT.save_user(
-            user_id=user_id, name="john", password="secret123"
-        )
+        ok, _id, _rev = CLIENT.save_user(user_id=user_id, name="john", password="secret123")
         self.assertEqual(ok, True)
         self.assertEqual(_id, user_id)
         self.assertIsInstance(_rev, str)
@@ -92,9 +88,7 @@ class TestClient(unittest.TestCase):
         self.assertFalse(Server("http://admin:secret@localhost:1234").up())
 
     def test_with_context(self):
-        with Server(
-            url=COUCHDB0_URL, user=COUCHDB_USER, password=COUCHDB_PASSWORD
-        ) as client:
+        with Server(url=COUCHDB0_URL, user=COUCHDB_USER, password=COUCHDB_PASSWORD) as client:
             self.assertIsInstance(client, Server)
 
 

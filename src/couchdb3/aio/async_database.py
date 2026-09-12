@@ -7,7 +7,6 @@ from typing import Any
 
 import httpx
 
-from .async_base import AsyncBase
 from ..document import (
     AttachmentDocument,
     Document,
@@ -23,6 +22,7 @@ from ..utils import (
     validate_db_name,
 )
 from ..view import ViewResult
+from .async_base import AsyncBase
 
 __all__ = [
     "AsyncDatabase",
@@ -159,9 +159,7 @@ class AsyncDatabase(AsyncBase):
         list[dict] : Each item contains `id`, `ok`, and `rev`.
         """
         return (
-            await self._post(
-                resource="_bulk_docs", body={"docs": docs, "new_edits": new_edits}
-            )
+            await self._post(resource="_bulk_docs", body={"docs": docs, "new_edits": new_edits})
         ).json()
 
     async def bulk_get(
@@ -272,15 +270,11 @@ class AsyncDatabase(AsyncBase):
         tuple[str, bool, str] : (id, ok, rev)
         """
         data = (
-            await self._post(
-                body=doc, query_kwargs={"batch": "ok" if batch is True else None}
-            )
+            await self._post(body=doc, query_kwargs={"batch": "ok" if batch is True else None})
         ).json()
         return data["id"], data["ok"], data["rev"]
 
-    async def delete(
-        self, docid: str, rev: str, *, batch: bool | None = None
-    ) -> bool:
+    async def delete(self, docid: str, rev: str, *, batch: bool | None = None) -> bool:
         """
         Delete a document.
 
@@ -571,9 +565,9 @@ class AsyncDatabase(AsyncBase):
                     )
                 ).json()
             )
-        except (CouchDBError, httpx.RequestError) as error:
+        except (CouchDBError, httpx.RequestError):
             if check:
-                raise error
+                raise
             return default_value
 
     async def get_attachment(
@@ -678,9 +672,7 @@ class AsyncDatabase(AsyncBase):
                 'Precisely one of the arguments "content" and "path" must be provided.'
             )
         if content and not content_type:
-            raise ValueError(
-                'Argument "content_type" cannot be empty when "content" is provided.'
-            )
+            raise ValueError('Argument "content_type" cannot be empty when "content" is provided.')
         resource = f"{docid}/{attname}"
         query_kwargs = {"rev": rev}
         content_type = content_type if content_type else mimetypes.guess_type(path)[0]
@@ -876,9 +868,7 @@ class AsyncDatabase(AsyncBase):
         bool : Operation status.
         """
         return (
-            await self._put(
-                resource="_security", body={"admins": admins, "members": members}
-            )
+            await self._put(resource="_security", body={"admins": admins, "members": members})
         ).json()["ok"]
 
     async def view(
@@ -1089,9 +1079,7 @@ class AsyncPartition(AsyncDatabase):
     def __repr__(self) -> str:
         return f"{super().__repr__()}/{self.partition_id}"
 
-    async def all_docs(
-        self, keys: Iterable[str] | None = None, **kwargs
-    ) -> ViewResult:
+    async def all_docs(self, keys: Iterable[str] | None = None, **kwargs) -> ViewResult:
         """
         Executes the built-in _all_docs view, returning all documents in the partition.
 
@@ -1106,9 +1094,7 @@ class AsyncPartition(AsyncDatabase):
         -------
         ViewResult
         """
-        return await super().all_docs(
-            partition=self.partition_id, keys=keys, **kwargs
-        )
+        return await super().all_docs(partition=self.partition_id, keys=keys, **kwargs)
 
     async def info(self) -> dict:
         """
@@ -1211,18 +1197,14 @@ class AsyncPartition(AsyncDatabase):
             update_seq=update_seq,
         )
 
-    async def bulk_docs(
-        self, docs: list[dict | Document], new_edits: bool = True
-    ) -> list[dict]:
+    async def bulk_docs(self, docs: list[dict | Document], new_edits: bool = True) -> list[dict]:
         """See `AsyncDatabase.bulk_docs`. Prepends partition ID to document IDs."""
         return await super().bulk_docs(
             docs=[self.add_partition_to_doc(doc) for doc in docs],
             new_edits=new_edits,
         )
 
-    async def bulk_get(
-        self, docs: list[dict | Document], revs: bool = False
-    ) -> list[dict]:
+    async def bulk_get(self, docs: list[dict | Document], revs: bool = False) -> list[dict]:
         """See `AsyncDatabase.bulk_get`. Prepends partition ID to document IDs."""
         return await super().bulk_get(
             docs=[self.add_partition_to_doc(doc) for doc in docs],
@@ -1253,9 +1235,7 @@ class AsyncPartition(AsyncDatabase):
             batch=batch,
         )
 
-    async def delete(
-        self, docid: str, rev: str, *, batch: bool | None = None
-    ) -> bool:
+    async def delete(self, docid: str, rev: str, *, batch: bool | None = None) -> bool:
         """See `AsyncDatabase.delete`. Prepends partition ID to document ID."""
         return await super().delete(
             docid=self.add_partition_to_str(docid),

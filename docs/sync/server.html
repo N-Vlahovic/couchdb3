@@ -299,9 +299,7 @@ el.replaceWith(d);
         -------
         couchdb3.sync.Database
         &#34;&#34;&#34;
-        self._put(
-            resource=name, query_kwargs={&#34;q&#34;: q, &#34;n&#34;: n, &#34;partitioned&#34;: partitioned}
-        )
+        self._put(resource=name, query_kwargs={&#34;q&#34;: q, &#34;n&#34;: n, &#34;partitioned&#34;: partitioned})
         return self.get(name=name)
 
     def dbs_info(self, keys: list[str]) -&gt; list[dict]:
@@ -346,11 +344,11 @@ el.replaceWith(d);
         )
         try:
             db._head()
-        except (NotFoundError, httpx.RequestError) as error:
+        except (NotFoundError, httpx.RequestError):
             if check is True:
-                raise error
-        except CouchDBError as error:
-            raise error
+                raise
+        except CouchDBError:
+            raise
         return db
 
     def delete(self, resource: str | None = None) -&gt; bool:
@@ -495,9 +493,9 @@ el.replaceWith(d);
         try:
             response = self._get(resource=&#34;_up&#34;)
             return &#34;status&#34; in response.json() and response.json()[&#34;status&#34;] == &#34;ok&#34;
-        except Exception as error:
+        except Exception:
             if raise_exception:
-                raise error
+                raise
             return False</code></pre>
 </details>
 <div class="desc"><p>Abstract Couchdb client</p>
@@ -699,9 +697,7 @@ request.</p>
     -------
     couchdb3.sync.Database
     &#34;&#34;&#34;
-    self._put(
-        resource=name, query_kwargs={&#34;q&#34;: q, &#34;n&#34;: n, &#34;partitioned&#34;: partitioned}
-    )
+    self._put(resource=name, query_kwargs={&#34;q&#34;: q, &#34;n&#34;: n, &#34;partitioned&#34;: partitioned})
     return self.get(name=name)</code></pre>
 </details>
 <div class="desc"><p>Create a database.</p>
@@ -824,11 +820,11 @@ used: <code>3</code>, unless overridden in the <code>cluster config</code>).</dd
     )
     try:
         db._head()
-    except (NotFoundError, httpx.RequestError) as error:
+    except (NotFoundError, httpx.RequestError):
         if check is True:
-            raise error
-    except CouchDBError as error:
-        raise error
+            raise
+    except CouchDBError:
+        raise
     return db</code></pre>
 </details>
 <div class="desc"><p>Get a database by name.</p>
@@ -1172,9 +1168,9 @@ stored.</dd>
     try:
         response = self._get(resource=&#34;_up&#34;)
         return &#34;status&#34; in response.json() and response.json()[&#34;status&#34;] == &#34;ok&#34;
-    except Exception as error:
+    except Exception:
         if raise_exception:
-            raise error
+            raise
         return False</code></pre>
 </details>
 <div class="desc"><p>Check if the server is up.</p>

@@ -14,9 +14,7 @@ from tests.credentials import (
 CLIENT: Server = Server(COUCHDB0_URL, user=COUCHDB_USER, password=COUCHDB_PASSWORD)
 DB_NAME: str = "tmp-test-partitioned-db"
 DB: Database = (
-    CLIENT.get(DB_NAME)
-    if DB_NAME in CLIENT
-    else CLIENT.create(DB_NAME, partitioned=True)
+    CLIENT.get(DB_NAME) if DB_NAME in CLIENT else CLIENT.create(DB_NAME, partitioned=True)
 )
 
 
