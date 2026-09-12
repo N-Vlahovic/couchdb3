@@ -208,11 +208,7 @@ el.replaceWith(d);
         &#34;&#34;&#34;
         try:
             return (
-                next(
-                    _.expires
-                    for _ in self.session.cookies.jar
-                    if _.name == &#34;AuthSession&#34;
-                )
+                next(_.expires for _ in self.session.cookies.jar if _.name == &#34;AuthSession&#34;)
                 &lt;= datetime.now(UTC).timestamp()
             )
         except StopIteration:
@@ -561,9 +557,7 @@ el.replaceWith(d);
         -------
         dict: A dictionary containing the server&#39;s or database&#39;s info.
         &#34;&#34;&#34;
-        return (
-            await self._get(resource=f&#34;_partition/{partition}&#34; if partition else None)
-        ).json()
+        return (await self._get(resource=f&#34;_partition/{partition}&#34; if partition else None)).json()
 
     async def rev(self, resource: str) -&gt; str | None:
         &#34;&#34;&#34;
@@ -749,9 +743,7 @@ def url(self) -&gt; str:
     -------
     dict: A dictionary containing the server&#39;s or database&#39;s info.
     &#34;&#34;&#34;
-    return (
-        await self._get(resource=f&#34;_partition/{partition}&#34; if partition else None)
-    ).json()</code></pre>
+    return (await self._get(resource=f&#34;_partition/{partition}&#34; if partition else None)).json()</code></pre>
 </details>
 <div class="desc"><p>Return a server's or database's info by sending a <code>GET</code> request to <code>/self.root</code>.</p>
 <h2 id="parameters">Parameters</h2>

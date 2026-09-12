@@ -184,9 +184,7 @@ el.replaceWith(d);
         list[dict] : Each item contains `id`, `ok`, and `rev`.
         &#34;&#34;&#34;
         return (
-            await self._post(
-                resource=&#34;_bulk_docs&#34;, body={&#34;docs&#34;: docs, &#34;new_edits&#34;: new_edits}
-            )
+            await self._post(resource=&#34;_bulk_docs&#34;, body={&#34;docs&#34;: docs, &#34;new_edits&#34;: new_edits})
         ).json()
 
     async def bulk_get(
@@ -297,15 +295,11 @@ el.replaceWith(d);
         tuple[str, bool, str] : (id, ok, rev)
         &#34;&#34;&#34;
         data = (
-            await self._post(
-                body=doc, query_kwargs={&#34;batch&#34;: &#34;ok&#34; if batch is True else None}
-            )
+            await self._post(body=doc, query_kwargs={&#34;batch&#34;: &#34;ok&#34; if batch is True else None})
         ).json()
         return data[&#34;id&#34;], data[&#34;ok&#34;], data[&#34;rev&#34;]
 
-    async def delete(
-        self, docid: str, rev: str, *, batch: bool | None = None
-    ) -&gt; bool:
+    async def delete(self, docid: str, rev: str, *, batch: bool | None = None) -&gt; bool:
         &#34;&#34;&#34;
         Delete a document.
 
@@ -596,9 +590,9 @@ el.replaceWith(d);
                     )
                 ).json()
             )
-        except (CouchDBError, httpx.RequestError) as error:
+        except (CouchDBError, httpx.RequestError):
             if check:
-                raise error
+                raise
             return default_value
 
     async def get_attachment(
@@ -703,9 +697,7 @@ el.replaceWith(d);
                 &#39;Precisely one of the arguments &#34;content&#34; and &#34;path&#34; must be provided.&#39;
             )
         if content and not content_type:
-            raise ValueError(
-                &#39;Argument &#34;content_type&#34; cannot be empty when &#34;content&#34; is provided.&#39;
-            )
+            raise ValueError(&#39;Argument &#34;content_type&#34; cannot be empty when &#34;content&#34; is provided.&#39;)
         resource = f&#34;{docid}/{attname}&#34;
         query_kwargs = {&#34;rev&#34;: rev}
         content_type = content_type if content_type else mimetypes.guess_type(path)[0]
@@ -901,9 +893,7 @@ el.replaceWith(d);
         bool : Operation status.
         &#34;&#34;&#34;
         return (
-            await self._put(
-                resource=&#34;_security&#34;, body={&#34;admins&#34;: admins, &#34;members&#34;: members}
-            )
+            await self._put(resource=&#34;_security&#34;, body={&#34;admins&#34;: admins, &#34;members&#34;: members})
         ).json()[&#34;ok&#34;]
 
     async def view(
@@ -1179,9 +1169,7 @@ Default is <code>None</code>.</dd>
     list[dict] : Each item contains `id`, `ok`, and `rev`.
     &#34;&#34;&#34;
     return (
-        await self._post(
-            resource=&#34;_bulk_docs&#34;, body={&#34;docs&#34;: docs, &#34;new_edits&#34;: new_edits}
-        )
+        await self._post(resource=&#34;_bulk_docs&#34;, body={&#34;docs&#34;: docs, &#34;new_edits&#34;: new_edits})
     ).json()</code></pre>
 </details>
 <div class="desc"><p>Create or update multiple documents in a single request.</p>
@@ -1376,9 +1364,7 @@ Default is <code>None</code>.</dd>
     tuple[str, bool, str] : (id, ok, rev)
     &#34;&#34;&#34;
     data = (
-        await self._post(
-            body=doc, query_kwargs={&#34;batch&#34;: &#34;ok&#34; if batch is True else None}
-        )
+        await self._post(body=doc, query_kwargs={&#34;batch&#34;: &#34;ok&#34; if batch is True else None})
     ).json()
     return data[&#34;id&#34;], data[&#34;ok&#34;], data[&#34;rev&#34;]</code></pre>
 </details>
@@ -1404,9 +1390,7 @@ Default is <code>None</code>.</dd>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">async def delete(
-    self, docid: str, rev: str, *, batch: bool | None = None
-) -&gt; bool:
+<pre><code class="python">async def delete(self, docid: str, rev: str, *, batch: bool | None = None) -&gt; bool:
     &#34;&#34;&#34;
     Delete a document.
 
@@ -1815,9 +1799,9 @@ Default is <code>None</code>.</dd>
                 )
             ).json()
         )
-    except (CouchDBError, httpx.RequestError) as error:
+    except (CouchDBError, httpx.RequestError):
         if check:
-            raise error
+            raise
         return default_value</code></pre>
 </details>
 <div class="desc"><p>Get a document by id.</p>
@@ -2104,9 +2088,7 @@ Default <code>None</code>.</dd>
             &#39;Precisely one of the arguments &#34;content&#34; and &#34;path&#34; must be provided.&#39;
         )
     if content and not content_type:
-        raise ValueError(
-            &#39;Argument &#34;content_type&#34; cannot be empty when &#34;content&#34; is provided.&#39;
-        )
+        raise ValueError(&#39;Argument &#34;content_type&#34; cannot be empty when &#34;content&#34; is provided.&#39;)
     resource = f&#34;{docid}/{attname}&#34;
     query_kwargs = {&#34;rev&#34;: rev}
     content_type = content_type if content_type else mimetypes.guess_type(path)[0]
@@ -2441,9 +2423,7 @@ Default <code>None</code>.</dd>
     bool : Operation status.
     &#34;&#34;&#34;
     return (
-        await self._put(
-            resource=&#34;_security&#34;, body={&#34;admins&#34;: admins, &#34;members&#34;: members}
-        )
+        await self._put(resource=&#34;_security&#34;, body={&#34;admins&#34;: admins, &#34;members&#34;: members})
     ).json()[&#34;ok&#34;]</code></pre>
 </details>
 <div class="desc"><p>Update database security.</p>
@@ -2729,9 +2709,7 @@ Default <code>None</code>.</dd>
     def __repr__(self) -&gt; str:
         return f&#34;{super().__repr__()}/{self.partition_id}&#34;
 
-    async def all_docs(
-        self, keys: Iterable[str] | None = None, **kwargs
-    ) -&gt; ViewResult:
+    async def all_docs(self, keys: Iterable[str] | None = None, **kwargs) -&gt; ViewResult:
         &#34;&#34;&#34;
         Executes the built-in _all_docs view, returning all documents in the partition.
 
@@ -2746,9 +2724,7 @@ Default <code>None</code>.</dd>
         -------
         ViewResult
         &#34;&#34;&#34;
-        return await super().all_docs(
-            partition=self.partition_id, keys=keys, **kwargs
-        )
+        return await super().all_docs(partition=self.partition_id, keys=keys, **kwargs)
 
     async def info(self) -&gt; dict:
         &#34;&#34;&#34;
@@ -2851,18 +2827,14 @@ Default <code>None</code>.</dd>
             update_seq=update_seq,
         )
 
-    async def bulk_docs(
-        self, docs: list[dict | Document], new_edits: bool = True
-    ) -&gt; list[dict]:
+    async def bulk_docs(self, docs: list[dict | Document], new_edits: bool = True) -&gt; list[dict]:
         &#34;&#34;&#34;See `AsyncDatabase.bulk_docs`. Prepends partition ID to document IDs.&#34;&#34;&#34;
         return await super().bulk_docs(
             docs=[self.add_partition_to_doc(doc) for doc in docs],
             new_edits=new_edits,
         )
 
-    async def bulk_get(
-        self, docs: list[dict | Document], revs: bool = False
-    ) -&gt; list[dict]:
+    async def bulk_get(self, docs: list[dict | Document], revs: bool = False) -&gt; list[dict]:
         &#34;&#34;&#34;See `AsyncDatabase.bulk_get`. Prepends partition ID to document IDs.&#34;&#34;&#34;
         return await super().bulk_get(
             docs=[self.add_partition_to_doc(doc) for doc in docs],
@@ -2893,9 +2865,7 @@ Default <code>None</code>.</dd>
             batch=batch,
         )
 
-    async def delete(
-        self, docid: str, rev: str, *, batch: bool | None = None
-    ) -&gt; bool:
+    async def delete(self, docid: str, rev: str, *, batch: bool | None = None) -&gt; bool:
         &#34;&#34;&#34;See `AsyncDatabase.delete`. Prepends partition ID to document ID.&#34;&#34;&#34;
         return await super().delete(
             docid=self.add_partition_to_str(docid),
@@ -3088,9 +3058,7 @@ Default <code>None</code>.</dd>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">async def all_docs(
-    self, keys: Iterable[str] | None = None, **kwargs
-) -&gt; ViewResult:
+<pre><code class="python">async def all_docs(self, keys: Iterable[str] | None = None, **kwargs) -&gt; ViewResult:
     &#34;&#34;&#34;
     Executes the built-in _all_docs view, returning all documents in the partition.
 
@@ -3105,9 +3073,7 @@ Default <code>None</code>.</dd>
     -------
     ViewResult
     &#34;&#34;&#34;
-    return await super().all_docs(
-        partition=self.partition_id, keys=keys, **kwargs
-    )</code></pre>
+    return await super().all_docs(partition=self.partition_id, keys=keys, **kwargs)</code></pre>
 </details>
 <div class="desc"><p>Executes the built-in _all_docs view, returning all documents in the partition.</p>
 <h2 id="parameters">Parameters</h2>
@@ -3131,9 +3097,7 @@ Default <code>None</code>.</dd>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">async def bulk_docs(
-    self, docs: list[dict | Document], new_edits: bool = True
-) -&gt; list[dict]:
+<pre><code class="python">async def bulk_docs(self, docs: list[dict | Document], new_edits: bool = True) -&gt; list[dict]:
     &#34;&#34;&#34;See `AsyncDatabase.bulk_docs`. Prepends partition ID to document IDs.&#34;&#34;&#34;
     return await super().bulk_docs(
         docs=[self.add_partition_to_doc(doc) for doc in docs],
@@ -3150,9 +3114,7 @@ Default <code>None</code>.</dd>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">async def bulk_get(
-    self, docs: list[dict | Document], revs: bool = False
-) -&gt; list[dict]:
+<pre><code class="python">async def bulk_get(self, docs: list[dict | Document], revs: bool = False) -&gt; list[dict]:
     &#34;&#34;&#34;See `AsyncDatabase.bulk_get`. Prepends partition ID to document IDs.&#34;&#34;&#34;
     return await super().bulk_get(
         docs=[self.add_partition_to_doc(doc) for doc in docs],
@@ -3213,9 +3175,7 @@ Default <code>None</code>.</dd>
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">async def delete(
-    self, docid: str, rev: str, *, batch: bool | None = None
-) -&gt; bool:
+<pre><code class="python">async def delete(self, docid: str, rev: str, *, batch: bool | None = None) -&gt; bool:
     &#34;&#34;&#34;See `AsyncDatabase.delete`. Prepends partition ID to document ID.&#34;&#34;&#34;
     return await super().delete(
         docid=self.add_partition_to_str(docid),
