@@ -18,6 +18,7 @@
   - [Fetching documents](#fetching-documents)
   - [Views](#views)
   - [Mango queries](#mango-queries)
+  - [Changes feed](#changes-feed)
   - [Working with partitions](#working-with-partitions)
 - [Async client](#async-client)
   - [Connecting to a database server](#connecting-to-a-database-server-1)
@@ -28,6 +29,7 @@
   - [Fetching documents](#fetching-documents-1)
   - [Views](#views-1)
   - [Mango queries](#mango-queries-1)
+  - [Changes feed](#changes-feed-1)
   - [Controlling concurrency](#controlling-concurrency)
   - [Working with async partitions](#working-with-async-partitions)
 
@@ -215,6 +217,46 @@ for doc in result["docs"]:
 plan = db.explain({"type": {"$eq": "post"}}, limit=10)
 ```
 
+### Changes feed
+
+`Database.changes()` wraps `GET /{db}/_changes` (and `POST /{db}/_changes` when filtering by
+document IDs or a Mango selector).
+
+```python
+# All recent changes (normal feed — returns immediately)
+result = db.changes()
+for row in result["results"]:
+    print(row["id"], row["changes"])
+
+# Only changes since a known sequence
+result = db.changes(since="now")  # wait marker — use last_seq to poll later
+last_seq = result["last_seq"]
+result = db.changes(since=last_seq)  # only changes after that point
+
+# Filter to specific document IDs (POST /_changes?filter=_doc_ids)
+result = db.changes(doc_ids=["doc-1", "doc-2"])
+
+# Filter with a Mango selector (POST /_changes?filter=_selector)
+result = db.changes(selector={"type": {"$eq": "post"}})
+
+# Include the full document body in each result
+result = db.changes(include_docs=True)
+for row in result["results"]:
+    print(row["id"], row.get("doc"))
+
+# Long-poll: server holds the connection open until at least one change arrives
+result = db.changes(feed="longpoll", since="now", timeout=30_000)
+```
+
+> **Note — continuous and eventsource feeds**
+>
+> `feed="continuous"` and `feed="eventsource"` are **not supported** by `changes()` and will
+> raise `ValueError`. These modes stream newline-delimited JSON over a persistent HTTP
+> connection, which requires response-body streaming rather than a single buffered read.
+> Support for streaming feeds will be added in a future `changes_stream()` method.
+> For now, a polling loop over `feed="longpoll"` with `since=last_seq` is a practical
+> alternative for most real-time use cases.
+
 ### Working with partitions
 For a partitioned database, the `couchdb3.sync.Partition` class offers a wrapper around partitions (acting similarly
 to collections in Mongo).
@@ -371,6 +413,45 @@ for doc in result["docs"]:
 # 3. Inspect the query plan
 plan = await db.explain({"type": {"$eq": "post"}}, limit=10)
 ```
+
+### Changes feed
+
+`AsyncDatabase.changes()` mirrors the sync API exactly.
+
+```python
+# All recent changes
+result = await db.changes()
+for row in result["results"]:
+    print(row["id"], row["changes"])
+
+# Only changes since a known sequence
+result = await db.changes(since="now")
+last_seq = result["last_seq"]
+result = await db.changes(since=last_seq)
+
+# Filter to specific document IDs (POST /_changes?filter=_doc_ids)
+result = await db.changes(doc_ids=["doc-1", "doc-2"])
+
+# Filter with a Mango selector (POST /_changes?filter=_selector)
+result = await db.changes(selector={"type": {"$eq": "post"}})
+
+# Include the full document body in each result
+result = await db.changes(include_docs=True)
+for row in result["results"]:
+    print(row["id"], row.get("doc"))
+
+# Long-poll: server holds the connection open until at least one change arrives
+result = await db.changes(feed="longpoll", since="now", timeout=30_000)
+```
+
+> **Note — continuous and eventsource feeds**
+>
+> `feed="continuous"` and `feed="eventsource"` are **not supported** by `changes()` and will
+> raise `ValueError`. These modes stream newline-delimited JSON over a persistent HTTP
+> connection, which requires response-body streaming rather than a single buffered read.
+> Support for streaming feeds will be added in a future `changes_stream()` method.
+> For now, a polling loop over `feed="longpoll"` with `since=last_seq` is a practical
+> alternative for most real-time use cases.
 
 ### Controlling concurrency
 

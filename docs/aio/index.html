@@ -1137,9 +1137,7 @@ re-exported here — import them from <code><a title="couchdb3" href="../index.h
                 &#34;in a future release.&#34;
             )
         if doc_ids is not None and selector is not None:
-            raise CouchDBError(
-                &#34;Arguments &#39;doc_ids&#39; and &#39;selector&#39; are mutually exclusive.&#34;
-            )
+            raise CouchDBError(&#34;Arguments &#39;doc_ids&#39; and &#39;selector&#39; are mutually exclusive.&#34;)
         query_kwargs = {
             &#34;conflicts&#34;: conflicts,
             &#34;descending&#34;: descending,
@@ -1501,9 +1499,7 @@ Default is <code>None</code>.</dd>
             &#34;in a future release.&#34;
         )
     if doc_ids is not None and selector is not None:
-        raise CouchDBError(
-            &#34;Arguments &#39;doc_ids&#39; and &#39;selector&#39; are mutually exclusive.&#34;
-        )
+        raise CouchDBError(&#34;Arguments &#39;doc_ids&#39; and &#39;selector&#39; are mutually exclusive.&#34;)
     query_kwargs = {
         &#34;conflicts&#34;: conflicts,
         &#34;descending&#34;: descending,
@@ -4502,11 +4498,15 @@ Default <code>None</code>.</dd>
         bool : ``True`` on success.
         &#34;&#34;&#34;
         return (
-            await self._post(
-                resource=f&#34;_node/{node}/_config/_reload&#34;,
-                body={},
+            (
+                await self._post(
+                    resource=f&#34;_node/{node}/_config/_reload&#34;,
+                    body={},
+                )
             )
-        ).json().get(&#34;ok&#34;, False)
+            .json()
+            .get(&#34;ok&#34;, False)
+        )
 
     async def node_stats(self, node: str = &#34;_local&#34;) -&gt; dict:
         &#34;&#34;&#34;
@@ -5194,11 +5194,15 @@ Defaults to <code>["_users", "_replicator"]</code>.</dd>
     bool : ``True`` on success.
     &#34;&#34;&#34;
     return (
-        await self._post(
-            resource=f&#34;_node/{node}/_config/_reload&#34;,
-            body={},
+        (
+            await self._post(
+                resource=f&#34;_node/{node}/_config/_reload&#34;,
+                body={},
+            )
         )
-    ).json().get(&#34;ok&#34;, False)</code></pre>
+        .json()
+        .get(&#34;ok&#34;, False)
+    )</code></pre>
 </details>
 <div class="desc"><p>Reloads the configuration from disk. Flushes any in-memory configuration changes
 that have not been written to disk.</p>

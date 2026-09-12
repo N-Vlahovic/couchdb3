@@ -1117,9 +1117,7 @@ el.replaceWith(d);
                 &#34;in a future release.&#34;
             )
         if doc_ids is not None and selector is not None:
-            raise CouchDBError(
-                &#34;Arguments &#39;doc_ids&#39; and &#39;selector&#39; are mutually exclusive.&#34;
-            )
+            raise CouchDBError(&#34;Arguments &#39;doc_ids&#39; and &#39;selector&#39; are mutually exclusive.&#34;)
         query_kwargs = {
             &#34;conflicts&#34;: conflicts,
             &#34;descending&#34;: descending,
@@ -1481,9 +1479,7 @@ Default is <code>None</code>.</dd>
             &#34;in a future release.&#34;
         )
     if doc_ids is not None and selector is not None:
-        raise CouchDBError(
-            &#34;Arguments &#39;doc_ids&#39; and &#39;selector&#39; are mutually exclusive.&#34;
-        )
+        raise CouchDBError(&#34;Arguments &#39;doc_ids&#39; and &#39;selector&#39; are mutually exclusive.&#34;)
     query_kwargs = {
         &#34;conflicts&#34;: conflicts,
         &#34;descending&#34;: descending,

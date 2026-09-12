@@ -672,11 +672,15 @@ el.replaceWith(d);
         bool : ``True`` on success.
         &#34;&#34;&#34;
         return (
-            await self._post(
-                resource=f&#34;_node/{node}/_config/_reload&#34;,
-                body={},
+            (
+                await self._post(
+                    resource=f&#34;_node/{node}/_config/_reload&#34;,
+                    body={},
+                )
             )
-        ).json().get(&#34;ok&#34;, False)
+            .json()
+            .get(&#34;ok&#34;, False)
+        )
 
     async def node_stats(self, node: str = &#34;_local&#34;) -&gt; dict:
         &#34;&#34;&#34;
@@ -1364,11 +1368,15 @@ Defaults to <code>["_users", "_replicator"]</code>.</dd>
     bool : ``True`` on success.
     &#34;&#34;&#34;
     return (
-        await self._post(
-            resource=f&#34;_node/{node}/_config/_reload&#34;,
-            body={},
+        (
+            await self._post(
+                resource=f&#34;_node/{node}/_config/_reload&#34;,
+                body={},
+            )
         )
-    ).json().get(&#34;ok&#34;, False)</code></pre>
+        .json()
+        .get(&#34;ok&#34;, False)
+    )</code></pre>
 </details>
 <div class="desc"><p>Reloads the configuration from disk. Flushes any in-memory configuration changes
 that have not been written to disk.</p>
