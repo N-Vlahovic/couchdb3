@@ -18,6 +18,7 @@
   - [Fetching documents](#fetching-documents)
   - [Views](#views)
   - [Mango queries](#mango-queries)
+  - [Changes feed](#changes-feed)
   - [Working with partitions](#working-with-partitions)
 - [Async client](#async-client)
   - [Connecting to a database server](#connecting-to-a-database-server-1)
@@ -28,6 +29,7 @@
   - [Fetching documents](#fetching-documents-1)
   - [Views](#views-1)
   - [Mango queries](#mango-queries-1)
+  - [Changes feed](#changes-feed-1)
   - [Controlling concurrency](#controlling-concurrency)
   - [Working with async partitions](#working-with-async-partitions)
 
@@ -85,9 +87,7 @@ from couchdb3 import Document, ViewResult, ViewRow, exceptions
 ```python
 import couchdb3
 
-client = couchdb3.Server(
-    "http://user:password@127.0.0.1:5984"
-)
+client = couchdb3.Server("http://user:password@127.0.0.1:5984")
 
 # Checking if the server is up
 print(client.up())
@@ -100,7 +100,7 @@ user and password can also be passed into the Server constructor as keyword para
 client = couchdb3.Server(
     "127.0.0.1:5984",  # Scheme omitted - will assume http protocol
     user="user",
-    password="password"
+    password="password",
 )
 ```
 
@@ -123,11 +123,7 @@ print(db)
 
 ### Creating a document
 ```python
-mydoc = {
-    "_id": "mydoc-id",
-    "name": "Hello",
-    "type": "World"
-}
+mydoc = {"_id": "mydoc-id", "name": "Hello", "type": "World"}
 print(db.save(mydoc))
 # ('mydoc-id', True, '1-24fa3b3fd2691da9649dd6abe3cafc7e')
 ```
@@ -139,11 +135,7 @@ To update an existing document, retrieving the revision is paramount.
 In the example below, `dbdoc` contains the key `_rev` and the builtin `dict.update` function is used to update the
 document before saving it.
 ```python
-mydoc = {
-    "_id": "mydoc-id",
-    "name": "Hello World",
-    "type": "Hello World"
-}
+mydoc = {"_id": "mydoc-id", "name": "Hello World", "type": "Hello World"}
 dbdoc = db.get(mydoc["_id"])
 dbdoc.update(mydoc)
 print(db.save(dbdoc))
@@ -155,7 +147,7 @@ mydoc = {
     "_id": "mydoc-id",
     "_rev": db.rev("mydoc-id"),
     "name": "Hello World",
-    "type": "Hello World"
+    "type": "Hello World",
 }
 print(db.save(mydoc))
 # ('mydoc-id', True, '3-d56b14b7ffb87960b51d03269990a30d')
@@ -197,14 +189,13 @@ for item in result:
 ### Views
 ```python
 # 1. Create a design document with a map function
-db.put_design("my-ddoc", views={
-    "my-view": {
-        "map": "function(doc) { if (doc.type === 'post') emit(doc._id, null); }"
-    }
-})
+db.put_design(
+    "my-ddoc",
+    views={"my-view": {"map": "function(doc) { if (doc.type === 'post') emit(doc._id, null); }"}},
+)
 
 # 2. Query the view
-result = db.view("my-ddoc", "my-view")                        # ViewResult
+result = db.view("my-ddoc", "my-view")  # ViewResult
 result = db.view("my-ddoc", "my-view", include_docs=True, limit=10)
 
 # 3. Iterate results
@@ -225,6 +216,46 @@ for doc in result["docs"]:
 # 3. Inspect the query plan
 plan = db.explain({"type": {"$eq": "post"}}, limit=10)
 ```
+
+### Changes feed
+
+`Database.changes()` wraps `GET /{db}/_changes` (and `POST /{db}/_changes` when filtering by
+document IDs or a Mango selector).
+
+```python
+# All recent changes (normal feed — returns immediately)
+result = db.changes()
+for row in result["results"]:
+    print(row["id"], row["changes"])
+
+# Only changes since a known sequence
+result = db.changes(since="now")  # wait marker — use last_seq to poll later
+last_seq = result["last_seq"]
+result = db.changes(since=last_seq)  # only changes after that point
+
+# Filter to specific document IDs (POST /_changes?filter=_doc_ids)
+result = db.changes(doc_ids=["doc-1", "doc-2"])
+
+# Filter with a Mango selector (POST /_changes?filter=_selector)
+result = db.changes(selector={"type": {"$eq": "post"}})
+
+# Include the full document body in each result
+result = db.changes(include_docs=True)
+for row in result["results"]:
+    print(row["id"], row.get("doc"))
+
+# Long-poll: server holds the connection open until at least one change arrives
+result = db.changes(feed="longpoll", since="now", timeout=30_000)
+```
+
+> **Note — continuous and eventsource feeds**
+>
+> `feed="continuous"` and `feed="eventsource"` are **not supported** by `changes()` and will
+> raise `ValueError`. These modes stream newline-delimited JSON over a persistent HTTP
+> connection, which requires response-body streaming rather than a single buffered read.
+> Support for streaming feeds will be added in a future `changes_stream()` method.
+> For now, a polling loop over `feed="longpoll"` with `since=last_seq` is a practical
+> alternative for most real-time use cases.
 
 ### Working with partitions
 For a partitioned database, the `couchdb3.sync.Partition` class offers a wrapper around partitions (acting similarly
@@ -276,10 +307,12 @@ with `async def` methods and `async with` context manager support.
 import asyncio
 from couchdb3.aio import AsyncServer
 
+
 async def main():
     async with AsyncServer("http://user:password@127.0.0.1:5984") as client:
         print(await client.up())
         # True
+
 
 asyncio.run(main())
 ```
@@ -288,11 +321,7 @@ user and password can also be passed as keyword parameters, and the manual lifec
 supported via `await client.aclose()`:
 
 ```python
-client = AsyncServer(
-    "127.0.0.1:5984",
-    user="user",
-    password="password"
-)
+client = AsyncServer("127.0.0.1:5984", user="user", password="password")
 # ... do stuff ...
 await client.aclose()
 ```
@@ -314,11 +343,7 @@ async with AsyncServer("http://user:password@127.0.0.1:5984") as client:
 ```python
 async with AsyncServer("http://user:password@127.0.0.1:5984") as client:
     db = await client.get("mydb")
-    mydoc = {
-        "_id": "mydoc-id",
-        "name": "Hello",
-        "type": "World"
-    }
+    mydoc = {"_id": "mydoc-id", "name": "Hello", "type": "World"}
     print(await db.save(mydoc))
     # ('mydoc-id', True, '1-24fa3b3fd2691da9649dd6abe3cafc7e')
 ```
@@ -329,7 +354,7 @@ mydoc = {
     "_id": "mydoc-id",
     "_rev": await db.rev("mydoc-id"),
     "name": "Hello World",
-    "type": "Hello World"
+    "type": "Hello World",
 }
 print(await db.save(mydoc))
 # ('mydoc-id', True, '2-374aa8f0236b9120242ca64935e2e8f1')
@@ -361,11 +386,10 @@ for item in result:
 ### Views
 ```python
 # 1. Create a design document with a map function
-await db.put_design("my-ddoc", views={
-    "my-view": {
-        "map": "function(doc) { if (doc.type === 'post') emit(doc._id, null); }"
-    }
-})
+await db.put_design(
+    "my-ddoc",
+    views={"my-view": {"map": "function(doc) { if (doc.type === 'post') emit(doc._id, null); }"}},
+)
 
 # 2. Query the view
 result = await db.view("my-ddoc", "my-view")
@@ -390,6 +414,45 @@ for doc in result["docs"]:
 plan = await db.explain({"type": {"$eq": "post"}}, limit=10)
 ```
 
+### Changes feed
+
+`AsyncDatabase.changes()` mirrors the sync API exactly.
+
+```python
+# All recent changes
+result = await db.changes()
+for row in result["results"]:
+    print(row["id"], row["changes"])
+
+# Only changes since a known sequence
+result = await db.changes(since="now")
+last_seq = result["last_seq"]
+result = await db.changes(since=last_seq)
+
+# Filter to specific document IDs (POST /_changes?filter=_doc_ids)
+result = await db.changes(doc_ids=["doc-1", "doc-2"])
+
+# Filter with a Mango selector (POST /_changes?filter=_selector)
+result = await db.changes(selector={"type": {"$eq": "post"}})
+
+# Include the full document body in each result
+result = await db.changes(include_docs=True)
+for row in result["results"]:
+    print(row["id"], row.get("doc"))
+
+# Long-poll: server holds the connection open until at least one change arrives
+result = await db.changes(feed="longpoll", since="now", timeout=30_000)
+```
+
+> **Note — continuous and eventsource feeds**
+>
+> `feed="continuous"` and `feed="eventsource"` are **not supported** by `changes()` and will
+> raise `ValueError`. These modes stream newline-delimited JSON over a persistent HTTP
+> connection, which requires response-body streaming rather than a single buffered read.
+> Support for streaming feeds will be added in a future `changes_stream()` method.
+> For now, a polling loop over `feed="longpoll"` with `since=last_seq` is a practical
+> alternative for most real-time use cases.
+
 ### Controlling concurrency
 
 `httpx.AsyncClient` pools connections internally. For application-level concurrency control
@@ -403,9 +466,11 @@ from couchdb3.aio import AsyncServer
 # Limit to 10 concurrent CouchDB operations
 sem = asyncio.Semaphore(10)
 
+
 async def fetch(db, docid):
     async with sem:
         return await db.get(docid)
+
 
 # Optionally tune the underlying connection pool
 client = AsyncServer(
@@ -425,9 +490,11 @@ async with AsyncServer("http://user:password@127.0.0.1:5984") as client:
     partition: AsyncPartition = await db.get_partition("partition_id")
 
     doc_id = "test-id"
-    await partition.save({
-        "_id": doc_id,  # no need to append the partition's ID
-        "type": "example"
-    })
+    await partition.save(
+        {
+            "_id": doc_id,  # no need to append the partition's ID
+            "type": "example",
+        }
+    )
     doc = await partition.get(doc_id)
 ```

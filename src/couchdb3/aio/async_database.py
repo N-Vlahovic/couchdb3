@@ -993,6 +993,142 @@ class AsyncDatabase(AsyncBase):
             ).json()
         )
 
+    async def changes(
+        self,
+        *,
+        doc_ids: list[str] | None = None,
+        conflicts: bool | None = None,
+        descending: bool | None = None,
+        feed: str | None = None,
+        filter: str | None = None,
+        heartbeat: int | None = None,
+        include_docs: bool | None = None,
+        attachments: bool | None = None,
+        att_encoding_info: bool | None = None,
+        limit: int | None = None,
+        since: str | None = None,
+        style: str | None = None,
+        timeout: int | None = None,
+        view: str | None = None,
+        seq_interval: int | None = None,
+        selector: dict | None = None,
+    ) -> dict:
+        """
+        Returns a sorted list of changes made to documents in the database. Only the most
+        recent change for a given document is included.
+
+        When `doc_ids` is provided the request is sent as ``POST /{db}/_changes`` with
+        ``filter=_doc_ids``. When `selector` is provided it is sent as
+        ``POST /{db}/_changes`` with ``filter=_selector``. All other cases use
+        ``GET /{db}/_changes``.
+
+        .. note::
+            ``feed='continuous'`` and ``feed='eventsource'`` are **not** supported by this
+            method. Passing either value raises :class:`ValueError`. Streaming feeds will be
+            addressed in a future ``changes_stream()`` method.
+
+        Parameters
+        ----------
+        doc_ids : list[str]
+            List of document IDs to filter the changes feed. Triggers a POST request with
+            ``filter=_doc_ids``. Mutually exclusive with `selector`.
+        conflicts : bool
+            Include conflicts information. Only effective when `include_docs` is `True`.
+        descending : bool
+            Return changes in descending sequence order. Default `False`.
+        feed : str
+            Feed type. Supported values: ``'normal'`` (default), ``'longpoll'``.
+            ``'continuous'`` and ``'eventsource'`` are not supported.
+        filter : str
+            Name of a filter function (``'design_doc/filter_name'``, ``'_design'``, or
+            ``'_view'``). Do not pass ``'_doc_ids'`` or ``'_selector'`` manually — use the
+            `doc_ids` / `selector` parameters instead.
+        heartbeat : int
+            Milliseconds between heartbeat newlines for ``longpoll`` feed.
+        include_docs : bool
+            Include the associated document with each result. Default `False`.
+        attachments : bool
+            Include Base64-encoded attachment content when `include_docs` is `True`.
+        att_encoding_info : bool
+            Include encoding info in attachment stubs when `include_docs` is `True`.
+        limit : int
+            Maximum number of rows to return.
+        since : str
+            Return only changes after the given update sequence. Use ``'now'`` to get only
+            future changes.
+        style : str
+            Revision style. ``'main_only'`` (default) or ``'all_docs'``.
+        timeout : int
+            Maximum milliseconds to wait for a change (``longpoll`` only).
+        view : str
+            View function to use as a filter (requires ``filter='_view'``).
+        seq_interval : int
+            Calculate update sequence every N results (reduces server load on large
+            sharded databases).
+        selector : dict
+            Mango selector to filter documents. Triggers a POST request with
+            ``filter=_selector``. Mutually exclusive with `doc_ids`.
+
+        Returns
+        -------
+        dict : A dictionary with the following keys.
+
+          - ``last_seq`` (`str`) — last change update sequence
+          - ``pending`` (`int`) — count of remaining items in the feed
+          - ``results`` (`list`) — list of change objects, each with ``id``, ``seq``,
+            ``changes``, and optionally ``deleted`` / ``doc``
+
+        Raises
+        ------
+        ValueError
+            If ``feed`` is ``'continuous'`` or ``'eventsource'``.
+        CouchDBError
+            If both `doc_ids` and `selector` are provided.
+        """
+        if feed in ("continuous", "eventsource"):
+            raise ValueError(
+                f"feed={feed!r} is not supported by changes(). Use feed='normal' or "
+                "'longpoll'. Streaming feeds will be available via changes_stream() "
+                "in a future release."
+            )
+        if doc_ids is not None and selector is not None:
+            raise CouchDBError("Arguments 'doc_ids' and 'selector' are mutually exclusive.")
+        query_kwargs = {
+            "conflicts": conflicts,
+            "descending": descending,
+            "feed": feed,
+            "filter": filter,
+            "heartbeat": heartbeat,
+            "include_docs": include_docs,
+            "attachments": attachments,
+            "att_encoding_info": att_encoding_info,
+            "limit": limit,
+            "since": since,
+            "style": style,
+            "timeout": timeout,
+            "view": view,
+            "seq_interval": seq_interval,
+        }
+        if doc_ids is not None:
+            query_kwargs["filter"] = "_doc_ids"
+            return (
+                await self._post(
+                    resource="_changes",
+                    body={"doc_ids": doc_ids},
+                    query_kwargs=query_kwargs,
+                )
+            ).json()
+        if selector is not None:
+            query_kwargs["filter"] = "_selector"
+            return (
+                await self._post(
+                    resource="_changes",
+                    body={"selector": selector},
+                    query_kwargs=query_kwargs,
+                )
+            ).json()
+        return (await self._get(resource="_changes", query_kwargs=query_kwargs)).json()
+
     async def get_partition(self, partition_id: str) -> AsyncPartition:
         """
         Get a given partition.

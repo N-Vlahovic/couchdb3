@@ -113,6 +113,75 @@ class TestAsyncClient(unittest.IsolatedAsyncioTestCase):
             self.assertIsInstance(client, AsyncServer)
             self.assertTrue(await client.up())
 
+    async def test_membership(self):
+        result = await self.client.membership()
+        self.assertIsInstance(result, dict)
+        self.assertIn("all_nodes", result)
+        self.assertIn("cluster_nodes", result)
+        self.assertIsInstance(result["all_nodes"], list)
+        self.assertIsInstance(result["cluster_nodes"], list)
+
+    async def test_cluster_setup(self):
+        result = await self.client.cluster_setup()
+        self.assertIsInstance(result, dict)
+        self.assertIn("state", result)
+        valid_states = {
+            "cluster_disabled",
+            "single_node_disabled",
+            "single_node_enabled",
+            "cluster_enabled",
+            "cluster_finished",
+        }
+        self.assertIn(result["state"], valid_states)
+
+    @unittest.skip("requires isolated CouchDB cluster — destructive operation")
+    async def test_setup_cluster(self):
+        # Contract: POST /_cluster_setup returns {"ok": true}
+        result = await self.client.setup_cluster(
+            action="enable_single_node",
+            bind_address="127.0.0.1",
+            username="admin",
+            password="secret",
+            port=5984,
+            ensure_dbs_exist=["_users", "_replicator"],
+        )
+        self.assertTrue(result.get("ok"))
+
+    async def test_node_config_full(self):
+        result = await self.client.node_config()
+        self.assertIsInstance(result, dict)
+        self.assertIn("couchdb", result)
+
+    async def test_node_config_section(self):
+        result = await self.client.node_config(section="couchdb")
+        self.assertIsInstance(result, dict)
+
+    async def test_node_config_key(self):
+        result = await self.client.node_config(section="chttpd", key="bind_address")
+        self.assertIsInstance(result, str)
+
+    async def test_set_and_delete_node_config(self):
+        section = "couchdb"
+        key = "test_opencode_async_key"
+        value = "test_async_value"
+        await self.client.set_node_config(section=section, key=key, value=value)
+        got = await self.client.node_config(section=section, key=key)
+        self.assertEqual(got, value)
+        deleted = await self.client.delete_node_config(section=section, key=key)
+        self.assertEqual(deleted, value)
+
+    async def test_reload_node_config(self):
+        result = await self.client.reload_node_config()
+        self.assertTrue(result)
+
+    async def test_node_stats(self):
+        result = await self.client.node_stats()
+        self.assertIsInstance(result, dict)
+
+    async def test_node_system(self):
+        result = await self.client.node_system()
+        self.assertIsInstance(result, dict)
+
 
 @atexit.register
 def rm_test_dbs() -> None:

@@ -445,6 +445,273 @@ el.replaceWith(d);
             )
         ).json()
 
+    async def membership(self) -&gt; dict:
+        &#34;&#34;&#34;
+        Displays the nodes that are part of the cluster.
+
+        Returns
+        -------
+        dict : A dictionary with the following keys.
+
+          - ``all_nodes`` (`list[str]`) — all nodes this node knows about
+          - ``cluster_nodes`` (`list[str]`) — nodes that are part of the cluster
+        &#34;&#34;&#34;
+        return (await self._get(resource=&#34;_membership&#34;)).json()
+
+    async def cluster_setup(
+        self,
+        *,
+        ensure_dbs_exist: list[str] | None = None,
+    ) -&gt; dict:
+        &#34;&#34;&#34;
+        Returns the status of the node or cluster, per the cluster setup wizard.
+
+        Parameters
+        ----------
+        ensure_dbs_exist : list[str]
+            List of system databases to ensure exist on the node/cluster.
+            Defaults to ``[&#34;_users&#34;, &#34;_replicator&#34;]``.
+
+        Returns
+        -------
+        dict : A dictionary with a single key ``state`` whose value is one of
+        ``&#39;cluster_disabled&#39;``, ``&#39;single_node_disabled&#39;``, ``&#39;single_node_enabled&#39;``,
+        ``&#39;cluster_enabled&#39;``, or ``&#39;cluster_finished&#39;``.
+        &#34;&#34;&#34;
+        return (
+            await self._get(
+                resource=&#34;_cluster_setup&#34;,
+                query_kwargs={&#34;ensure_dbs_exist&#34;: ensure_dbs_exist},
+            )
+        ).json()
+
+    async def setup_cluster(
+        self,
+        action: str,
+        *,
+        bind_address: str | None = None,
+        username: str | None = None,
+        password: str | None = None,
+        port: int | None = None,
+        node_count: int | None = None,
+        remote_node: str | None = None,
+        remote_current_user: str | None = None,
+        remote_current_password: str | None = None,
+        host: str | None = None,
+        ensure_dbs_exist: list[str] | None = None,
+    ) -&gt; dict:
+        &#34;&#34;&#34;
+        Configure a node as a single (standalone) node, as part of a cluster, or finalise
+        a cluster. This is a **destructive** operation — do not run against a shared or
+        production CouchDB instance during testing.
+
+        Parameters
+        ----------
+        action : str
+            One of ``&#39;enable_single_node&#39;``, ``&#39;enable_cluster&#39;``, ``&#39;add_node&#39;``, or
+            ``&#39;finish_cluster&#39;``.
+        bind_address : str
+            IP address to bind the current node. Use ``&#39;0.0.0.0&#39;`` to bind all interfaces.
+            (``enable_cluster`` and ``enable_single_node`` only)
+        username : str
+            Server-level administrator username to create, or the remote server&#39;s
+            administrator username (``add_node``).
+        password : str
+            Server-level administrator password to create, or the remote server&#39;s password
+            (``add_node``).
+        port : int
+            TCP port for this node (``enable_cluster`` / ``enable_single_node``) or the
+            remote node&#39;s port (``add_node``).
+        node_count : int
+            Total number of nodes to join into the cluster. Determines ``n`` (max 3).
+            (``enable_cluster`` only)
+        remote_node : str
+            IP address of the remote node. (``enable_cluster`` only)
+        remote_current_user : str
+            Username of the admin on the remote node. (``enable_cluster`` only)
+        remote_current_password : str
+            Password of the admin on the remote node. (``enable_cluster`` only)
+        host : str
+            Remote node IP to add to the cluster. (``add_node`` only)
+        ensure_dbs_exist : list[str]
+            List of system databases to ensure exist. Defaults to
+            ``[&#34;_users&#34;, &#34;_replicator&#34;]``.
+
+        Returns
+        -------
+        dict : ``{&#34;ok&#34;: true}`` on success.
+        &#34;&#34;&#34;
+        return (
+            await self._post(
+                resource=&#34;_cluster_setup&#34;,
+                body=rm_nones_from_dict(
+                    {
+                        &#34;action&#34;: action,
+                        &#34;bind_address&#34;: bind_address,
+                        &#34;username&#34;: username,
+                        &#34;password&#34;: password,
+                        &#34;port&#34;: port,
+                        &#34;node_count&#34;: node_count,
+                        &#34;remote_node&#34;: remote_node,
+                        &#34;remote_current_user&#34;: remote_current_user,
+                        &#34;remote_current_password&#34;: remote_current_password,
+                        &#34;host&#34;: host,
+                        &#34;ensure_dbs_exist&#34;: ensure_dbs_exist,
+                    }
+                ),
+            )
+        ).json()
+
+    async def node_config(
+        self,
+        node: str = &#34;_local&#34;,
+        section: str | None = None,
+        key: str | None = None,
+    ) -&gt; dict | str:
+        &#34;&#34;&#34;
+        Returns CouchDB node configuration.
+
+        - No `section` / `key` → full configuration tree (`dict`)
+        - `section` only → configuration section (`dict`)
+        - `section` + `key` → single configuration value (`str` or primitive)
+
+        The literal string ``&#39;_local&#39;`` (default) is an alias for the local node name.
+
+        Parameters
+        ----------
+        node : str
+            Node name. Default ``&#39;_local&#39;``.
+        section : str
+            Configuration section name (e.g. ``&#39;log&#39;``, ``&#39;couchdb&#39;``).
+        key : str
+            Configuration key within the section (e.g. ``&#39;level&#39;``).
+
+        Returns
+        -------
+        dict | str
+        &#34;&#34;&#34;
+        resource = f&#34;_node/{node}/_config&#34;
+        if section:
+            resource = f&#34;{resource}/{section}&#34;
+            if key:
+                resource = f&#34;{resource}/{key}&#34;
+        return (await self._get(resource=resource)).json()
+
+    async def set_node_config(
+        self,
+        section: str,
+        key: str,
+        value: str,
+        node: str = &#34;_local&#34;,
+    ) -&gt; str:
+        &#34;&#34;&#34;
+        Updates a single configuration value on a node. Returns the **old** value.
+
+        Parameters
+        ----------
+        section : str
+            Configuration section name.
+        key : str
+            Configuration key name.
+        value : str
+            New value (must be a valid JSON string).
+        node : str
+            Node name. Default ``&#39;_local&#39;``.
+
+        Returns
+        -------
+        str : The previous value of the configuration key.
+        &#34;&#34;&#34;
+        return (
+            await self._put(
+                resource=f&#34;_node/{node}/_config/{section}/{key}&#34;,
+                body=value,
+            )
+        ).json()
+
+    async def delete_node_config(
+        self,
+        section: str,
+        key: str,
+        node: str = &#34;_local&#34;,
+    ) -&gt; str:
+        &#34;&#34;&#34;
+        Deletes a single configuration value from a node. Returns the **old** value.
+
+        Parameters
+        ----------
+        section : str
+            Configuration section name.
+        key : str
+            Configuration key name.
+        node : str
+            Node name. Default ``&#39;_local&#39;``.
+
+        Returns
+        -------
+        str : The deleted value.
+        &#34;&#34;&#34;
+        return (
+            await self._delete(
+                resource=f&#34;_node/{node}/_config/{section}/{key}&#34;,
+            )
+        ).json()
+
+    async def reload_node_config(self, node: str = &#34;_local&#34;) -&gt; bool:
+        &#34;&#34;&#34;
+        Reloads the configuration from disk. Flushes any in-memory configuration changes
+        that have not been written to disk.
+
+        Parameters
+        ----------
+        node : str
+            Node name. Default ``&#39;_local&#39;``.
+
+        Returns
+        -------
+        bool : ``True`` on success.
+        &#34;&#34;&#34;
+        return (
+            (
+                await self._post(
+                    resource=f&#34;_node/{node}/_config/_reload&#34;,
+                    body={},
+                )
+            )
+            .json()
+            .get(&#34;ok&#34;, False)
+        )
+
+    async def node_stats(self, node: str = &#34;_local&#34;) -&gt; dict:
+        &#34;&#34;&#34;
+        Returns statistics for the specified node.
+
+        Parameters
+        ----------
+        node : str
+            Node name. Default ``&#39;_local&#39;``.
+
+        Returns
+        -------
+        dict
+        &#34;&#34;&#34;
+        return (await self._get(resource=f&#34;_node/{node}/_stats&#34;)).json()
+
+    async def node_system(self, node: str = &#34;_local&#34;) -&gt; dict:
+        &#34;&#34;&#34;
+        Returns system-level statistics for the specified node.
+
+        Parameters
+        ----------
+        node : str
+            Node name. Default ``&#39;_local&#39;``.
+
+        Returns
+        -------
+        dict
+        &#34;&#34;&#34;
+        return (await self._get(resource=f&#34;_node/{node}/_system&#34;)).json()
+
     async def up(self, raise_exception: bool = False) -&gt; bool:
         &#34;&#34;&#34;
         Check if the server is up.
@@ -638,6 +905,56 @@ instance and performing a <code>check</code> request.</p>
 <h2 id="returns">Returns</h2>
 <p>bool : A boolean indicating if the username/password combination is valid.</p></div>
 </dd>
+<dt id="couchdb3.aio.async_server.AsyncServer.cluster_setup"><code class="name flex">
+<span>async def <span class="ident">cluster_setup</span></span>(<span>self, *, ensure_dbs_exist: list[str] | None = None) ‑> dict</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def cluster_setup(
+    self,
+    *,
+    ensure_dbs_exist: list[str] | None = None,
+) -&gt; dict:
+    &#34;&#34;&#34;
+    Returns the status of the node or cluster, per the cluster setup wizard.
+
+    Parameters
+    ----------
+    ensure_dbs_exist : list[str]
+        List of system databases to ensure exist on the node/cluster.
+        Defaults to ``[&#34;_users&#34;, &#34;_replicator&#34;]``.
+
+    Returns
+    -------
+    dict : A dictionary with a single key ``state`` whose value is one of
+    ``&#39;cluster_disabled&#39;``, ``&#39;single_node_disabled&#39;``, ``&#39;single_node_enabled&#39;``,
+    ``&#39;cluster_enabled&#39;``, or ``&#39;cluster_finished&#39;``.
+    &#34;&#34;&#34;
+    return (
+        await self._get(
+            resource=&#34;_cluster_setup&#34;,
+            query_kwargs={&#34;ensure_dbs_exist&#34;: ensure_dbs_exist},
+        )
+    ).json()</code></pre>
+</details>
+<div class="desc"><p>Returns the status of the node or cluster, per the cluster setup wizard.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>ensure_dbs_exist</code></strong> :&ensp;<code>list[str]</code></dt>
+<dd>List of system databases to ensure exist on the node/cluster.
+Defaults to <code>["_users", "_replicator"]</code>.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><strong><code>dict</code></strong> :&ensp;<code>A dictionary with a single key <code>state</code> whose value is one of</code></dt>
+<dd>&nbsp;</dd>
+</dl>
+<p><code>'cluster_disabled'</code>, <code>'single_node_disabled'</code>, <code>'single_node_enabled'</code>,
+<code>'cluster_enabled'</code>, or <code>'cluster_finished'</code>.</p></div>
+</dd>
 <dt id="couchdb3.aio.async_server.AsyncServer.create"><code class="name flex">
 <span>async def <span class="ident">create</span></span>(<span>self,<br>name: str,<br>q: int | None = None,<br>n: int | None = None,<br>partitioned: bool = False) ‑> <a title="couchdb3.aio.async_database.AsyncDatabase" href="async_database.html#couchdb3.aio.async_database.AsyncDatabase">AsyncDatabase</a></span>
 </code></dt>
@@ -760,6 +1077,55 @@ instance and performing a <code>check</code> request.</p>
 <h2 id="returns">Returns</h2>
 <p>bool: <code>True</code> upon successful deletion.</p></div>
 </dd>
+<dt id="couchdb3.aio.async_server.AsyncServer.delete_node_config"><code class="name flex">
+<span>async def <span class="ident">delete_node_config</span></span>(<span>self, section: str, key: str, node: str = '_local') ‑> str</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def delete_node_config(
+    self,
+    section: str,
+    key: str,
+    node: str = &#34;_local&#34;,
+) -&gt; str:
+    &#34;&#34;&#34;
+    Deletes a single configuration value from a node. Returns the **old** value.
+
+    Parameters
+    ----------
+    section : str
+        Configuration section name.
+    key : str
+        Configuration key name.
+    node : str
+        Node name. Default ``&#39;_local&#39;``.
+
+    Returns
+    -------
+    str : The deleted value.
+    &#34;&#34;&#34;
+    return (
+        await self._delete(
+            resource=f&#34;_node/{node}/_config/{section}/{key}&#34;,
+        )
+    ).json()</code></pre>
+</details>
+<div class="desc"><p>Deletes a single configuration value from a node. Returns the <strong>old</strong> value.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>section</code></strong> :&ensp;<code>str</code></dt>
+<dd>Configuration section name.</dd>
+<dt><strong><code>key</code></strong> :&ensp;<code>str</code></dt>
+<dd>Configuration key name.</dd>
+<dt><strong><code>node</code></strong> :&ensp;<code>str</code></dt>
+<dd>Node name. Default <code>'_local'</code>.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>str : The deleted value.</p></div>
+</dd>
 <dt id="couchdb3.aio.async_server.AsyncServer.get"><code class="name flex">
 <span>async def <span class="ident">get</span></span>(<span>self, name: str, check: bool = False) ‑> <a title="couchdb3.aio.async_database.AsyncDatabase" href="async_database.html#couchdb3.aio.async_database.AsyncDatabase">AsyncDatabase</a></span>
 </code></dt>
@@ -814,6 +1180,213 @@ instance and performing a <code>check</code> request.</p>
 <dt><code>AsyncDatabase</code></dt>
 <dd>&nbsp;</dd>
 </dl></div>
+</dd>
+<dt id="couchdb3.aio.async_server.AsyncServer.membership"><code class="name flex">
+<span>async def <span class="ident">membership</span></span>(<span>self) ‑> dict</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def membership(self) -&gt; dict:
+    &#34;&#34;&#34;
+    Displays the nodes that are part of the cluster.
+
+    Returns
+    -------
+    dict : A dictionary with the following keys.
+
+      - ``all_nodes`` (`list[str]`) — all nodes this node knows about
+      - ``cluster_nodes`` (`list[str]`) — nodes that are part of the cluster
+    &#34;&#34;&#34;
+    return (await self._get(resource=&#34;_membership&#34;)).json()</code></pre>
+</details>
+<div class="desc"><p>Displays the nodes that are part of the cluster.</p>
+<h2 id="returns">Returns</h2>
+<p>dict : A dictionary with the following keys.</p>
+<ul>
+<li><code>all_nodes</code> (<code>list[str]</code>) — all nodes this node knows about</li>
+<li><code>cluster_nodes</code> (<code>list[str]</code>) — nodes that are part of the cluster</li>
+</ul></div>
+</dd>
+<dt id="couchdb3.aio.async_server.AsyncServer.node_config"><code class="name flex">
+<span>async def <span class="ident">node_config</span></span>(<span>self, node: str = '_local', section: str | None = None, key: str | None = None) ‑> dict | str</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def node_config(
+    self,
+    node: str = &#34;_local&#34;,
+    section: str | None = None,
+    key: str | None = None,
+) -&gt; dict | str:
+    &#34;&#34;&#34;
+    Returns CouchDB node configuration.
+
+    - No `section` / `key` → full configuration tree (`dict`)
+    - `section` only → configuration section (`dict`)
+    - `section` + `key` → single configuration value (`str` or primitive)
+
+    The literal string ``&#39;_local&#39;`` (default) is an alias for the local node name.
+
+    Parameters
+    ----------
+    node : str
+        Node name. Default ``&#39;_local&#39;``.
+    section : str
+        Configuration section name (e.g. ``&#39;log&#39;``, ``&#39;couchdb&#39;``).
+    key : str
+        Configuration key within the section (e.g. ``&#39;level&#39;``).
+
+    Returns
+    -------
+    dict | str
+    &#34;&#34;&#34;
+    resource = f&#34;_node/{node}/_config&#34;
+    if section:
+        resource = f&#34;{resource}/{section}&#34;
+        if key:
+            resource = f&#34;{resource}/{key}&#34;
+    return (await self._get(resource=resource)).json()</code></pre>
+</details>
+<div class="desc"><p>Returns CouchDB node configuration.</p>
+<ul>
+<li>No <code>section</code> / <code>key</code> → full configuration tree (<code>dict</code>)</li>
+<li><code>section</code> only → configuration section (<code>dict</code>)</li>
+<li><code>section</code> + <code>key</code> → single configuration value (<code>str</code> or primitive)</li>
+</ul>
+<p>The literal string <code>'_local'</code> (default) is an alias for the local node name.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>node</code></strong> :&ensp;<code>str</code></dt>
+<dd>Node name. Default <code>'_local'</code>.</dd>
+<dt><strong><code>section</code></strong> :&ensp;<code>str</code></dt>
+<dd>Configuration section name (e.g. <code>'log'</code>, <code>'couchdb'</code>).</dd>
+<dt><strong><code>key</code></strong> :&ensp;<code>str</code></dt>
+<dd>Configuration key within the section (e.g. <code>'level'</code>).</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dict | str</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+</dd>
+<dt id="couchdb3.aio.async_server.AsyncServer.node_stats"><code class="name flex">
+<span>async def <span class="ident">node_stats</span></span>(<span>self, node: str = '_local') ‑> dict</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def node_stats(self, node: str = &#34;_local&#34;) -&gt; dict:
+    &#34;&#34;&#34;
+    Returns statistics for the specified node.
+
+    Parameters
+    ----------
+    node : str
+        Node name. Default ``&#39;_local&#39;``.
+
+    Returns
+    -------
+    dict
+    &#34;&#34;&#34;
+    return (await self._get(resource=f&#34;_node/{node}/_stats&#34;)).json()</code></pre>
+</details>
+<div class="desc"><p>Returns statistics for the specified node.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>node</code></strong> :&ensp;<code>str</code></dt>
+<dd>Node name. Default <code>'_local'</code>.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dict</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+</dd>
+<dt id="couchdb3.aio.async_server.AsyncServer.node_system"><code class="name flex">
+<span>async def <span class="ident">node_system</span></span>(<span>self, node: str = '_local') ‑> dict</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def node_system(self, node: str = &#34;_local&#34;) -&gt; dict:
+    &#34;&#34;&#34;
+    Returns system-level statistics for the specified node.
+
+    Parameters
+    ----------
+    node : str
+        Node name. Default ``&#39;_local&#39;``.
+
+    Returns
+    -------
+    dict
+    &#34;&#34;&#34;
+    return (await self._get(resource=f&#34;_node/{node}/_system&#34;)).json()</code></pre>
+</details>
+<div class="desc"><p>Returns system-level statistics for the specified node.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>node</code></strong> :&ensp;<code>str</code></dt>
+<dd>Node name. Default <code>'_local'</code>.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>dict</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+</dd>
+<dt id="couchdb3.aio.async_server.AsyncServer.reload_node_config"><code class="name flex">
+<span>async def <span class="ident">reload_node_config</span></span>(<span>self, node: str = '_local') ‑> bool</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def reload_node_config(self, node: str = &#34;_local&#34;) -&gt; bool:
+    &#34;&#34;&#34;
+    Reloads the configuration from disk. Flushes any in-memory configuration changes
+    that have not been written to disk.
+
+    Parameters
+    ----------
+    node : str
+        Node name. Default ``&#39;_local&#39;``.
+
+    Returns
+    -------
+    bool : ``True`` on success.
+    &#34;&#34;&#34;
+    return (
+        (
+            await self._post(
+                resource=f&#34;_node/{node}/_config/_reload&#34;,
+                body={},
+            )
+        )
+        .json()
+        .get(&#34;ok&#34;, False)
+    )</code></pre>
+</details>
+<div class="desc"><p>Reloads the configuration from disk. Flushes any in-memory configuration changes
+that have not been written to disk.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>node</code></strong> :&ensp;<code>str</code></dt>
+<dd>Node name. Default <code>'_local'</code>.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>bool : <code>True</code> on success.</p></div>
 </dd>
 <dt id="couchdb3.aio.async_server.AsyncServer.replicate"><code class="name flex">
 <span>async def <span class="ident">replicate</span></span>(<span>self,<br>source: dict | str,<br>target: dict | str,<br>replication_id: str | None = None,<br>cancel: bool | None = None,<br>continuous: bool | None = None,<br>create_target: bool | None = None,<br>create_target_params: dict | None = None,<br>doc_ids: list[str] | None = None,<br>filter_func: str | None = None,<br>selector: dict | None = None,<br>source_proxy: str | None = None,<br>target_proxy: str | None = None) ‑> dict</span>
@@ -1049,6 +1622,184 @@ instance and performing a <code>check</code> request.</p>
 <dd>&nbsp;</dd>
 </dl></div>
 </dd>
+<dt id="couchdb3.aio.async_server.AsyncServer.set_node_config"><code class="name flex">
+<span>async def <span class="ident">set_node_config</span></span>(<span>self, section: str, key: str, value: str, node: str = '_local') ‑> str</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def set_node_config(
+    self,
+    section: str,
+    key: str,
+    value: str,
+    node: str = &#34;_local&#34;,
+) -&gt; str:
+    &#34;&#34;&#34;
+    Updates a single configuration value on a node. Returns the **old** value.
+
+    Parameters
+    ----------
+    section : str
+        Configuration section name.
+    key : str
+        Configuration key name.
+    value : str
+        New value (must be a valid JSON string).
+    node : str
+        Node name. Default ``&#39;_local&#39;``.
+
+    Returns
+    -------
+    str : The previous value of the configuration key.
+    &#34;&#34;&#34;
+    return (
+        await self._put(
+            resource=f&#34;_node/{node}/_config/{section}/{key}&#34;,
+            body=value,
+        )
+    ).json()</code></pre>
+</details>
+<div class="desc"><p>Updates a single configuration value on a node. Returns the <strong>old</strong> value.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>section</code></strong> :&ensp;<code>str</code></dt>
+<dd>Configuration section name.</dd>
+<dt><strong><code>key</code></strong> :&ensp;<code>str</code></dt>
+<dd>Configuration key name.</dd>
+<dt><strong><code>value</code></strong> :&ensp;<code>str</code></dt>
+<dd>New value (must be a valid JSON string).</dd>
+<dt><strong><code>node</code></strong> :&ensp;<code>str</code></dt>
+<dd>Node name. Default <code>'_local'</code>.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>str : The previous value of the configuration key.</p></div>
+</dd>
+<dt id="couchdb3.aio.async_server.AsyncServer.setup_cluster"><code class="name flex">
+<span>async def <span class="ident">setup_cluster</span></span>(<span>self,<br>action: str,<br>*,<br>bind_address: str | None = None,<br>username: str | None = None,<br>password: str | None = None,<br>port: int | None = None,<br>node_count: int | None = None,<br>remote_node: str | None = None,<br>remote_current_user: str | None = None,<br>remote_current_password: str | None = None,<br>host: str | None = None,<br>ensure_dbs_exist: list[str] | None = None) ‑> dict</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def setup_cluster(
+    self,
+    action: str,
+    *,
+    bind_address: str | None = None,
+    username: str | None = None,
+    password: str | None = None,
+    port: int | None = None,
+    node_count: int | None = None,
+    remote_node: str | None = None,
+    remote_current_user: str | None = None,
+    remote_current_password: str | None = None,
+    host: str | None = None,
+    ensure_dbs_exist: list[str] | None = None,
+) -&gt; dict:
+    &#34;&#34;&#34;
+    Configure a node as a single (standalone) node, as part of a cluster, or finalise
+    a cluster. This is a **destructive** operation — do not run against a shared or
+    production CouchDB instance during testing.
+
+    Parameters
+    ----------
+    action : str
+        One of ``&#39;enable_single_node&#39;``, ``&#39;enable_cluster&#39;``, ``&#39;add_node&#39;``, or
+        ``&#39;finish_cluster&#39;``.
+    bind_address : str
+        IP address to bind the current node. Use ``&#39;0.0.0.0&#39;`` to bind all interfaces.
+        (``enable_cluster`` and ``enable_single_node`` only)
+    username : str
+        Server-level administrator username to create, or the remote server&#39;s
+        administrator username (``add_node``).
+    password : str
+        Server-level administrator password to create, or the remote server&#39;s password
+        (``add_node``).
+    port : int
+        TCP port for this node (``enable_cluster`` / ``enable_single_node``) or the
+        remote node&#39;s port (``add_node``).
+    node_count : int
+        Total number of nodes to join into the cluster. Determines ``n`` (max 3).
+        (``enable_cluster`` only)
+    remote_node : str
+        IP address of the remote node. (``enable_cluster`` only)
+    remote_current_user : str
+        Username of the admin on the remote node. (``enable_cluster`` only)
+    remote_current_password : str
+        Password of the admin on the remote node. (``enable_cluster`` only)
+    host : str
+        Remote node IP to add to the cluster. (``add_node`` only)
+    ensure_dbs_exist : list[str]
+        List of system databases to ensure exist. Defaults to
+        ``[&#34;_users&#34;, &#34;_replicator&#34;]``.
+
+    Returns
+    -------
+    dict : ``{&#34;ok&#34;: true}`` on success.
+    &#34;&#34;&#34;
+    return (
+        await self._post(
+            resource=&#34;_cluster_setup&#34;,
+            body=rm_nones_from_dict(
+                {
+                    &#34;action&#34;: action,
+                    &#34;bind_address&#34;: bind_address,
+                    &#34;username&#34;: username,
+                    &#34;password&#34;: password,
+                    &#34;port&#34;: port,
+                    &#34;node_count&#34;: node_count,
+                    &#34;remote_node&#34;: remote_node,
+                    &#34;remote_current_user&#34;: remote_current_user,
+                    &#34;remote_current_password&#34;: remote_current_password,
+                    &#34;host&#34;: host,
+                    &#34;ensure_dbs_exist&#34;: ensure_dbs_exist,
+                }
+            ),
+        )
+    ).json()</code></pre>
+</details>
+<div class="desc"><p>Configure a node as a single (standalone) node, as part of a cluster, or finalise
+a cluster. This is a <strong>destructive</strong> operation — do not run against a shared or
+production CouchDB instance during testing.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>action</code></strong> :&ensp;<code>str</code></dt>
+<dd>One of <code>'enable_single_node'</code>, <code>'enable_cluster'</code>, <code>'add_node'</code>, or
+<code>'finish_cluster'</code>.</dd>
+<dt><strong><code>bind_address</code></strong> :&ensp;<code>str</code></dt>
+<dd>IP address to bind the current node. Use <code>'0.0.0.0'</code> to bind all interfaces.
+(<code>enable_cluster</code> and <code>enable_single_node</code> only)</dd>
+<dt><strong><code>username</code></strong> :&ensp;<code>str</code></dt>
+<dd>Server-level administrator username to create, or the remote server's
+administrator username (<code>add_node</code>).</dd>
+<dt><strong><code>password</code></strong> :&ensp;<code>str</code></dt>
+<dd>Server-level administrator password to create, or the remote server's password
+(<code>add_node</code>).</dd>
+<dt><strong><code>port</code></strong> :&ensp;<code>int</code></dt>
+<dd>TCP port for this node (<code>enable_cluster</code> / <code>enable_single_node</code>) or the
+remote node's port (<code>add_node</code>).</dd>
+<dt><strong><code>node_count</code></strong> :&ensp;<code>int</code></dt>
+<dd>Total number of nodes to join into the cluster. Determines <code>n</code> (max 3).
+(<code>enable_cluster</code> only)</dd>
+<dt><strong><code>remote_node</code></strong> :&ensp;<code>str</code></dt>
+<dd>IP address of the remote node. (<code>enable_cluster</code> only)</dd>
+<dt><strong><code>remote_current_user</code></strong> :&ensp;<code>str</code></dt>
+<dd>Username of the admin on the remote node. (<code>enable_cluster</code> only)</dd>
+<dt><strong><code>remote_current_password</code></strong> :&ensp;<code>str</code></dt>
+<dd>Password of the admin on the remote node. (<code>enable_cluster</code> only)</dd>
+<dt><strong><code>host</code></strong> :&ensp;<code>str</code></dt>
+<dd>Remote node IP to add to the cluster. (<code>add_node</code> only)</dd>
+<dt><strong><code>ensure_dbs_exist</code></strong> :&ensp;<code>list[str]</code></dt>
+<dd>List of system databases to ensure exist. Defaults to
+<code>["_users", "_replicator"]</code>.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>dict : <code>{"ok": true}</code> on success.</p></div>
+</dd>
 <dt id="couchdb3.aio.async_server.AsyncServer.up"><code class="name flex">
 <span>async def <span class="ident">up</span></span>(<span>self, raise_exception: bool = False) ‑> bool</span>
 </code></dt>
@@ -1122,12 +1873,21 @@ instance and performing a <code>check</code> request.</p>
 <li><code><a title="couchdb3.aio.async_server.AsyncServer.active_tasks" href="#couchdb3.aio.async_server.AsyncServer.active_tasks">active_tasks</a></code></li>
 <li><code><a title="couchdb3.aio.async_server.AsyncServer.all_dbs" href="#couchdb3.aio.async_server.AsyncServer.all_dbs">all_dbs</a></code></li>
 <li><code><a title="couchdb3.aio.async_server.AsyncServer.check_user" href="#couchdb3.aio.async_server.AsyncServer.check_user">check_user</a></code></li>
+<li><code><a title="couchdb3.aio.async_server.AsyncServer.cluster_setup" href="#couchdb3.aio.async_server.AsyncServer.cluster_setup">cluster_setup</a></code></li>
 <li><code><a title="couchdb3.aio.async_server.AsyncServer.create" href="#couchdb3.aio.async_server.AsyncServer.create">create</a></code></li>
 <li><code><a title="couchdb3.aio.async_server.AsyncServer.dbs_info" href="#couchdb3.aio.async_server.AsyncServer.dbs_info">dbs_info</a></code></li>
 <li><code><a title="couchdb3.aio.async_server.AsyncServer.delete" href="#couchdb3.aio.async_server.AsyncServer.delete">delete</a></code></li>
+<li><code><a title="couchdb3.aio.async_server.AsyncServer.delete_node_config" href="#couchdb3.aio.async_server.AsyncServer.delete_node_config">delete_node_config</a></code></li>
 <li><code><a title="couchdb3.aio.async_server.AsyncServer.get" href="#couchdb3.aio.async_server.AsyncServer.get">get</a></code></li>
+<li><code><a title="couchdb3.aio.async_server.AsyncServer.membership" href="#couchdb3.aio.async_server.AsyncServer.membership">membership</a></code></li>
+<li><code><a title="couchdb3.aio.async_server.AsyncServer.node_config" href="#couchdb3.aio.async_server.AsyncServer.node_config">node_config</a></code></li>
+<li><code><a title="couchdb3.aio.async_server.AsyncServer.node_stats" href="#couchdb3.aio.async_server.AsyncServer.node_stats">node_stats</a></code></li>
+<li><code><a title="couchdb3.aio.async_server.AsyncServer.node_system" href="#couchdb3.aio.async_server.AsyncServer.node_system">node_system</a></code></li>
+<li><code><a title="couchdb3.aio.async_server.AsyncServer.reload_node_config" href="#couchdb3.aio.async_server.AsyncServer.reload_node_config">reload_node_config</a></code></li>
 <li><code><a title="couchdb3.aio.async_server.AsyncServer.replicate" href="#couchdb3.aio.async_server.AsyncServer.replicate">replicate</a></code></li>
 <li><code><a title="couchdb3.aio.async_server.AsyncServer.save_user" href="#couchdb3.aio.async_server.AsyncServer.save_user">save_user</a></code></li>
+<li><code><a title="couchdb3.aio.async_server.AsyncServer.set_node_config" href="#couchdb3.aio.async_server.AsyncServer.set_node_config">set_node_config</a></code></li>
+<li><code><a title="couchdb3.aio.async_server.AsyncServer.setup_cluster" href="#couchdb3.aio.async_server.AsyncServer.setup_cluster">setup_cluster</a></code></li>
 <li><code><a title="couchdb3.aio.async_server.AsyncServer.up" href="#couchdb3.aio.async_server.AsyncServer.up">up</a></code></li>
 </ul>
 </li>
