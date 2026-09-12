@@ -1092,9 +1092,7 @@ class AsyncDatabase(AsyncBase):
                 "in a future release."
             )
         if doc_ids is not None and selector is not None:
-            raise CouchDBError(
-                "Arguments 'doc_ids' and 'selector' are mutually exclusive."
-            )
+            raise CouchDBError("Arguments 'doc_ids' and 'selector' are mutually exclusive.")
         query_kwargs = {
             "conflicts": conflicts,
             "descending": descending,

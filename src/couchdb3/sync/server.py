@@ -660,10 +660,14 @@ class Server(Base):
         -------
         bool : ``True`` on success.
         """
-        return self._post(
-            resource=f"_node/{node}/_config/_reload",
-            body={},
-        ).json().get("ok", False)
+        return (
+            self._post(
+                resource=f"_node/{node}/_config/_reload",
+                body={},
+            )
+            .json()
+            .get("ok", False)
+        )
 
     def node_stats(self, node: str = "_local") -> dict:
         """

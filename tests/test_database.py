@@ -388,10 +388,7 @@ class TestDatabase(unittest.TestCase):
         self.assertIsInstance(partition, Partition)
 
     def test_changes_normal(self):
-        docs = [
-            {"_id": f"test-changes-doc-{i}", "type": "changes-test"}
-            for i in range(3)
-        ]
+        docs = [{"_id": f"test-changes-doc-{i}", "type": "changes-test"} for i in range(3)]
         DB.bulk_docs(docs=docs)
         result = DB.changes()
         self.assertIsInstance(result, dict)
@@ -445,6 +442,7 @@ class TestDatabase(unittest.TestCase):
 
     def test_changes_mutual_exclusion_raises(self):
         from couchdb3.exceptions import CouchDBError
+
         with self.assertRaises(CouchDBError):
             DB.changes(doc_ids=["a"], selector={"type": "x"})
 

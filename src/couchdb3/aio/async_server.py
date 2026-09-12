@@ -639,11 +639,15 @@ class AsyncServer(AsyncBase):
         bool : ``True`` on success.
         """
         return (
-            await self._post(
-                resource=f"_node/{node}/_config/_reload",
-                body={},
+            (
+                await self._post(
+                    resource=f"_node/{node}/_config/_reload",
+                    body={},
+                )
             )
-        ).json().get("ok", False)
+            .json()
+            .get("ok", False)
+        )
 
     async def node_stats(self, node: str = "_local") -> dict:
         """

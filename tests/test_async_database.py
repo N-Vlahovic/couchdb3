@@ -270,8 +270,7 @@ class TestAsyncDatabaseChanges(unittest.IsolatedAsyncioTestCase):
 
     async def test_changes_normal(self):
         docs = [
-            {"_id": f"test-async-changes-doc-{i}", "type": "async-changes-test"}
-            for i in range(3)
+            {"_id": f"test-async-changes-doc-{i}", "type": "async-changes-test"} for i in range(3)
         ]
         await self.db.bulk_docs(docs=docs)
         result = await self.db.changes()
@@ -315,9 +314,7 @@ class TestAsyncDatabaseChanges(unittest.IsolatedAsyncioTestCase):
         await self.db.create(
             {"_id": "test-async-changes-selector-doc", "type": "async-changes-selector-unique"}
         )
-        result = await self.db.changes(
-            selector={"type": {"$eq": "async-changes-selector-unique"}}
-        )
+        result = await self.db.changes(selector={"type": {"$eq": "async-changes-selector-unique"}})
         self.assertIsInstance(result, dict)
         self.assertIn("results", result)
 
@@ -329,6 +326,7 @@ class TestAsyncDatabaseChanges(unittest.IsolatedAsyncioTestCase):
 
     async def test_changes_mutual_exclusion_raises(self):
         from couchdb3.exceptions import CouchDBError
+
         with self.assertRaises(CouchDBError):
             await self.db.changes(doc_ids=["a"], selector={"type": "x"})
 
