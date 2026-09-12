@@ -30,6 +30,14 @@ Server/Database method
 objects. The child sets `_owns_session = False` and therefore never closes the shared client.
 Only the owning object (the one that created the `httpx.Client`) closes it in `__del__`/`__exit__`.
 
+**Lifetime anchoring (v3.3.1, issue #39):** Children also store a strong back-reference to their
+parent — `Database._server` (set by `Server.get()`) and `Partition._database` (set by
+`Database.get_partition()`). This prevents CPython's reference-counting GC from destroying the
+session-owning parent while a child is still in use — which caused `RuntimeError: Cannot send a
+request, as the client has been closed.` when a `Server` was constructed inline and immediately
+chained (`Server(...)['db'].method()`). The back-references are exposed as read-only public
+properties `Database.server` and `Partition.database` (returns `None` for standalone objects).
+
 ---
 
 ## Migration History (v3.2.0 complete)
