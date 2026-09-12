@@ -256,6 +256,83 @@ class TestAsyncPartition(unittest.IsolatedAsyncioTestCase):
         self.assertIsInstance(self.partition, AsyncPartition)
 
 
+class TestAsyncDatabaseChanges(unittest.IsolatedAsyncioTestCase):
+    async def asyncSetUp(self):
+        self.server = AsyncServer(url=COUCHDB0_URL, user=COUCHDB_USER, password=COUCHDB_PASSWORD)
+        all_dbs = await self.server.all_dbs()
+        if DB_NAME in all_dbs:
+            self.db = await self.server.get(DB_NAME)
+        else:
+            self.db = await self.server.create(DB_NAME)
+
+    async def asyncTearDown(self):
+        await self.server.aclose()
+
+    async def test_changes_normal(self):
+        docs = [
+            {"_id": f"test-async-changes-doc-{i}", "type": "async-changes-test"}
+            for i in range(3)
+        ]
+        await self.db.bulk_docs(docs=docs)
+        result = await self.db.changes()
+        self.assertIsInstance(result, dict)
+        self.assertIn("results", result)
+        self.assertIn("last_seq", result)
+        self.assertIsInstance(result["results"], list)
+
+    async def test_changes_since(self):
+        before = await self.db.changes(since="now")
+        last_seq = before["last_seq"]
+        new_doc = {"_id": "test-async-changes-since-doc", "type": "async-changes-since"}
+        await self.db.create(new_doc)
+        result = await self.db.changes(since=last_seq)
+        ids = [r["id"] for r in result["results"]]
+        self.assertIn("test-async-changes-since-doc", ids)
+
+    async def test_changes_doc_ids(self):
+        target_id = "test-async-changes-doc-ids-doc"
+        await self.db.create({"_id": target_id, "type": "async-changes-doc-ids"})
+        result = await self.db.changes(doc_ids=[target_id])
+        self.assertIsInstance(result, dict)
+        self.assertIn("results", result)
+        ids = [r["id"] for r in result["results"]]
+        self.assertIn(target_id, ids)
+
+    async def test_changes_include_docs(self):
+        doc_id = "test-async-changes-include-docs-doc"
+        if not await self.db.get(doc_id):
+            await self.db.create({"_id": doc_id, "type": "async-changes-include-docs"})
+        result = await self.db.changes(doc_ids=[doc_id], include_docs=True)
+        self.assertIsInstance(result, dict)
+        for row in result["results"]:
+            if row["id"] == doc_id:
+                self.assertIn("doc", row)
+                break
+        else:
+            self.fail(f"Doc '{doc_id}' not found in changes results")
+
+    async def test_changes_selector(self):
+        await self.db.create(
+            {"_id": "test-async-changes-selector-doc", "type": "async-changes-selector-unique"}
+        )
+        result = await self.db.changes(
+            selector={"type": {"$eq": "async-changes-selector-unique"}}
+        )
+        self.assertIsInstance(result, dict)
+        self.assertIn("results", result)
+
+    async def test_changes_invalid_feed_raises(self):
+        with self.assertRaises(ValueError):
+            await self.db.changes(feed="continuous")
+        with self.assertRaises(ValueError):
+            await self.db.changes(feed="eventsource")
+
+    async def test_changes_mutual_exclusion_raises(self):
+        from couchdb3.exceptions import CouchDBError
+        with self.assertRaises(CouchDBError):
+            await self.db.changes(doc_ids=["a"], selector={"type": "x"})
+
+
 @atexit.register
 def rm_test_dbs() -> None:
     """Remove temporary async database test DBs using the sync client."""

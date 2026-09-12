@@ -442,6 +442,259 @@ class Server(Base):
             ),
         ).json()
 
+    def membership(self) -> dict:
+        """
+        Displays the nodes that are part of the cluster.
+
+        Returns
+        -------
+        dict : A dictionary with the following keys.
+
+          - ``all_nodes`` (`list[str]`) — all nodes this node knows about
+          - ``cluster_nodes`` (`list[str]`) — nodes that are part of the cluster
+        """
+        return self._get(resource="_membership").json()
+
+    def cluster_setup(
+        self,
+        *,
+        ensure_dbs_exist: list[str] | None = None,
+    ) -> dict:
+        """
+        Returns the status of the node or cluster, per the cluster setup wizard.
+
+        Parameters
+        ----------
+        ensure_dbs_exist : list[str]
+            List of system databases to ensure exist on the node/cluster.
+            Defaults to ``["_users", "_replicator"]``.
+
+        Returns
+        -------
+        dict : A dictionary with a single key ``state`` whose value is one of
+        ``'cluster_disabled'``, ``'single_node_disabled'``, ``'single_node_enabled'``,
+        ``'cluster_enabled'``, or ``'cluster_finished'``.
+        """
+        return self._get(
+            resource="_cluster_setup",
+            query_kwargs={"ensure_dbs_exist": ensure_dbs_exist},
+        ).json()
+
+    def setup_cluster(
+        self,
+        action: str,
+        *,
+        bind_address: str | None = None,
+        username: str | None = None,
+        password: str | None = None,
+        port: int | None = None,
+        node_count: int | None = None,
+        remote_node: str | None = None,
+        remote_current_user: str | None = None,
+        remote_current_password: str | None = None,
+        host: str | None = None,
+        ensure_dbs_exist: list[str] | None = None,
+    ) -> dict:
+        """
+        Configure a node as a single (standalone) node, as part of a cluster, or finalise
+        a cluster. This is a **destructive** operation — do not run against a shared or
+        production CouchDB instance during testing.
+
+        Parameters
+        ----------
+        action : str
+            One of ``'enable_single_node'``, ``'enable_cluster'``, ``'add_node'``, or
+            ``'finish_cluster'``.
+        bind_address : str
+            IP address to bind the current node. Use ``'0.0.0.0'`` to bind all interfaces.
+            (``enable_cluster`` and ``enable_single_node`` only)
+        username : str
+            Server-level administrator username to create, or the remote server's
+            administrator username (``add_node``).
+        password : str
+            Server-level administrator password to create, or the remote server's password
+            (``add_node``).
+        port : int
+            TCP port for this node (``enable_cluster`` / ``enable_single_node``) or the
+            remote node's port (``add_node``).
+        node_count : int
+            Total number of nodes to join into the cluster. Determines ``n`` (max 3).
+            (``enable_cluster`` only)
+        remote_node : str
+            IP address of the remote node. (``enable_cluster`` only)
+        remote_current_user : str
+            Username of the admin on the remote node. (``enable_cluster`` only)
+        remote_current_password : str
+            Password of the admin on the remote node. (``enable_cluster`` only)
+        host : str
+            Remote node IP to add to the cluster. (``add_node`` only)
+        ensure_dbs_exist : list[str]
+            List of system databases to ensure exist. Defaults to
+            ``["_users", "_replicator"]``.
+
+        Returns
+        -------
+        dict : ``{"ok": true}`` on success.
+        """
+        return self._post(
+            resource="_cluster_setup",
+            body=rm_nones_from_dict(
+                {
+                    "action": action,
+                    "bind_address": bind_address,
+                    "username": username,
+                    "password": password,
+                    "port": port,
+                    "node_count": node_count,
+                    "remote_node": remote_node,
+                    "remote_current_user": remote_current_user,
+                    "remote_current_password": remote_current_password,
+                    "host": host,
+                    "ensure_dbs_exist": ensure_dbs_exist,
+                }
+            ),
+        ).json()
+
+    def node_config(
+        self,
+        node: str = "_local",
+        section: str | None = None,
+        key: str | None = None,
+    ) -> dict | str:
+        """
+        Returns CouchDB node configuration.
+
+        - No `section` / `key` → full configuration tree (`dict`)
+        - `section` only → configuration section (`dict`)
+        - `section` + `key` → single configuration value (`str` or primitive)
+
+        The literal string ``'_local'`` (default) is an alias for the local node name.
+
+        Parameters
+        ----------
+        node : str
+            Node name. Default ``'_local'``.
+        section : str
+            Configuration section name (e.g. ``'log'``, ``'couchdb'``).
+        key : str
+            Configuration key within the section (e.g. ``'level'``).
+
+        Returns
+        -------
+        dict | str
+        """
+        resource = f"_node/{node}/_config"
+        if section:
+            resource = f"{resource}/{section}"
+            if key:
+                resource = f"{resource}/{key}"
+        return self._get(resource=resource).json()
+
+    def set_node_config(
+        self,
+        section: str,
+        key: str,
+        value: str,
+        node: str = "_local",
+    ) -> str:
+        """
+        Updates a single configuration value on a node. Returns the **old** value.
+
+        Parameters
+        ----------
+        section : str
+            Configuration section name.
+        key : str
+            Configuration key name.
+        value : str
+            New value (must be a valid JSON string).
+        node : str
+            Node name. Default ``'_local'``.
+
+        Returns
+        -------
+        str : The previous value of the configuration key.
+        """
+        return self._put(
+            resource=f"_node/{node}/_config/{section}/{key}",
+            body=value,
+        ).json()
+
+    def delete_node_config(
+        self,
+        section: str,
+        key: str,
+        node: str = "_local",
+    ) -> str:
+        """
+        Deletes a single configuration value from a node. Returns the **old** value.
+
+        Parameters
+        ----------
+        section : str
+            Configuration section name.
+        key : str
+            Configuration key name.
+        node : str
+            Node name. Default ``'_local'``.
+
+        Returns
+        -------
+        str : The deleted value.
+        """
+        return self._delete(
+            resource=f"_node/{node}/_config/{section}/{key}",
+        ).json()
+
+    def reload_node_config(self, node: str = "_local") -> bool:
+        """
+        Reloads the configuration from disk. Flushes any in-memory configuration changes
+        that have not been written to disk.
+
+        Parameters
+        ----------
+        node : str
+            Node name. Default ``'_local'``.
+
+        Returns
+        -------
+        bool : ``True`` on success.
+        """
+        return self._post(
+            resource=f"_node/{node}/_config/_reload",
+            body={},
+        ).json().get("ok", False)
+
+    def node_stats(self, node: str = "_local") -> dict:
+        """
+        Returns statistics for the specified node.
+
+        Parameters
+        ----------
+        node : str
+            Node name. Default ``'_local'``.
+
+        Returns
+        -------
+        dict
+        """
+        return self._get(resource=f"_node/{node}/_stats").json()
+
+    def node_system(self, node: str = "_local") -> dict:
+        """
+        Returns system-level statistics for the specified node.
+
+        Parameters
+        ----------
+        node : str
+            Node name. Default ``'_local'``.
+
+        Returns
+        -------
+        dict
+        """
+        return self._get(resource=f"_node/{node}/_system").json()
+
     def up(
         self,
         raise_exception: bool = False,

@@ -387,6 +387,67 @@ class TestDatabase(unittest.TestCase):
         partition = DB_PARTITIONED.get_partition("p0")
         self.assertIsInstance(partition, Partition)
 
+    def test_changes_normal(self):
+        docs = [
+            {"_id": f"test-changes-doc-{i}", "type": "changes-test"}
+            for i in range(3)
+        ]
+        DB.bulk_docs(docs=docs)
+        result = DB.changes()
+        self.assertIsInstance(result, dict)
+        self.assertIn("results", result)
+        self.assertIn("last_seq", result)
+        self.assertIsInstance(result["results"], list)
+
+    def test_changes_since(self):
+        # Capture the current sequence before creating the doc
+        before = DB.changes(since="now")
+        last_seq = before["last_seq"]
+        new_doc = {"_id": "test-changes-since-doc", "type": "changes-since"}
+        DB.create(new_doc)
+        result = DB.changes(since=last_seq)
+        ids = [r["id"] for r in result["results"]]
+        self.assertIn("test-changes-since-doc", ids)
+
+    def test_changes_doc_ids(self):
+        target_id = "test-changes-doc-ids-doc"
+        DB.create({"_id": target_id, "type": "changes-doc-ids"})
+        result = DB.changes(doc_ids=[target_id])
+        self.assertIsInstance(result, dict)
+        self.assertIn("results", result)
+        ids = [r["id"] for r in result["results"]]
+        self.assertIn(target_id, ids)
+
+    def test_changes_include_docs(self):
+        doc_id = "test-changes-include-docs-doc"
+        if doc_id not in DB:
+            DB.create({"_id": doc_id, "type": "changes-include-docs"})
+        result = DB.changes(doc_ids=[doc_id], include_docs=True)
+        self.assertIsInstance(result, dict)
+        for row in result["results"]:
+            if row["id"] == doc_id:
+                self.assertIn("doc", row)
+                break
+        else:
+            self.fail(f"Doc '{doc_id}' not found in changes results")
+
+    def test_changes_selector(self):
+        DB.create({"_id": "test-changes-selector-doc", "type": "changes-selector-unique"})
+        result = DB.changes(selector={"type": {"$eq": "changes-selector-unique"}})
+        self.assertIsInstance(result, dict)
+        self.assertIn("results", result)
+
+    def test_changes_invalid_feed_raises(self):
+        with self.assertRaises(ValueError):
+            DB.changes(feed="continuous")
+        with self.assertRaises(ValueError):
+            DB.changes(feed="eventsource")
+
+    def test_changes_mutual_exclusion_raises(self):
+        from couchdb3.exceptions import CouchDBError
+        with self.assertRaises(CouchDBError):
+            DB.changes(doc_ids=["a"], selector={"type": "x"})
+
 
 @atexit.register
 def rm_test_db() -> None:

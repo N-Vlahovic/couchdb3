@@ -91,6 +91,81 @@ class TestClient(unittest.TestCase):
         with Server(url=COUCHDB0_URL, user=COUCHDB_USER, password=COUCHDB_PASSWORD) as client:
             self.assertIsInstance(client, Server)
 
+    def test_membership(self):
+        result = CLIENT.membership()
+        self.assertIsInstance(result, dict)
+        self.assertIn("all_nodes", result)
+        self.assertIn("cluster_nodes", result)
+        self.assertIsInstance(result["all_nodes"], list)
+        self.assertIsInstance(result["cluster_nodes"], list)
+
+    def test_cluster_setup(self):
+        result = CLIENT.cluster_setup()
+        self.assertIsInstance(result, dict)
+        self.assertIn("state", result)
+        valid_states = {
+            "cluster_disabled",
+            "single_node_disabled",
+            "single_node_enabled",
+            "cluster_enabled",
+            "cluster_finished",
+        }
+        self.assertIn(result["state"], valid_states)
+
+    @unittest.skip("requires isolated CouchDB cluster — destructive operation")
+    def test_setup_cluster(self):
+        # Contract: POST /_cluster_setup returns {"ok": true}
+        # action must be one of: enable_single_node, enable_cluster, add_node, finish_cluster
+        result = CLIENT.setup_cluster(
+            action="enable_single_node",
+            bind_address="127.0.0.1",
+            username="admin",
+            password="secret",
+            port=5984,
+            ensure_dbs_exist=["_users", "_replicator"],
+        )
+        self.assertTrue(result.get("ok"))
+
+    def test_node_config_full(self):
+        result = CLIENT.node_config()
+        self.assertIsInstance(result, dict)
+        # CouchDB always has at least these top-level sections
+        self.assertIn("couchdb", result)
+
+    def test_node_config_section(self):
+        result = CLIENT.node_config(section="couchdb")
+        self.assertIsInstance(result, dict)
+
+    def test_node_config_key(self):
+        result = CLIENT.node_config(section="chttpd", key="bind_address")
+        # Returns a raw string value
+        self.assertIsInstance(result, str)
+
+    def test_set_and_delete_node_config(self):
+        section = "couchdb"
+        key = "test_opencode_key"
+        value = "test_value"
+        # Set a new key — old value is None (missing key) so CouchDB returns ""
+        CLIENT.set_node_config(section=section, key=key, value=value)
+        # Confirm it was set
+        got = CLIENT.node_config(section=section, key=key)
+        self.assertEqual(got, value)
+        # Delete it — returns old value
+        deleted = CLIENT.delete_node_config(section=section, key=key)
+        self.assertEqual(deleted, value)
+
+    def test_reload_node_config(self):
+        result = CLIENT.reload_node_config()
+        self.assertTrue(result)
+
+    def test_node_stats(self):
+        result = CLIENT.node_stats()
+        self.assertIsInstance(result, dict)
+
+    def test_node_system(self):
+        result = CLIENT.node_system()
+        self.assertIsInstance(result, dict)
+
 
 @atexit.register
 def rm_test_db() -> None:
