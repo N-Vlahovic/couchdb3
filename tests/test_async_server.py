@@ -75,6 +75,10 @@ class TestAsyncClient(unittest.IsolatedAsyncioTestCase):
                 db = await self.client.get(name)
                 self.assertIsInstance(db, AsyncDatabase)
 
+    async def test_has_db(self):
+        self.assertTrue(await self.client.has_db("_users"))
+        self.assertFalse(await self.client.has_db("definitely-not-a-real-db-12345"))
+
     async def test_replicate(self):
         if TEST_DB_NAME not in (await self.client.all_dbs()):
             await self.client.create(TEST_DB_NAME)
@@ -87,6 +91,19 @@ class TestAsyncClient(unittest.IsolatedAsyncioTestCase):
             create_target=True,
         )
         self.assertTrue(result.get("ok"))
+
+    async def test_replicate_one_shot(self):
+        if TEST_DB_NAME not in (await self.client.all_dbs()):
+            await self.client.create(TEST_DB_NAME)
+        db = await self.client.get(TEST_DB_NAME)
+        target_db = f"{self.client.url}/{TEST_DB_NAME}-rep-once"
+        result = await self.client.replicate(
+            source=db.url,
+            target=target_db,
+            create_target=True,
+        )
+        self.assertTrue(result.get("ok"))
+        self.assertIn("session_id", result)
 
     async def test_rev(self):
         self.assertIsInstance(await self.client.rev("_users/_design/_auth"), str)
@@ -186,7 +203,7 @@ class TestAsyncClient(unittest.IsolatedAsyncioTestCase):
 @atexit.register
 def rm_test_dbs() -> None:
     """Remove temporary async test databases using the sync client."""
-    for dbname in [TEST_DB_NAME, f"{TEST_DB_NAME}-rep"]:
+    for dbname in [TEST_DB_NAME, f"{TEST_DB_NAME}-rep", f"{TEST_DB_NAME}-rep-once"]:
         if dbname in _SYNC_CLIENT:
             _SYNC_CLIENT.delete(dbname)
 

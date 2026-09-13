@@ -101,6 +101,24 @@ class TestDatabase(unittest.TestCase):
         DB.compact()
         self.assertTrue(DB.info().get("compact_running"))
 
+    def test_compact_with_ddoc(self):
+        ddoc = "compact-design"
+        DB.put_design(
+            ddoc=ddoc,
+            rev=DB.rev(f"_design/{ddoc}"),
+            views={VIEW_ID: {"map": DOCUMENT_VIEW}},
+        )
+        self.assertTrue(DB.compact(ddoc=ddoc))
+
+    def test_purge(self):
+        docid = "test-purge-doc"
+        DB.save({"_id": docid, "type": "purge-test"})
+        rev = DB.rev(docid)
+        result = DB.purge({docid: [rev]})
+        self.assertIsInstance(result, dict)
+        self.assertIn("purge_seq", result)
+        self.assertIsNone(DB.rev(docid))
+
     def test_copy(self):
         docid = "doc-id-test-copy"
         doc = {"_id": docid, "name": "Test Copy"}
@@ -336,6 +354,22 @@ class TestDatabase(unittest.TestCase):
         self.assertTrue(res in {"created", "exists"})
         self.assertEqual(_id, "_design/example-ddoc")
         self.assertEqual(name, "foo-index")
+
+    def test_delete_index(self):
+        DB.save_index(index={"fields": ["name"]}, ddoc="delete-me-ddoc", name="delete-me-idx")
+        self.assertTrue(DB.delete_index(ddoc="delete-me-ddoc", name="delete-me-idx"))
+
+    def test_design_docs(self):
+        ddoc = "design-docs-ddoc"
+        DB.put_design(
+            ddoc=ddoc,
+            rev=DB.rev(f"_design/{ddoc}"),
+            views={VIEW_ID: {"map": DOCUMENT_VIEW}},
+        )
+        result = DB.design_docs()
+        self.assertIsInstance(result, ViewResult)
+        ids = [row.id for row in result.rows]
+        self.assertIn(f"_design/{ddoc}", ids)
 
     def test_security(self):
         read_user = "reader-0"

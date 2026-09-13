@@ -160,6 +160,72 @@ class AsyncDatabase(AsyncBase):
             **kwargs,
         )
 
+    async def design_docs(
+        self,
+        *,
+        conflicts: bool | None = None,
+        descending: bool | None = None,
+        endkey: str | None = None,
+        include_docs: bool | None = None,
+        keys: Iterable[str] | None = None,
+        limit: int | None = None,
+        skip: int | None = None,
+        startkey: str | None = None,
+        update_seq: bool | None = None,
+    ) -> ViewResult:
+        """
+        Executes the built-in `_design_docs` view, returning all the design documents in the database.
+
+        This is a shorthand for `_all_docs` filtered to the `_design/` key range.
+
+        Parameters
+        ----------
+        conflicts : bool
+            Include conflicts information. Ignored if `include_docs` isn't `True`. Default is `None`.
+        descending : bool
+            Return the documents in descending order by key. Default is `None`.
+        endkey : str
+            Stop returning records when the specified key is reached. Default is `None`.
+        include_docs : bool
+            Include the associated document with each row. Default is `None`.
+        keys : Iterable[str]
+            Return only documents where the key matches one of the keys specified in the argument.
+            Default is `None`.
+        limit : int
+            Limit the number of the returned documents. Default is `None`.
+        skip : int
+            Skip this number of records before starting to return the results. Default is `None`.
+        startkey : str
+            Return records starting with the specified key. Default is `None`.
+        update_seq : bool
+            Whether to include an `update_seq` value indicating the sequence id of the database.
+            Default is `None`.
+
+        Returns
+        -------
+        ViewResult
+        """
+        return ViewResult(
+            **(
+                await self._get(
+                    resource="_design_docs",
+                    query_kwargs=rm_nones_from_dict(
+                        {
+                            "conflicts": conflicts,
+                            "descending": descending,
+                            "endkey": endkey,
+                            "include_docs": include_docs,
+                            "keys": keys,
+                            "limit": limit,
+                            "skip": skip,
+                            "startkey": startkey,
+                            "update_seq": update_seq,
+                        }
+                    ),
+                )
+            ).json()
+        )
+
     async def bulk_docs(
         self,
         docs: list[dict | Document],
@@ -757,7 +823,7 @@ class AsyncDatabase(AsyncBase):
         tuple[str, bool, str] : (id, ok, rev)
         """
         if partitioned:
-            options = (options or {}).update({"partitioned": partitioned})
+            options = {**(options or {}), "partitioned": partitioned}
         return await self.save(
             doc=rm_nones_from_dict(
                 {
@@ -857,6 +923,28 @@ class AsyncDatabase(AsyncBase):
             )
         ).json()
         return data["result"], data["id"], data["name"]
+
+    async def delete_index(self, ddoc: str, name: str, index_type: str = "json") -> bool:
+        """
+        Delete an index from a database. For more info, please refer to
+        [the official documentation](https://docs.couchdb.org/en/main/api/database/find.html#db-index).
+
+        Parameters
+        ----------
+        ddoc : str
+            Name of the design document the index belongs to. A `_design/` prefix is stripped
+            automatically.
+        name : str
+            Name of the index.
+        index_type : str
+            Can be `json` or `text`. Defaults to `json`.
+
+        Returns
+        -------
+        bool : `True` upon successful deletion.
+        """
+        ddoc = ddoc.removeprefix("_design/")
+        return (await self._delete(resource=f"_index/{ddoc}/{index_type}/{name}")).json().get("ok")
 
     async def security(self) -> SecurityDocument:
         """
@@ -1386,7 +1474,7 @@ class AsyncPartition(AsyncDatabase):
     async def bulk_get(self, docs: list[dict | Document], revs: bool = False) -> list[dict]:
         """See `AsyncDatabase.bulk_get`. Prepends partition ID to document IDs."""
         return await super().bulk_get(
-            docs=[self.add_partition_to_doc(doc) for doc in docs],
+            docs=[self.add_partition_to_bulk_get_doc(doc) for doc in docs],
             revs=revs,
         )
 
@@ -1522,7 +1610,7 @@ class AsyncPartition(AsyncDatabase):
 
     def add_partition_to_str(self, string: str) -> str:
         """Append the instance's partition ID to a string if not already present."""
-        if string.startswith(self.partition_id):
+        if string.startswith(f"{self.partition_id}:"):
             return string
         return f"{self.partition_id}:{string}"
 
@@ -1532,4 +1620,12 @@ class AsyncPartition(AsyncDatabase):
         if docid is None:
             return doc
         doc["_id"] = self.add_partition_to_str(docid)
+        return doc
+
+    def add_partition_to_bulk_get_doc(self, doc: Document | dict) -> Document | dict:
+        """Append the instance's partition ID to a `bulk_get` document's `id` (or `_id`)."""
+        key = "_id" if "_id" in doc else "id" if "id" in doc else None
+        if key is None:
+            return doc
+        doc[key] = self.add_partition_to_str(doc[key])
         return doc
