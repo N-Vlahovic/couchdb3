@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import atexit
 import unittest
+import warnings
 
 from couchdb3.sync import Database, Server
 from couchdb3.utils import COUCH_DB_RESERVED_DB_NAMES
@@ -71,6 +72,21 @@ class TestClient(unittest.TestCase):
             create_target=True,
         )
         self.assertTrue(result.get("ok"))
+
+    def test_replicate_deprecation_warning(self):
+        if TEST_DB_NAME not in CLIENT:
+            CLIENT.create(TEST_DB_NAME)
+        target_db = f"{CLIENT.url}/{TEST_DB_NAME}-rep"
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            CLIENT.replicate(
+                source=CLIENT.get(TEST_DB_NAME).url,
+                target=target_db,
+                replication_id="replication-id",
+                continuous=True,
+                create_target=True,
+            )
+        self.assertTrue(any(issubclass(w.category, DeprecationWarning) for w in caught))
 
     def test_replicate_one_shot(self):
         if TEST_DB_NAME not in CLIENT:

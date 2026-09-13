@@ -36,8 +36,8 @@
 - **`changes_stream()` for `feed=continuous|eventsource`** — largest remaining functional gap; `changes()` explicitly raises `ValueError` for streaming feeds and the README documents this as unsupported.
   - **sync:** implement `Database.changes_stream()` as a generator using `httpx.Client.stream()`, yielding parsed JSON objects line-by-line from the NDJSON response; caller controls iteration and closure via a `with` block or explicit `.close()`
   - **async:** implement `AsyncDatabase.changes_stream()` as an async generator using `httpx.AsyncClient.stream()`, yielding the same parsed objects; caller drives with `async for` and the underlying connection is released on `aclose()` or generator exhaustion
-- **`pdoc>=16.0.0` + `pdoc3>=0.11.6` conflict in `[project.optional-dependencies] dev`** — both packages ship a `pdoc` module; a fresh `uv sync --extra dev` causes `make html` to break. `scripts/html.sh` was patched (`pdoc` → `pdoc3`) as a workaround, but the root cause remains. Fix: drop `pdoc>=16.0.0` from dev deps.
-- **`Server.replicate(replication_id=...)` silently ignored** — no `DeprecationWarning` is emitted, and this represents a silent behaviour change from the pre-v3.4.0 `_replicator` path. Fix: emit `warnings.warn(..., DeprecationWarning)` when `replication_id` is passed (both sync and async).
+- <s>`pdoc>=16.0.0` + `pdoc3>=0.11.6` conflict in `[project.optional-dependencies] dev`</s> — fixed in PR #42: dropped `pdoc>=16.0.0` from dev deps
+- <s>`Server.replicate(replication_id=...)` silently ignored</s> — fixed in v3.4.2: `DeprecationWarning` now emitted when `replication_id` is passed (both sync and async)
 
 ### p3 — minor
 
