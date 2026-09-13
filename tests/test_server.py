@@ -75,12 +75,13 @@ class TestClient(unittest.TestCase):
     def test_replicate_one_shot(self):
         if TEST_DB_NAME not in CLIENT:
             CLIENT.create(TEST_DB_NAME)
-        target_db = f"{CLIENT.url}/{TEST_DB_NAME}-rep-once"
-        result = CLIENT.replicate(
-            source=CLIENT.get(TEST_DB_NAME).url,
-            target=target_db,
-            create_target=True,
-        )
+        source_db = CLIENT.get(TEST_DB_NAME)
+        if not source_db.rev("replicate-one-shot-doc"):
+            source_db.save({"_id": "replicate-one-shot-doc", "type": "replicate"})
+        auth_header = {"Authorization": f"Basic {CLIENT.basic}"}
+        source = {"url": source_db.url, "headers": auth_header}
+        target = {"url": f"{CLIENT.url}/{TEST_DB_NAME}-rep-once", "headers": auth_header}
+        result = CLIENT.replicate(source=source, target=target, create_target=True)
         self.assertTrue(result.get("ok"))
         self.assertIn("session_id", result)
 

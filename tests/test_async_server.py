@@ -95,13 +95,13 @@ class TestAsyncClient(unittest.IsolatedAsyncioTestCase):
     async def test_replicate_one_shot(self):
         if TEST_DB_NAME not in (await self.client.all_dbs()):
             await self.client.create(TEST_DB_NAME)
-        db = await self.client.get(TEST_DB_NAME)
-        target_db = f"{self.client.url}/{TEST_DB_NAME}-rep-once"
-        result = await self.client.replicate(
-            source=db.url,
-            target=target_db,
-            create_target=True,
-        )
+        source_db = await self.client.get(TEST_DB_NAME)
+        if not await source_db.rev("replicate-one-shot-doc"):
+            await source_db.save({"_id": "replicate-one-shot-doc", "type": "replicate"})
+        auth_header = {"Authorization": f"Basic {self.client.basic}"}
+        source = {"url": source_db.url, "headers": auth_header}
+        target = {"url": f"{self.client.url}/{TEST_DB_NAME}-rep-once", "headers": auth_header}
+        result = await self.client.replicate(source=source, target=target, create_target=True)
         self.assertTrue(result.get("ok"))
         self.assertIn("session_id", result)
 
