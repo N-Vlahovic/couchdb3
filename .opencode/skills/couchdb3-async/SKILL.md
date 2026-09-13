@@ -142,7 +142,7 @@ tests/
 └── test_async_database.py
 ```
 `make test` picks up `IsolatedAsyncioTestCase` automatically.
-**Current test count: 150 tests, 2 skipped** (as of v3.4.1).
+**Current test count: 152 tests, 2 skipped** (as of v3.4.2).
 
 ---
 
@@ -188,4 +188,9 @@ Added to `AsyncDatabase` (sync + async):
 
 ### v3.4.1 (PR #41)
 - Package metadata only: corrected author email in `pyproject.toml` / `setup.py`.
+
+### v3.4.2 (PR #43)
+- `AsyncServer.replicate()` (and sync `Server.replicate()`) now emits `DeprecationWarning` when
+  `replication_id` is passed — previously silently ignored since v3.4.0 switched to `/_replicate`.
+- 2 new tests: `test_replicate_deprecation_warning` (sync + async); test count: 152.
 

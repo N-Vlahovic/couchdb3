@@ -46,6 +46,7 @@ Shared: `utils.check_response` (maps HTTP codes → `CouchDBError` subclasses).
    - Added `Database.delete_index()`, `Database.design_docs()`, `AsyncServer.has_db()` (all sync + async)
    - Full sync `Partition` method test coverage; 150 tests total (2 skipped)
 7. **Package metadata fix** — v3.4.1, PR #41: corrected redacted author email
+8. **Deprecation warning** — v3.4.2, PR #43: `Server.replicate(replication_id=...)` now emits `DeprecationWarning` (sync + async); 152 tests (2 skipped)
 
 ## Key conventions
 
