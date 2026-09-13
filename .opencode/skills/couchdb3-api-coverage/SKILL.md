@@ -31,20 +31,28 @@ description: Use when implementing or tracking missing CouchDB API endpoint cove
 
 ---
 
+## Batch 2 — Database & ergonomic endpoints (v3.4.0)
+
+| Endpoint | Method(s) | Class | Status |
+|---|---|---|---|
+| `DELETE /{db}/_index/{ddoc}/{type}/{name}` | `Database.delete_index()` | Database / AsyncDatabase | ✅ |
+| `GET /{db}/_design_docs` | `Database.design_docs()` | Database / AsyncDatabase | ✅ |
+| `HEAD /{db}` (existence) | `AsyncServer.has_db()` | AsyncServer | ✅ |
+
+Bug fixes in v3.4.0: `Database.put_design()` no longer drops `options` when
+`partitioned=True`; `Server.replicate()` now posts to the one-shot `/_replicate`
+endpoint (dropping the invalid `_id` field and mapping `filter_func` → `filter`).
+
+---
+
 ## Still pending (from TODO.md)
 
 | Endpoint | Notes |
 |---|---|
-| `DELETE /{db}/_index/{ddoc}/json/{name}` | Delete a Mango index |
-| `GET /{db}/_design_docs` | List design documents |
 | `GET /{db}/_local_docs` / `GET\|PUT\|DELETE /{db}/_local/{docid}` | Local documents |
-| `GET /_membership` | ✅ done in Batch 1 |
-| `POST /_cluster_setup` / `GET /_cluster_setup` | ✅ done in Batch 1 |
-| `GET /_node/{node}/_config`, `_stats`, `_system` | ✅ done in Batch 1 |
 | `GET\|PUT /{db}/_revs_limit` | Revision limit management |
 | `POST /{db}/_missing_revs` / `POST /{db}/_revs_diff` | Replication helpers |
 | `POST /{db}/_view_cleanup` | View index cleanup |
-| `__contains__` on `AsyncServer` | Ergonomic gap — Python disallows async `__contains__` but a helper like `await client.has_db(name)` could fill the gap |
 | `GET /{db}/_changes` with `feed=continuous\|eventsource` | Streaming feeds — deferred; requires iterator/stream response handling |
 
 ---
@@ -147,3 +155,19 @@ Annotate as `dict | str` to cover all three cases.
 | `tests/test_async_server.py` | Same tests, async |
 | `TODO.md` | Struck through completed items |
 | `pyproject.toml` / `setup.py` | Version bumped to `3.3.0` |
+
+## Files modified in Batch 2
+
+| File | Change |
+|---|---|
+| `src/couchdb3/sync/database.py` | Fixed `put_design` options bug; added `delete_index`, `design_docs`; removed orphaned `:return:` stub |
+| `src/couchdb3/aio/async_database.py` | Same, async |
+| `src/couchdb3/sync/server.py` | Fixed `replicate` → `/_replicate`; fixed `__repr__` docstring |
+| `src/couchdb3/aio/async_server.py` | Fixed `replicate` → `/_replicate`; added `has_db` |
+| `tests/test_database.py` | `test_delete_index`, `test_design_docs`, `test_compact_with_ddoc`, `test_purge` |
+| `tests/test_async_database.py` | Same tests, async |
+| `tests/test_server.py` | `test_replicate` now asserts `session_id`; `test_cookie_auth_token_renewal` |
+| `tests/test_async_server.py` | `test_has_db`; `test_replicate` now asserts `session_id` |
+| `tests/test_partitioned_database.py` | `TestPartition` — full sync `Partition` method coverage |
+| `TODO.md` | Struck through completed items |
+| `pyproject.toml` / `setup.py` | Version bumped to `3.4.0` |

@@ -187,6 +187,70 @@ el.replaceWith(d);
             **kwargs,
         )
 
+    def design_docs(
+        self,
+        *,
+        conflicts: bool | None = None,
+        descending: bool | None = None,
+        endkey: str | None = None,
+        include_docs: bool | None = None,
+        keys: Iterable[str] | None = None,
+        limit: int | None = None,
+        skip: int | None = None,
+        startkey: str | None = None,
+        update_seq: bool | None = None,
+    ) -&gt; ViewResult:
+        &#34;&#34;&#34;
+        Executes the built-in `_design_docs` view, returning all the design documents in the database.
+
+        This is a shorthand for `_all_docs` filtered to the `_design/` key range.
+
+        Parameters
+        ----------
+        conflicts : bool
+            Include conflicts information. Ignored if `include_docs` isn&#39;t `True`. Default is `None`.
+        descending : bool
+            Return the documents in descending order by key. Default is `None`.
+        endkey : str
+            Stop returning records when the specified key is reached. Default is `None`.
+        include_docs : bool
+            Include the associated document with each row. Default is `None`.
+        keys : Iterable[str]
+            Return only documents where the key matches one of the keys specified in the argument.
+            Default is `None`.
+        limit : int
+            Limit the number of the returned documents. Default is `None`.
+        skip : int
+            Skip this number of records before starting to return the results. Default is `None`.
+        startkey : str
+            Return records starting with the specified key. Default is `None`.
+        update_seq : bool
+            Whether to include an `update_seq` value indicating the sequence id of the database.
+            Default is `None`.
+
+        Returns
+        -------
+        ViewResult
+        &#34;&#34;&#34;
+        return ViewResult(
+            **self._get(
+                resource=&#34;_design_docs&#34;,
+                query_kwargs=rm_nones_from_dict(
+                    {
+                        &#34;conflicts&#34;: conflicts,
+                        &#34;descending&#34;: descending,
+                        &#34;endkey&#34;: endkey,
+                        &#34;include_docs&#34;: include_docs,
+                        &#34;keys&#34;: keys,
+                        &#34;limit&#34;: limit,
+                        &#34;skip&#34;: skip,
+                        &#34;startkey&#34;: startkey,
+                        &#34;update_seq&#34;: update_seq,
+                    }
+                ),
+            ).json()
+        )
+
     def bulk_docs(self, docs: list[dict | Document], new_edits: bool = True) -&gt; list[dict]:
         &#34;&#34;&#34;
         The bulk document API allows you to create and update multiple documents at the same time within a single
@@ -873,7 +937,7 @@ el.replaceWith(d);
         ... })
         &#34;&#34;&#34;
         if partitioned:
-            options = (options or {}).update({&#34;partitioned&#34;: partitioned})
+            options = {**(options or {}), &#34;partitioned&#34;: partitioned}
         return self.save(
             doc=rm_nones_from_dict(
                 {
@@ -918,9 +982,6 @@ el.replaceWith(d);
         Returns
         -------
         Tuple[str, bool, str] : The document&#39;s id ( `str`), the operation status (`bool`) and the revision ( `str`).
-        &#34;&#34;&#34;
-        &#34;&#34;&#34;
-        :return: 
         &#34;&#34;&#34;
         batch = &#34;ok&#34; if batch else None
         data = self._put(
@@ -994,6 +1055,28 @@ el.replaceWith(d);
             ),
         ).json()
         return data[&#34;result&#34;], data[&#34;id&#34;], data[&#34;name&#34;]
+
+    def delete_index(self, ddoc: str, name: str, index_type: str = &#34;json&#34;) -&gt; bool:
+        &#34;&#34;&#34;
+        Delete an index from a database. For more info, please refer to
+        [the official documentation](https://docs.couchdb.org/en/main/api/database/find.html#db-index).
+
+        Parameters
+        ----------
+        ddoc : str
+            Name of the design document the index belongs to. A `_design/` prefix is stripped
+            automatically.
+        name : str
+            Name of the index.
+        index_type : str
+            Can be `json` or `text`. Defaults to `json`.
+
+        Returns
+        -------
+        bool : `True` upon successful deletion.
+        &#34;&#34;&#34;
+        ddoc = ddoc.removeprefix(&#34;_design/&#34;)
+        return self._delete(resource=f&#34;_index/{ddoc}/{index_type}/{name}&#34;).json().get(&#34;ok&#34;)
 
     def security(self) -&gt; SecurityDocument:
         &#34;&#34;&#34;
@@ -2062,6 +2145,154 @@ database. For more info, please refer to
 <h2 id="returns">Returns</h2>
 <p>bool : <code>True</code> upon successful deletion.</p></div>
 </dd>
+<dt id="couchdb3.sync.database.Database.delete_index"><code class="name flex">
+<span>def <span class="ident">delete_index</span></span>(<span>self, ddoc: str, name: str, index_type: str = 'json') ‑> bool</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def delete_index(self, ddoc: str, name: str, index_type: str = &#34;json&#34;) -&gt; bool:
+    &#34;&#34;&#34;
+    Delete an index from a database. For more info, please refer to
+    [the official documentation](https://docs.couchdb.org/en/main/api/database/find.html#db-index).
+
+    Parameters
+    ----------
+    ddoc : str
+        Name of the design document the index belongs to. A `_design/` prefix is stripped
+        automatically.
+    name : str
+        Name of the index.
+    index_type : str
+        Can be `json` or `text`. Defaults to `json`.
+
+    Returns
+    -------
+    bool : `True` upon successful deletion.
+    &#34;&#34;&#34;
+    ddoc = ddoc.removeprefix(&#34;_design/&#34;)
+    return self._delete(resource=f&#34;_index/{ddoc}/{index_type}/{name}&#34;).json().get(&#34;ok&#34;)</code></pre>
+</details>
+<div class="desc"><p>Delete an index from a database. For more info, please refer to
+<a href="https://docs.couchdb.org/en/main/api/database/find.html#db-index">the official documentation</a>.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>ddoc</code></strong> :&ensp;<code>str</code></dt>
+<dd>Name of the design document the index belongs to. A <code>_design/</code> prefix is stripped
+automatically.</dd>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>Name of the index.</dd>
+<dt><strong><code>index_type</code></strong> :&ensp;<code>str</code></dt>
+<dd>Can be <code>json</code> or <code>text</code>. Defaults to <code>json</code>.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>bool : <code>True</code> upon successful deletion.</p></div>
+</dd>
+<dt id="couchdb3.sync.database.Database.design_docs"><code class="name flex">
+<span>def <span class="ident">design_docs</span></span>(<span>self,<br>*,<br>conflicts: bool | None = None,<br>descending: bool | None = None,<br>endkey: str | None = None,<br>include_docs: bool | None = None,<br>keys: Iterable[str] | None = None,<br>limit: int | None = None,<br>skip: int | None = None,<br>startkey: str | None = None,<br>update_seq: bool | None = None) ‑> <a title="couchdb3.view.ViewResult" href="../view.html#couchdb3.view.ViewResult">ViewResult</a></span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def design_docs(
+    self,
+    *,
+    conflicts: bool | None = None,
+    descending: bool | None = None,
+    endkey: str | None = None,
+    include_docs: bool | None = None,
+    keys: Iterable[str] | None = None,
+    limit: int | None = None,
+    skip: int | None = None,
+    startkey: str | None = None,
+    update_seq: bool | None = None,
+) -&gt; ViewResult:
+    &#34;&#34;&#34;
+    Executes the built-in `_design_docs` view, returning all the design documents in the database.
+
+    This is a shorthand for `_all_docs` filtered to the `_design/` key range.
+
+    Parameters
+    ----------
+    conflicts : bool
+        Include conflicts information. Ignored if `include_docs` isn&#39;t `True`. Default is `None`.
+    descending : bool
+        Return the documents in descending order by key. Default is `None`.
+    endkey : str
+        Stop returning records when the specified key is reached. Default is `None`.
+    include_docs : bool
+        Include the associated document with each row. Default is `None`.
+    keys : Iterable[str]
+        Return only documents where the key matches one of the keys specified in the argument.
+        Default is `None`.
+    limit : int
+        Limit the number of the returned documents. Default is `None`.
+    skip : int
+        Skip this number of records before starting to return the results. Default is `None`.
+    startkey : str
+        Return records starting with the specified key. Default is `None`.
+    update_seq : bool
+        Whether to include an `update_seq` value indicating the sequence id of the database.
+        Default is `None`.
+
+    Returns
+    -------
+    ViewResult
+    &#34;&#34;&#34;
+    return ViewResult(
+        **self._get(
+            resource=&#34;_design_docs&#34;,
+            query_kwargs=rm_nones_from_dict(
+                {
+                    &#34;conflicts&#34;: conflicts,
+                    &#34;descending&#34;: descending,
+                    &#34;endkey&#34;: endkey,
+                    &#34;include_docs&#34;: include_docs,
+                    &#34;keys&#34;: keys,
+                    &#34;limit&#34;: limit,
+                    &#34;skip&#34;: skip,
+                    &#34;startkey&#34;: startkey,
+                    &#34;update_seq&#34;: update_seq,
+                }
+            ),
+        ).json()
+    )</code></pre>
+</details>
+<div class="desc"><p>Executes the built-in <code>_design_docs</code> view, returning all the design documents in the database.</p>
+<p>This is a shorthand for <code>_all_docs</code> filtered to the <code>_design/</code> key range.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>conflicts</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Include conflicts information. Ignored if <code>include_docs</code> isn't <code>True</code>. Default is <code>None</code>.</dd>
+<dt><strong><code>descending</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Return the documents in descending order by key. Default is <code>None</code>.</dd>
+<dt><strong><code>endkey</code></strong> :&ensp;<code>str</code></dt>
+<dd>Stop returning records when the specified key is reached. Default is <code>None</code>.</dd>
+<dt><strong><code>include_docs</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Include the associated document with each row. Default is <code>None</code>.</dd>
+<dt><strong><code>keys</code></strong> :&ensp;<code>Iterable[str]</code></dt>
+<dd>Return only documents where the key matches one of the keys specified in the argument.
+Default is <code>None</code>.</dd>
+<dt><strong><code>limit</code></strong> :&ensp;<code>int</code></dt>
+<dd>Limit the number of the returned documents. Default is <code>None</code>.</dd>
+<dt><strong><code>skip</code></strong> :&ensp;<code>int</code></dt>
+<dd>Skip this number of records before starting to return the results. Default is <code>None</code>.</dd>
+<dt><strong><code>startkey</code></strong> :&ensp;<code>str</code></dt>
+<dd>Return records starting with the specified key. Default is <code>None</code>.</dd>
+<dt><strong><code>update_seq</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Whether to include an <code>update_seq</code> value indicating the sequence id of the database.
+Default is <code>None</code>.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>ViewResult</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+</dd>
 <dt id="couchdb3.sync.database.Database.explain"><code class="name flex">
 <span>def <span class="ident">explain</span></span>(<span>self,<br>selector: dict,<br>limit: int = 25,<br>skip: int = 0,<br>sort: list[dict] | None = None,<br>fields: list[str] | None = None,<br>use_index: str | list[str] | None = None,<br>conflicts: bool = False,<br>r: int = 1,<br>bookmark: str | None = None,<br>update: bool = True,<br>stable: bool | None = None,<br>execution_stats: bool = False) ‑> dict</span>
 </code></dt>
@@ -2888,7 +3119,7 @@ Must be provided when passing the <code>content</code> argument.</dd>
     ... })
     &#34;&#34;&#34;
     if partitioned:
-        options = (options or {}).update({&#34;partitioned&#34;: partitioned})
+        options = {**(options or {}), &#34;partitioned&#34;: partitioned}
     return self.save(
         doc=rm_nones_from_dict(
             {
@@ -2980,9 +3211,6 @@ design document functions.</dd>
     Returns
     -------
     Tuple[str, bool, str] : The document&#39;s id ( `str`), the operation status (`bool`) and the revision ( `str`).
-    &#34;&#34;&#34;
-    &#34;&#34;&#34;
-    :return: 
     &#34;&#34;&#34;
     batch = &#34;ok&#34; if batch else None
     data = self._put(
@@ -3618,7 +3846,6 @@ ViewResult: {
         ddoc: str,
         view: str | None = None,
         *,
-        # partition: str = None,
         conflicts: bool | None = None,
         descending: bool | None = None,
         endkey: Any | None = None,
@@ -3761,7 +3988,7 @@ ViewResult: {
         Appends the partition&#39;s ID to the documents&#39; ID.
         &#34;&#34;&#34;
         return super().bulk_get(
-            docs=[self.add_partition_to_doc(doc) for doc in docs],
+            docs=[self.add_partition_to_bulk_get_doc(doc) for doc in docs],
             revs=revs,
         )
 
@@ -3961,7 +4188,7 @@ ViewResult: {
         &#34;&#34;&#34;
         Append the instance&#39;s partition ID to a string.
         &#34;&#34;&#34;
-        if string.startswith(self.partition_id):
+        if string.startswith(f&#34;{self.partition_id}:&#34;):
             return string
         return f&#34;{self.partition_id}:{string}&#34;
 
@@ -3973,6 +4200,16 @@ ViewResult: {
         if docid is None:
             return doc
         doc[&#34;_id&#34;] = self.add_partition_to_str(docid)
+        return doc
+
+    def add_partition_to_bulk_get_doc(self, doc: Document | dict) -&gt; Document | dict:
+        &#34;&#34;&#34;
+        Append the instance&#39;s partition ID to a `bulk_get` document&#39;s `id` (or `_id`).
+        &#34;&#34;&#34;
+        key = &#34;_id&#34; if &#34;_id&#34; in doc else &#34;id&#34; if &#34;id&#34; in doc else None
+        if key is None:
+            return doc
+        doc[key] = self.add_partition_to_str(doc[key])
         return doc</code></pre>
 </details>
 <div class="desc"><p>Abstract Couchdb partition</p>
@@ -4047,6 +4284,26 @@ was constructed directly (i.e. not via <code><a title="couchdb3.sync.database.Da
 </dl>
 <h3>Methods</h3>
 <dl>
+<dt id="couchdb3.sync.database.Partition.add_partition_to_bulk_get_doc"><code class="name flex">
+<span>def <span class="ident">add_partition_to_bulk_get_doc</span></span>(<span>self, doc: Document | dict) ‑> <a title="couchdb3.document.Document" href="../document.html#couchdb3.document.Document">Document</a> | dict</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add_partition_to_bulk_get_doc(self, doc: Document | dict) -&gt; Document | dict:
+    &#34;&#34;&#34;
+    Append the instance&#39;s partition ID to a `bulk_get` document&#39;s `id` (or `_id`).
+    &#34;&#34;&#34;
+    key = &#34;_id&#34; if &#34;_id&#34; in doc else &#34;id&#34; if &#34;id&#34; in doc else None
+    if key is None:
+        return doc
+    doc[key] = self.add_partition_to_str(doc[key])
+    return doc</code></pre>
+</details>
+<div class="desc"><p>Append the instance's partition ID to a <code>bulk_get</code> document's <code>id</code> (or <code>_id</code>).</p></div>
+</dd>
 <dt id="couchdb3.sync.database.Partition.add_partition_to_doc"><code class="name flex">
 <span>def <span class="ident">add_partition_to_doc</span></span>(<span>self, doc: Document | dict) ‑> <a title="couchdb3.document.Document" href="../document.html#couchdb3.document.Document">Document</a> | dict</span>
 </code></dt>
@@ -4079,7 +4336,7 @@ was constructed directly (i.e. not via <code><a title="couchdb3.sync.database.Da
     &#34;&#34;&#34;
     Append the instance&#39;s partition ID to a string.
     &#34;&#34;&#34;
-    if string.startswith(self.partition_id):
+    if string.startswith(f&#34;{self.partition_id}:&#34;):
         return string
     return f&#34;{self.partition_id}:{string}&#34;</code></pre>
 </details>
@@ -4168,7 +4425,7 @@ Appends the partition's ID to the documents' ID.</p></div>
     Appends the partition&#39;s ID to the documents&#39; ID.
     &#34;&#34;&#34;
     return super().bulk_get(
-        docs=[self.add_partition_to_doc(doc) for doc in docs],
+        docs=[self.add_partition_to_bulk_get_doc(doc) for doc in docs],
         revs=revs,
     )</code></pre>
 </details>
@@ -4552,7 +4809,6 @@ Appends the partition's ID to the document's ID.</p></div>
     ddoc: str,
     view: str | None = None,
     *,
-    # partition: str = None,
     conflicts: bool | None = None,
     descending: bool | None = None,
     endkey: Any | None = None,
@@ -4748,6 +5004,8 @@ view reflects. Default is <code>False</code>.</dd>
 <li><code><a title="couchdb3.sync.database.Database.changes" href="#couchdb3.sync.database.Database.changes">changes</a></code></li>
 <li><code><a title="couchdb3.sync.database.Database.check" href="base.html#couchdb3.sync.base.Base.check">check</a></code></li>
 <li><code><a title="couchdb3.sync.database.Database.compact" href="#couchdb3.sync.database.Database.compact">compact</a></code></li>
+<li><code><a title="couchdb3.sync.database.Database.delete_index" href="#couchdb3.sync.database.Database.delete_index">delete_index</a></code></li>
+<li><code><a title="couchdb3.sync.database.Database.design_docs" href="#couchdb3.sync.database.Database.design_docs">design_docs</a></code></li>
 <li><code><a title="couchdb3.sync.database.Database.explain" href="#couchdb3.sync.database.Database.explain">explain</a></code></li>
 <li><code><a title="couchdb3.sync.database.Database.get_design" href="#couchdb3.sync.database.Database.get_design">get_design</a></code></li>
 <li><code><a title="couchdb3.sync.database.Database.get_partition" href="#couchdb3.sync.database.Database.get_partition">get_partition</a></code></li>
@@ -4790,6 +5048,8 @@ view reflects. Default is <code>False</code>.</dd>
 <li><code><a title="couchdb3.sync.database.Database.create" href="#couchdb3.sync.database.Database.create">create</a></code></li>
 <li><code><a title="couchdb3.sync.database.Database.delete" href="#couchdb3.sync.database.Database.delete">delete</a></code></li>
 <li><code><a title="couchdb3.sync.database.Database.delete_attachment" href="#couchdb3.sync.database.Database.delete_attachment">delete_attachment</a></code></li>
+<li><code><a title="couchdb3.sync.database.Database.delete_index" href="#couchdb3.sync.database.Database.delete_index">delete_index</a></code></li>
+<li><code><a title="couchdb3.sync.database.Database.design_docs" href="#couchdb3.sync.database.Database.design_docs">design_docs</a></code></li>
 <li><code><a title="couchdb3.sync.database.Database.explain" href="#couchdb3.sync.database.Database.explain">explain</a></code></li>
 <li><code><a title="couchdb3.sync.database.Database.find" href="#couchdb3.sync.database.Database.find">find</a></code></li>
 <li><code><a title="couchdb3.sync.database.Database.get" href="#couchdb3.sync.database.Database.get">get</a></code></li>
@@ -4811,6 +5071,7 @@ view reflects. Default is <code>False</code>.</dd>
 <li>
 <h4><code><a title="couchdb3.sync.database.Partition" href="#couchdb3.sync.database.Partition">Partition</a></code></h4>
 <ul class="">
+<li><code><a title="couchdb3.sync.database.Partition.add_partition_to_bulk_get_doc" href="#couchdb3.sync.database.Partition.add_partition_to_bulk_get_doc">add_partition_to_bulk_get_doc</a></code></li>
 <li><code><a title="couchdb3.sync.database.Partition.add_partition_to_doc" href="#couchdb3.sync.database.Partition.add_partition_to_doc">add_partition_to_doc</a></code></li>
 <li><code><a title="couchdb3.sync.database.Partition.add_partition_to_str" href="#couchdb3.sync.database.Partition.add_partition_to_str">add_partition_to_str</a></code></li>
 <li><code><a title="couchdb3.sync.database.Partition.all_docs" href="#couchdb3.sync.database.Partition.all_docs">all_docs</a></code></li>

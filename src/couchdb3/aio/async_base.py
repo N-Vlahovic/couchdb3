@@ -162,10 +162,10 @@ class AsyncBase:
         bool : `True` if the auth token is expired or absent.
         """
         try:
-            return (
-                next(_.expires for _ in self.session.cookies.jar if _.name == "AuthSession")
-                <= datetime.now(UTC).timestamp()
-            )
+            expires = next(_.expires for _ in self.session.cookies.jar if _.name == "AuthSession")
+            if expires is None:
+                return False
+            return expires <= datetime.now(UTC).timestamp()
         except StopIteration:
             return True
 

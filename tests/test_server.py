@@ -72,6 +72,19 @@ class TestClient(unittest.TestCase):
         )
         self.assertTrue(result.get("ok"))
 
+    def test_replicate_one_shot(self):
+        if TEST_DB_NAME not in CLIENT:
+            CLIENT.create(TEST_DB_NAME)
+        source_db = CLIENT.get(TEST_DB_NAME)
+        if not source_db.rev("replicate-one-shot-doc"):
+            source_db.save({"_id": "replicate-one-shot-doc", "type": "replicate"})
+        auth_header = {"Authorization": f"Basic {CLIENT.basic}"}
+        source = {"url": source_db.url, "headers": auth_header}
+        target = {"url": f"{CLIENT.url}/{TEST_DB_NAME}-rep-once", "headers": auth_header}
+        result = CLIENT.replicate(source=source, target=target, create_target=True)
+        self.assertTrue(result.get("ok"))
+        self.assertIn("session_id", result)
+
     def test_rev(self):
         self.assertIsInstance(CLIENT.rev("_users/_design/_auth"), str)
         self.assertIs(CLIENT.rev("_users/test"), None)
@@ -166,13 +179,32 @@ class TestClient(unittest.TestCase):
         result = CLIENT.node_system()
         self.assertIsInstance(result, dict)
 
+    def test_cookie_auth_token_renewal(self):
+        with Server(
+            url=COUCHDB0_URL,
+            user=COUCHDB_USER,
+            password=COUCHDB_PASSWORD,
+            auth_method="cookie",
+        ) as client:
+            # No AuthSession cookie yet → token considered expired
+            self.assertTrue(client._is_auth_token_expired())
+            # A cookie-auth request triggers an automatic renewal
+            self.assertTrue(client.up())
+            self.assertFalse(client._is_auth_token_expired())
+            # Simulate expiry by dropping the cookie
+            client.session.cookies.clear()
+            self.assertTrue(client._is_auth_token_expired())
+            # Explicit renewal restores a valid token
+            client._renew_auth_token()
+            self.assertFalse(client._is_auth_token_expired())
+
 
 @atexit.register
 def rm_test_db() -> None:
     """
     Removing temporary test database.
     """
-    for dbname in [TEST_DB_NAME, f"{TEST_DB_NAME}-rep"]:
+    for dbname in [TEST_DB_NAME, f"{TEST_DB_NAME}-rep", f"{TEST_DB_NAME}-rep-once"]:
         if dbname in CLIENT:
             CLIENT.delete(dbname)
 

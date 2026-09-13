@@ -366,6 +366,29 @@ el.replaceWith(d);
         await self._delete(resource=resource)
         return True
 
+    async def has_db(self, name: str) -&gt; bool:
+        &#34;&#34;&#34;
+        Check if the server contains a database with the given name.
+
+        Note:
+        The async client cannot support the `name in server` syntax (Python does not allow
+        `__contains__` to be a coroutine). Use `await client.has_db(name)` instead.
+
+        Parameters
+        ----------
+        name : str
+            The database&#39;s name.
+
+        Returns
+        -------
+        bool : `True` if the database exists, otherwise `False`.
+        &#34;&#34;&#34;
+        try:
+            await self._head(resource=name)
+            return True
+        except CouchDBError:
+            return False
+
     async def replicate(
         self,
         source: dict | str,
@@ -392,7 +415,8 @@ el.replaceWith(d);
         target : dict | str
             Fully qualified target database URL or an object with URL and headers.
         replication_id : str
-            The ID of the replication document.
+            Deprecated. Ignored for one-shot replication (the `_replicate` endpoint does not accept
+            a replication document ID).
         cancel : bool
             Cancels the replication.
         continuous : bool
@@ -426,10 +450,9 @@ el.replaceWith(d);
             )
         return (
             await self._post(
-                resource=&#34;_replicator&#34;,
+                resource=&#34;_replicate&#34;,
                 body=rm_nones_from_dict(
                     {
-                        &#34;_id&#34;: replication_id,
                         &#34;source&#34;: source,
                         &#34;target&#34;: target,
                         &#34;cancel&#34;: cancel,
@@ -437,7 +460,7 @@ el.replaceWith(d);
                         &#34;create_target&#34;: create_target,
                         &#34;create_target_params&#34;: create_target_params,
                         &#34;doc_ids&#34;: doc_ids,
-                        &#34;filter_func&#34;: filter_func,
+                        &#34;filter&#34;: filter_func,
                         &#34;selector&#34;: selector,
                         &#34;source_proxy&#34;: source_proxy,
                         &#34;target_proxy&#34;: target_proxy,
@@ -1183,6 +1206,49 @@ Defaults to <code>["_users", "_replicator"]</code>.</dd>
 <dd>&nbsp;</dd>
 </dl></div>
 </dd>
+<dt id="couchdb3.aio.async_server.AsyncServer.has_db"><code class="name flex">
+<span>async def <span class="ident">has_db</span></span>(<span>self, name: str) ‑> bool</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def has_db(self, name: str) -&gt; bool:
+    &#34;&#34;&#34;
+    Check if the server contains a database with the given name.
+
+    Note:
+    The async client cannot support the `name in server` syntax (Python does not allow
+    `__contains__` to be a coroutine). Use `await client.has_db(name)` instead.
+
+    Parameters
+    ----------
+    name : str
+        The database&#39;s name.
+
+    Returns
+    -------
+    bool : `True` if the database exists, otherwise `False`.
+    &#34;&#34;&#34;
+    try:
+        await self._head(resource=name)
+        return True
+    except CouchDBError:
+        return False</code></pre>
+</details>
+<div class="desc"><p>Check if the server contains a database with the given name.</p>
+<p>Note:
+The async client cannot support the <code>name in server</code> syntax (Python does not allow
+<code>__contains__</code> to be a coroutine). Use <code>await client.has_db(name)</code> instead.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>The database's name.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>bool : <code>True</code> if the database exists, otherwise <code>False</code>.</p></div>
+</dd>
 <dt id="couchdb3.aio.async_server.AsyncServer.membership"><code class="name flex">
 <span>async def <span class="ident">membership</span></span>(<span>self) ‑> dict</span>
 </code></dt>
@@ -1424,7 +1490,8 @@ that have not been written to disk.</p>
     target : dict | str
         Fully qualified target database URL or an object with URL and headers.
     replication_id : str
-        The ID of the replication document.
+        Deprecated. Ignored for one-shot replication (the `_replicate` endpoint does not accept
+        a replication document ID).
     cancel : bool
         Cancels the replication.
     continuous : bool
@@ -1458,10 +1525,9 @@ that have not been written to disk.</p>
         )
     return (
         await self._post(
-            resource=&#34;_replicator&#34;,
+            resource=&#34;_replicate&#34;,
             body=rm_nones_from_dict(
                 {
-                    &#34;_id&#34;: replication_id,
                     &#34;source&#34;: source,
                     &#34;target&#34;: target,
                     &#34;cancel&#34;: cancel,
@@ -1469,7 +1535,7 @@ that have not been written to disk.</p>
                     &#34;create_target&#34;: create_target,
                     &#34;create_target_params&#34;: create_target_params,
                     &#34;doc_ids&#34;: doc_ids,
-                    &#34;filter_func&#34;: filter_func,
+                    &#34;filter&#34;: filter_func,
                     &#34;selector&#34;: selector,
                     &#34;source_proxy&#34;: source_proxy,
                     &#34;target_proxy&#34;: target_proxy,
@@ -1487,7 +1553,8 @@ that have not been written to disk.</p>
 <dt><strong><code>target</code></strong> :&ensp;<code>dict | str</code></dt>
 <dd>Fully qualified target database URL or an object with URL and headers.</dd>
 <dt><strong><code>replication_id</code></strong> :&ensp;<code>str</code></dt>
-<dd>The ID of the replication document.</dd>
+<dd>Deprecated. Ignored for one-shot replication (the <code>_replicate</code> endpoint does not accept
+a replication document ID).</dd>
 <dt><strong><code>cancel</code></strong> :&ensp;<code>bool</code></dt>
 <dd>Cancels the replication.</dd>
 <dt><strong><code>continuous</code></strong> :&ensp;<code>bool</code></dt>
@@ -1881,6 +1948,7 @@ remote node's port (<code>add_node</code>).</dd>
 <li><code><a title="couchdb3.aio.async_server.AsyncServer.delete" href="#couchdb3.aio.async_server.AsyncServer.delete">delete</a></code></li>
 <li><code><a title="couchdb3.aio.async_server.AsyncServer.delete_node_config" href="#couchdb3.aio.async_server.AsyncServer.delete_node_config">delete_node_config</a></code></li>
 <li><code><a title="couchdb3.aio.async_server.AsyncServer.get" href="#couchdb3.aio.async_server.AsyncServer.get">get</a></code></li>
+<li><code><a title="couchdb3.aio.async_server.AsyncServer.has_db" href="#couchdb3.aio.async_server.AsyncServer.has_db">has_db</a></code></li>
 <li><code><a title="couchdb3.aio.async_server.AsyncServer.membership" href="#couchdb3.aio.async_server.AsyncServer.membership">membership</a></code></li>
 <li><code><a title="couchdb3.aio.async_server.AsyncServer.node_config" href="#couchdb3.aio.async_server.AsyncServer.node_config">node_config</a></code></li>
 <li><code><a title="couchdb3.aio.async_server.AsyncServer.node_stats" href="#couchdb3.aio.async_server.AsyncServer.node_stats">node_stats</a></code></li>

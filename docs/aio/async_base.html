@@ -207,10 +207,10 @@ el.replaceWith(d);
         bool : `True` if the auth token is expired or absent.
         &#34;&#34;&#34;
         try:
-            return (
-                next(_.expires for _ in self.session.cookies.jar if _.name == &#34;AuthSession&#34;)
-                &lt;= datetime.now(UTC).timestamp()
-            )
+            expires = next(_.expires for _ in self.session.cookies.jar if _.name == &#34;AuthSession&#34;)
+            if expires is None:
+                return False
+            return expires &lt;= datetime.now(UTC).timestamp()
         except StopIteration:
             return True
 

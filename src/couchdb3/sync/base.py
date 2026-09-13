@@ -471,10 +471,10 @@ class Base:
         try:
             # httpx.Client.cookies.jar yields http.cookiejar.Cookie objects which
             # carry the .name and .expires attributes we need.
-            return (
-                next(_.expires for _ in self.session.cookies.jar if _.name == "AuthSession")
-                <= datetime.now(UTC).timestamp()
-            )
+            expires = next(_.expires for _ in self.session.cookies.jar if _.name == "AuthSession")
+            if expires is None:
+                return False
+            return expires <= datetime.now(UTC).timestamp()
         except StopIteration:
             return True
 

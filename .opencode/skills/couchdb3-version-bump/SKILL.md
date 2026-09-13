@@ -55,3 +55,4 @@ description: Use when bumping the couchdb3 version. Lists every file to update, 
 | `3.2.1` | #36 | Linting/style fixes, ruff config, dependency cleanup |
 | `3.3.0` | #37 | `Database.changes()`, `Server.membership()`, `cluster_setup()`, `setup_cluster()`, `node_config()`, `set_node_config()`, `delete_node_config()`, `reload_node_config()`, `node_stats()`, `node_system()` — all sync + async |
 | `3.3.1` | #38 | Fix `RuntimeError` on chained `Server().__getitem__().method()` (session lifetime bug, issue #39); adds read-only `Database.server`, `Partition.database`, `AsyncDatabase.server`, `AsyncPartition.database` back-reference properties |
+| `3.4.0` | #40 | `Database.delete_index()`, `Database.design_docs()`, `AsyncServer.has_db()` (all sync + async); fix `put_design` options bug and `Server.replicate` endpoint; broader test coverage |
