@@ -516,10 +516,10 @@ el.replaceWith(d);
         try:
             # httpx.Client.cookies.jar yields http.cookiejar.Cookie objects which
             # carry the .name and .expires attributes we need.
-            return (
-                next(_.expires for _ in self.session.cookies.jar if _.name == &#34;AuthSession&#34;)
-                &lt;= datetime.now(UTC).timestamp()
-            )
+            expires = next(_.expires for _ in self.session.cookies.jar if _.name == &#34;AuthSession&#34;)
+            if expires is None:
+                return False
+            return expires &lt;= datetime.now(UTC).timestamp()
         except StopIteration:
             return True
 

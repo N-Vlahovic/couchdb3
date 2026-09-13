@@ -333,6 +333,29 @@ class AsyncServer(AsyncBase):
         await self._delete(resource=resource)
         return True
 
+    async def has_db(self, name: str) -> bool:
+        """
+        Check if the server contains a database with the given name.
+
+        Note:
+        The async client cannot support the `name in server` syntax (Python does not allow
+        `__contains__` to be a coroutine). Use `await client.has_db(name)` instead.
+
+        Parameters
+        ----------
+        name : str
+            The database's name.
+
+        Returns
+        -------
+        bool : `True` if the database exists, otherwise `False`.
+        """
+        try:
+            await self._head(resource=name)
+            return True
+        except CouchDBError:
+            return False
+
     async def replicate(
         self,
         source: dict | str,
@@ -359,7 +382,8 @@ class AsyncServer(AsyncBase):
         target : dict | str
             Fully qualified target database URL or an object with URL and headers.
         replication_id : str
-            The ID of the replication document.
+            Deprecated. Ignored for one-shot replication (the `_replicate` endpoint does not accept
+            a replication document ID).
         cancel : bool
             Cancels the replication.
         continuous : bool
@@ -393,10 +417,9 @@ class AsyncServer(AsyncBase):
             )
         return (
             await self._post(
-                resource="_replicator",
+                resource="_replicate",
                 body=rm_nones_from_dict(
                     {
-                        "_id": replication_id,
                         "source": source,
                         "target": target,
                         "cancel": cancel,
@@ -404,7 +427,7 @@ class AsyncServer(AsyncBase):
                         "create_target": create_target,
                         "create_target_params": create_target_params,
                         "doc_ids": doc_ids,
-                        "filter_func": filter_func,
+                        "filter": filter_func,
                         "selector": selector,
                         "source_proxy": source_proxy,
                         "target_proxy": target_proxy,

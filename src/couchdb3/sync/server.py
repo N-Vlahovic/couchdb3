@@ -81,11 +81,11 @@ class Server(Base):
 
     def __repr__(self) -> str:
         """
-        Close the session on delete.
+        Basic repr.
 
         Returns
         -------
-        str
+        str : The instance's representation.
         """
         return f"{super().__repr__()}: {self.url}"
 
@@ -378,7 +378,8 @@ class Server(Base):
                 {“url”:”url in here”, “headers”: {“header1”:”value1”, …}}
 
         replication_id : str
-            The ID of the replication document.
+            Deprecated. Ignored for one-shot replication (the `_replicate` endpoint does not accept
+            a replication document ID).
         cancel : bool
             Cancels the replication.
         continuous : bool
@@ -424,10 +425,9 @@ class Server(Base):
                 'Arguments "doc_ids", "filter_func" and "selector" are mutually exclusive.'
             )
         return self._post(
-            resource="_replicator",
+            resource="_replicate",
             body=rm_nones_from_dict(
                 {
-                    "_id": replication_id,
                     "source": source,
                     "target": target,
                     "cancel": cancel,
@@ -435,7 +435,7 @@ class Server(Base):
                     "create_target": create_target,
                     "create_target_params": create_target_params,
                     "doc_ids": doc_ids,
-                    "filter_func": filter_func,
+                    "filter": filter_func,
                     "selector": selector,
                     "source_proxy": source_proxy,
                     "target_proxy": target_proxy,

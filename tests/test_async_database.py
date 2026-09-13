@@ -82,6 +82,24 @@ class TestAsyncDatabase(unittest.IsolatedAsyncioTestCase):
         result = await self.db.compact()
         self.assertTrue(result)
 
+    async def test_compact_with_ddoc(self):
+        ddoc = "async-compact-design"
+        await self.db.put_design(
+            ddoc=ddoc,
+            rev=await self.db.rev(f"_design/{ddoc}"),
+            views={VIEW_ID: {"map": DOCUMENT_VIEW}},
+        )
+        self.assertTrue(await self.db.compact(ddoc=ddoc))
+
+    async def test_purge(self):
+        docid = "test-async-purge-doc"
+        await self.db.save({"_id": docid, "type": "async-purge-test"})
+        rev = await self.db.rev(docid)
+        result = await self.db.purge({docid: [rev]})
+        self.assertIsInstance(result, dict)
+        self.assertIn("purge_seq", result)
+        self.assertIsNone(await self.db.rev(docid))
+
     async def test_create(self):
         docid = "test-async-create"
         _id, ok, _rev = await self.db.create({"_id": docid, "type": "test"})
@@ -203,6 +221,28 @@ class TestAsyncDatabase(unittest.IsolatedAsyncioTestCase):
         self.assertIn(result, ["created", "exists"])
         self.assertIsInstance(_id, str)
         self.assertIsInstance(name, str)
+
+    async def test_delete_index(self):
+        await self.db.save_index(
+            index={"fields": ["name"]},
+            ddoc="async-delete-me-ddoc",
+            name="async-delete-me-idx",
+        )
+        self.assertTrue(
+            await self.db.delete_index(ddoc="async-delete-me-ddoc", name="async-delete-me-idx")
+        )
+
+    async def test_design_docs(self):
+        ddoc = "async-design-docs-ddoc"
+        await self.db.put_design(
+            ddoc=ddoc,
+            rev=await self.db.rev(f"_design/{ddoc}"),
+            views={VIEW_ID: {"map": DOCUMENT_VIEW}},
+        )
+        result = await self.db.design_docs()
+        self.assertIsInstance(result, ViewResult)
+        ids = [row.id for row in result.rows]
+        self.assertIn(f"_design/{ddoc}", ids)
 
     async def test_security(self):
         from couchdb3.document import SecurityDocument

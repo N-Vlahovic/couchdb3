@@ -205,6 +205,72 @@ re-exported here — import them from <code><a title="couchdb3" href="../index.h
             **kwargs,
         )
 
+    async def design_docs(
+        self,
+        *,
+        conflicts: bool | None = None,
+        descending: bool | None = None,
+        endkey: str | None = None,
+        include_docs: bool | None = None,
+        keys: Iterable[str] | None = None,
+        limit: int | None = None,
+        skip: int | None = None,
+        startkey: str | None = None,
+        update_seq: bool | None = None,
+    ) -&gt; ViewResult:
+        &#34;&#34;&#34;
+        Executes the built-in `_design_docs` view, returning all the design documents in the database.
+
+        This is a shorthand for `_all_docs` filtered to the `_design/` key range.
+
+        Parameters
+        ----------
+        conflicts : bool
+            Include conflicts information. Ignored if `include_docs` isn&#39;t `True`. Default is `None`.
+        descending : bool
+            Return the documents in descending order by key. Default is `None`.
+        endkey : str
+            Stop returning records when the specified key is reached. Default is `None`.
+        include_docs : bool
+            Include the associated document with each row. Default is `None`.
+        keys : Iterable[str]
+            Return only documents where the key matches one of the keys specified in the argument.
+            Default is `None`.
+        limit : int
+            Limit the number of the returned documents. Default is `None`.
+        skip : int
+            Skip this number of records before starting to return the results. Default is `None`.
+        startkey : str
+            Return records starting with the specified key. Default is `None`.
+        update_seq : bool
+            Whether to include an `update_seq` value indicating the sequence id of the database.
+            Default is `None`.
+
+        Returns
+        -------
+        ViewResult
+        &#34;&#34;&#34;
+        return ViewResult(
+            **(
+                await self._get(
+                    resource=&#34;_design_docs&#34;,
+                    query_kwargs=rm_nones_from_dict(
+                        {
+                            &#34;conflicts&#34;: conflicts,
+                            &#34;descending&#34;: descending,
+                            &#34;endkey&#34;: endkey,
+                            &#34;include_docs&#34;: include_docs,
+                            &#34;keys&#34;: keys,
+                            &#34;limit&#34;: limit,
+                            &#34;skip&#34;: skip,
+                            &#34;startkey&#34;: startkey,
+                            &#34;update_seq&#34;: update_seq,
+                        }
+                    ),
+                )
+            ).json()
+        )
+
     async def bulk_docs(
         self,
         docs: list[dict | Document],
@@ -802,7 +868,7 @@ re-exported here — import them from <code><a title="couchdb3" href="../index.h
         tuple[str, bool, str] : (id, ok, rev)
         &#34;&#34;&#34;
         if partitioned:
-            options = (options or {}).update({&#34;partitioned&#34;: partitioned})
+            options = {**(options or {}), &#34;partitioned&#34;: partitioned}
         return await self.save(
             doc=rm_nones_from_dict(
                 {
@@ -902,6 +968,28 @@ re-exported here — import them from <code><a title="couchdb3" href="../index.h
             )
         ).json()
         return data[&#34;result&#34;], data[&#34;id&#34;], data[&#34;name&#34;]
+
+    async def delete_index(self, ddoc: str, name: str, index_type: str = &#34;json&#34;) -&gt; bool:
+        &#34;&#34;&#34;
+        Delete an index from a database. For more info, please refer to
+        [the official documentation](https://docs.couchdb.org/en/main/api/database/find.html#db-index).
+
+        Parameters
+        ----------
+        ddoc : str
+            Name of the design document the index belongs to. A `_design/` prefix is stripped
+            automatically.
+        name : str
+            Name of the index.
+        index_type : str
+            Can be `json` or `text`. Defaults to `json`.
+
+        Returns
+        -------
+        bool : `True` upon successful deletion.
+        &#34;&#34;&#34;
+        ddoc = ddoc.removeprefix(&#34;_design/&#34;)
+        return (await self._delete(resource=f&#34;_index/{ddoc}/{index_type}/{name}&#34;)).json().get(&#34;ok&#34;)
 
     async def security(self) -&gt; SecurityDocument:
         &#34;&#34;&#34;
@@ -1905,6 +1993,156 @@ sharded databases).</dd>
 <h2 id="returns">Returns</h2>
 <p>bool : <code>True</code> upon successful deletion.</p></div>
 </dd>
+<dt id="couchdb3.aio.AsyncDatabase.delete_index"><code class="name flex">
+<span>async def <span class="ident">delete_index</span></span>(<span>self, ddoc: str, name: str, index_type: str = 'json') ‑> bool</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def delete_index(self, ddoc: str, name: str, index_type: str = &#34;json&#34;) -&gt; bool:
+    &#34;&#34;&#34;
+    Delete an index from a database. For more info, please refer to
+    [the official documentation](https://docs.couchdb.org/en/main/api/database/find.html#db-index).
+
+    Parameters
+    ----------
+    ddoc : str
+        Name of the design document the index belongs to. A `_design/` prefix is stripped
+        automatically.
+    name : str
+        Name of the index.
+    index_type : str
+        Can be `json` or `text`. Defaults to `json`.
+
+    Returns
+    -------
+    bool : `True` upon successful deletion.
+    &#34;&#34;&#34;
+    ddoc = ddoc.removeprefix(&#34;_design/&#34;)
+    return (await self._delete(resource=f&#34;_index/{ddoc}/{index_type}/{name}&#34;)).json().get(&#34;ok&#34;)</code></pre>
+</details>
+<div class="desc"><p>Delete an index from a database. For more info, please refer to
+<a href="https://docs.couchdb.org/en/main/api/database/find.html#db-index">the official documentation</a>.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>ddoc</code></strong> :&ensp;<code>str</code></dt>
+<dd>Name of the design document the index belongs to. A <code>_design/</code> prefix is stripped
+automatically.</dd>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>Name of the index.</dd>
+<dt><strong><code>index_type</code></strong> :&ensp;<code>str</code></dt>
+<dd>Can be <code>json</code> or <code>text</code>. Defaults to <code>json</code>.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>bool : <code>True</code> upon successful deletion.</p></div>
+</dd>
+<dt id="couchdb3.aio.AsyncDatabase.design_docs"><code class="name flex">
+<span>async def <span class="ident">design_docs</span></span>(<span>self,<br>*,<br>conflicts: bool | None = None,<br>descending: bool | None = None,<br>endkey: str | None = None,<br>include_docs: bool | None = None,<br>keys: Iterable[str] | None = None,<br>limit: int | None = None,<br>skip: int | None = None,<br>startkey: str | None = None,<br>update_seq: bool | None = None) ‑> <a title="couchdb3.view.ViewResult" href="../view.html#couchdb3.view.ViewResult">ViewResult</a></span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def design_docs(
+    self,
+    *,
+    conflicts: bool | None = None,
+    descending: bool | None = None,
+    endkey: str | None = None,
+    include_docs: bool | None = None,
+    keys: Iterable[str] | None = None,
+    limit: int | None = None,
+    skip: int | None = None,
+    startkey: str | None = None,
+    update_seq: bool | None = None,
+) -&gt; ViewResult:
+    &#34;&#34;&#34;
+    Executes the built-in `_design_docs` view, returning all the design documents in the database.
+
+    This is a shorthand for `_all_docs` filtered to the `_design/` key range.
+
+    Parameters
+    ----------
+    conflicts : bool
+        Include conflicts information. Ignored if `include_docs` isn&#39;t `True`. Default is `None`.
+    descending : bool
+        Return the documents in descending order by key. Default is `None`.
+    endkey : str
+        Stop returning records when the specified key is reached. Default is `None`.
+    include_docs : bool
+        Include the associated document with each row. Default is `None`.
+    keys : Iterable[str]
+        Return only documents where the key matches one of the keys specified in the argument.
+        Default is `None`.
+    limit : int
+        Limit the number of the returned documents. Default is `None`.
+    skip : int
+        Skip this number of records before starting to return the results. Default is `None`.
+    startkey : str
+        Return records starting with the specified key. Default is `None`.
+    update_seq : bool
+        Whether to include an `update_seq` value indicating the sequence id of the database.
+        Default is `None`.
+
+    Returns
+    -------
+    ViewResult
+    &#34;&#34;&#34;
+    return ViewResult(
+        **(
+            await self._get(
+                resource=&#34;_design_docs&#34;,
+                query_kwargs=rm_nones_from_dict(
+                    {
+                        &#34;conflicts&#34;: conflicts,
+                        &#34;descending&#34;: descending,
+                        &#34;endkey&#34;: endkey,
+                        &#34;include_docs&#34;: include_docs,
+                        &#34;keys&#34;: keys,
+                        &#34;limit&#34;: limit,
+                        &#34;skip&#34;: skip,
+                        &#34;startkey&#34;: startkey,
+                        &#34;update_seq&#34;: update_seq,
+                    }
+                ),
+            )
+        ).json()
+    )</code></pre>
+</details>
+<div class="desc"><p>Executes the built-in <code>_design_docs</code> view, returning all the design documents in the database.</p>
+<p>This is a shorthand for <code>_all_docs</code> filtered to the <code>_design/</code> key range.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>conflicts</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Include conflicts information. Ignored if <code>include_docs</code> isn't <code>True</code>. Default is <code>None</code>.</dd>
+<dt><strong><code>descending</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Return the documents in descending order by key. Default is <code>None</code>.</dd>
+<dt><strong><code>endkey</code></strong> :&ensp;<code>str</code></dt>
+<dd>Stop returning records when the specified key is reached. Default is <code>None</code>.</dd>
+<dt><strong><code>include_docs</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Include the associated document with each row. Default is <code>None</code>.</dd>
+<dt><strong><code>keys</code></strong> :&ensp;<code>Iterable[str]</code></dt>
+<dd>Return only documents where the key matches one of the keys specified in the argument.
+Default is <code>None</code>.</dd>
+<dt><strong><code>limit</code></strong> :&ensp;<code>int</code></dt>
+<dd>Limit the number of the returned documents. Default is <code>None</code>.</dd>
+<dt><strong><code>skip</code></strong> :&ensp;<code>int</code></dt>
+<dd>Skip this number of records before starting to return the results. Default is <code>None</code>.</dd>
+<dt><strong><code>startkey</code></strong> :&ensp;<code>str</code></dt>
+<dd>Return records starting with the specified key. Default is <code>None</code>.</dd>
+<dt><strong><code>update_seq</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Whether to include an <code>update_seq</code> value indicating the sequence id of the database.
+Default is <code>None</code>.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>ViewResult</code></dt>
+<dd>&nbsp;</dd>
+</dl></div>
+</dd>
 <dt id="couchdb3.aio.AsyncDatabase.explain"><code class="name flex">
 <span>async def <span class="ident">explain</span></span>(<span>self,<br>selector: dict,<br>limit: int = 25,<br>skip: int = 0,<br>sort: list[dict] | None = None,<br>fields: list[str] | None = None,<br>use_index: str | list[str] | None = None,<br>conflicts: bool = False,<br>r: int = 1,<br>bookmark: str | None = None,<br>update: bool = True,<br>stable: bool | None = None,<br>execution_stats: bool = False) ‑> dict</span>
 </code></dt>
@@ -2612,7 +2850,7 @@ Default <code>None</code>.</dd>
     tuple[str, bool, str] : (id, ok, rev)
     &#34;&#34;&#34;
     if partitioned:
-        options = (options or {}).update({&#34;partitioned&#34;: partitioned})
+        options = {**(options or {}), &#34;partitioned&#34;: partitioned}
     return await self.save(
         doc=rm_nones_from_dict(
             {
@@ -3288,7 +3526,7 @@ Default <code>None</code>.</dd>
     async def bulk_get(self, docs: list[dict | Document], revs: bool = False) -&gt; list[dict]:
         &#34;&#34;&#34;See `AsyncDatabase.bulk_get`. Prepends partition ID to document IDs.&#34;&#34;&#34;
         return await super().bulk_get(
-            docs=[self.add_partition_to_doc(doc) for doc in docs],
+            docs=[self.add_partition_to_bulk_get_doc(doc) for doc in docs],
             revs=revs,
         )
 
@@ -3424,7 +3662,7 @@ Default <code>None</code>.</dd>
 
     def add_partition_to_str(self, string: str) -&gt; str:
         &#34;&#34;&#34;Append the instance&#39;s partition ID to a string if not already present.&#34;&#34;&#34;
-        if string.startswith(self.partition_id):
+        if string.startswith(f&#34;{self.partition_id}:&#34;):
             return string
         return f&#34;{self.partition_id}:{string}&#34;
 
@@ -3434,6 +3672,14 @@ Default <code>None</code>.</dd>
         if docid is None:
             return doc
         doc[&#34;_id&#34;] = self.add_partition_to_str(docid)
+        return doc
+
+    def add_partition_to_bulk_get_doc(self, doc: Document | dict) -&gt; Document | dict:
+        &#34;&#34;&#34;Append the instance&#39;s partition ID to a `bulk_get` document&#39;s `id` (or `_id`).&#34;&#34;&#34;
+        key = &#34;_id&#34; if &#34;_id&#34; in doc else &#34;id&#34; if &#34;id&#34; in doc else None
+        if key is None:
+            return doc
+        doc[key] = self.add_partition_to_str(doc[key])
         return doc</code></pre>
 </details>
 <div class="desc"><p>Async CouchDB partition client. Mirrors <code>Partition</code> with <code>async def</code> methods throughout.</p>
@@ -3504,6 +3750,24 @@ partition was constructed directly (i.e. not via <code><a title="couchdb3.aio.As
 </dl>
 <h3>Methods</h3>
 <dl>
+<dt id="couchdb3.aio.AsyncPartition.add_partition_to_bulk_get_doc"><code class="name flex">
+<span>def <span class="ident">add_partition_to_bulk_get_doc</span></span>(<span>self, doc: Document | dict) ‑> <a title="couchdb3.document.Document" href="../document.html#couchdb3.document.Document">Document</a> | dict</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def add_partition_to_bulk_get_doc(self, doc: Document | dict) -&gt; Document | dict:
+    &#34;&#34;&#34;Append the instance&#39;s partition ID to a `bulk_get` document&#39;s `id` (or `_id`).&#34;&#34;&#34;
+    key = &#34;_id&#34; if &#34;_id&#34; in doc else &#34;id&#34; if &#34;id&#34; in doc else None
+    if key is None:
+        return doc
+    doc[key] = self.add_partition_to_str(doc[key])
+    return doc</code></pre>
+</details>
+<div class="desc"><p>Append the instance's partition ID to a <code>bulk_get</code> document's <code>id</code> (or <code>_id</code>).</p></div>
+</dd>
 <dt id="couchdb3.aio.AsyncPartition.add_partition_to_doc"><code class="name flex">
 <span>def <span class="ident">add_partition_to_doc</span></span>(<span>self, doc: Document | dict) ‑> <a title="couchdb3.document.Document" href="../document.html#couchdb3.document.Document">Document</a> | dict</span>
 </code></dt>
@@ -3532,7 +3796,7 @@ partition was constructed directly (i.e. not via <code><a title="couchdb3.aio.As
 </summary>
 <pre><code class="python">def add_partition_to_str(self, string: str) -&gt; str:
     &#34;&#34;&#34;Append the instance&#39;s partition ID to a string if not already present.&#34;&#34;&#34;
-    if string.startswith(self.partition_id):
+    if string.startswith(f&#34;{self.partition_id}:&#34;):
         return string
     return f&#34;{self.partition_id}:{string}&#34;</code></pre>
 </details>
@@ -3605,7 +3869,7 @@ partition was constructed directly (i.e. not via <code><a title="couchdb3.aio.As
 <pre><code class="python">async def bulk_get(self, docs: list[dict | Document], revs: bool = False) -&gt; list[dict]:
     &#34;&#34;&#34;See `AsyncDatabase.bulk_get`. Prepends partition ID to document IDs.&#34;&#34;&#34;
     return await super().bulk_get(
-        docs=[self.add_partition_to_doc(doc) for doc in docs],
+        docs=[self.add_partition_to_bulk_get_doc(doc) for doc in docs],
         revs=revs,
     )</code></pre>
 </details>
@@ -3976,6 +4240,8 @@ partition was constructed directly (i.e. not via <code><a title="couchdb3.aio.As
 <li><code><a title="couchdb3.aio.async_database.AsyncDatabase.changes" href="async_database.html#couchdb3.aio.async_database.AsyncDatabase.changes">changes</a></code></li>
 <li><code><a title="couchdb3.aio.async_database.AsyncDatabase.check" href="async_base.html#couchdb3.aio.async_base.AsyncBase.check">check</a></code></li>
 <li><code><a title="couchdb3.aio.async_database.AsyncDatabase.compact" href="async_database.html#couchdb3.aio.async_database.AsyncDatabase.compact">compact</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncDatabase.delete_index" href="async_database.html#couchdb3.aio.async_database.AsyncDatabase.delete_index">delete_index</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncDatabase.design_docs" href="async_database.html#couchdb3.aio.async_database.AsyncDatabase.design_docs">design_docs</a></code></li>
 <li><code><a title="couchdb3.aio.async_database.AsyncDatabase.explain" href="async_database.html#couchdb3.aio.async_database.AsyncDatabase.explain">explain</a></code></li>
 <li><code><a title="couchdb3.aio.async_database.AsyncDatabase.get_design" href="async_database.html#couchdb3.aio.async_database.AsyncDatabase.get_design">get_design</a></code></li>
 <li><code><a title="couchdb3.aio.async_database.AsyncDatabase.get_partition" href="async_database.html#couchdb3.aio.async_database.AsyncDatabase.get_partition">get_partition</a></code></li>
@@ -4311,6 +4577,29 @@ partition was constructed directly (i.e. not via <code><a title="couchdb3.aio.As
         await self._delete(resource=resource)
         return True
 
+    async def has_db(self, name: str) -&gt; bool:
+        &#34;&#34;&#34;
+        Check if the server contains a database with the given name.
+
+        Note:
+        The async client cannot support the `name in server` syntax (Python does not allow
+        `__contains__` to be a coroutine). Use `await client.has_db(name)` instead.
+
+        Parameters
+        ----------
+        name : str
+            The database&#39;s name.
+
+        Returns
+        -------
+        bool : `True` if the database exists, otherwise `False`.
+        &#34;&#34;&#34;
+        try:
+            await self._head(resource=name)
+            return True
+        except CouchDBError:
+            return False
+
     async def replicate(
         self,
         source: dict | str,
@@ -4337,7 +4626,8 @@ partition was constructed directly (i.e. not via <code><a title="couchdb3.aio.As
         target : dict | str
             Fully qualified target database URL or an object with URL and headers.
         replication_id : str
-            The ID of the replication document.
+            Deprecated. Ignored for one-shot replication (the `_replicate` endpoint does not accept
+            a replication document ID).
         cancel : bool
             Cancels the replication.
         continuous : bool
@@ -4371,10 +4661,9 @@ partition was constructed directly (i.e. not via <code><a title="couchdb3.aio.As
             )
         return (
             await self._post(
-                resource=&#34;_replicator&#34;,
+                resource=&#34;_replicate&#34;,
                 body=rm_nones_from_dict(
                     {
-                        &#34;_id&#34;: replication_id,
                         &#34;source&#34;: source,
                         &#34;target&#34;: target,
                         &#34;cancel&#34;: cancel,
@@ -4382,7 +4671,7 @@ partition was constructed directly (i.e. not via <code><a title="couchdb3.aio.As
                         &#34;create_target&#34;: create_target,
                         &#34;create_target_params&#34;: create_target_params,
                         &#34;doc_ids&#34;: doc_ids,
-                        &#34;filter_func&#34;: filter_func,
+                        &#34;filter&#34;: filter_func,
                         &#34;selector&#34;: selector,
                         &#34;source_proxy&#34;: source_proxy,
                         &#34;target_proxy&#34;: target_proxy,
@@ -5128,6 +5417,49 @@ Defaults to <code>["_users", "_replicator"]</code>.</dd>
 <dd>&nbsp;</dd>
 </dl></div>
 </dd>
+<dt id="couchdb3.aio.AsyncServer.has_db"><code class="name flex">
+<span>async def <span class="ident">has_db</span></span>(<span>self, name: str) ‑> bool</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">async def has_db(self, name: str) -&gt; bool:
+    &#34;&#34;&#34;
+    Check if the server contains a database with the given name.
+
+    Note:
+    The async client cannot support the `name in server` syntax (Python does not allow
+    `__contains__` to be a coroutine). Use `await client.has_db(name)` instead.
+
+    Parameters
+    ----------
+    name : str
+        The database&#39;s name.
+
+    Returns
+    -------
+    bool : `True` if the database exists, otherwise `False`.
+    &#34;&#34;&#34;
+    try:
+        await self._head(resource=name)
+        return True
+    except CouchDBError:
+        return False</code></pre>
+</details>
+<div class="desc"><p>Check if the server contains a database with the given name.</p>
+<p>Note:
+The async client cannot support the <code>name in server</code> syntax (Python does not allow
+<code>__contains__</code> to be a coroutine). Use <code>await client.has_db(name)</code> instead.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>name</code></strong> :&ensp;<code>str</code></dt>
+<dd>The database's name.</dd>
+</dl>
+<h2 id="returns">Returns</h2>
+<p>bool : <code>True</code> if the database exists, otherwise <code>False</code>.</p></div>
+</dd>
 <dt id="couchdb3.aio.AsyncServer.membership"><code class="name flex">
 <span>async def <span class="ident">membership</span></span>(<span>self) ‑> dict</span>
 </code></dt>
@@ -5369,7 +5701,8 @@ that have not been written to disk.</p>
     target : dict | str
         Fully qualified target database URL or an object with URL and headers.
     replication_id : str
-        The ID of the replication document.
+        Deprecated. Ignored for one-shot replication (the `_replicate` endpoint does not accept
+        a replication document ID).
     cancel : bool
         Cancels the replication.
     continuous : bool
@@ -5403,10 +5736,9 @@ that have not been written to disk.</p>
         )
     return (
         await self._post(
-            resource=&#34;_replicator&#34;,
+            resource=&#34;_replicate&#34;,
             body=rm_nones_from_dict(
                 {
-                    &#34;_id&#34;: replication_id,
                     &#34;source&#34;: source,
                     &#34;target&#34;: target,
                     &#34;cancel&#34;: cancel,
@@ -5414,7 +5746,7 @@ that have not been written to disk.</p>
                     &#34;create_target&#34;: create_target,
                     &#34;create_target_params&#34;: create_target_params,
                     &#34;doc_ids&#34;: doc_ids,
-                    &#34;filter_func&#34;: filter_func,
+                    &#34;filter&#34;: filter_func,
                     &#34;selector&#34;: selector,
                     &#34;source_proxy&#34;: source_proxy,
                     &#34;target_proxy&#34;: target_proxy,
@@ -5432,7 +5764,8 @@ that have not been written to disk.</p>
 <dt><strong><code>target</code></strong> :&ensp;<code>dict | str</code></dt>
 <dd>Fully qualified target database URL or an object with URL and headers.</dd>
 <dt><strong><code>replication_id</code></strong> :&ensp;<code>str</code></dt>
-<dd>The ID of the replication document.</dd>
+<dd>Deprecated. Ignored for one-shot replication (the <code>_replicate</code> endpoint does not accept
+a replication document ID).</dd>
 <dt><strong><code>cancel</code></strong> :&ensp;<code>bool</code></dt>
 <dd>Cancels the replication.</dd>
 <dt><strong><code>continuous</code></strong> :&ensp;<code>bool</code></dt>
@@ -5833,6 +6166,8 @@ remote node's port (<code>add_node</code>).</dd>
 <li><code><a title="couchdb3.aio.AsyncDatabase.create" href="#couchdb3.aio.AsyncDatabase.create">create</a></code></li>
 <li><code><a title="couchdb3.aio.AsyncDatabase.delete" href="#couchdb3.aio.AsyncDatabase.delete">delete</a></code></li>
 <li><code><a title="couchdb3.aio.AsyncDatabase.delete_attachment" href="#couchdb3.aio.AsyncDatabase.delete_attachment">delete_attachment</a></code></li>
+<li><code><a title="couchdb3.aio.AsyncDatabase.delete_index" href="#couchdb3.aio.AsyncDatabase.delete_index">delete_index</a></code></li>
+<li><code><a title="couchdb3.aio.AsyncDatabase.design_docs" href="#couchdb3.aio.AsyncDatabase.design_docs">design_docs</a></code></li>
 <li><code><a title="couchdb3.aio.AsyncDatabase.explain" href="#couchdb3.aio.AsyncDatabase.explain">explain</a></code></li>
 <li><code><a title="couchdb3.aio.AsyncDatabase.find" href="#couchdb3.aio.AsyncDatabase.find">find</a></code></li>
 <li><code><a title="couchdb3.aio.AsyncDatabase.get" href="#couchdb3.aio.AsyncDatabase.get">get</a></code></li>
@@ -5854,6 +6189,7 @@ remote node's port (<code>add_node</code>).</dd>
 <li>
 <h4><code><a title="couchdb3.aio.AsyncPartition" href="#couchdb3.aio.AsyncPartition">AsyncPartition</a></code></h4>
 <ul class="">
+<li><code><a title="couchdb3.aio.AsyncPartition.add_partition_to_bulk_get_doc" href="#couchdb3.aio.AsyncPartition.add_partition_to_bulk_get_doc">add_partition_to_bulk_get_doc</a></code></li>
 <li><code><a title="couchdb3.aio.AsyncPartition.add_partition_to_doc" href="#couchdb3.aio.AsyncPartition.add_partition_to_doc">add_partition_to_doc</a></code></li>
 <li><code><a title="couchdb3.aio.AsyncPartition.add_partition_to_str" href="#couchdb3.aio.AsyncPartition.add_partition_to_str">add_partition_to_str</a></code></li>
 <li><code><a title="couchdb3.aio.AsyncPartition.all_docs" href="#couchdb3.aio.AsyncPartition.all_docs">all_docs</a></code></li>
@@ -5886,6 +6222,7 @@ remote node's port (<code>add_node</code>).</dd>
 <li><code><a title="couchdb3.aio.AsyncServer.delete" href="#couchdb3.aio.AsyncServer.delete">delete</a></code></li>
 <li><code><a title="couchdb3.aio.AsyncServer.delete_node_config" href="#couchdb3.aio.AsyncServer.delete_node_config">delete_node_config</a></code></li>
 <li><code><a title="couchdb3.aio.AsyncServer.get" href="#couchdb3.aio.AsyncServer.get">get</a></code></li>
+<li><code><a title="couchdb3.aio.AsyncServer.has_db" href="#couchdb3.aio.AsyncServer.has_db">has_db</a></code></li>
 <li><code><a title="couchdb3.aio.AsyncServer.membership" href="#couchdb3.aio.AsyncServer.membership">membership</a></code></li>
 <li><code><a title="couchdb3.aio.AsyncServer.node_config" href="#couchdb3.aio.AsyncServer.node_config">node_config</a></code></li>
 <li><code><a title="couchdb3.aio.AsyncServer.node_stats" href="#couchdb3.aio.AsyncServer.node_stats">node_stats</a></code></li>
