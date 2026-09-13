@@ -5447,6 +5447,13 @@ view reflects. Default is <code>False</code>.</dd>
             target_proxy and validate_proxy(target_proxy) is False
         ):
             raise ProxySchemeComplianceError(&#34;Proxy has invalid scheme.&#34;)
+        if replication_id is not None:
+            warnings.warn(
+                &#34;`replication_id` is deprecated and has no effect on the one-shot &#34;
+                &#34;`_replicate` endpoint; it is ignored.&#34;,
+                DeprecationWarning,
+                stacklevel=2,
+            )
         if sum(bool(_) for _ in [doc_ids, filter_func, selector]) &gt; 1:
             raise CouchDBError(
                 &#39;Arguments &#34;doc_ids&#34;, &#34;filter_func&#34; and &#34;selector&#34; are mutually exclusive.&#39;
@@ -6487,6 +6494,13 @@ that have not been written to disk.</p>
         target_proxy and validate_proxy(target_proxy) is False
     ):
         raise ProxySchemeComplianceError(&#34;Proxy has invalid scheme.&#34;)
+    if replication_id is not None:
+        warnings.warn(
+            &#34;`replication_id` is deprecated and has no effect on the one-shot &#34;
+            &#34;`_replicate` endpoint; it is ignored.&#34;,
+            DeprecationWarning,
+            stacklevel=2,
+        )
     if sum(bool(_) for _ in [doc_ids, filter_func, selector]) &gt; 1:
         raise CouchDBError(
             &#39;Arguments &#34;doc_ids&#34;, &#34;filter_func&#34; and &#34;selector&#34; are mutually exclusive.&#39;
