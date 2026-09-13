@@ -26,10 +26,23 @@
 - <s>`DELETE /{db}/_index/{ddoc}/json/{name}` — delete a Mango index</s> — implemented in v3.4.0 (`delete_index`)
 - <s>`GET /{db}/_design_docs` — list design documents</s> — implemented in v3.4.0 (`design_docs`)
 - <s>`__contains__` on `AsyncServer` (sync `Server` supports `if db in server`; async does not)</s> — implemented in v3.4.0 as `AsyncServer.has_db()`
-- `GET /{db}/_local_docs` / `GET|PUT|DELETE /{db}/_local/{docid}` — local documents
-- `GET|PUT /{db}/_revs_limit` — revision limit management
-- `POST /{db}/_missing_revs` / `POST /{db}/_revs_diff` — replication helpers
-- `POST /{db}/_view_cleanup` — view index cleanup
-- `GET /{db}/_changes` with `feed=continuous|eventsource` — streaming feeds (deferred)
+
+---
+
+## Open items
+
+### p2 — important
+
+- **`changes_stream()` for `feed=continuous|eventsource`** — largest remaining functional gap; `changes()` explicitly raises `ValueError` for streaming feeds and the README documents this as unsupported.
   - **sync:** implement `Database.changes_stream()` as a generator using `httpx.Client.stream()`, yielding parsed JSON objects line-by-line from the NDJSON response; caller controls iteration and closure via a `with` block or explicit `.close()`
   - **async:** implement `AsyncDatabase.changes_stream()` as an async generator using `httpx.AsyncClient.stream()`, yielding the same parsed objects; caller drives with `async for` and the underlying connection is released on `aclose()` or generator exhaustion
+- **`pdoc>=16.0.0` + `pdoc3>=0.11.6` conflict in `[project.optional-dependencies] dev`** — both packages ship a `pdoc` module; a fresh `uv sync --extra dev` causes `make html` to break. `scripts/html.sh` was patched (`pdoc` → `pdoc3`) as a workaround, but the root cause remains. Fix: drop `pdoc>=16.0.0` from dev deps.
+- **`Server.replicate(replication_id=...)` silently ignored** — no `DeprecationWarning` is emitted, and this represents a silent behaviour change from the pre-v3.4.0 `_replicator` path. Fix: emit `warnings.warn(..., DeprecationWarning)` when `replication_id` is passed (both sync and async).
+
+### p3 — minor
+
+- `GET /{db}/_local_docs` / `GET|PUT|DELETE /{db}/_local/{docid}` — local documents (highest-value of the p3 group)
+- `POST /{db}/_missing_revs` / `POST /{db}/_revs_diff` — replication helpers
+- `GET|PUT /{db}/_revs_limit` — revision limit management
+- `POST /{db}/_view_cleanup` — view index cleanup
+- `Database.save()` redundant double `batch` evaluation — `batch = "ok" if batch else None` computed twice (line ~961 and again inline in `query_kwargs`); harmless dead code
