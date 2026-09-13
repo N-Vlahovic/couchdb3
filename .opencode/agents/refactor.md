@@ -37,7 +37,15 @@ Shared: `utils.check_response` (maps HTTP codes → `CouchDBError` subclasses).
 3. **Async client implementation** using `httpx.AsyncClient` — v3.2.0, PR #34
 4. **New server & database endpoints** — v3.3.0, PR #37: `Database.changes()`, `Server.membership()`, `cluster_setup()`, `setup_cluster()`, `node_config()`, `set_node_config()`, `delete_node_config()`, `reload_node_config()`, `node_stats()`, `node_system()` — all sync + async
 5. **Session lifetime fix** — v3.3.1, PR #38 (issue #39): `Database.server` and `Partition.database` back-reference properties; fixes `RuntimeError` on chained one-liners
-6. **126 tests passing** (2 skipped — destructive `setup_cluster`)
+6. **Bug fixes + new API** — v3.4.0, PR #40:
+   - Fixed `put_design` options bug (`(opts or {}).update(...)` always returned `None`)
+   - Fixed `Server.replicate` endpoint (`_replicator` DB → `/_replicate`; body corrected)
+   - Fixed `_is_auth_token_expired` `TypeError` on session cookies with `None` expires
+   - Fixed `Partition.add_partition_to_str` prefix guard (`partition_id:` not just `partition_id`)
+   - Fixed `Partition.bulk_get` to prefix `id` key via new `add_partition_to_bulk_get_doc`
+   - Added `Database.delete_index()`, `Database.design_docs()`, `AsyncServer.has_db()` (all sync + async)
+   - Full sync `Partition` method test coverage; 150 tests total (2 skipped)
+7. **Package metadata fix** — v3.4.1, PR #41: corrected redacted author email
 
 ## Key conventions
 

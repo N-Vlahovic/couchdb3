@@ -3,6 +3,7 @@
 ## Status
 Step 1 (requests → httpx) is **complete and merged** (PR #32, v3.1.0).
 Step 2 (async client) is **complete and merged** (PR #34, v3.2.0).
+v3.3.0–v3.4.1 additions are **complete and merged** — see changelog below.
 
 ---
 
@@ -134,11 +135,57 @@ class TestAsyncServer(unittest.IsolatedAsyncioTestCase):
             self.assertTrue(await client.up())
 ```
 
-New test files:
+Test files:
 ```
 tests/
 ├── test_async_server.py
 └── test_async_database.py
 ```
 `make test` picks up `IsolatedAsyncioTestCase` automatically.
+**Current test count: 150 tests, 2 skipped** (as of v3.4.1).
+
+---
+
+## Changelog
+
+### v3.3.0 (PR #37)
+Added to `AsyncServer` (sync + async):
+- `membership()`, `cluster_setup()`, `setup_cluster()`
+- `node_config()`, `set_node_config()`, `delete_node_config()`, `reload_node_config()`
+- `node_stats()`, `node_system()`
+
+Added to `AsyncDatabase` (sync + async):
+- `changes()` — polling / longpoll; `feed=continuous|eventsource` raises `ValueError`.
+
+### v3.3.1 (PR #38, issue #39)
+- `AsyncDatabase.server` and `AsyncPartition.database` read-only back-reference properties to anchor
+  parent lifetime and prevent `RuntimeError: Cannot send a request, as the client has been closed.`
+
+### v3.4.0 (PR #40)
+**Bug fixes:**
+- `AsyncDatabase.put_design()` — `options = (options or {}).update(...)` always set options to `None`;
+  fixed to `{**(options or {}), "partitioned": partitioned}`.
+- `AsyncServer.replicate()` — was posting to `_replicator` DB; now posts to `/_replicate`.
+  Body: dropped invalid `_id` field, mapped `filter_func` → `filter` key. `replication_id` param
+  kept but deprecated (silently ignored).
+- `AsyncBase._is_auth_token_expired()` — now handles `None` `.expires` (session cookie)
+  without raising `TypeError`.
+- `AsyncPartition.add_partition_to_str()` — guard tightened to `startswith(f"{partition_id}:")`
+  to avoid false matches on IDs that share a prefix.
+- `AsyncPartition.bulk_get()` — was calling `add_partition_to_doc` (looks for `_id` key only);
+  now calls `add_partition_to_bulk_get_doc` which handles both `id` and `_id` keys.
+
+**New API:**
+- `AsyncServer.has_db(name) -> bool` — async equivalent of sync `name in server`
+  (Python disallows async `__contains__`).
+- `AsyncDatabase.delete_index(ddoc, name, index_type="json") -> bool`
+  — `DELETE /{db}/_index/{ddoc}/{type}/{name}`; strips a `_design/` prefix automatically.
+- `AsyncDatabase.design_docs(...) -> ViewResult`
+  — `GET /{db}/_design_docs` with explicit signature.
+
+**New helpers on `AsyncPartition`:**
+- `add_partition_to_bulk_get_doc(doc)` — prefixes the `id` (or `_id`) key; public method.
+
+### v3.4.1 (PR #41)
+- Package metadata only: corrected author email in `pyproject.toml` / `setup.py`.
 
