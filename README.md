@@ -328,7 +328,7 @@ await client.aclose()
 
 Note: `AsyncServer` does not implement `__getitem__` — Python does not allow `__getitem__` to
 be a coroutine. Use `await client.get(name)` instead of `client[name]`. Similarly, for the
-sync `name in server` existence check, use `await client.has_db(name)`.
+async equivalent of the sync `name in server` check, use `await client.has_db(name)`.
 
 ### Getting or creating a database
 ```python
