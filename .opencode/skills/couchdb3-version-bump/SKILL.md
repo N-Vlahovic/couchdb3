@@ -57,3 +57,4 @@ description: Use when bumping the couchdb3 version. Lists every file to update, 
 | `3.3.1` | #38 | Fix `RuntimeError` on chained `Server().__getitem__().method()` (session lifetime bug, issue #39); adds read-only `Database.server`, `Partition.database`, `AsyncDatabase.server`, `AsyncPartition.database` back-reference properties |
 | `3.4.0` | #40 | `Database.delete_index()`, `Database.design_docs()`, `AsyncServer.has_db()` (all sync + async); fix `put_design` options bug and `Server.replicate` endpoint; broader test coverage |
 | `3.4.1` | — | Fix redacted author email in `pyproject.toml` / `setup.py` |
+| `3.4.2` | — | Emit `DeprecationWarning` when `Server.replicate(replication_id=...)` is passed (sync + async) |

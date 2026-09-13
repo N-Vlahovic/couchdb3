@@ -2,6 +2,7 @@
 
 import atexit
 import unittest
+import warnings
 
 from couchdb3.aio import AsyncDatabase, AsyncServer
 from couchdb3.sync import Server
@@ -91,6 +92,22 @@ class TestAsyncClient(unittest.IsolatedAsyncioTestCase):
             create_target=True,
         )
         self.assertTrue(result.get("ok"))
+
+    async def test_replicate_deprecation_warning(self):
+        if TEST_DB_NAME not in (await self.client.all_dbs()):
+            await self.client.create(TEST_DB_NAME)
+        db = await self.client.get(TEST_DB_NAME)
+        target_db = f"{self.client.url}/{TEST_DB_NAME}-rep"
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            await self.client.replicate(
+                source=db.url,
+                target=target_db,
+                replication_id="replication-id",
+                continuous=True,
+                create_target=True,
+            )
+        self.assertTrue(any(issubclass(w.category, DeprecationWarning) for w in caught))
 
     async def test_replicate_one_shot(self):
         if TEST_DB_NAME not in (await self.client.all_dbs()):

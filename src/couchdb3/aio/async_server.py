@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+import warnings
+
 import httpx
 
 from ..exceptions import (
@@ -411,6 +413,13 @@ class AsyncServer(AsyncBase):
             target_proxy and validate_proxy(target_proxy) is False
         ):
             raise ProxySchemeComplianceError("Proxy has invalid scheme.")
+        if replication_id is not None:
+            warnings.warn(
+                "`replication_id` is deprecated and has no effect on the one-shot "
+                "`_replicate` endpoint; it is ignored.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
         if sum(bool(_) for _ in [doc_ids, filter_func, selector]) > 1:
             raise CouchDBError(
                 'Arguments "doc_ids", "filter_func" and "selector" are mutually exclusive.'
