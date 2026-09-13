@@ -113,11 +113,11 @@ el.replaceWith(d);
 
     def __repr__(self) -&gt; str:
         &#34;&#34;&#34;
-        Close the session on delete.
+        Basic repr.
 
         Returns
         -------
-        str
+        str : The instance&#39;s representation.
         &#34;&#34;&#34;
         return f&#34;{super().__repr__()}: {self.url}&#34;
 
@@ -410,7 +410,8 @@ el.replaceWith(d);
                 {“url”:”url in here”, “headers”: {“header1”:”value1”, …}}
 
         replication_id : str
-            The ID of the replication document.
+            Deprecated. Ignored for one-shot replication (the `_replicate` endpoint does not accept
+            a replication document ID).
         cancel : bool
             Cancels the replication.
         continuous : bool
@@ -456,10 +457,9 @@ el.replaceWith(d);
                 &#39;Arguments &#34;doc_ids&#34;, &#34;filter_func&#34; and &#34;selector&#34; are mutually exclusive.&#39;
             )
         return self._post(
-            resource=&#34;_replicator&#34;,
+            resource=&#34;_replicate&#34;,
             body=rm_nones_from_dict(
                 {
-                    &#34;_id&#34;: replication_id,
                     &#34;source&#34;: source,
                     &#34;target&#34;: target,
                     &#34;cancel&#34;: cancel,
@@ -467,7 +467,7 @@ el.replaceWith(d);
                     &#34;create_target&#34;: create_target,
                     &#34;create_target_params&#34;: create_target_params,
                     &#34;doc_ids&#34;: doc_ids,
-                    &#34;filter_func&#34;: filter_func,
+                    &#34;filter&#34;: filter_func,
                     &#34;selector&#34;: selector,
                     &#34;source_proxy&#34;: source_proxy,
                     &#34;target_proxy&#34;: target_proxy,
@@ -1450,7 +1450,8 @@ that have not been written to disk.</p>
             {“url”:”url in here”, “headers”: {“header1”:”value1”, …}}
 
     replication_id : str
-        The ID of the replication document.
+        Deprecated. Ignored for one-shot replication (the `_replicate` endpoint does not accept
+        a replication document ID).
     cancel : bool
         Cancels the replication.
     continuous : bool
@@ -1496,10 +1497,9 @@ that have not been written to disk.</p>
             &#39;Arguments &#34;doc_ids&#34;, &#34;filter_func&#34; and &#34;selector&#34; are mutually exclusive.&#39;
         )
     return self._post(
-        resource=&#34;_replicator&#34;,
+        resource=&#34;_replicate&#34;,
         body=rm_nones_from_dict(
             {
-                &#34;_id&#34;: replication_id,
                 &#34;source&#34;: source,
                 &#34;target&#34;: target,
                 &#34;cancel&#34;: cancel,
@@ -1507,7 +1507,7 @@ that have not been written to disk.</p>
                 &#34;create_target&#34;: create_target,
                 &#34;create_target_params&#34;: create_target_params,
                 &#34;doc_ids&#34;: doc_ids,
-                &#34;filter_func&#34;: filter_func,
+                &#34;filter&#34;: filter_func,
                 &#34;selector&#34;: selector,
                 &#34;source_proxy&#34;: source_proxy,
                 &#34;target_proxy&#34;: target_proxy,
@@ -1540,7 +1540,8 @@ additional parameters like headers. Eg:</p>
 </code></pre>
 </dd>
 <dt><strong><code>replication_id</code></strong> :&ensp;<code>str</code></dt>
-<dd>The ID of the replication document.</dd>
+<dd>Deprecated. Ignored for one-shot replication (the <code>_replicate</code> endpoint does not accept
+a replication document ID).</dd>
 <dt><strong><code>cancel</code></strong> :&ensp;<code>bool</code></dt>
 <dd>Cancels the replication.</dd>
 <dt><strong><code>continuous</code></strong> :&ensp;<code>bool</code></dt>
