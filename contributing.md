@@ -31,8 +31,10 @@ cd couchdb3
 
 # Create the environment, install the package and all dev dependencies
 uv sync
-uv pip install -e ".[dev]"
 ```
+
+`uv sync` installs the package plus the `dev` dependency group (declared under
+`[dependency-groups]` in `pyproject.toml`), so no separate dev-extras install step is needed.
 
 From there, prefix commands with `uv run` to run them inside the managed environment, e.g.
 `uv run python3`, `uv run ruff check .`, etc. — or use `make test`, `make build` etc. which
@@ -41,7 +43,7 @@ handle this automatically.
 ### Other environments
 
 `venv`, `pipenv`, `conda` and similar tools work fine too. The only requirement is that
-`httpx>=0.27,<1.0` is available at runtime, and the dev extras (`build`, `pdoc3`, `ruff`,
+`httpx>=0.27,<1.0` is available at runtime, and the dev tools (`build`, `pdoc3`, `ruff`,
 `setuptools`, `twine`) are available when running the corresponding `make` targets.
 
 ## Requirements
@@ -73,10 +75,10 @@ Backwards compatibility might be a future topic but as of now `v3` is the only o
 The package itself only requires `httpx` (c.f. `setup.py` and `pyproject.toml`).
 
 Dev/build tools (`build`, `pdoc3`, `ruff`, `setuptools`, `twine`) are declared under
-`[project.optional-dependencies] dev` in `pyproject.toml`. Install them all in one step:
+`[dependency-groups]` in `pyproject.toml`. Install them all in one step:
 
 ```bash
-uv pip install -e ".[dev]"
+uv sync
 ```
 
 

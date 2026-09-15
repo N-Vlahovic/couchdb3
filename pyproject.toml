@@ -18,7 +18,7 @@ dependencies = [
     "httpx>=0.27,<1.0",
 ]
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
     "build>=1.5.0",
     "pdoc3>=0.11.6",
