@@ -31,6 +31,22 @@
 
 ## Open items
 
+### p1 — bug / correctness
+
+- <s>**`AsyncDatabase.put_attachment` blocks the event loop on file I/O** — when `path=` is supplied,
+  `aio/async_database.py` called synchronous `open()` + `file.read()` inside an `async def`
+  with no `asyncio.to_thread()` / `run_in_executor()` wrapping.  The same bug was inherited by
+  `AsyncPartition.put_attachment` (delegates straight to the parent method).</s>
+  — fixed in v3.4.3: file read offloaded via `asyncio.to_thread`.
+
+  - **TODO (future / nested):** replace the whole-file read with httpx streaming so large
+    attachments are never fully loaded into memory:
+    - Pass an open file-like object (or an async generator) directly to `httpx.AsyncClient`
+      as the `content=` argument; httpx will chunk-read the file during the upload.
+    - This eliminates both the blocking I/O *and* the memory spike for large files.
+    - Requires coordinating `content_length` header so CouchDB does not reject the request.
+    - Consider exposing a `chunk_size` parameter for caller-controlled buffering.
+
 ### p2 — important
 
 - **`changes_stream()` for `feed=continuous|eventsource`** — largest remaining functional gap; `changes()` explicitly raises `ValueError` for streaming feeds and the README documents this as unsupported.

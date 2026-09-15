@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import asyncio
 import mimetypes
 from collections.abc import Iterable
 from typing import Any
@@ -28,6 +29,11 @@ __all__ = [
     "AsyncDatabase",
     "AsyncPartition",
 ]
+
+
+def _read_bytes(path: str) -> bytes:
+    with open(path, "rb") as file:
+        return file.read()
 
 
 class AsyncDatabase(AsyncBase):
@@ -764,8 +770,7 @@ class AsyncDatabase(AsyncBase):
         query_kwargs = {"rev": rev}
         content_type = content_type if content_type else mimetypes.guess_type(path)[0]
         if path:
-            with open(path, "rb") as file:
-                content = file.read()
+            content = await asyncio.to_thread(_read_bytes, path)
         response = await self._put(
             resource=resource,
             query_kwargs=query_kwargs,

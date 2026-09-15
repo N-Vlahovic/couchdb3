@@ -146,7 +146,34 @@ tests/
 
 ---
 
+## Known issues / open work
+
+### Blocking file I/O in `AsyncDatabase.put_attachment` (fixed in v3.4.3)
+
+**File:** `aio/async_database.py`
+
+When `path=` is passed to `put_attachment`, the file read is now offloaded to a worker thread via
+`asyncio.to_thread`, so the event loop thread is no longer blocked:
+
+```python
+if path:
+    content = await asyncio.to_thread(_read_bytes, path)
+```
+
+`_read_bytes(path)` is a module-level helper that does the blocking `open()` + `file.read()`.
+
+**Remaining (future / nested) work:** httpx streaming — pass the file object directly to httpx so the
+attachment is never fully read into memory.  Requires setting `Content-Length` explicitly.
+
+Tracked in `TODO.md` under **p1 — bug / correctness**.
+
+---
+
 ## Changelog
+
+### v3.4.3 (PR #45)
+- `AsyncDatabase.put_attachment()` no longer blocks the event loop when `path=` is supplied: the
+  file read is offloaded via `asyncio.to_thread`.  `AsyncPartition.put_attachment()` inherits the fix.
 
 ### v3.3.0 (PR #37)
 Added to `AsyncServer` (sync + async):
