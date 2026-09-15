@@ -18,7 +18,8 @@ description: Use when bumping the couchdb3 version. Lists every file to update, 
 1. Decide the new version (see rules below)
 2. Update `pyproject.toml` → `version = "x.y.z"`
 3. Update `setup.py` → `version="x.y.z"`
-4. Run `uv sync` to regenerate `uv.lock`
+4. Run `uv sync` to regenerate `uv.lock` (dev deps are a `[dependency-groups]` group, so a
+   bare `uv sync` installs them — no `--extra dev` / `uv pip install -e ".[dev]"` needed)
 5. Run `make test` to verify nothing is broken
 6. Commit all three files: `git commit -m "Bump version to x.y.z"`
 
