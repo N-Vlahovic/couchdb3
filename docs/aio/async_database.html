@@ -789,8 +789,7 @@ el.replaceWith(d);
         query_kwargs = {&#34;rev&#34;: rev}
         content_type = content_type if content_type else mimetypes.guess_type(path)[0]
         if path:
-            with open(path, &#34;rb&#34;) as file:
-                content = file.read()
+            content = await asyncio.to_thread(_read_bytes, path)
         response = await self._put(
             resource=resource,
             query_kwargs=query_kwargs,
@@ -2741,8 +2740,7 @@ Default <code>None</code>.</dd>
     query_kwargs = {&#34;rev&#34;: rev}
     content_type = content_type if content_type else mimetypes.guess_type(path)[0]
     if path:
-        with open(path, &#34;rb&#34;) as file:
-            content = file.read()
+        content = await asyncio.to_thread(_read_bytes, path)
     response = await self._put(
         resource=resource,
         query_kwargs=query_kwargs,
