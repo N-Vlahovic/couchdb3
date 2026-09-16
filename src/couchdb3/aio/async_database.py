@@ -3,8 +3,9 @@ from __future__ import annotations
 
 import asyncio
 import mimetypes
-from collections.abc import Iterable
-from typing import Any
+import os
+from collections.abc import AsyncIterator, Iterable
+from typing import Any, BinaryIO
 
 import httpx
 
@@ -31,9 +32,26 @@ __all__ = [
 ]
 
 
-def _read_bytes(path: str) -> bytes:
-    with open(path, "rb") as file:
-        return file.read()
+async def _stream_file_content(file: BinaryIO, chunk_size: int = 64 * 1024) -> AsyncIterator[bytes]:
+    """
+    Yield a file's contents in chunks without loading the whole file into memory.
+
+    Each `read` call is offloaded to a worker thread so the event loop is never
+    blocked by disk I/O.
+
+    Parameters
+    ----------
+    file : BinaryIO
+        An open binary file handle positioned at the start of the file.
+    chunk_size : int
+        The number of bytes to read per chunk. Defaults to 64 KiB.
+
+    Yields
+    ------
+    bytes : The next chunk of file content.
+    """
+    while chunk := await asyncio.to_thread(file.read, chunk_size):
+        yield chunk
 
 
 class AsyncDatabase(AsyncBase):
@@ -749,6 +767,8 @@ class AsyncDatabase(AsyncBase):
             The attachment's name.
         path : str
             Path to a local file to upload. Mutually exclusive with `content`.
+            The file is streamed to CouchDB in chunks, so its full contents are never
+            loaded into memory.
         content : bytes
             Raw bytes to upload. Mutually exclusive with `path`.
         content_type : str
@@ -770,13 +790,24 @@ class AsyncDatabase(AsyncBase):
         query_kwargs = {"rev": rev}
         content_type = content_type if content_type else mimetypes.guess_type(path)[0]
         if path:
-            content = await asyncio.to_thread(_read_bytes, path)
-        response = await self._put(
-            resource=resource,
-            query_kwargs=query_kwargs,
-            content=content,
-            headers={"content-type": content_type},
-        )
+            with open(path, "rb") as file:
+                content_length = os.fstat(file.fileno()).st_size
+                response = await self._put(
+                    resource=resource,
+                    query_kwargs=query_kwargs,
+                    content=_stream_file_content(file),
+                    headers={
+                        "content-type": content_type,
+                        "content-length": str(content_length),
+                    },
+                )
+        else:
+            response = await self._put(
+                resource=resource,
+                query_kwargs=query_kwargs,
+                content=content,
+                headers={"content-type": content_type},
+            )
         data = response.json()
         return data["id"], data["ok"], data["rev"]
 

@@ -859,7 +859,9 @@ re-exported here — import them from <code><a title="couchdb3" href="../index.h
         attname : str
             The attachment&#39;s name.
         path : str
-            The path ot the local file to be uploaded.
+            The path to the local file to be uploaded.
+            The file is streamed to CouchDB in chunks, so its full contents are never
+            loaded into memory.
             Precisely one of the arguments `path` or `content` must be supplied.
         content : bytes
             The content to be uploaded.
@@ -880,7 +882,7 @@ re-exported here — import them from <code><a title="couchdb3" href="../index.h
         &#34;&#34;&#34;
         if (not content and not path) or (content and path):
             raise ValueError(
-                &#39;Precisely one of the arguments &#34;attdata&#34; and  &#34;attloc&#34; must be provided.&#39;
+                &#39;Precisely one of the arguments &#34;content&#34; and &#34;path&#34; must be provided.&#39;
             )
         if content and not content_type:
             raise ValueError(&#39;Argument &#34;content_type&#34; cannot be empty when &#34;content&#34; is provided.&#39;)
@@ -889,13 +891,19 @@ re-exported here — import them from <code><a title="couchdb3" href="../index.h
         content_type = content_type if content_type else mimetypes.guess_type(path)[0]
         if path:
             with open(path, &#34;rb&#34;) as file:
-                content = file.read()
-        response = self._put(
-            resource=resource,
-            query_kwargs=query_kwargs,
-            content=content,
-            headers={&#34;content-type&#34;: content_type},
-        )
+                response = self._put(
+                    resource=resource,
+                    query_kwargs=query_kwargs,
+                    content=file,
+                    headers={&#34;content-type&#34;: content_type},
+                )
+        else:
+            response = self._put(
+                resource=resource,
+                query_kwargs=query_kwargs,
+                content=content,
+                headers={&#34;content-type&#34;: content_type},
+            )
         data = response.json()
         return data[&#34;id&#34;], data[&#34;ok&#34;], data[&#34;rev&#34;]
 
@@ -3006,7 +3014,9 @@ marked as <code>_deleted=true</code> as opposed to being completely purged. For 
     attname : str
         The attachment&#39;s name.
     path : str
-        The path ot the local file to be uploaded.
+        The path to the local file to be uploaded.
+        The file is streamed to CouchDB in chunks, so its full contents are never
+        loaded into memory.
         Precisely one of the arguments `path` or `content` must be supplied.
     content : bytes
         The content to be uploaded.
@@ -3027,7 +3037,7 @@ marked as <code>_deleted=true</code> as opposed to being completely purged. For 
     &#34;&#34;&#34;
     if (not content and not path) or (content and path):
         raise ValueError(
-            &#39;Precisely one of the arguments &#34;attdata&#34; and  &#34;attloc&#34; must be provided.&#39;
+            &#39;Precisely one of the arguments &#34;content&#34; and &#34;path&#34; must be provided.&#39;
         )
     if content and not content_type:
         raise ValueError(&#39;Argument &#34;content_type&#34; cannot be empty when &#34;content&#34; is provided.&#39;)
@@ -3036,13 +3046,19 @@ marked as <code>_deleted=true</code> as opposed to being completely purged. For 
     content_type = content_type if content_type else mimetypes.guess_type(path)[0]
     if path:
         with open(path, &#34;rb&#34;) as file:
-            content = file.read()
-    response = self._put(
-        resource=resource,
-        query_kwargs=query_kwargs,
-        content=content,
-        headers={&#34;content-type&#34;: content_type},
-    )
+            response = self._put(
+                resource=resource,
+                query_kwargs=query_kwargs,
+                content=file,
+                headers={&#34;content-type&#34;: content_type},
+            )
+    else:
+        response = self._put(
+            resource=resource,
+            query_kwargs=query_kwargs,
+            content=content,
+            headers={&#34;content-type&#34;: content_type},
+        )
     data = response.json()
     return data[&#34;id&#34;], data[&#34;ok&#34;], data[&#34;rev&#34;]</code></pre>
 </details>
@@ -3054,7 +3070,9 @@ marked as <code>_deleted=true</code> as opposed to being completely purged. For 
 <dt><strong><code>attname</code></strong> :&ensp;<code>str</code></dt>
 <dd>The attachment's name.</dd>
 <dt><strong><code>path</code></strong> :&ensp;<code>str</code></dt>
-<dd>The path ot the local file to be uploaded.
+<dd>The path to the local file to be uploaded.
+The file is streamed to CouchDB in chunks, so its full contents are never
+loaded into memory.
 Precisely one of the arguments <code>path</code> or <code>content</code> must be supplied.</dd>
 <dt><strong><code>content</code></strong> :&ensp;<code>bytes</code></dt>
 <dd>The content to be uploaded.

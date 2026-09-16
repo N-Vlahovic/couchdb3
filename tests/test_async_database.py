@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 
 import atexit
+import os
 import random
 import string
+import tempfile
 import unittest
 
 from couchdb3.aio import AsyncPartition, AsyncServer
@@ -185,6 +187,26 @@ class TestAsyncDatabase(unittest.IsolatedAsyncioTestCase):
             )
             self.assertEqual(_id, docid)
             self.assertTrue(ok)
+
+    async def test_put_attachment_from_path_large_file(self):
+        docid = "test-async-put-attachment-large"
+        attname = "large.bin"
+        await self.db.save({"_id": docid})
+        content = os.urandom(8 * 1024 * 1024)
+        with tempfile.NamedTemporaryFile(suffix=".bin", delete=False) as f:
+            f.write(content)
+            path = f.name
+        try:
+            rev = await self.db.rev(docid)
+            _id, ok, _rev = await self.db.put_attachment(
+                docid=docid, attname=attname, path=path, rev=rev
+            )
+            self.assertEqual(_id, docid)
+            self.assertTrue(ok)
+            response = await self.db.get_attachment(docid=docid, attname=attname)
+            self.assertEqual(response.content, content)
+        finally:
+            os.unlink(path)
 
     async def test_put_design(self):
         db = await self.server.get(DB_NAME)

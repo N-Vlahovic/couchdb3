@@ -39,13 +39,19 @@
   `AsyncPartition.put_attachment` (delegates straight to the parent method).</s>
   — fixed in v3.4.3: file read offloaded via `asyncio.to_thread`.
 
-  - **TODO (future / nested):** replace the whole-file read with httpx streaming so large
+  - <s>**TODO (future / nested):** replace the whole-file read with httpx streaming so large
     attachments are never fully loaded into memory:
     - Pass an open file-like object (or an async generator) directly to `httpx.AsyncClient`
       as the `content=` argument; httpx will chunk-read the file during the upload.
     - This eliminates both the blocking I/O *and* the memory spike for large files.
     - Requires coordinating `content_length` header so CouchDB does not reject the request.
-    - Consider exposing a `chunk_size` parameter for caller-controlled buffering.
+    - Consider exposing a `chunk_size` parameter for caller-controlled buffering.</s>
+    — done: `put_attachment(path=...)` now streams the file to CouchDB in chunks instead of
+    reading it fully into memory. Sync passes the open file handle straight to httpx as
+    `content=` (httpx sets `Content-Length` via `fstat()` and chunk-reads the file). Async wraps
+    the handle in a `_stream_file_content` async generator (each `read` offloaded via
+    `asyncio.to_thread`) with an explicit `Content-Length` from `os.fstat(file.fileno()).st_size`. No
+    `chunk_size` parameter exposed (deferred).
 
 ### p2 — important
 

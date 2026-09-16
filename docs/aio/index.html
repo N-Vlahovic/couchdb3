@@ -788,6 +788,8 @@ re-exported here — import them from <code><a title="couchdb3" href="../index.h
             The attachment&#39;s name.
         path : str
             Path to a local file to upload. Mutually exclusive with `content`.
+            The file is streamed to CouchDB in chunks, so its full contents are never
+            loaded into memory.
         content : bytes
             Raw bytes to upload. Mutually exclusive with `path`.
         content_type : str
@@ -809,13 +811,24 @@ re-exported here — import them from <code><a title="couchdb3" href="../index.h
         query_kwargs = {&#34;rev&#34;: rev}
         content_type = content_type if content_type else mimetypes.guess_type(path)[0]
         if path:
-            content = await asyncio.to_thread(_read_bytes, path)
-        response = await self._put(
-            resource=resource,
-            query_kwargs=query_kwargs,
-            content=content,
-            headers={&#34;content-type&#34;: content_type},
-        )
+            with open(path, &#34;rb&#34;) as file:
+                content_length = os.fstat(file.fileno()).st_size
+                response = await self._put(
+                    resource=resource,
+                    query_kwargs=query_kwargs,
+                    content=_stream_file_content(file),
+                    headers={
+                        &#34;content-type&#34;: content_type,
+                        &#34;content-length&#34;: str(content_length),
+                    },
+                )
+        else:
+            response = await self._put(
+                resource=resource,
+                query_kwargs=query_kwargs,
+                content=content,
+                headers={&#34;content-type&#34;: content_type},
+            )
         data = response.json()
         return data[&#34;id&#34;], data[&#34;ok&#34;], data[&#34;rev&#34;]
 
@@ -2739,6 +2752,8 @@ Default <code>None</code>.</dd>
         The attachment&#39;s name.
     path : str
         Path to a local file to upload. Mutually exclusive with `content`.
+        The file is streamed to CouchDB in chunks, so its full contents are never
+        loaded into memory.
     content : bytes
         Raw bytes to upload. Mutually exclusive with `path`.
     content_type : str
@@ -2760,13 +2775,24 @@ Default <code>None</code>.</dd>
     query_kwargs = {&#34;rev&#34;: rev}
     content_type = content_type if content_type else mimetypes.guess_type(path)[0]
     if path:
-        content = await asyncio.to_thread(_read_bytes, path)
-    response = await self._put(
-        resource=resource,
-        query_kwargs=query_kwargs,
-        content=content,
-        headers={&#34;content-type&#34;: content_type},
-    )
+        with open(path, &#34;rb&#34;) as file:
+            content_length = os.fstat(file.fileno()).st_size
+            response = await self._put(
+                resource=resource,
+                query_kwargs=query_kwargs,
+                content=_stream_file_content(file),
+                headers={
+                    &#34;content-type&#34;: content_type,
+                    &#34;content-length&#34;: str(content_length),
+                },
+            )
+    else:
+        response = await self._put(
+            resource=resource,
+            query_kwargs=query_kwargs,
+            content=content,
+            headers={&#34;content-type&#34;: content_type},
+        )
     data = response.json()
     return data[&#34;id&#34;], data[&#34;ok&#34;], data[&#34;rev&#34;]</code></pre>
 </details>
@@ -2778,7 +2804,9 @@ Default <code>None</code>.</dd>
 <dt><strong><code>attname</code></strong> :&ensp;<code>str</code></dt>
 <dd>The attachment's name.</dd>
 <dt><strong><code>path</code></strong> :&ensp;<code>str</code></dt>
-<dd>Path to a local file to upload. Mutually exclusive with <code>content</code>.</dd>
+<dd>Path to a local file to upload. Mutually exclusive with <code>content</code>.
+The file is streamed to CouchDB in chunks, so its full contents are never
+loaded into memory.</dd>
 <dt><strong><code>content</code></strong> :&ensp;<code>bytes</code></dt>
 <dd>Raw bytes to upload. Mutually exclusive with <code>path</code>.</dd>
 <dt><strong><code>content_type</code></strong> :&ensp;<code>str</code></dt>
