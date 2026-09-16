@@ -3,8 +3,10 @@
 import atexit
 import datetime
 import mimetypes
+import os
 import random
 import string
+import tempfile
 import unittest
 
 from couchdb3.document import AttachmentDocument, Document
@@ -324,6 +326,23 @@ class TestDatabase(unittest.TestCase):
             self.assertEqual(results[0], docid)
             self.assertEqual(results[1], True)
             self.assertEqual(results[2], DB.rev(docid))
+
+    def test_put_attachment_large_file(self):
+        docid = "test-doc-put-attachment-large"
+        attname = "large.bin"
+        DB.save({"_id": docid})
+        content = os.urandom(8 * 1024 * 1024)
+        with tempfile.NamedTemporaryFile(suffix=".bin", delete=False) as f:
+            f.write(content)
+            path = f.name
+        try:
+            results = DB.put_attachment(docid=docid, attname=attname, path=path, rev=DB.rev(docid))
+            self.assertEqual(results[0], docid)
+            self.assertEqual(results[1], True)
+            response = DB.get_attachment(docid=docid, attname=attname)
+            self.assertEqual(response.content, content)
+        finally:
+            os.unlink(path)
 
     def test_save(self):
         doc0 = {

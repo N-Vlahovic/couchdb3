@@ -148,28 +148,45 @@ tests/
 
 ## Known issues / open work
 
-### Blocking file I/O in `AsyncDatabase.put_attachment` (fixed in v3.4.3)
+### Blocking file I/O in `AsyncDatabase.put_attachment` (fixed in v3.4.3, streamed in v3.4.x)
 
 **File:** `aio/async_database.py`
 
-When `path=` is passed to `put_attachment`, the file read is now offloaded to a worker thread via
-`asyncio.to_thread`, so the event loop thread is no longer blocked:
+When `path=` is passed to `put_attachment`, the file is streamed to CouchDB in chunks without
+ever loading the full contents into memory. A `_stream_file_content` async generator yields
+64 KiB chunks, offloading each `read` to a worker thread via `asyncio.to_thread`. `Content-Length`
+is set explicitly from `os.fstat(file.fileno()).st_size` so CouchDB is not sent
+`Transfer-Encoding: chunked` (which it does not support on the request side):
 
 ```python
 if path:
-    content = await asyncio.to_thread(_read_bytes, path)
+    with open(path, "rb") as file:
+        content_length = os.fstat(file.fileno()).st_size
+        response = await self._put(
+            ...,
+            content=_stream_file_content(file),
+            headers={"content-type": content_type, "content-length": str(content_length)},
+        )
+else:
+    response = await self._put(..., content=content, headers={"content-type": content_type})
 ```
 
-`_read_bytes(path)` is a module-level helper that does the blocking `open()` + `file.read()`.
+`httpx.AsyncClient` rejects a plain (sync) file object passed as `content=`, so the async path
+cannot simply pass the open handle the way the sync client does. The `_stream_file_content`
+async generator bridges the gap.
 
-**Remaining (future / nested) work:** httpx streaming — pass the file object directly to httpx so the
-attachment is never fully read into memory.  Requires setting `Content-Length` explicitly.
-
-Tracked in `TODO.md` under **p1 — bug / correctness**.
+The previous `asyncio.to_thread(_read_bytes, path)` whole-file read was removed along with the
+module-level `_read_bytes` helper.
 
 ---
 
 ## Changelog
+
+### v3.4.4 (PR #47)
+- `AsyncDatabase.put_attachment()` (and `AsyncPartition.put_attachment()`) now stream the file to
+  CouchDB in chunks instead of reading it fully into memory. A `_stream_file_content` async
+  generator yields 64 KiB chunks, offloading each `read` via `asyncio.to_thread`, with an explicit
+  `Content-Length` from `os.fstat(file.fileno()).st_size`.
 
 ### v3.4.3 (PR #45)
 - `AsyncDatabase.put_attachment()` no longer blocks the event loop when `path=` is supplied: the

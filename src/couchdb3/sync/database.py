@@ -814,7 +814,9 @@ class Database(Base):
         attname : str
             The attachment's name.
         path : str
-            The path ot the local file to be uploaded.
+            The path to the local file to be uploaded.
+            The file is streamed to CouchDB in chunks, so its full contents are never
+            loaded into memory.
             Precisely one of the arguments `path` or `content` must be supplied.
         content : bytes
             The content to be uploaded.
@@ -835,7 +837,7 @@ class Database(Base):
         """
         if (not content and not path) or (content and path):
             raise ValueError(
-                'Precisely one of the arguments "attdata" and  "attloc" must be provided.'
+                'Precisely one of the arguments "content" and "path" must be provided.'
             )
         if content and not content_type:
             raise ValueError('Argument "content_type" cannot be empty when "content" is provided.')
@@ -844,13 +846,19 @@ class Database(Base):
         content_type = content_type if content_type else mimetypes.guess_type(path)[0]
         if path:
             with open(path, "rb") as file:
-                content = file.read()
-        response = self._put(
-            resource=resource,
-            query_kwargs=query_kwargs,
-            content=content,
-            headers={"content-type": content_type},
-        )
+                response = self._put(
+                    resource=resource,
+                    query_kwargs=query_kwargs,
+                    content=file,
+                    headers={"content-type": content_type},
+                )
+        else:
+            response = self._put(
+                resource=resource,
+                query_kwargs=query_kwargs,
+                content=content,
+                headers={"content-type": content_type},
+            )
         data = response.json()
         return data["id"], data["ok"], data["rev"]
 

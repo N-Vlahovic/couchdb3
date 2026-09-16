@@ -1,6 +1,6 @@
 [project]
 name = "couchdb3"
-version = "3.4.3"
+version = "3.4.4"
 description = "A wrapper around the CouchDB API."
 authors = [{ name = "Nikolai Vlahovic", email = "vlahovic.nikolai@gmail.com" }]
 requires-python = ">= 3.11"
@@ -45,7 +45,7 @@ ignore = [
     "EXE001",   # shebang present but file not executable — OS/git artifact
     "EXE002",   # file executable but no shebang — OS/git artifact
     "SIM102",   # nested if → single and — intentional in _request auth flow
-    "ASYNC230", # blocking open() in async — no aiofiles dep, bounded read
+    "ASYNC230", # open() in async — handle passed to httpx for streaming, no blocking read
     "DTZ005",   # datetime.now() without tz — intentional in test code
 ]
 
