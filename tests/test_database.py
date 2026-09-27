@@ -501,7 +501,11 @@ class TestDatabase(unittest.TestCase):
 
     def test_changes_stream_basic(self):
         last_seq = DB.changes()["last_seq"]
-        DB.create({"_id": "test-changes-stream-doc", "type": "changes-stream"})
+        doc_id = "test-changes-stream-doc"
+        if doc_id not in DB:
+            DB.create({"_id": doc_id, "type": "changes-stream"})
+        else:
+            DB.save({"_id": doc_id, "_rev": DB.rev(doc_id), "type": "changes-stream"})
         with DB.changes_stream(since=last_seq) as stream:
             row = next(iter(stream))
         self.assertIn("id", row)

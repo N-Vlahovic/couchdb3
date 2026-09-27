@@ -1344,7 +1344,8 @@ class AsyncDatabase(AsyncBase):
         style : str
             Revision style. ``'main_only'`` (default) or ``'all_docs'``.
         timeout : int
-            Maximum milliseconds to wait for a change. Default `None` (no timeout).
+            Maximum milliseconds to wait for a change, sent to CouchDB as the ``timeout``
+            query parameter (not the HTTP connection timeout). Default `None` (no timeout).
         view : str
             View function to use as a filter (requires ``filter='_view'``).
         seq_interval : int
@@ -1421,15 +1422,16 @@ class AsyncDatabase(AsyncBase):
         elif selector is not None:
             method, body = "POST", {"selector": selector}
 
-        async def _iter() -> AsyncIterator[dict]:
-            async for line in response.aiter_lines():
-                if line := line.strip():
-                    yield json.loads(line)
-
         async with self.session.stream(
             method, url, json=body, timeout=self.timeout, **req_kwargs
         ) as response:
             check_response(response=response)
+
+            async def _iter() -> AsyncIterator[dict]:
+                async for line in response.aiter_lines():
+                    if line := line.strip():
+                        yield json.loads(line)
+
             yield _iter()
 
     async def get_partition(self, partition_id: str) -> AsyncPartition:

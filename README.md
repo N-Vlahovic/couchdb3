@@ -279,6 +279,7 @@ always `break` out of the loop to stop. Guard against a possible trailing `{"las
 object (no `id` key) that some CouchDB versions may emit:
 
 ```python
+last_seq = db.changes()["last_seq"]
 with db.changes_stream(since=last_seq, limit=100) as stream:
     for row in stream:
         if "id" in row:
@@ -512,6 +513,7 @@ always `break` out of the loop to stop. Guard against a possible trailing `{"las
 object (no `id` key) that some CouchDB versions may emit:
 
 ```python
+last_seq = (await db.changes())["last_seq"]
 async with db.changes_stream(since=last_seq, limit=100) as stream:
     async for row in stream:
         if "id" in row:

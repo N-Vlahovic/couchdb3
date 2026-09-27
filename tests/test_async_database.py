@@ -394,9 +394,13 @@ class TestAsyncDatabaseChanges(unittest.IsolatedAsyncioTestCase):
 
     async def test_changes_stream_basic(self):
         last_seq = (await self.db.changes())["last_seq"]
-        await self.db.create(
-            {"_id": "test-async-changes-stream-doc", "type": "async-changes-stream"}
-        )
+        doc_id = "test-async-changes-stream-doc"
+        if not await self.db.get(doc_id):
+            await self.db.create({"_id": doc_id, "type": "async-changes-stream"})
+        else:
+            await self.db.save(
+                {"_id": doc_id, "_rev": await self.db.rev(doc_id), "type": "async-changes-stream"}
+            )
         async with self.db.changes_stream(since=last_seq) as stream:
             row = await anext(stream)
         self.assertIn("id", row)
