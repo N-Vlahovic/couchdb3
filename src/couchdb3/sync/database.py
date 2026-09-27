@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
+import json
 import mimetypes
-from collections.abc import Iterable
+from collections.abc import Iterable, Iterator
+from contextlib import contextmanager
 from typing import Any
 
 import httpx
@@ -17,6 +19,8 @@ from ..document import (
 from ..exceptions import CouchDBError, NameComplianceError
 from ..utils import (
     DEFAULT_TIMEOUT,
+    build_url,
+    check_response,
     partitioned_db_resource_parser,
     rm_nones_from_dict,
     validate_db_name,
@@ -1380,6 +1384,161 @@ class Database(Base):
                 query_kwargs=query_kwargs,
             ).json()
         return self._get(resource="_changes", query_kwargs=query_kwargs).json()
+
+    @contextmanager
+    def changes_stream(
+        self,
+        *,
+        doc_ids: list[str] | None = None,
+        conflicts: bool | None = None,
+        descending: bool | None = None,
+        filter: str | None = None,
+        heartbeat: int | None = None,
+        include_docs: bool | None = None,
+        attachments: bool | None = None,
+        att_encoding_info: bool | None = None,
+        limit: int | None = None,
+        since: str | None = None,
+        style: str | None = None,
+        timeout: int | None = None,
+        view: str | None = None,
+        seq_interval: int | None = None,
+        selector: dict | None = None,
+    ) -> Iterator[dict]:
+        """
+        Stream changes made to documents in the database using the ``continuous`` changes
+        feed. Unlike `Database.changes`, this does not buffer the whole response — it yields
+        each change object as it arrives over a persistent HTTP connection.
+
+        This method must be used as a context manager. The underlying connection is kept open
+        for the duration of the ``with`` block and closed automatically on exit.
+
+        When `doc_ids` is provided the request is sent as ``POST /{db}/_changes`` with
+        ``filter=_doc_ids``. When `selector` is provided it is sent as
+        ``POST /{db}/_changes`` with ``filter=_selector``. All other cases use
+        ``GET /{db}/_changes``.
+
+        Parameters
+        ----------
+        doc_ids : list[str]
+            List of document IDs to filter the changes feed. Triggers a POST request with
+            ``filter=_doc_ids``. Mutually exclusive with `selector`.
+        conflicts : bool
+            Include conflicts information. Only effective when `include_docs` is `True`.
+        descending : bool
+            Return changes in descending sequence order. Default `False`.
+        filter : str
+            Name of a filter function (``'design_doc/filter_name'``, ``'_design'``, or
+            ``'_view'``). Do not pass ``'_doc_ids'`` or ``'_selector'`` manually — use the
+            `doc_ids` / `selector` parameters instead.
+        heartbeat : int
+            Milliseconds between heartbeat newlines for ``continuous`` feed.
+        include_docs : bool
+            Include the associated document with each result. Default `False`.
+        attachments : bool
+            Include Base64-encoded attachment content when `include_docs` is `True`.
+        att_encoding_info : bool
+            Include encoding info in attachment stubs when `include_docs` is `True`.
+        limit : int
+            Maximum number of rows to return. On the ``continuous`` feed this caps the
+            number of emitted rows but does not close the connection on CouchDB 3.3.x —
+            the stream keeps blocking until the caller breaks out of the loop or the
+            server times out.
+        since : str
+            Return only changes after the given update sequence. Use ``'now'`` to get only
+            future changes.
+        style : str
+            Revision style. ``'main_only'`` (default) or ``'all_docs'``.
+        timeout : int
+            Maximum milliseconds to wait for a change, sent to CouchDB as the ``timeout``
+            query parameter (not the HTTP connection timeout). Default `None` (no timeout).
+        view : str
+            View function to use as a filter (requires ``filter='_view'``).
+        seq_interval : int
+            Calculate update sequence every N results (reduces server load on large
+            sharded databases).
+        selector : dict
+            Mango selector to filter documents. Triggers a POST request with
+            ``filter=_selector``. Mutually exclusive with `doc_ids`.
+
+        Yields
+        ------
+        Iterator[dict] : An iterator yielding change objects, each with ``id``, ``seq``,
+            ``changes``, and optionally ``deleted`` / ``doc``.
+
+        Raises
+        ------
+        CouchDBError
+            If both `doc_ids` and `selector` are provided.
+
+        Notes
+        -----
+        - The stream stays open indefinitely. Break out of the loop (or exit the ``with``
+          block) to close the connection.
+        - When ``limit`` is set, CouchDB's documentation mentions that the feed may end
+          with a terminal ``{"last_seq": "..."}`` object that has no ``id`` key. This
+          object is not emitted by CouchDB 3.3.x and its presence may vary by server
+          version, so callers indexing ``row["id"]`` should guard against rows without an
+          ``id`` key.
+
+        Examples
+        --------
+        >>> with db.changes_stream(since="now") as stream:
+        ...     for row in stream:
+        ...         print(row["id"], row["seq"])
+        """
+        if doc_ids is not None and selector is not None:
+            raise CouchDBError("Arguments 'doc_ids' and 'selector' are mutually exclusive.")
+        query_kwargs = rm_nones_from_dict(
+            {
+                "feed": "continuous",
+                "conflicts": conflicts,
+                "descending": descending,
+                "filter": filter,
+                "heartbeat": heartbeat,
+                "include_docs": include_docs,
+                "attachments": attachments,
+                "att_encoding_info": att_encoding_info,
+                "limit": limit,
+                "since": since,
+                "style": style,
+                "timeout": timeout,
+                "view": view,
+                "seq_interval": seq_interval,
+            }
+        )
+        path = f"{self.root}/_changes"
+        url = build_url(
+            scheme=self.scheme,
+            host=self.host,
+            path=path,
+            port=self.port,
+            **query_kwargs,
+        )
+        req_kwargs = {}
+        if self.auth_method == "basic":
+            req_kwargs["auth"] = self._auth
+        elif self.auth_method == "cookie":
+            if self._is_auth_token_expired() is True:
+                self._renew_auth_token()
+        method = "GET"
+        body = None
+        if doc_ids is not None:
+            method, body = "POST", {"doc_ids": doc_ids}
+        elif selector is not None:
+            method, body = "POST", {"selector": selector}
+
+        with self.session.stream(
+            method, url, json=body, timeout=self.timeout, **req_kwargs
+        ) as response:
+            check_response(response=response)
+
+            def _iter() -> Iterator[dict]:
+                for line in response.iter_lines():
+                    if line := line.strip():
+                        yield json.loads(line)
+
+            yield _iter()
 
     def get_partition(self, partition_id: str) -> Partition:
         """

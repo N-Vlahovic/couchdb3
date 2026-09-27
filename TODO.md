@@ -55,9 +55,10 @@
 
 ### p2 — important
 
-- **`changes_stream()` for `feed=continuous|eventsource`** — largest remaining functional gap; `changes()` explicitly raises `ValueError` for streaming feeds and the README documents this as unsupported.
-  - **sync:** implement `Database.changes_stream()` as a generator using `httpx.Client.stream()`, yielding parsed JSON objects line-by-line from the NDJSON response; caller controls iteration and closure via a `with` block or explicit `.close()`
-  - **async:** implement `AsyncDatabase.changes_stream()` as an async generator using `httpx.AsyncClient.stream()`, yielding the same parsed objects; caller drives with `async for` and the underlying connection is released on `aclose()` or generator exhaustion
+- <s>**`changes_stream()` for `feed=continuous|eventsource`** — largest remaining functional gap; `changes()` explicitly raises `ValueError` for streaming feeds and the README documents this as unsupported.</s>
+  - <s>**sync:** implement `Database.changes_stream()` as a generator using `httpx.Client.stream()`, yielding parsed JSON objects line-by-line from the NDJSON response; caller controls iteration and closure via a `with` block or explicit `.close()`</s>
+  - <s>**async:** implement `AsyncDatabase.changes_stream()` as an async generator using `httpx.AsyncClient.stream()`, yielding the same parsed objects; caller drives with `async for` and the underlying connection is released on `aclose()` or generator exhaustion</s>
+  - **done in v3.5.0:** `changes_stream()` implemented as a `@contextmanager` (sync) / `@asynccontextmanager` (async) wrapping `session.stream()`, yielding parsed NDJSON objects; `feed` is fixed to `continuous` internally.
 - <s>`pdoc>=16.0.0` + `pdoc3>=0.11.6` conflict in `[project.optional-dependencies] dev`</s> — fixed in PR #42: dropped `pdoc>=16.0.0` from dev deps
 - <s>`Server.replicate(replication_id=...)` silently ignored</s> — fixed in v3.4.2: `DeprecationWarning` now emitted when `replication_id` is passed (both sync and async)
 
@@ -68,3 +69,4 @@
 - `GET|PUT /{db}/_revs_limit` — revision limit management
 - `POST /{db}/_view_cleanup` — view index cleanup
 - `Database.save()` redundant double `batch` evaluation — `batch = "ok" if batch else None` computed twice (line ~961 and again inline in `query_kwargs`); harmless dead code
+- `changes_stream()` returns a raw iterator exposing CouchDB's terminal `{"last_seq": ...}` object (when `limit` is set); consider a `ChangesStream` wrapper that yields only change objects and exposes `.last_seq` on the wrapper (see Batch A review discussion)

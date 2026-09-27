@@ -392,6 +392,70 @@ class TestAsyncDatabaseChanges(unittest.IsolatedAsyncioTestCase):
         with self.assertRaises(CouchDBError):
             await self.db.changes(doc_ids=["a"], selector={"type": "x"})
 
+    async def test_changes_stream_basic(self):
+        last_seq = (await self.db.changes())["last_seq"]
+        doc_id = "test-async-changes-stream-doc"
+        if not await self.db.get(doc_id):
+            await self.db.create({"_id": doc_id, "type": "async-changes-stream"})
+        else:
+            await self.db.save(
+                {"_id": doc_id, "_rev": await self.db.rev(doc_id), "type": "async-changes-stream"}
+            )
+        async with self.db.changes_stream(since=last_seq) as stream:
+            row = await anext(stream)
+        self.assertIn("id", row)
+
+    async def test_changes_stream_include_docs(self):
+        doc_id = "test-async-changes-stream-include-docs-doc"
+        last_seq = (await self.db.changes())["last_seq"]
+        if not await self.db.get(doc_id):
+            await self.db.create({"_id": doc_id, "type": "async-changes-stream-include-docs"})
+        else:
+            await self.db.save(
+                {
+                    "_id": doc_id,
+                    "_rev": await self.db.rev(doc_id),
+                    "type": "async-changes-stream-include-docs",
+                }
+            )
+        async with self.db.changes_stream(
+            doc_ids=[doc_id], include_docs=True, since=last_seq
+        ) as stream:
+            async for row in stream:
+                if row.get("id") == doc_id:
+                    self.assertIn("doc", row)
+                    break
+
+    async def test_changes_stream_limit(self):
+        last_seq = (await self.db.changes())["last_seq"]
+        for i in range(3):
+            doc_id = f"test-async-changes-stream-limit-{i}"
+            if not await self.db.get(doc_id):
+                await self.db.create({"_id": doc_id, "type": "async-changes-stream-limit"})
+            else:
+                await self.db.save(
+                    {
+                        "_id": doc_id,
+                        "_rev": await self.db.rev(doc_id),
+                        "type": "async-changes-stream-limit",
+                    }
+                )
+        rows = []
+        async with self.db.changes_stream(since=last_seq, limit=2) as stream:
+            async for row in stream:
+                rows.append(row)
+                if len(rows) >= 2:
+                    break
+        self.assertEqual(len(rows), 2)
+        self.assertTrue(all("id" in row for row in rows))
+
+    async def test_changes_stream_mutual_exclusion_raises(self):
+        from couchdb3.exceptions import CouchDBError
+
+        with self.assertRaises(CouchDBError):
+            async with self.db.changes_stream(doc_ids=["a"], selector={"type": "x"}) as _:
+                pass
+
 
 class TestAsyncDatabaseServerRef(unittest.IsolatedAsyncioTestCase):
     """Tests for the db.server and partition.database back-references (Option C lifetime fix)."""

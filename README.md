@@ -248,14 +248,51 @@ for row in result["results"]:
 result = db.changes(feed="longpoll", since="now", timeout=30_000)
 ```
 
-> **Note — continuous and eventsource feeds**
+### Streaming the changes feed
+
+`Database.changes_stream()` wraps the `continuous` feed and yields each change object as it
+arrives over a persistent HTTP connection. It must be used as a context manager:
+
+```python
+# Stream continuous changes (blocks until the `with` block exits)
+with db.changes_stream(since="now") as stream:
+    for row in stream:
+        print(row["id"], row["seq"], row["changes"])
+
+# Filter to specific document IDs (POST /_changes?filter=_doc_ids)
+with db.changes_stream(doc_ids=["doc-1", "doc-2"], include_docs=True) as stream:
+    for row in stream:
+        print(row["id"], row.get("doc"))
+
+# Filter with a Mango selector (POST /_changes?filter=_selector)
+with db.changes_stream(selector={"type": {"$eq": "post"}}) as stream:
+    for row in stream:
+        print(row["id"], row["seq"])
+```
+
+The underlying connection is kept open for the duration of the `with` block and closed
+automatically on exit. To stop listening, break out of the loop and let the context manager
+close the connection.
+
+Note: `limit` caps the number of rows but does **not** close the connection on CouchDB 3.3.x —
+always `break` out of the loop to stop. Guard against a possible trailing `{"last_seq": ...}`
+object (no `id` key) that some CouchDB versions may emit:
+
+```python
+last_seq = db.changes()["last_seq"]
+with db.changes_stream(since=last_seq, limit=100) as stream:
+    for row in stream:
+        if "id" in row:
+            print(row["id"])
+```
+
+> **Note — `feed="continuous"` and `feed="eventsource"` on `changes()`**
 >
 > `feed="continuous"` and `feed="eventsource"` are **not supported** by `changes()` and will
 > raise `ValueError`. These modes stream newline-delimited JSON over a persistent HTTP
 > connection, which requires response-body streaming rather than a single buffered read.
-> Support for streaming feeds will be added in a future `changes_stream()` method.
-> For now, a polling loop over `feed="longpoll"` with `since=last_seq` is a practical
-> alternative for most real-time use cases.
+> Use `changes_stream()` above for streaming feeds, or a polling loop over
+> `feed="longpoll"` with `since=last_seq`.
 
 ### Working with partitions
 For a partitioned database, the `couchdb3.sync.Partition` class offers a wrapper around partitions (acting similarly
@@ -445,14 +482,51 @@ for row in result["results"]:
 result = await db.changes(feed="longpoll", since="now", timeout=30_000)
 ```
 
-> **Note — continuous and eventsource feeds**
+### Streaming the changes feed
+
+`AsyncDatabase.changes_stream()` wraps the `continuous` feed and yields each change object as
+it arrives over a persistent HTTP connection. It must be used as an async context manager:
+
+```python
+# Stream continuous changes (blocks until the `async with` block exits)
+async with db.changes_stream(since="now") as stream:
+    async for row in stream:
+        print(row["id"], row["seq"], row["changes"])
+
+# Filter to specific document IDs (POST /_changes?filter=_doc_ids)
+async with db.changes_stream(doc_ids=["doc-1", "doc-2"], include_docs=True) as stream:
+    async for row in stream:
+        print(row["id"], row.get("doc"))
+
+# Filter with a Mango selector (POST /_changes?filter=_selector)
+async with db.changes_stream(selector={"type": {"$eq": "post"}}) as stream:
+    async for row in stream:
+        print(row["id"], row["seq"])
+```
+
+The underlying connection is kept open for the duration of the `async with` block and closed
+automatically on exit. To stop listening, break out of the loop and let the context manager
+close the connection.
+
+Note: `limit` caps the number of rows but does **not** close the connection on CouchDB 3.3.x —
+always `break` out of the loop to stop. Guard against a possible trailing `{"last_seq": ...}`
+object (no `id` key) that some CouchDB versions may emit:
+
+```python
+last_seq = (await db.changes())["last_seq"]
+async with db.changes_stream(since=last_seq, limit=100) as stream:
+    async for row in stream:
+        if "id" in row:
+            print(row["id"])
+```
+
+> **Note — `feed="continuous"` and `feed="eventsource"` on `changes()`**
 >
 > `feed="continuous"` and `feed="eventsource"` are **not supported** by `changes()` and will
 > raise `ValueError`. These modes stream newline-delimited JSON over a persistent HTTP
 > connection, which requires response-body streaming rather than a single buffered read.
-> Support for streaming feeds will be added in a future `changes_stream()` method.
-> For now, a polling loop over `feed="longpoll"` with `since=last_seq` is a practical
-> alternative for most real-time use cases.
+> Use `changes_stream()` above for streaming feeds, or a polling loop over
+> `feed="longpoll"` with `since=last_seq`.
 
 ### Controlling concurrency
 

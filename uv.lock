@@ -181,7 +181,7 @@ wheels = [
 
 [[package]]
 name = "couchdb3"
-version = "3.4.4"
+version = "3.5.0"
 source = { editable = "." }
 dependencies = [
     { name = "httpx" },

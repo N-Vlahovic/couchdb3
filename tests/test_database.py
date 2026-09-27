@@ -499,6 +499,56 @@ class TestDatabase(unittest.TestCase):
         with self.assertRaises(CouchDBError):
             DB.changes(doc_ids=["a"], selector={"type": "x"})
 
+    def test_changes_stream_basic(self):
+        last_seq = DB.changes()["last_seq"]
+        doc_id = "test-changes-stream-doc"
+        if doc_id not in DB:
+            DB.create({"_id": doc_id, "type": "changes-stream"})
+        else:
+            DB.save({"_id": doc_id, "_rev": DB.rev(doc_id), "type": "changes-stream"})
+        with DB.changes_stream(since=last_seq) as stream:
+            row = next(iter(stream))
+        self.assertIn("id", row)
+
+    def test_changes_stream_include_docs(self):
+        doc_id = "test-changes-stream-include-docs-doc"
+        last_seq = DB.changes()["last_seq"]
+        if doc_id not in DB:
+            DB.create({"_id": doc_id, "type": "changes-stream-include-docs"})
+        else:
+            DB.save({"_id": doc_id, "_rev": DB.rev(doc_id), "type": "changes-stream-include-docs"})
+        with DB.changes_stream(doc_ids=[doc_id], include_docs=True, since=last_seq) as stream:
+            for row in stream:
+                if row.get("id") == doc_id:
+                    self.assertIn("doc", row)
+                    break
+
+    def test_changes_stream_limit(self):
+        last_seq = DB.changes()["last_seq"]
+        for i in range(3):
+            doc_id = f"test-changes-stream-limit-{i}"
+            if doc_id not in DB:
+                DB.create({"_id": doc_id, "type": "changes-stream-limit"})
+            else:
+                DB.save({"_id": doc_id, "_rev": DB.rev(doc_id), "type": "changes-stream-limit"})
+        rows = []
+        with DB.changes_stream(since=last_seq, limit=2) as stream:
+            for row in stream:
+                rows.append(row)
+                if len(rows) >= 2:
+                    break
+        self.assertEqual(len(rows), 2)
+        self.assertTrue(all("id" in row for row in rows))
+
+    def test_changes_stream_mutual_exclusion_raises(self):
+        from couchdb3.exceptions import CouchDBError
+
+        with (
+            self.assertRaises(CouchDBError),
+            DB.changes_stream(doc_ids=["a"], selector={"type": "x"}),
+        ):
+            pass
+
 
 class TestDatabaseServerRef(unittest.TestCase):
     """Tests for the db.server and partition.database back-references (Option C lifetime fix)."""
