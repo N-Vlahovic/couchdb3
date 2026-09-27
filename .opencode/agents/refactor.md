@@ -47,6 +47,9 @@ Shared: `utils.check_response` (maps HTTP codes → `CouchDBError` subclasses).
    - Full sync `Partition` method test coverage; 150 tests total (2 skipped)
 7. **Package metadata fix** — v3.4.1, PR #41: corrected redacted author email
 8. **Deprecation warning** — v3.4.2, PR #43: `Server.replicate(replication_id=...)` now emits `DeprecationWarning` (sync + async); 152 tests (2 skipped)
+9. **Dev dependency group** — v3.4.3, PR #46: dev deps declared under `[dependency-groups]` in `pyproject.toml`
+10. **Attachment streaming** — v3.4.4, PR #47: `put_attachment(path=...)` streams file to CouchDB in chunks (sync passes open handle to httpx as `content=`; async offloads each `read` via `asyncio.to_thread`)
+11. **Streaming changes feed** — v3.5.0, PR #49: `Database.changes_stream()` / `AsyncDatabase.changes_stream()` as `@contextmanager` / `@asynccontextmanager` over `httpx` `.stream()`, yielding parsed NDJSON change objects; `feed` fixed to `continuous`; 162 tests (2 skipped)
 
 ## Key conventions
 

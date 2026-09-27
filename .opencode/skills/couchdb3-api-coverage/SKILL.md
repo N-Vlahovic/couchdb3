@@ -45,6 +45,20 @@ endpoint (dropping the invalid `_id` field and mapping `filter_func` → `filter
 
 ---
 
+## Batch 3 — Streaming changes feed (v3.5.0)
+
+| Endpoint | Method(s) | Class | Status |
+|---|---|---|---|
+| `GET /{db}/_changes?feed=continuous` | `Database.changes_stream()` | Database / AsyncDatabase | ✅ |
+| `POST /{db}/_changes?feed=continuous` | `Database.changes_stream(doc_ids=...)` or `changes_stream(selector=...)` | Database / AsyncDatabase | ✅ |
+
+`feed` is fixed to `continuous` internally (not a caller parameter). `eventsource`
+is intentionally **not** surfaced: it differs only in wire framing (`text/event-stream`
+with `data:` / `event:` lines), which no caller has requested — consumers that need it
+can add a sibling method reusing the same `changes_stream()` machinery.
+
+---
+
 ## Still pending (from TODO.md)
 
 | Endpoint | Notes |
@@ -53,7 +67,6 @@ endpoint (dropping the invalid `_id` field and mapping `filter_func` → `filter
 | `GET\|PUT /{db}/_revs_limit` | Revision limit management |
 | `POST /{db}/_missing_revs` / `POST /{db}/_revs_diff` | Replication helpers |
 | `POST /{db}/_view_cleanup` | View index cleanup |
-| `GET /{db}/_changes` with `feed=continuous\|eventsource` | Streaming feeds — deferred; requires iterator/stream response handling |
 
 ---
 
@@ -93,6 +106,44 @@ def changes(self, *, doc_ids=None, selector=None, feed=None, ...):
     else:
         return self._get(resource="_changes", query_kwargs=query_kwargs).json()
 ```
+
+### `Database.changes_stream()` — streaming via `httpx` `stream()`
+
+Streaming does **not** go through `_request()` (which buffers the whole response via
+`.json()`). It calls `httpx.Client.stream()` / `httpx.AsyncClient.stream()` directly,
+rebuilding the URL with `utils.build_url`. `feed="continuous"` is fixed internally.
+
+```python
+@contextmanager
+def changes_stream(self, *, doc_ids=None, selector=None, since=None, limit=None, ...):
+    if doc_ids is not None and selector is not None:
+        raise CouchDBError("Arguments 'doc_ids' and 'selector' are mutually exclusive.")
+    query_kwargs = rm_nones_from_dict({"feed": "continuous", "since": since, "limit": limit, ...})
+    url = build_url(scheme=self.scheme, host=self.host, path=f"{self.root}/_changes",
+                    port=self.port, **query_kwargs)
+    # auth: same basic/cookie handling as _request()
+    method, body = "GET", None
+    if doc_ids is not None:
+        method, body = "POST", {"doc_ids": doc_ids}
+    elif selector is not None:
+        method, body = "POST", {"selector": selector}
+    with self.session.stream(method, url, json=body, timeout=self.timeout) as response:
+        check_response(response)
+        def _iter():
+            for line in response.iter_lines():
+                if line := line.strip():
+                    yield json.loads(line)
+        yield _iter()
+```
+
+Async is identical but `@asynccontextmanager` + `aiter_lines()` + `async def _iter()`.
+
+Behavioural caveats (verified against CouchDB 3.3.3, documented in the docstring/README):
+- `limit` caps emitted rows but does **not** close the connection on 3.3.x — callers must
+  `break` out of the loop (or exit the `with` block) to stop the stream.
+- CouchDB's docs mention a terminal `{"last_seq": ...}` object (no `id` key) when `limit` is
+  set, but it is **not** emitted by 3.3.x and its presence varies by version — callers
+  indexing `row["id"]` should guard against rows without `id`.
 
 ### Node-level path construction
 
@@ -171,3 +222,16 @@ Annotate as `dict | str` to cover all three cases.
 | `tests/test_partitioned_database.py` | `TestPartition` — full sync `Partition` method coverage |
 | `TODO.md` | Struck through completed items |
 | `pyproject.toml` / `setup.py` | Version bumped to `3.4.0` |
+
+## Files modified in Batch 3
+
+| File | Change |
+|---|---|
+| `src/couchdb3/sync/database.py` | Added `Database.changes_stream()` (`@contextmanager`) |
+| `src/couchdb3/aio/async_database.py` | Added `AsyncDatabase.changes_stream()` (`@asynccontextmanager`) |
+| `tests/test_database.py` | `test_changes_stream_basic`, `test_changes_stream_include_docs`, `test_changes_stream_limit`, `test_changes_stream_mutual_exclusion_raises` |
+| `tests/test_async_database.py` | Same 4 tests, async |
+| `README.md` | Replaced "not supported" callout with streaming examples (sync + async) |
+| `TODO.md` | Struck through `changes_stream()` p2 item; added `ChangesStream` wrapper (Option 3) as p3 |
+| `docs/*.html` | Regenerated pdoc3 output |
+| `pyproject.toml` / `setup.py` | Version bumped to `3.5.0` |

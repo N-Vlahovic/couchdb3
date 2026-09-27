@@ -59,3 +59,6 @@ description: Use when bumping the couchdb3 version. Lists every file to update, 
 | `3.4.0` | #40 | `Database.delete_index()`, `Database.design_docs()`, `AsyncServer.has_db()` (all sync + async); fix `put_design` options bug and `Server.replicate` endpoint; broader test coverage |
 | `3.4.1` | — | Fix redacted author email in `pyproject.toml` / `setup.py` |
 | `3.4.2` | — | Emit `DeprecationWarning` when `Server.replicate(replication_id=...)` is passed (sync + async) |
+| `3.4.3` | #46 | Declare dev deps as a uv `[dependency-groups]` group |
+| `3.4.4` | #47 | Stream attachment uploads from disk in chunks (sync + async); offload async file read to a thread |
+| `3.5.0` | #49 | `Database.changes_stream()` / `AsyncDatabase.changes_stream()` — streaming `continuous`/`eventsource` changes feed (context-managed generators over `httpx` streaming) |
