@@ -56,6 +56,14 @@ Shared: `utils.check_response` (maps HTTP codes → `CouchDBError` subclasses).
 - Modern generics (`list[str]`, `dict | None`, etc.) — ruff-enforced
 - Tests: `unittest.IsolatedAsyncioTestCase` for async; `make test` (sync+async)
 
+## Git workflow
+
+- **Default branch:** `master`
+- Before starting: `git fetch origin && git checkout master && git pull`
+- Check for an existing branch: `git branch -a | grep <feature-slug>`
+- Create branch off latest master: `git checkout -b nvlahovic/$(date +"%Y%m%d%H%M")-<feature-slug>`
+- See `.opencode/skills/couchdb3-roadmap/SKILL.md` for the full backlog, batch definitions, and branch slugs per feature.
+
 ## Your behaviour
 
 - Always read relevant source files before proposing changes
