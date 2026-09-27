@@ -33,7 +33,7 @@ Before starting any feature:
 
 ---
 
-## Batch A — Streaming (v3.5.0) ← next up
+## Batch A — Streaming (v3.5.0) ✅ done (PR #49)
 
 `Database.changes_stream()` and `AsyncDatabase.changes_stream()`
 
@@ -41,32 +41,17 @@ Before starting any feature:
 **Why:** Largest remaining functional gap. `changes()` raises `ValueError` for `feed=continuous|eventsource`. README documents this as unsupported.
 **Branch slug:** `changes-stream`
 
-### Sync
-- `Database.changes_stream(**kwargs)` — context-managed generator
-- Uses `httpx.Client.stream()`
-- Yields parsed NDJSON objects line-by-line
-- Caller: `with db.changes_stream(...) as stream: for row in stream: ...`
+Shipped as context-managed generators (`@contextmanager` sync / `@asynccontextmanager` async)
+over `httpx` streaming. `feed` is fixed to `continuous`; `eventsource` (EventSource wire
+framing) was deliberately not surfaced — add a sibling method later if needed.
 
-### Async
-- `AsyncDatabase.changes_stream(**kwargs)` — async context-managed generator
-- Uses `httpx.AsyncClient.stream()`
-- Caller: `async with db.changes_stream(...) as stream: async for row in stream: ...`
-
-### Parameters
-Same surface as `changes()`: `since`, `filter`, `heartbeat`, `timeout`, `include_docs`, `conflicts`, `descending`, `style`, `view`, `seq_interval`, `doc_ids`, `selector`. `feed` is fixed internally to `'continuous'`.
-
-### Deliverables
-- `sync/database.py` — `Database.changes_stream()`
-- `aio/async_database.py` — `AsyncDatabase.changes_stream()`
-- `tests/test_database.py` — streaming tests
-- `tests/test_async_database.py` — streaming tests
-- `README.md` — replace "not supported" callout with streaming example
-- `TODO.md` — strike through `changes_stream()` p2 item
-- Version bump to `3.5.0`
+Key behavioural notes (documented in docstrings + README): `limit` caps rows but does not
+close the connection on CouchDB 3.3.x (callers must `break`); the terminal `{"last_seq": ...}`
+object from CouchDB's docs is absent on 3.3.x and version-dependent, so guard on `"id" in row`.
 
 ---
 
-## Batch B — Missing p3 API endpoints (v3.6.0)
+## Batch B — Missing p3 API endpoints (v3.6.0) ← next up
 
 **Branch slug:** `p3-api-endpoints`
 
@@ -162,8 +147,8 @@ Nouveau / Clouseau `_search`, `_index`, `_nouveau_cleanup`. Not actively schedul
 
 | Batch | Theme | Target version | Status |
 |---|---|---|---|
-| A | `changes_stream()` streaming | 3.5.0 | **Next up** |
-| B | Local docs, replication helpers, revs_limit, view_cleanup, save() fix | 3.6.0 | Pending |
+| A | `changes_stream()` streaming | 3.5.0 | ✅ Done (PR #49) |
+| B | Local docs, replication helpers, revs_limit, view_cleanup, save() fix | 3.6.0 | **Next up** |
 | C | CouchDB 3.5 compat + uuids + ergonomics | 3.7.0 | Pending |
 | D | Ops: _scheduler, _db_updates, _prometheus | 3.8.0 | Pending |
 | E | Full-text search (Nouveau/Clouseau) | TBD | Unscheduled |
