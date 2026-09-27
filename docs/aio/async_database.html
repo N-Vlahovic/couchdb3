@@ -1275,6 +1275,162 @@ el.replaceWith(d);
             ).json()
         return (await self._get(resource=&#34;_changes&#34;, query_kwargs=query_kwargs)).json()
 
+    @asynccontextmanager
+    async def changes_stream(
+        self,
+        *,
+        doc_ids: list[str] | None = None,
+        conflicts: bool | None = None,
+        descending: bool | None = None,
+        filter: str | None = None,
+        heartbeat: int | None = None,
+        include_docs: bool | None = None,
+        attachments: bool | None = None,
+        att_encoding_info: bool | None = None,
+        limit: int | None = None,
+        since: str | None = None,
+        style: str | None = None,
+        timeout: int | None = None,
+        view: str | None = None,
+        seq_interval: int | None = None,
+        selector: dict | None = None,
+    ) -&gt; AsyncIterator[dict]:
+        &#34;&#34;&#34;
+        Stream changes made to documents in the database using the ``continuous`` changes
+        feed. Unlike `AsyncDatabase.changes`, this does not buffer the whole response — it
+        yields each change object as it arrives over a persistent HTTP connection.
+
+        This method must be used as an async context manager. The underlying connection is
+        kept open for the duration of the ``async with`` block and closed automatically on
+        exit.
+
+        When `doc_ids` is provided the request is sent as ``POST /{db}/_changes`` with
+        ``filter=_doc_ids``. When `selector` is provided it is sent as
+        ``POST /{db}/_changes`` with ``filter=_selector``. All other cases use
+        ``GET /{db}/_changes``.
+
+        Parameters
+        ----------
+        doc_ids : list[str]
+            List of document IDs to filter the changes feed. Triggers a POST request with
+            ``filter=_doc_ids``. Mutually exclusive with `selector`.
+        conflicts : bool
+            Include conflicts information. Only effective when `include_docs` is `True`.
+        descending : bool
+            Return changes in descending sequence order. Default `False`.
+        filter : str
+            Name of a filter function (``&#39;design_doc/filter_name&#39;``, ``&#39;_design&#39;``, or
+            ``&#39;_view&#39;``). Do not pass ``&#39;_doc_ids&#39;`` or ``&#39;_selector&#39;`` manually — use the
+            `doc_ids` / `selector` parameters instead.
+        heartbeat : int
+            Milliseconds between heartbeat newlines for ``continuous`` feed.
+        include_docs : bool
+            Include the associated document with each result. Default `False`.
+        attachments : bool
+            Include Base64-encoded attachment content when `include_docs` is `True`.
+        att_encoding_info : bool
+            Include encoding info in attachment stubs when `include_docs` is `True`.
+        limit : int
+            Maximum number of rows to return. On the ``continuous`` feed this caps the
+            number of emitted rows but does not close the connection on CouchDB 3.3.x —
+            the stream keeps blocking until the caller breaks out of the loop or the
+            server times out.
+        since : str
+            Return only changes after the given update sequence. Use ``&#39;now&#39;`` to get only
+            future changes.
+        style : str
+            Revision style. ``&#39;main_only&#39;`` (default) or ``&#39;all_docs&#39;``.
+        timeout : int
+            Maximum milliseconds to wait for a change, sent to CouchDB as the ``timeout``
+            query parameter (not the HTTP connection timeout). Default `None` (no timeout).
+        view : str
+            View function to use as a filter (requires ``filter=&#39;_view&#39;``).
+        seq_interval : int
+            Calculate update sequence every N results (reduces server load on large
+            sharded databases).
+        selector : dict
+            Mango selector to filter documents. Triggers a POST request with
+            ``filter=_selector``. Mutually exclusive with `doc_ids`.
+
+        Yields
+        ------
+        AsyncIterator[dict] : An async iterator yielding change objects, each with ``id``,
+            ``seq``, ``changes``, and optionally ``deleted`` / ``doc``.
+
+        Raises
+        ------
+        CouchDBError
+            If both `doc_ids` and `selector` are provided.
+
+        Notes
+        -----
+        - The stream stays open indefinitely. Break out of the loop (or exit the
+          ``async with`` block) to close the connection.
+        - When ``limit`` is set, CouchDB&#39;s documentation mentions that the feed may end
+          with a terminal ``{&#34;last_seq&#34;: &#34;...&#34;}`` object that has no ``id`` key. This
+          object is not emitted by CouchDB 3.3.x and its presence may vary by server
+          version, so callers indexing ``row[&#34;id&#34;]`` should guard against rows without an
+          ``id`` key.
+
+        Examples
+        --------
+        &gt;&gt;&gt; async with db.changes_stream(since=&#34;now&#34;) as stream:
+        ...     async for row in stream:
+        ...         print(row[&#34;id&#34;], row[&#34;seq&#34;])
+        &#34;&#34;&#34;
+        if doc_ids is not None and selector is not None:
+            raise CouchDBError(&#34;Arguments &#39;doc_ids&#39; and &#39;selector&#39; are mutually exclusive.&#34;)
+        query_kwargs = rm_nones_from_dict(
+            {
+                &#34;feed&#34;: &#34;continuous&#34;,
+                &#34;conflicts&#34;: conflicts,
+                &#34;descending&#34;: descending,
+                &#34;filter&#34;: filter,
+                &#34;heartbeat&#34;: heartbeat,
+                &#34;include_docs&#34;: include_docs,
+                &#34;attachments&#34;: attachments,
+                &#34;att_encoding_info&#34;: att_encoding_info,
+                &#34;limit&#34;: limit,
+                &#34;since&#34;: since,
+                &#34;style&#34;: style,
+                &#34;timeout&#34;: timeout,
+                &#34;view&#34;: view,
+                &#34;seq_interval&#34;: seq_interval,
+            }
+        )
+        path = f&#34;{self.root}/_changes&#34;
+        url = build_url(
+            scheme=self.scheme,
+            host=self.host,
+            path=path,
+            port=self.port,
+            **query_kwargs,
+        )
+        req_kwargs = {}
+        if self.auth_method == &#34;basic&#34;:
+            req_kwargs[&#34;auth&#34;] = self._auth
+        elif self.auth_method == &#34;cookie&#34;:
+            if self._is_auth_token_expired():
+                await self._renew_auth_token()
+        method = &#34;GET&#34;
+        body = None
+        if doc_ids is not None:
+            method, body = &#34;POST&#34;, {&#34;doc_ids&#34;: doc_ids}
+        elif selector is not None:
+            method, body = &#34;POST&#34;, {&#34;selector&#34;: selector}
+
+        async with self.session.stream(
+            method, url, json=body, timeout=self.timeout, **req_kwargs
+        ) as response:
+            check_response(response=response)
+
+            async def _iter() -&gt; AsyncIterator[dict]:
+                async for line in response.aiter_lines():
+                    if line := line.strip():
+                        yield json.loads(line)
+
+            yield _iter()
+
     async def get_partition(self, partition_id: str) -&gt; AsyncPartition:
         &#34;&#34;&#34;
         Get a given partition.
@@ -1744,6 +1900,247 @@ sharded databases).</dd>
 <dt><code>CouchDBError</code></dt>
 <dd>If both <code>doc_ids</code> and <code>selector</code> are provided.</dd>
 </dl></div>
+</dd>
+<dt id="couchdb3.aio.async_database.AsyncDatabase.changes_stream"><code class="name flex">
+<span>async def <span class="ident">changes_stream</span></span>(<span>self,<br>*,<br>doc_ids: list[str] | None = None,<br>conflicts: bool | None = None,<br>descending: bool | None = None,<br>filter: str | None = None,<br>heartbeat: int | None = None,<br>include_docs: bool | None = None,<br>attachments: bool | None = None,<br>att_encoding_info: bool | None = None,<br>limit: int | None = None,<br>since: str | None = None,<br>style: str | None = None,<br>timeout: int | None = None,<br>view: str | None = None,<br>seq_interval: int | None = None,<br>selector: dict | None = None) ‑> AsyncIterator[dict]</span>
+</code></dt>
+<dd>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@asynccontextmanager
+async def changes_stream(
+    self,
+    *,
+    doc_ids: list[str] | None = None,
+    conflicts: bool | None = None,
+    descending: bool | None = None,
+    filter: str | None = None,
+    heartbeat: int | None = None,
+    include_docs: bool | None = None,
+    attachments: bool | None = None,
+    att_encoding_info: bool | None = None,
+    limit: int | None = None,
+    since: str | None = None,
+    style: str | None = None,
+    timeout: int | None = None,
+    view: str | None = None,
+    seq_interval: int | None = None,
+    selector: dict | None = None,
+) -&gt; AsyncIterator[dict]:
+    &#34;&#34;&#34;
+    Stream changes made to documents in the database using the ``continuous`` changes
+    feed. Unlike `AsyncDatabase.changes`, this does not buffer the whole response — it
+    yields each change object as it arrives over a persistent HTTP connection.
+
+    This method must be used as an async context manager. The underlying connection is
+    kept open for the duration of the ``async with`` block and closed automatically on
+    exit.
+
+    When `doc_ids` is provided the request is sent as ``POST /{db}/_changes`` with
+    ``filter=_doc_ids``. When `selector` is provided it is sent as
+    ``POST /{db}/_changes`` with ``filter=_selector``. All other cases use
+    ``GET /{db}/_changes``.
+
+    Parameters
+    ----------
+    doc_ids : list[str]
+        List of document IDs to filter the changes feed. Triggers a POST request with
+        ``filter=_doc_ids``. Mutually exclusive with `selector`.
+    conflicts : bool
+        Include conflicts information. Only effective when `include_docs` is `True`.
+    descending : bool
+        Return changes in descending sequence order. Default `False`.
+    filter : str
+        Name of a filter function (``&#39;design_doc/filter_name&#39;``, ``&#39;_design&#39;``, or
+        ``&#39;_view&#39;``). Do not pass ``&#39;_doc_ids&#39;`` or ``&#39;_selector&#39;`` manually — use the
+        `doc_ids` / `selector` parameters instead.
+    heartbeat : int
+        Milliseconds between heartbeat newlines for ``continuous`` feed.
+    include_docs : bool
+        Include the associated document with each result. Default `False`.
+    attachments : bool
+        Include Base64-encoded attachment content when `include_docs` is `True`.
+    att_encoding_info : bool
+        Include encoding info in attachment stubs when `include_docs` is `True`.
+    limit : int
+        Maximum number of rows to return. On the ``continuous`` feed this caps the
+        number of emitted rows but does not close the connection on CouchDB 3.3.x —
+        the stream keeps blocking until the caller breaks out of the loop or the
+        server times out.
+    since : str
+        Return only changes after the given update sequence. Use ``&#39;now&#39;`` to get only
+        future changes.
+    style : str
+        Revision style. ``&#39;main_only&#39;`` (default) or ``&#39;all_docs&#39;``.
+    timeout : int
+        Maximum milliseconds to wait for a change, sent to CouchDB as the ``timeout``
+        query parameter (not the HTTP connection timeout). Default `None` (no timeout).
+    view : str
+        View function to use as a filter (requires ``filter=&#39;_view&#39;``).
+    seq_interval : int
+        Calculate update sequence every N results (reduces server load on large
+        sharded databases).
+    selector : dict
+        Mango selector to filter documents. Triggers a POST request with
+        ``filter=_selector``. Mutually exclusive with `doc_ids`.
+
+    Yields
+    ------
+    AsyncIterator[dict] : An async iterator yielding change objects, each with ``id``,
+        ``seq``, ``changes``, and optionally ``deleted`` / ``doc``.
+
+    Raises
+    ------
+    CouchDBError
+        If both `doc_ids` and `selector` are provided.
+
+    Notes
+    -----
+    - The stream stays open indefinitely. Break out of the loop (or exit the
+      ``async with`` block) to close the connection.
+    - When ``limit`` is set, CouchDB&#39;s documentation mentions that the feed may end
+      with a terminal ``{&#34;last_seq&#34;: &#34;...&#34;}`` object that has no ``id`` key. This
+      object is not emitted by CouchDB 3.3.x and its presence may vary by server
+      version, so callers indexing ``row[&#34;id&#34;]`` should guard against rows without an
+      ``id`` key.
+
+    Examples
+    --------
+    &gt;&gt;&gt; async with db.changes_stream(since=&#34;now&#34;) as stream:
+    ...     async for row in stream:
+    ...         print(row[&#34;id&#34;], row[&#34;seq&#34;])
+    &#34;&#34;&#34;
+    if doc_ids is not None and selector is not None:
+        raise CouchDBError(&#34;Arguments &#39;doc_ids&#39; and &#39;selector&#39; are mutually exclusive.&#34;)
+    query_kwargs = rm_nones_from_dict(
+        {
+            &#34;feed&#34;: &#34;continuous&#34;,
+            &#34;conflicts&#34;: conflicts,
+            &#34;descending&#34;: descending,
+            &#34;filter&#34;: filter,
+            &#34;heartbeat&#34;: heartbeat,
+            &#34;include_docs&#34;: include_docs,
+            &#34;attachments&#34;: attachments,
+            &#34;att_encoding_info&#34;: att_encoding_info,
+            &#34;limit&#34;: limit,
+            &#34;since&#34;: since,
+            &#34;style&#34;: style,
+            &#34;timeout&#34;: timeout,
+            &#34;view&#34;: view,
+            &#34;seq_interval&#34;: seq_interval,
+        }
+    )
+    path = f&#34;{self.root}/_changes&#34;
+    url = build_url(
+        scheme=self.scheme,
+        host=self.host,
+        path=path,
+        port=self.port,
+        **query_kwargs,
+    )
+    req_kwargs = {}
+    if self.auth_method == &#34;basic&#34;:
+        req_kwargs[&#34;auth&#34;] = self._auth
+    elif self.auth_method == &#34;cookie&#34;:
+        if self._is_auth_token_expired():
+            await self._renew_auth_token()
+    method = &#34;GET&#34;
+    body = None
+    if doc_ids is not None:
+        method, body = &#34;POST&#34;, {&#34;doc_ids&#34;: doc_ids}
+    elif selector is not None:
+        method, body = &#34;POST&#34;, {&#34;selector&#34;: selector}
+
+    async with self.session.stream(
+        method, url, json=body, timeout=self.timeout, **req_kwargs
+    ) as response:
+        check_response(response=response)
+
+        async def _iter() -&gt; AsyncIterator[dict]:
+            async for line in response.aiter_lines():
+                if line := line.strip():
+                    yield json.loads(line)
+
+        yield _iter()</code></pre>
+</details>
+<div class="desc"><p>Stream changes made to documents in the database using the <code>continuous</code> changes
+feed. Unlike <code><a title="couchdb3.aio.async_database.AsyncDatabase.changes" href="#couchdb3.aio.async_database.AsyncDatabase.changes">AsyncDatabase.changes()</a></code>, this does not buffer the whole response — it
+yields each change object as it arrives over a persistent HTTP connection.</p>
+<p>This method must be used as an async context manager. The underlying connection is
+kept open for the duration of the <code>async with</code> block and closed automatically on
+exit.</p>
+<p>When <code>doc_ids</code> is provided the request is sent as <code>POST /{db}/_changes</code> with
+<code>filter=_doc_ids</code>. When <code>selector</code> is provided it is sent as
+<code>POST /{db}/_changes</code> with <code>filter=_selector</code>. All other cases use
+<code>GET /{db}/_changes</code>.</p>
+<h2 id="parameters">Parameters</h2>
+<dl>
+<dt><strong><code>doc_ids</code></strong> :&ensp;<code>list[str]</code></dt>
+<dd>List of document IDs to filter the changes feed. Triggers a POST request with
+<code>filter=_doc_ids</code>. Mutually exclusive with <code>selector</code>.</dd>
+<dt><strong><code>conflicts</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Include conflicts information. Only effective when <code>include_docs</code> is <code>True</code>.</dd>
+<dt><strong><code>descending</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Return changes in descending sequence order. Default <code>False</code>.</dd>
+<dt><strong><code>filter</code></strong> :&ensp;<code>str</code></dt>
+<dd>Name of a filter function (<code>'design_doc/filter_name'</code>, <code>'_design'</code>, or
+<code>'_view'</code>). Do not pass <code>'_doc_ids'</code> or <code>'_selector'</code> manually — use the
+<code>doc_ids</code> / <code>selector</code> parameters instead.</dd>
+<dt><strong><code>heartbeat</code></strong> :&ensp;<code>int</code></dt>
+<dd>Milliseconds between heartbeat newlines for <code>continuous</code> feed.</dd>
+<dt><strong><code>include_docs</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Include the associated document with each result. Default <code>False</code>.</dd>
+<dt><strong><code>attachments</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Include Base64-encoded attachment content when <code>include_docs</code> is <code>True</code>.</dd>
+<dt><strong><code>att_encoding_info</code></strong> :&ensp;<code>bool</code></dt>
+<dd>Include encoding info in attachment stubs when <code>include_docs</code> is <code>True</code>.</dd>
+<dt><strong><code>limit</code></strong> :&ensp;<code>int</code></dt>
+<dd>Maximum number of rows to return. On the <code>continuous</code> feed this caps the
+number of emitted rows but does not close the connection on CouchDB 3.3.x —
+the stream keeps blocking until the caller breaks out of the loop or the
+server times out.</dd>
+<dt><strong><code>since</code></strong> :&ensp;<code>str</code></dt>
+<dd>Return only changes after the given update sequence. Use <code>'now'</code> to get only
+future changes.</dd>
+<dt><strong><code>style</code></strong> :&ensp;<code>str</code></dt>
+<dd>Revision style. <code>'main_only'</code> (default) or <code>'all_docs'</code>.</dd>
+<dt><strong><code>timeout</code></strong> :&ensp;<code>int</code></dt>
+<dd>Maximum milliseconds to wait for a change, sent to CouchDB as the <code>timeout</code>
+query parameter (not the HTTP connection timeout). Default <code>None</code> (no timeout).</dd>
+<dt><strong><code>view</code></strong> :&ensp;<code>str</code></dt>
+<dd>View function to use as a filter (requires <code>filter='_view'</code>).</dd>
+<dt><strong><code>seq_interval</code></strong> :&ensp;<code>int</code></dt>
+<dd>Calculate update sequence every N results (reduces server load on large
+sharded databases).</dd>
+<dt><strong><code>selector</code></strong> :&ensp;<code>dict</code></dt>
+<dd>Mango selector to filter documents. Triggers a POST request with
+<code>filter=_selector</code>. Mutually exclusive with <code>doc_ids</code>.</dd>
+</dl>
+<h2 id="yields">Yields</h2>
+<p>AsyncIterator[dict] : An async iterator yielding change objects, each with <code>id</code>,
+<code>seq</code>, <code>changes</code>, and optionally <code>deleted</code> / <code>doc</code>.</p>
+<h2 id="raises">Raises</h2>
+<dl>
+<dt><code>CouchDBError</code></dt>
+<dd>If both <code>doc_ids</code> and <code>selector</code> are provided.</dd>
+</dl>
+<h2 id="notes">Notes</h2>
+<ul>
+<li>The stream stays open indefinitely. Break out of the loop (or exit the
+<code>async with</code> block) to close the connection.</li>
+<li>When <code>limit</code> is set, CouchDB's documentation mentions that the feed may end
+with a terminal <code>{"last_seq": "..."}</code> object that has no <code>id</code> key. This
+object is not emitted by CouchDB 3.3.x and its presence may vary by server
+version, so callers indexing <code>row["id"]</code> should guard against rows without an
+<code>id</code> key.</li>
+</ul>
+<h2 id="examples">Examples</h2>
+<pre><code class="language-python-repl">&gt;&gt;&gt; async with db.changes_stream(since=&quot;now&quot;) as stream:
+...     async for row in stream:
+...         print(row[&quot;id&quot;], row[&quot;seq&quot;])
+</code></pre></div>
 </dd>
 <dt id="couchdb3.aio.async_database.AsyncDatabase.compact"><code class="name flex">
 <span>async def <span class="ident">compact</span></span>(<span>self, ddoc: str | None = None) ‑> bool</span>
@@ -4244,6 +4641,7 @@ partition was constructed directly (i.e. not via <code><a title="couchdb3.aio.as
 <ul class="hlist">
 <li><code><a title="couchdb3.aio.async_database.AsyncDatabase.aclose" href="async_base.html#couchdb3.aio.async_base.AsyncBase.aclose">aclose</a></code></li>
 <li><code><a title="couchdb3.aio.async_database.AsyncDatabase.changes" href="#couchdb3.aio.async_database.AsyncDatabase.changes">changes</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncDatabase.changes_stream" href="#couchdb3.aio.async_database.AsyncDatabase.changes_stream">changes_stream</a></code></li>
 <li><code><a title="couchdb3.aio.async_database.AsyncDatabase.check" href="async_base.html#couchdb3.aio.async_base.AsyncBase.check">check</a></code></li>
 <li><code><a title="couchdb3.aio.async_database.AsyncDatabase.compact" href="#couchdb3.aio.async_database.AsyncDatabase.compact">compact</a></code></li>
 <li><code><a title="couchdb3.aio.async_database.AsyncDatabase.delete_index" href="#couchdb3.aio.async_database.AsyncDatabase.delete_index">delete_index</a></code></li>
@@ -4285,6 +4683,7 @@ partition was constructed directly (i.e. not via <code><a title="couchdb3.aio.as
 <li><code><a title="couchdb3.aio.async_database.AsyncDatabase.bulk_docs" href="#couchdb3.aio.async_database.AsyncDatabase.bulk_docs">bulk_docs</a></code></li>
 <li><code><a title="couchdb3.aio.async_database.AsyncDatabase.bulk_get" href="#couchdb3.aio.async_database.AsyncDatabase.bulk_get">bulk_get</a></code></li>
 <li><code><a title="couchdb3.aio.async_database.AsyncDatabase.changes" href="#couchdb3.aio.async_database.AsyncDatabase.changes">changes</a></code></li>
+<li><code><a title="couchdb3.aio.async_database.AsyncDatabase.changes_stream" href="#couchdb3.aio.async_database.AsyncDatabase.changes_stream">changes_stream</a></code></li>
 <li><code><a title="couchdb3.aio.async_database.AsyncDatabase.compact" href="#couchdb3.aio.async_database.AsyncDatabase.compact">compact</a></code></li>
 <li><code><a title="couchdb3.aio.async_database.AsyncDatabase.copy" href="#couchdb3.aio.async_database.AsyncDatabase.copy">copy</a></code></li>
 <li><code><a title="couchdb3.aio.async_database.AsyncDatabase.create" href="#couchdb3.aio.async_database.AsyncDatabase.create">create</a></code></li>

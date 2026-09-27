@@ -410,6 +410,14 @@ class TestAsyncDatabaseChanges(unittest.IsolatedAsyncioTestCase):
         last_seq = (await self.db.changes())["last_seq"]
         if not await self.db.get(doc_id):
             await self.db.create({"_id": doc_id, "type": "async-changes-stream-include-docs"})
+        else:
+            await self.db.save(
+                {
+                    "_id": doc_id,
+                    "_rev": await self.db.rev(doc_id),
+                    "type": "async-changes-stream-include-docs",
+                }
+            )
         async with self.db.changes_stream(
             doc_ids=[doc_id], include_docs=True, since=last_seq
         ) as stream:
@@ -421,12 +429,17 @@ class TestAsyncDatabaseChanges(unittest.IsolatedAsyncioTestCase):
     async def test_changes_stream_limit(self):
         last_seq = (await self.db.changes())["last_seq"]
         for i in range(3):
-            await self.db.create(
-                {
-                    "_id": f"test-async-changes-stream-limit-{i}",
-                    "type": "async-changes-stream-limit",
-                }
-            )
+            doc_id = f"test-async-changes-stream-limit-{i}"
+            if not await self.db.get(doc_id):
+                await self.db.create({"_id": doc_id, "type": "async-changes-stream-limit"})
+            else:
+                await self.db.save(
+                    {
+                        "_id": doc_id,
+                        "_rev": await self.db.rev(doc_id),
+                        "type": "async-changes-stream-limit",
+                    }
+                )
         rows = []
         async with self.db.changes_stream(since=last_seq, limit=2) as stream:
             async for row in stream:

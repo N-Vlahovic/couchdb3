@@ -515,6 +515,8 @@ class TestDatabase(unittest.TestCase):
         last_seq = DB.changes()["last_seq"]
         if doc_id not in DB:
             DB.create({"_id": doc_id, "type": "changes-stream-include-docs"})
+        else:
+            DB.save({"_id": doc_id, "_rev": DB.rev(doc_id), "type": "changes-stream-include-docs"})
         with DB.changes_stream(doc_ids=[doc_id], include_docs=True, since=last_seq) as stream:
             for row in stream:
                 if row.get("id") == doc_id:
@@ -524,7 +526,11 @@ class TestDatabase(unittest.TestCase):
     def test_changes_stream_limit(self):
         last_seq = DB.changes()["last_seq"]
         for i in range(3):
-            DB.create({"_id": f"test-changes-stream-limit-{i}", "type": "changes-stream-limit"})
+            doc_id = f"test-changes-stream-limit-{i}"
+            if doc_id not in DB:
+                DB.create({"_id": doc_id, "type": "changes-stream-limit"})
+            else:
+                DB.save({"_id": doc_id, "_rev": DB.rev(doc_id), "type": "changes-stream-limit"})
         rows = []
         with DB.changes_stream(since=last_seq, limit=2) as stream:
             for row in stream:
