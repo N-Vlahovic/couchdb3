@@ -69,3 +69,4 @@
 - `GET|PUT /{db}/_revs_limit` — revision limit management
 - `POST /{db}/_view_cleanup` — view index cleanup
 - `Database.save()` redundant double `batch` evaluation — `batch = "ok" if batch else None` computed twice (line ~961 and again inline in `query_kwargs`); harmless dead code
+- `changes_stream()` returns a raw iterator exposing CouchDB's terminal `{"last_seq": ...}` object (when `limit` is set); consider a `ChangesStream` wrapper that yields only change objects and exposes `.last_seq` on the wrapper (see Batch A review discussion)

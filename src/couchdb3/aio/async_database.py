@@ -1334,7 +1334,10 @@ class AsyncDatabase(AsyncBase):
         att_encoding_info : bool
             Include encoding info in attachment stubs when `include_docs` is `True`.
         limit : int
-            Maximum number of rows to return.
+            Maximum number of rows to return. On the ``continuous`` feed this caps the
+            number of emitted rows but does not close the connection on CouchDB 3.3.x —
+            the stream keeps blocking until the caller breaks out of the loop or the
+            server times out.
         since : str
             Return only changes after the given update sequence. Use ``'now'`` to get only
             future changes.
@@ -1360,6 +1363,16 @@ class AsyncDatabase(AsyncBase):
         ------
         CouchDBError
             If both `doc_ids` and `selector` are provided.
+
+        Notes
+        -----
+        - The stream stays open indefinitely. Break out of the loop (or exit the
+          ``async with`` block) to close the connection.
+        - When ``limit`` is set, CouchDB's documentation mentions that the feed may end
+          with a terminal ``{"last_seq": "..."}`` object that has no ``id`` key. This
+          object is not emitted by CouchDB 3.3.x and its presence may vary by server
+          version, so callers indexing ``row["id"]`` should guard against rows without an
+          ``id`` key.
 
         Examples
         --------

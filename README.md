@@ -274,6 +274,17 @@ The underlying connection is kept open for the duration of the `with` block and 
 automatically on exit. To stop listening, break out of the loop and let the context manager
 close the connection.
 
+Note: `limit` caps the number of rows but does **not** close the connection on CouchDB 3.3.x —
+always `break` out of the loop to stop. Guard against a possible trailing `{"last_seq": ...}`
+object (no `id` key) that some CouchDB versions may emit:
+
+```python
+with db.changes_stream(since=last_seq, limit=100) as stream:
+    for row in stream:
+        if "id" in row:
+            print(row["id"])
+```
+
 > **Note — `feed="continuous"` and `feed="eventsource"` on `changes()`**
 >
 > `feed="continuous"` and `feed="eventsource"` are **not supported** by `changes()` and will
@@ -495,6 +506,17 @@ async with db.changes_stream(selector={"type": {"$eq": "post"}}) as stream:
 The underlying connection is kept open for the duration of the `async with` block and closed
 automatically on exit. To stop listening, break out of the loop and let the context manager
 close the connection.
+
+Note: `limit` caps the number of rows but does **not** close the connection on CouchDB 3.3.x —
+always `break` out of the loop to stop. Guard against a possible trailing `{"last_seq": ...}`
+object (no `id` key) that some CouchDB versions may emit:
+
+```python
+async with db.changes_stream(since=last_seq, limit=100) as stream:
+    async for row in stream:
+        if "id" in row:
+            print(row["id"])
+```
 
 > **Note — `feed="continuous"` and `feed="eventsource"` on `changes()`**
 >

@@ -517,6 +517,19 @@ class TestDatabase(unittest.TestCase):
                     self.assertIn("doc", row)
                     break
 
+    def test_changes_stream_limit(self):
+        last_seq = DB.changes()["last_seq"]
+        for i in range(3):
+            DB.create({"_id": f"test-changes-stream-limit-{i}", "type": "changes-stream-limit"})
+        rows = []
+        with DB.changes_stream(since=last_seq, limit=2) as stream:
+            for row in stream:
+                rows.append(row)
+                if len(rows) >= 2:
+                    break
+        self.assertEqual(len(rows), 2)
+        self.assertTrue(all("id" in row for row in rows))
+
     def test_changes_stream_mutual_exclusion_raises(self):
         from couchdb3.exceptions import CouchDBError
 

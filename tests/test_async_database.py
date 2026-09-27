@@ -414,6 +414,24 @@ class TestAsyncDatabaseChanges(unittest.IsolatedAsyncioTestCase):
                     self.assertIn("doc", row)
                     break
 
+    async def test_changes_stream_limit(self):
+        last_seq = (await self.db.changes())["last_seq"]
+        for i in range(3):
+            await self.db.create(
+                {
+                    "_id": f"test-async-changes-stream-limit-{i}",
+                    "type": "async-changes-stream-limit",
+                }
+            )
+        rows = []
+        async with self.db.changes_stream(since=last_seq, limit=2) as stream:
+            async for row in stream:
+                rows.append(row)
+                if len(rows) >= 2:
+                    break
+        self.assertEqual(len(rows), 2)
+        self.assertTrue(all("id" in row for row in rows))
+
     async def test_changes_stream_mutual_exclusion_raises(self):
         from couchdb3.exceptions import CouchDBError
 
